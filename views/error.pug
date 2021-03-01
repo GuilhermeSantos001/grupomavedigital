@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") A pagina não pode ser exibida por causa de um erro.
+  p(id="app-data-page" class=`path stringPath ${path} error string ${JSON.stringify(error)}`) #{message}
+  script(src="/javascripts/public/error.js")

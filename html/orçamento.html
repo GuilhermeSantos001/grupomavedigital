@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+  <style>
+    table,
+    th,
+    td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+  </style>
+
+  <title>Grupo Mave Digital</title>
+</head>
+
+<body>
+  <h6 class="text-start fw-bold">Orçamento: {{budgetDesc}}({{budgetID}}) - {{clientname}}</h6>
+  <h6 class="text-start fw-bold">Data de Emissão: {{datenow}}</h6>
+  <h1 class="text-center fw-bold">Grupo Mave Digital - Impressão de Orçamento</h1>
+  <div class="d-flex justify-content-center">
+    <!-- GERAL -->
+    <div class="col-12 mx-auto p-2 text-break">
+      <h5 class="text-center fw-bold">Geral</h5>
+      <table class="mx-auto mb-5" style="font-size: 14px;">
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">% Encargos</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% Reserva Tec.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% Indireto</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% Lucro</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% ISS</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% PIS & COFINS</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% IR</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">% CSLL</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Encargos</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Custo Total</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Impostos</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Custo Indireto</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Lucro</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor de Venda</th>
+        </tr>
+        <tr>
+          <td class="text-center text-wrap">{{chargetotal.percentage}}</td>
+          <td class="text-center text-wrap">{{technicalreserve}}</td>
+          <td class="text-center text-wrap">{{indirect}}</td>
+          <td class="text-center text-wrap">{{lair}}</td>
+          <td class="text-center text-wrap">{{iss.percentage}}</td>
+          <td class="text-center text-wrap">{{piscofins.percentage}}</td>
+          <td class="text-center text-wrap">{{ir.percentage}}</td>
+          <td class="text-center text-wrap">{{csll.percentage}}</td>
+          <td class="text-center text-wrap">{{chargetotal.value}}</td>
+          <td class="text-center text-wrap">{{totalcost}}</td>
+          <td class="text-center text-wrap">{{taxes}}</td>
+          <td class="text-center text-wrap">{{indirectcost}}</td>
+          <td class="text-center text-wrap">{{profit}}</td>
+          <td class="text-center text-wrap">{{salevalue}}</td>
+        </tr>
+      </table>
+    </div>
+    <!-- A1: Salários & Proventos -->
+    <div class="col-12 mx-auto p-2 text-break">
+      <h5 class="text-center fw-bold">A1: Salários & Proventos</h5>
+      <table class="mx-auto mb-5" style="font-size: 14px;">
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Cargo/Função</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Escala/Horário</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Qtd.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Piso Salarial</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Dias de Trabalho</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">DSR</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Ad. Noturno</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Gratificação</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Acumulo</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Periculosidade</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Insalubridade</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Intervalo/Hora Extra 50%</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Hora Extra 100%</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Total Unit.</th>
+        </tr>
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;"></th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;"></th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.quantity}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.salary}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.dayswork}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.dsr}}</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.additionalnight}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.gratification}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.accumulation}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.dangerousness}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.insalubrity}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.overtimefifty}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.overtimehundred}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">
+            {{totals.workdata.totalunity}}
+          </th>
+        </tr>
+        {{#each workdata}}
+        <tr>
+          <td class="text-center text-wrap">{{this.description}}</td>
+          <td class="text-center text-wrap">{{this.scale}}</td>
+          <td class="text-center text-wrap">{{this.quantity}}</td>
+          <td class="text-center text-wrap">{{this.salary}}</td>
+          <td class="text-center text-wrap">{{this.dayswork}}</td>
+          <td class="text-center text-wrap">{{this.dsr}}</td>
+          <td class="text-center text-wrap">{{this.additionalnight.value}}</td>
+          <td class="text-center text-wrap">{{this.gratification.value}}</td>
+          <td class="text-center text-wrap">{{this.accumulation.value}}</td>
+          <td class="text-center text-wrap">{{this.dangerousness.value}}</td>
+          <td class="text-center text-wrap">{{this.insalubrity.value}}</td>
+          <td class="text-center text-wrap">{{this.overtimefifty.value}}</td>
+          <td class="text-center text-wrap">{{this.overtimehundred.value}}</td>
+          <td class="text-center text-wrap">{{this.totalunity.value}}</td>
+        </tr>
+        {{/each}}
+      </table>
+    </div>
+    <!-- B1: Benefícios -->
+    <div class="col-12 mx-auto p-2 text-break" style="margin-bottom: 100vh;">
+      <h5 class="text-center fw-bold">B1: Benefícios</h5>
+      <table class="mx-auto mb-5" style="font-size: 14px;">
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Descrição</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Qtd.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor Calculado</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">R$ Total</th>
+        </tr>
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede"></th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.benefits.quantity}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.benefits.value}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.benefits.calculation}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.benefits.total}}
+          </th>
+        </tr>
+        {{#each benefits}}
+        <tr>
+          <td class="text-center text-wrap">{{this.description}}</td>
+          <td class="text-center text-wrap">{{this.quantity}}</td>
+          <td class="text-center text-wrap">{{this.value}}</td>
+          <td class="text-center text-wrap">{{this.calculation}}</td>
+          <td class="text-center text-wrap">{{this.total}}</td>
+        </tr>
+        {{/each}}
+      </table>
+    </div>
+    <!-- B2: Uniforme/EPI/SSMA -->
+    <div class="col-12 mx-auto p-2 text-break">
+      <h5 class="text-center fw-bold">B2: Uniforme/EPI/SSMA</h5>
+      <table class="mx-auto mb-5" style="font-size: 14px;">
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Descrição</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Qtd.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor Unit.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor Total</th>
+        </tr>
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede"></th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.uniforms.quantity}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.uniforms.unitary}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.uniforms.total}}
+          </th>
+        </tr>
+        {{#each uniforms}}
+        <tr>
+          <td class="text-center text-wrap">{{this.description}}</td>
+          <td class="text-center text-wrap">{{this.quantity}}</td>
+          <td class="text-center text-wrap">{{this.unitary.value}}</td>
+          <td class="text-center text-wrap">{{this.total.value}}</td>
+        </tr>
+        {{/each}}
+      </table>
+    </div>
+    <!-- C1: Materiais/Insumos -->
+    <div class="col-12 mx-auto p-2 text-break">
+      <h5 class="text-center fw-bold">C1: Materiais/Insumos</h5>
+      <table class="mx-auto mb-5" style="font-size: 14px;">
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede;">Descrição</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Qtd.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Depreciação</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Investimento</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor Unit.</th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">Valor Total</th>
+        </tr>
+        <tr>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede"></th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.equipments.quantity}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.equipments.depreciation}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.equipments.investment}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.equipments.unitary}}
+          </th>
+          <th class="text-center text-wrap" style="width: 5cm; background-color: #dedede">
+            {{totals.equipments.total}}
+          </th>
+        </tr>
+        {{#each equipments}}
+        <tr>
+          <td class="text-center text-wrap">{{this.description}}</td>
+          <td class="text-center text-wrap">{{this.quantity}}</td>
+          <td class="text-center text-wrap">{{this.depreciation}}</td>
+          <td class="text-center text-wrap">{{this.investment}}</td>
+          <td class="text-center text-wrap">{{this.unitary.value}}</td>
+          <td class="text-center text-wrap">{{this.total.value}}</td>
+        </tr>
+        {{/each}}
+      </table>
+    </div>
+  </div>
+
+  <!-- Carrega as imagens -->
+  <img src="file:///C:\Users\guilherme\Documents\MaveBank\html\timbrado-cima.png" class="img-wluid d-none"
+    alt="Responsive image" style="height: 2cm;">
+  <img src="file:///C:\Users\guilherme\Documents\MaveBank\html\timbrado-baixo.png" class="img-wluid d-none"
+    alt="Responsive image" style="height: 2cm;">
+</body>
+
+</html>

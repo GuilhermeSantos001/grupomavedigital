@@ -1,0 +1,212 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Dados Trabalhistas
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Dados Trabalhistas
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="col-12 mt-3")
+          if (workdata.length) > 0
+            div(class="text-center")
+              h4(class="fw-bold text-center text-muted border-bottom p-2") Filtrar por cargo/função
+              input(type="text" id="filter_description" class="form-control text-muted mb-3" onkeyup="filter_description()" placeholder="Procurar por cargo ou função...")
+            ul(class="list-group p-2 mb-5" id="ul-workdata")
+              each data in workdata
+                li(class="list-group-item border mb-3")
+                  h4(class="fw-bold text-center text-muted border-bottom p-2") #{data['jobtitle']}
+                  div(class="text-center text-white")
+                    a(class="btn btn-mave1 col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" data-bs-toggle="collapse" href=`#collapse-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}-1` role="button" aria-expanded="false" aria-controls=`collapse-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}-1`)
+                      | Ver informações
+                    a(class="btn btn-success col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" role="button" onclick=`workdataEdit('${data['id']}')`)
+                      | Editar
+                    a(class="btn btn-danger col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" role="button" onclick=`workdataRemove('${data['id']}')`)
+                      | Remover
+                  div(class="collapse mt-2" id=`collapse-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}-1`)
+                    nav(class="col-12 mt-2")
+                      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+                        a(class="nav-item nav-link active" id=`nav-informations-common-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` data-bs-toggle="tab" href=`#nav-informations-common-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tab" aria-controls=`nav-informations-common-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` aria-selected="true") Informações Gerais
+                        a(class="nav-item nav-link" id=`nav-additionalcategory-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` data-bs-toggle="tab" href=`#nav-additionalcategory-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tab" aria-controls=`nav-additionalcategory-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` aria-selected="false") Adicionais da Categoria
+                        a(class="nav-item nav-link" id=`nav-uniforms-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` data-bs-toggle="tab" href=`#nav-uniforms-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tab" aria-controls=`nav-uniforms-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` aria-selected="false") Informações do uniforme
+                    div(class="tab-content col-12" id="nav-tabContent")
+                      //- Informações Gerais
+                      div(class="tab-pane fade show active" id=`nav-informations-common-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tabpanel" aria-labelledby=`nav-informations-common-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`)
+                        div(class="row border-bottom mt-3")
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-ID-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Código
+                            input(type="text" class="form-control" id=`workdata-ID-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` placeholder="???" value=`${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-jobtitle-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Cargo/Função
+                            input(type="text" class="form-control" id=`workdata-jobtitle-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['jobtitle']}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-scale-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Escala
+                            input(type="text" class="form-control" id=`workdata-scale-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['scale']}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-salary-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Piso Salarial
+                            input(type="text" class="form-control" id=`workdata-salary-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['salary']}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-time-start-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Horario de entrada
+                            input(type="time" class="form-control" id=`workdata-time-start-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['time']['start']}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-time-end-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Horario de saida
+                            input(type="time" class="form-control" id=`workdata-time-end-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['time']['end']}` disabled)
+                          div(class="col-12 mb-5")
+                            label(for=`workdata-dayswork-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Dias de trabalho
+                            input(type="number" class="form-control" id=`workdata-dayswork-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` min="1" max="26" value=`${data['dayswork']}` disabled)
+                      //- Adicionais da categoria
+                      div(class="tab-pane fade show" id=`nav-additionalcategory-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tabpanel" aria-labelledby=`nav-additionalcategory-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`)
+                        div(class="row border-bottom mt-3")
+                          div(class="col-12 mb-2")
+                            h4(class="fw-bold text-center text-muted border-bottom p-2") Adicional Noturno
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-additionalnight-status-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Status
+                            input(type="text" class="form-control" id=`workdata-additionalnight-status-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['additionalnight']['enabled'] === false ? 'Desabilitado' : 'Habilitado'}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for=`workdata-additionalnight-value-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`) Valor
+                            input(type="text" class="form-control" id=`workdata-additionalnight-value-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['additionalnight']['value']}` disabled)
+                          div(class="col-12 mb-2")
+                            h4(class="fw-bold text-center text-muted border-bottom p-2") Gratificação
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for="workdata-gratification-status") Status
+                            input(type="text" class="form-control" id=`workdata-gratification-status-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['gratification']['enabled'] === false ? 'Desabilitado' : 'Habilitado'}` disabled)
+                          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                            label(for="workdata-gratification-value") Valor
+                            input(type="text" class="form-control" id=`workdata-gratification-value-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` value=`${data['gratification']['value']}` disabled)
+                      //- Informações do uniforme
+                      div(class="tab-pane fade show" id=`nav-uniforms-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}` role="tabpanel" aria-labelledby=`nav-uniforms-tab-${String(data['id']).replace(/\\|\/|\(|\)|\s{1,}/g, '_').toLowerCase()}`)
+                        if (uniforms[data['id']].length) > 0
+                          div(class="row mt-3")
+                            div(class="col-12 mb-3")
+                              label(for="uniforms-monthlycost") Custo Mensal
+                              input(type="text" class="form-control" id="uniforms-monthlycost" value="0" disabled)
+                          h4(class="fw-bold text-center text-muted border-bottom p-2") Lista de uniformes
+                          ul(class="list-group p-2 mb-5" id="ul-uniforms")
+                            each uniform in uniforms[data['id']]
+                              li(class="list-group-item mb-3")
+                                div(class="row border-bottom mt-3")
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-ID-${uniform['id']}`) Código
+                                    input(type="text" class="form-control" id=`uniform-ID-${uniform['id']}` value=`${uniform['id']}` disabled)
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-description-${uniform['id']}`) Descrição
+                                    input(type="text" class="form-control" id=`uniform-description-${uniform['id']}` value=`${uniform['description']}` disabled)
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-quantity-${uniform['id']}`) Quantidade
+                                    input(type="number" class="form-control" id=`uniform-quantity-${uniform['id']}` value=`${uniform['quantity']}` disabled)
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-unitary-${uniform['id']}`) Valor unitario
+                                    input(type="text" class="form-control" id=`uniform-unitary-${uniform['id']}` value=`${uniform['unitary']}` disabled)
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-total-${uniform['id']}`) Valor total
+                                    input(type="text" class="form-control" id=`uniform-total-${uniform['id']}` value=`${uniform['total']}` disabled)
+                                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                                    label(for=`uniform-monthlycost-${uniform['id']}`) Custo Mensal
+                                    input(type="text" class="form-control" id=`uniform-monthlycost-${uniform['id']}` value=`${uniform['monthlycost']}` disabled)
+                        else
+                          p(class="mt-3") Não existem uniformes associados ao dado trabalhista.
+          else
+            p(class="mt-3") Não existem dados trabalhistas registrados.
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let workdataLength = Number("#{workdataLength}"),
+      uniformslength = Number("#{uniformslength}"),
+      monthlycost_total = Number("#{monthlycost_total}");
+
+    $(document).ready(() => {
+      storage_menu_start('workdata');
+
+      $('#uniforms-monthlycost').val(monthlycost_total).priceFormat({
+      prefix: 'R$ ',
+      centsSeparator: ',',
+      thousandsSeparator: '.'
+      });
+
+      let i = 0, l = workdataLength;
+      for(; i < l; i++) {
+        $(`#workdata-salary-${StringPadZero(i + 1, 6)}, \
+          #workdata-additionalnight-value-${StringPadZero(i + 1, 6)}, \
+          #workdata-gratification-value-${StringPadZero(i + 1, 6)} \
+        `).priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+        });
+      }
+
+      i = 0, l = uniformslength;
+      for(; i < l; i++) {
+        $(`#uniform-unitary-${StringPadZero(i + 1, 6)}, \
+          #uniform-total-${StringPadZero(i + 1, 6)}, \
+          #uniform-monthlycost-${StringPadZero(i + 1, 6)} \
+        `).priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+        });
+      }
+    })
+
+    function gotoSystem() {
+      document.location = `${baseurl}/system/?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function register() {
+      document.location = `${baseurl}/system/workdata/register?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function workdataEdit(id) {
+      document.location = `${baseurl}/system/workdata/edit/${id}?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function workdataRemove(id) {
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/workdata/remove`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": id
+        }
+      })
+      .then(response => document.location.reload())
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    /** 
+      Filtros
+    */
+    function filter_description() {
+      var input, filter, ul, li, a, i, txtValue;
+      input = document.getElementById("filter_description");
+      filter = input.value.toUpperCase();
+      ul = document.getElementById("ul-workdata");
+      li = ul.getElementsByTagName("li");
+
+      for (i = 0; i < li.length; i++) {
+        let valid = true;
+
+        a = li[i].getElementsByTagName("h4")[0] || {};
+
+        txtValue = a.textContent || a.innerText;
+
+        if (!txtValue || txtValue.length <= 0) valid = false;
+
+        if (valid)
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+          } else {
+            li[i].style.display = "none";
+          }
+      }
+    }

@@ -1,0 +1,135 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Equipamentos
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Equipamentos
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="col-12 mt-3")
+          if (equipments.length) > 0
+            div(class="text-center")
+              h4(class="fw-bold text-center text-muted border-bottom p-2") Filtrar por descrição
+              input(type="text" id="filter_description" class="form-control text-muted mb-3" onkeyup="filter_description()" placeholder="Procurar por descrição...")
+            ul(class="list-group mb-5" id="ul-equipments")
+              each equipment in equipments
+                li(class="list-group-item border mb-3")
+                  h4(class="fw-bold text-center text-muted border-bottom p-2") #{equipment['description']} (#{equipment['segment']})
+                  div(class="text-center text-white")
+                    a(class="btn btn-mave1 col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 m-2" data-bs-toggle="collapse" href=`#collapse-${equipment['id']}-1` role="button" aria-expanded="false" aria-controls=`collapse-${equipment['id']}-1`)
+                      | Ver informações
+                    a(class="btn btn-success col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 m-2" role="button" onclick=`equipmentsEdit('${equipment['id']}')`)
+                      | Editar
+                    a(class="btn btn-danger col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 m-2" role="button" onclick=`equipmentsRemove('${equipment['id']}')`)
+                      | Remover
+                  div(class="collapse mt-2" id=`collapse-${equipment['id']}-1`)
+                    div(class="card card-body")
+                      h5(class="text-center text-muted border-bottom p-2") Informações
+                      div(class="row border-bottom mt-3")
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-ID-${equipment['id']}`) Código
+                          input(type="text" class="form-control" id=`equipments-ID-${equipment['id']}` value=`${equipment['id']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-depreciation-${equipment['id']}`) Depreciação
+                          input(type="number" class="form-control" id=`equipments-depreciation-${equipment['id']}` value=`${equipment['depreciation']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-segment-${equipment['id']}`) Segmento
+                          input(type="text" class="form-control" id=`equipments-segment-${equipment['id']}` value=`${equipment['segment']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-description-${equipment['id']}`) Descrição
+                          input(type="text" class="form-control" id=`equipments-description-${equipment['id']}` value=`${equipment['description']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-quantity-${equipment['id']}`) Quantidade
+                          input(type="number" class="form-control" id=`equipments-quantity-${equipment['id']}` value=`${equipment['quantity']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-investment-${equipment['id']}`) Investimento
+                          input(type="text" class="form-control" id=`equipments-investment-${equipment['id']}` value=`${equipment['investment']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-amortization-${equipment['id']}`) Amortização
+                          input(type="text" class="form-control" id=`equipments-amortization-${equipment['id']}` value=`${equipment['amortization']}` disabled)
+                        div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                          label(for=`equipments-investmentTotal-${equipment['id']}`) Investimento Total
+                          input(type="text" class="form-control" id=`equipments-investmentTotal-${equipment['id']}` value=`${equipment['investmentTotal']}` disabled)
+          else
+            p(class="mt-3") Não existem equipamentos registrados.
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let equipmentslength = Number("#{equipmentslength}");
+
+    $(document).ready(() => {
+      storage_menu_start('equipments');
+
+      let i = 0, l = equipmentslength;
+      for(; i < l; i++) {
+        $(`#equipments-investment-${StringPadZero(i + 1, 6)}, \
+          #equipments-amortization-${StringPadZero(i + 1, 6)}, \
+          #equipments-investmentTotal-${StringPadZero(i + 1, 6)} \
+        `).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      }
+    })
+
+    function gotoSystem() {
+      document.location = `${baseurl}/system/?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function register() {
+      document.location = `${baseurl}/system/equipments/register?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function equipmentsEdit(id) {
+      document.location = `${baseurl}/system/equipments/edit/${id}?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function equipmentsRemove(id) {
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/equipments/remove`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": id
+        }
+      })
+      .then(response => document.location.reload())
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    /** 
+      Equipamentos
+    */
+    function filter_description() {
+      var input, filter, ul, li, a, i, txtValue;
+      input = document.getElementById("filter_description");
+      filter = input.value.toUpperCase();
+      ul = document.getElementById("ul-equipments");
+      li = ul.getElementsByTagName("li");
+
+      for (i = 0; i < li.length; i++) {
+        let valid = true;
+
+        a = li[i].getElementsByTagName("h4")[0];
+        txtValue = a.textContent || a.innerText;
+
+        if (valid)
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+          } else {
+            li[i].style.display = "none";
+          }
+      }
+    }

@@ -1,0 +1,135 @@
+extends layout
+
+block content
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") Definições do novo cartão digital.
+  div(class="col-12")
+    p(class="text-wrap")
+      | Olá #[b(class="text-mave1 text-capitalize" id="usr-name")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+  div(class="d-flex flex-column bg-danger col-12 pt-2")
+    p(class="text-center text-white fw-bold fs-6 mb-0") A página a baixo é uma prévia do cartão digital.
+    p(class="text-center text-white fw-bold") (Durante o modo de prévia não será possível visualizar como o layout se comporta em vários dispositivos)
+  include includes/card-layout-1.pug
+  div(class="list-group mt-3")
+    a(href="#" class="list-group-item list-group-item-action disabled" aria-current="true")
+      div(class="d-flex w-100 justify-content-between")
+        h5(class="mb-1") Layout
+        small Atualizado em 22/02/2021
+      p(class="mb-1") Versão 1.0.
+  div(class="accordion mt-1" id="accordion_main")
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_1")
+        button(class="accordion-button text-mave1 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
+          | Redes Sociais
+          span(class="badge bg-mave1 rounded-pill ms-2") Habilitar/Desabilitar
+      div(id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          mixin socialmedia(media, enabled)
+            div(class="form-check col-12 mx-auto py-2")
+              input(class="form-check-input" type="checkbox" value="" id=`check-input-socialmedia-${media}` checked=enabled)
+              label(class="form-check-label" for=`check-input-socialmedia-${media}`)
+                | #[i(class=`fab fa-${media}`)] #{media}
+          div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
+            +socialmedia('facebook', true)
+            +socialmedia('youtube', true)
+            +socialmedia('linkedin', true)
+            +socialmedia('instagram', true)
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_2")
+        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_2" aria-expanded="false" aria-controls="collapse_2")
+          | Redes Sociais
+          span(class="badge bg-mave1 rounded-pill ms-2") Domínios
+      div(id="collapse_2" class="accordion-collapse collapse" aria-labelledby="heading_2" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          mixin socialmedia(media, address)
+            div(class="form-floating col-12 mx-auto py-2")
+              input(type="text" class="form-control" id=`input-address-socialmedia-${media}` placeholder=`${address}` value=address)
+              label(for=`input-address-socialmedia-${media}`) #{media}
+          div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
+            +socialmedia('facebook', 'https://www.facebook.com/grupomaveoficial/')
+            +socialmedia('youtube', 'https://www.youtube.com/channel/UC5y4IOAlxQ4eictbudG785g')
+            +socialmedia('linkedin', 'https://www.linkedin.com/company/grupo-mave/?originalSubdomain=pt')
+            +socialmedia('instagram', 'https://www.instagram.com/grupo.mave/')
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_3")
+        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_3" aria-expanded="false" aria-controls="collapse_3")
+          | Dados para importar contato
+          span(class="badge bg-mave1 rounded-pill ms-2") vCard
+      div(id="collapse_3" class="accordion-collapse collapse" aria-labelledby="heading_3" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          mixin vcardprop(prop, value, type)
+            div(class="form-floating col-12 mx-auto py-2")
+              - var id = String(prop).toLowerCase().replace(/\s{1,}/g, '-');
+              if (type === undefined)
+                input(type="text" class="form-control" id=`input-vcard-prop-${id}` placeholder=`${prop}` value=value)
+                label(for=`input-vcard-prop-${id}`) #{prop}
+              else if (type === 'date')
+                input(type="date" class="form-control" id=`input-vcard-prop-${id}` placeholder=`${prop}` value=value)
+                label(for=`input-vcard-prop-${id}`) #{prop}
+          div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
+            +vcardprop('Primeiro Nome', 'Luiz')
+            +vcardprop('Último Nome', 'Guilherme dos Santos')
+            +vcardprop('Organização', 'Grupo Mave')
+            +vcardprop('Telefone de Trabalho', '(11) 3683-3408')
+            +vcardprop('Telefone de Trabalho 2', '(11) 99999-9999')
+            +vcardprop('Data de Aniversario', '1999-02-17', 'date')
+            +vcardprop('Titulo', 'Analista Programador')
+            +vcardprop('Website', 'https://grupomave.com.br')
+            +vcardprop('Email', 'suporte@grupomave.com.br')
+            +vcardprop('Rua', 'R. Barão de Itaúna, 397 - Lapa, São Paulo - SP, 05078-080')
+            +vcardprop('Cidade', 'São Paulo')
+            +vcardprop('Estado', 'São Paulo')
+            +vcardprop('CEP', '05078-080')
+            button(type="button" class="btn btn-mave2 col-12 fs-5" id="vcard-generate") #[i(class="fas fa-id-card")] Gerar vCard
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_4")
+        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_4" aria-expanded="false" aria-controls="collapse_4")
+          | Compartilhar no Whatsapp
+          span(class="badge bg-mave1 rounded-pill ms-2") Texto
+      div(id="collapse_4" class="accordion-collapse collapse" aria-labelledby="heading_4" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
+            div(class="form-floating col-12 mx-auto py-2")
+              span(class="input-group-text" id="span-share-whatsapp") #[i(class="fas fa-quote-right")]
+              textarea(class="form-control col-6 p-2" id="input-share-whatsapp" style="height: 250px" placeholder="Texto a ser compartilhar" aria-label="span-share-whatsapp" aria-describedby="span-share-whatsapp")
+                | Olá, este é o cartão de visita digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!
+  div(class="input-group flex-nowrap my-3")
+    div(class="col-12")
+      label(for="input-photo" class="form-label fw-bold text-mave1 fs-5") Escolher Foto de Perfil
+      input(class="form-control" type="file" id="input-photo" accept="image/x-png,image/gif,image/jpeg")
+  div(class="input-group flex-nowrap my-3")
+    button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-photo" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
+  div(class="input-group flex-nowrap my-3")
+    div(class="col-12")
+      label(for="input-file" class="form-label fw-bold text-mave1 fs-5") Escolher Arquivo de Apresentação
+      input(class="form-control" type="file" id="input-file" accept="application/pdf")
+  div(class="input-group flex-nowrap my-3")
+    button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-file" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Arquivo de Apresentação
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-username") #[i(class="fas fa-user-circle")]
+    input(type="text" class="form-control col-6" id="input-username" placeholder="Nome do Colaborador" aria-label="span-username" aria-describedby="span-username" value="Nome do Colaborador")
+    span(class="input-group-text" id="span-jobtitle") #[i(class="far fa-address-card")]
+    input(type="text" class="form-control col-6" id="input-jobtitle" placeholder="Cargo/Função" aria-label="span-jobtitle" aria-describedby="span-jobtitle" value="Cargo/Função")
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-phone1") #[i(class="fas fa-phone")]
+    input(type="text" class="form-control col-6" id="input-phone1" placeholder="Telefone" aria-label="span-phone1" aria-describedby="span-phone1" value="(11) 3683-3408")
+    span(class="input-group-text" id="span-phone2") #[i(class="fas fa-mobile")]
+    input(type="text" class="form-control col-6" id="input-phone2" placeholder="Celular" aria-label="span-phone2" aria-describedby="span-phone2" value="(11) 99999-9999")
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-phone3") #[i(class="fab fa-whatsapp")]
+    input(type="text" class="form-control" id="input-phone3" placeholder="Whatsapp" aria-label="span-phone3" aria-describedby="span-phone3" value="(11) 94784-1110")
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-phone3-text") #[i(class="far fa-comment-dots")]
+    input(type="text" class="form-control" id="input-phone3-text" placeholder="Mensagem no Whatsapp" aria-label="span-phone3-text" aria-describedby="span-phone3-text" value="Olá tudo bem? como representante comercial do Grupo Mave, estou aqui para ajudar no que for possível. Qual sua dúvida?")
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-email") #[i(class="far fa-envelope")]
+    input(type="text" class="form-control col-6" id="input-email" placeholder="E-mail" aria-label="span-email" aria-describedby="span-email" value="ti@grupomave.com.br")
+    span(class="input-group-text" id="span-localization") #[i(class="fas fa-map-marked-alt")]
+    input(type="text" class="form-control col-6" id="input-localization" placeholder="Endereço" aria-label="span-localization" aria-describedby="span-localization" value="R. Barão de Itaúna, 397 - Lapa, São Paulo - SP, 05078-080")
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-website") #[i(class="fab fa-chrome")]
+    input(type="text" class="form-control" id="input-website" placeholder="https://grupomave.com.br" aria-label="span-website" aria-describedby="span-website" value="https://grupomave.com.br")
+  div(class="input-group flex-nowrap my-3")
+    button(type="button" class="btn btn-mave2 col-12 fs-5" id="card-phone-2" onclick="window.app.cardOpenPhone(1)")
+      | #[i(class="fas fa-cloud-upload-alt")] Registrar o Cartão Digital
+  script(src="/javascripts/public/card-create.js")

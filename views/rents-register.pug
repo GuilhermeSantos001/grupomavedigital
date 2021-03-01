@@ -1,0 +1,159 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Informações Gerais
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Informações Gerais
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="row border-bottom mt-3")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="rental-ID") Código
+            input(type="text" class="form-control" id="rental-ID" placeholder="???" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="rental-description") Descrição
+            input(type="text" class="form-control" id="rental-description")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="rental-quantity") Quantidade
+            input(type="number" class="form-control" id="rental-quantity" value="1" min="1" max="999")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="rental-unitary") Valor Unitario
+            input(type="text" class="form-control" id="rental-unitary" value="0")
+          div(class="col-12 mb-5")
+            label(for="rental-total") R$ Total
+            input(type="text" class="form-control" id="rental-total" value="0" disabled)
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let rents = JSON.parse(LZString.decompressFromBase64(`#{rents}`));
+
+    $(document).ready(() => {
+      $("#rental-ID").val(StringPadZero(rents.length + 1, 6));
+
+      $('#rental-unitary, #rental-total').priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+      });
+
+      $('#rental-quantity').change(function (e) {
+        if ($(e.target).val() <= 0) {
+          $(e.target).val(1);
+        } else if ($(e.target).val() > 999) {
+          $(e.target).val(999);
+        }
+      })
+
+      //- Calculo da amortização
+      $('#rental-unitary, \
+        #rental-quantity \
+      ').change(function() {
+        let unitary = Number($('#rental-unitary').unmask()),
+          quantity = Number($('#rental-quantity').val().slice(0, 2)),
+          calculate = Math.round(Number(unitary*quantity).toFixed(2));
+
+        $('#rental-total').val(calculate).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+    })
+
+    function gotoSystem() {
+      return document.location = `${baseurl}/system/rents?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    let send_interval = null,
+      send_valid = null,
+      send_details = {};
+
+    function send() {
+      send_valid = true;
+
+      if ($('#rental-ID').val().length <= 0) {
+        $('#rental-ID').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#rental-description').val().length <= 0) {
+        $('#rental-description').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#rental-quantity').val().length <= 0) {
+        $('#rental-quantity').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#rental-unitary').val().length <= 0) {
+        $('#rental-unitary').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#rental-total').val().length <= 0) {
+        $('#rental-total').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if (!send_valid) {
+        alerting('Existem campos obrigatórios não preenchidos e/ou invalidos.');
+
+        if (send_interval) {
+          clearTimeout(send_interval);
+          send_interval = null;
+        }
+
+        send_interval = setTimeout(function() {
+          $('\
+            #rental-ID, \
+            #rental-description, \
+            #rental-quantity, \
+            #rental-unitary, \
+            #rental-total \
+          '.trim()).removeClass('is-invalid');
+        }, 1000)
+      }
+
+      if (!send_valid) return;
+
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/rents/register`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          'id': String($("#rental-ID").val()),
+          'description': String($("#rental-description").val()),
+          'quantity': Number($("#rental-quantity").val()),
+          'unitary': Number($("#rental-unitary").unmask()),
+          'total': Number($("#rental-total").unmask())
+        }
+      })
+      .then(() => {
+        alerting(`Alocação registrada com sucesso!`);
+
+        rents.push({});
+        $("#rental-ID").val(StringPadZero(rents.length + 1, 6));
+        $("#rental-description").val('');
+        $("#rental-quantity").val(1);
+        $("#rental-unitary, #rental-total").val(0).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+
+        loading(false);
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }

@@ -1,0 +1,270 @@
+extends layout
+
+block head
+  style.
+    .bg-twofactor {
+      color: rgba(255, 255, 255, 1);
+      background-color: rgba(0, 0, 0, .5);
+    }
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage col-12 nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Configurações Gerais
+    div(class="tab-content col-12" id="nav-tabContent")
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="col-12 mt-3 border-bottom")
+          div(class="row")
+            div(class="col-12 mb-2 fw-bold text-muted text-center")
+              h4(class="fw-bold text-center text-muted border-bottom p-2") Mudança de Senha
+            div(class="col-12 mb-3")
+              label(for="password-actual") Senha Atual
+              input(type="password" class="form-control mb-2" id="password-actual")
+            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-3")
+              label(for="password-new") Nova Senha
+              input(type="password" class="form-control" id="password-new")
+            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-2")
+              label(for="password-new-confirm") Confirme a nova senha
+              input(type="password" class="form-control mb-2" id="password-new-confirm")
+            div(class="col-12 text-muted")
+              div(class="alert alert-secondary" role="alert")
+                | Utilize senhas com letras, numeros, caracteres especiais.
+              div(class="alert alert-secondary" role="alert")
+                | Não utilize senhas conhecidas como: 123, abcd, a1b2b3...
+              div(class="alert alert-secondary" role="alert")
+                | Nós não temos posse de sua senha, lembre-se de armazenada em um local seguro, para se lembrar depois.
+            div(class="col-12 mb-3")
+              button(type="button" class="btn btn-mave1 col-12" id="button-define-new-password" disabled) Definir a nova senha
+            div(class="col-12 mb-2 fw-bold text-muted text-center")
+              h4(class="fw-bold text-center text-muted border-bottom p-2") Configuração de Autenticação
+            if (!twofactor_enabled)
+              div(class="col-12 mb-3")
+                label(for="sessions-auth-OATH-selected") Autenticação de dois fatores
+                select(class="form-select mb-2" id="sessions-auth-OATH-selected" onchange="$('#sessions-auth-OATH-selected').val() !== 'null' ? $('#button-generate-qr-code').attr('disabled', false) : $('#button-generate-qr-code').attr('disabled', true)")
+                  option(value="true") Habilitado
+                  option(selected value="null") Desabilitado
+                button(type="button" class="btn btn-mave1 col-12" id="button-generate-qr-code" onclick="signtwofactor()" disabled) Gerar QR CODE
+            else
+              div(class="col-12 mb-3")
+                label(for="sessions-auth-OATH-disabled") Autenticação de dois fatores
+                button(type="button" class="btn btn-mave1 col-12" id="sessions-auth-OATH-disabled" onclick="disabledtwofactor()") Desabilitar
+  script.
+    $(document).ready(() => {
+      $('\
+        #password-actual, \
+        #password-new, \
+        #password-new-confirm \
+      ').on('change', function() {
+        if (
+          $('#password-actual').val().length > 0 &&
+          $('#password-new').val().length > 0 &&
+          $('#password-new-confirm').val().length > 0 &&
+          $('#password-new').val() == $('#password-new-confirm').val()
+        ) {
+          $('#button-define-new-password').attr('disabled', false);
+        } else if(
+          $('#password-new').val().length > 0 &&
+          $('#password-new-confirm').val().length > 0 &&
+          $('#password-new').val() !== $('#password-new-confirm').val()
+        ) {
+          $('#password-new, #password-new-confirm').addClass('is-invalid');
+          alerting('As senhas não coincidem!', 3000, () => { $('#password-new, #password-new-confirm').removeClass('is-invalid'); });
+        }
+      });
+
+      document.getElementById('button-define-new-password').onclick = function () {
+        loading(true);
+
+        axios.request({
+          method: 'POST',
+          url: `${baseurl}/user/auth/security/change/password`,
+          headers: {
+            "Content-Type": "application/json",
+            "usr_token": localStorage.getItem('usr-token'),
+            "usr_internetadress": localStorage.getItem('usr-internetadress')
+          },
+          data: {
+            usr_authorization: localStorage.getItem('usr-auth'),
+            password: $('#password-actual').val(),
+            new_password: $('#password-new').val()
+          }
+        })
+        .then(response => {
+          loading(false);
+
+          if (!response['data']) {
+            $('#password-actual').addClass('is-invalid');
+            alerting('Verifique sua senha e tente novamente!', 3000, () => { $('#password-actual').removeClass('is-invalid'); });
+          } else {
+            alerting(`Sua senha foi alterada com sucesso!`, 1000, function() { document.location.reload(); });
+          }
+        })
+        .catch(error => {
+          if (error.response && error.response.data && error.response.data.error != undefined) {
+            console.log(error.response.data);
+          } else {
+            console.log(error);
+          }
+
+          loading(false);
+        })
+      };
+    })
+
+    function gotoSystem() {
+      document.location = `${baseurl}/system/?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function showQRCode(qrcode = '???') {
+      $('body').append(`\
+      <div style="z-index: 9999; height: 100vh; opacity: 0;" class="twofactor bg-twofactor fixed-top col-12 overflow-auto"> \
+        <h1 class="text-white text-center fs-1 fw-bold m-5">Escaneie o seu QRCode com um aplicativo de autenticação, por exemplo, Google Authenticator.</h1><br />\
+        <img src="${qrcode}" class="img-thumbnail border border-5 border-primary mx-auto mb-2 d-block" alt="Escaneie seu QRCODE"><br/> \
+        <div class="col-10 mx-auto mb-5"> \
+          <label for="qrcode-usertoken">Insira o código que aparece em seu visor</label> \
+          <input type="tel" class="form-control mb-2" id="qrcode-usertoken"> \
+          <button type="button" class="btn btn-mave1 col-12" onclick="verifytwofactor()">Validar</button> \
+      </div>\
+      `);
+
+      setTimeout(function () {
+        $('.twofactor').animate({ opacity: 1 }, "slow");
+      }, 1000);
+    }
+
+    function signtwofactor() {
+      loading(true);
+
+      if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
+        return document.location = `${baseurl}/user/auth`;
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/user/auth/security/sign/twofactor`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          usr_authorization: localStorage.getItem('usr-auth')
+        }
+      })
+      .then(response => {
+        loading(false);
+
+        try {
+          showQRCode(response['data']['qrcode']);
+        } catch(err) {
+          alerting(`Não foi possível gerar seu QRCode, fale com o administrador do sistema.`);
+          console.log(err);
+        }
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    function verifytwofactor() {
+      loading(true);
+
+      if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
+        return document.location = `${baseurl}/user/auth`;
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/user/auth/security/verify/twofactor`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          usr_authorization: localStorage.getItem('usr-auth'),
+          usertoken: $('#qrcode-usertoken').val()
+        }
+      })
+      .then(response => {
+        loading(false);
+
+        try {
+          if (!response['data']) {
+            alerting(`Seu código não está correto, tente novamente.`);
+          } else {
+            $(".twofactor").fadeOut(500, function () {
+              $(".twofactor").remove();
+              enabledtwofactor();
+            });
+          }
+        } catch(err) {
+          alerting(`Não foi possível verificar seu código, tente novamente mais tarde.`);
+          console.log(err);
+        }
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    function enabledtwofactor() {
+      loading(true);
+
+      if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
+        return document.location = `${baseurl}/user/auth`;
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/user/auth/security/enabled/twofactor`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          usr_authorization: localStorage.getItem('usr-auth')
+        }
+      })
+      .then(() => {
+        loading(false);
+        alerting(`Sua autenticação de dois fatores, está ativada!`, 1000, function() { document.location.reload(); });
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    function disabledtwofactor() {
+      loading(true);
+
+      if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
+        return document.location = `${baseurl}/user/auth`;
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/user/auth/security/disabled/twofactor`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          usr_authorization: localStorage.getItem('usr-auth')
+        }
+      })
+      .then(() => {
+        loading(false);
+        alerting(`Sua autenticação de dois fatores, está desativada!`, 1000, function() { document.location.reload(); });
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }

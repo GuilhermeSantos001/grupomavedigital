@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") Ambiente Digital Interativo.
+  div(class="col-12")
+    p(class="text-wrap")
+      | Olá #[b(class="text-mave1 text-capitalize" id="usr-name")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+  div(class="accordion" id="accordion_main")
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_1")
+        button(class="accordion-button text-mave1 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
+          | Melhorias de Layout
+          span(class="badge bg-mave1 rounded-pill ms-2") Novidade
+      div(id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          | #[li #[strong(class="text-mave1") Interface 2.0.] Toda a interface foi reformulada.]
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_2")
+        button(class="accordion-button text-mave1 collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_2" aria-expanded="false" aria-controls="collapse_2")
+          | Integrações
+          span(class="badge bg-mave1 rounded-pill ms-2") Novidade
+      div(id="collapse_2" class="accordion-collapse collapse" aria-labelledby="heading_2" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          | #[li #[strong(class="text-mave1") Saida do Monday.] O #[b(class="text-mave1") "PORTAL"] foi estruturado para comportar os processos do monday.]
+          | #[li #[strong(class="text-mave1") Cartões Digitais.] Agora os #[b(class="text-mave1") Cartões Digitais] podem ser criados pelos #[b(class="text-mave1") Administradores #{"&"} Moderadores] do #[b(class="text-mave1") Portal].]
+  script(src="/javascripts/public/system.js")

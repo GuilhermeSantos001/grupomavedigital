@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") Insira suas informações de entrada
+  div(class="d-flex flex-column col-12 mt-3")
+    div(class="form-floating mt-auto mb-3")
+      input(type="text" class="form-control" id="input_authorization" aria-describedby="authorizationHelp" placeholder="Código exclusivo de acesso")
+      label(for="input_authorization") Autorização
+      small(id="authorizationHelp" class="form-text text-muted") Caso tenha perdido o seu código fale com o administrador do sistema.
+    div(class="form-floating mt-auto mb-3")
+      input(type="password" class="form-control" id="input_password" aria-describedby="passwordHelp" placeholder="Sua senha...")
+      label(class="mt-2" for="input_password") Password
+      small(id="passwordHelp" class="form-text text-danger")
+    button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick="window.app.login()") #[span(class="material-icons") login]
+  script(src="/javascripts/public/login.js")

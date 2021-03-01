@@ -1,0 +1,168 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="nav-item nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Informações Gerais
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Informações Gerais
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="row border-bottom mt-3")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-ID") Código
+            input(type="text" class="form-control" id="uniform-ID" placeholder="???" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-description") Descrição
+            input(type="text" class="form-control" id="uniform-description")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-quantity") Quantidade
+            input(type="number" class="form-control" id="uniform-quantity" min="0" max="999")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-unitary") Valor unitario
+            input(type="text" class="form-control" id="uniform-unitary" value="0")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-total") Valor total
+            input(type="text" class="form-control" id="uniform-total" value="0" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="uniform-monthlycost") Custo Mensal
+            input(type="text" class="form-control" id="uniform-monthlycost" value="0" disabled)
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let uniforms = JSON.parse(LZString.decompressFromBase64(`#{uniforms}`));
+
+    $(document).ready(() => {
+      $("#uniform-ID").val(StringPadZero(uniforms.length + 1, 6));
+
+      $('#uniform-unitary, #uniform-total, #uniform-monthlycost').priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+      });
+
+      $('#uniform-quantity, #uniform-unitary').change(function(e) {
+        let quantity = Number($('#uniform-quantity').val()),
+          unitary = parseFloat($('#uniform-unitary').unmask()) * 0.01,
+          total = Number(unitary * quantity).toFixed(2),
+          monthlycost = Number(Math.round(total * 2/12)).toFixed(2);
+
+        $('#uniform-total').val(total).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+
+        $('#uniform-monthlycost').val(monthlycost).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+
+      $(window).bind('beforeunload', function() {
+        return 'Você tem certeza de que quer sair?';
+      });
+    })
+
+    function gotoSystem() {
+      return document.location = `${baseurl}/system/uniforms?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    let send_interval = null,
+      send_valid = null;
+
+    function send() {
+      send_valid = true;
+
+      if ($('#uniform-ID').val().length <= 0) {
+        $('#uniform-ID').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#uniform-description').val().length <= 0) {
+        $('#uniform-description').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#uniform-quantity').val().length <= 0) {
+        $('#uniform-quantity').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#uniform-unitary').val().length <= 0) {
+        $('#uniform-unitary').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#uniform-total').val().length <= 0) {
+        $('#uniform-total').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#uniform-monthlycost').val().length <= 0) {
+        $('#uniform-monthlycost').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if (!send_valid) {
+        alerting('Existem campos obrigatórios não preenchidos e/ou invalidos.');
+
+        if (send_interval) {
+          clearTimeout(send_interval);
+          send_interval = null;
+        }
+
+        send_interval = setTimeout(function() {
+          $('\
+            #uniform-ID, \
+            #uniform-description, \
+            #uniform-quantity, \
+            #uniform-unitary, \
+            #uniform-total, \
+            #uniform-monthlycost \
+          '.trim()).removeClass('is-invalid');
+        }, 1000)
+      }
+
+      if (!send_valid) return;
+
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/uniforms/register`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": String($("#uniform-ID").val()),
+          "description": String($("#uniform-description").val()),
+          "quantity": Number($("#uniform-quantity").val()),
+          "unitary": Number($("#uniform-unitary").unmask()),
+          "total": Number($("#uniform-total").unmask()),
+          "monthlycost": Number($("#uniform-monthlycost").unmask())
+        }
+      })
+      .then(() => {
+        alerting(`Uniforme registrado com sucesso!`);
+
+        uniforms.push({});
+        $("#uniform-ID").val(StringPadZero(uniforms.length + 1, 6));
+        $("#uniform-description").val('');
+        $("#uniform-quantity").val('');
+        $('#uniform-unitary, #uniform-total, #uniform-monthlycost').val(0).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+
+        loading(false);
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }

@@ -1,0 +1,128 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="nav-item nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Resolução da inativação do cliente
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Motivo
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="row border-bottom mt-3 mb-3")
+          div(class="col-12")
+            p(class="text-left text-dark")
+              | O cliente #[b #{client['name']} (#{client['costcenter']})] está #[b inativado], o mesmo não pode ser utilizado em novas propostas. #[br]
+              | Motivo: #[b #{client['inactive']['reason']}]. #[br]
+              | Medida de ação: #[b #{client['inactive']['measure']}]. #[br]
+          div(class="col-12 mb-5 border")
+            h1(class="p-2 m-2 mb-4 text-center border-bottom") Data de Encerramento
+            div(class="row m-2")
+              div(class="col-12 mb-5")
+                input(type="date" class="form-control" id="date-encerramento" value=`${closingdate}` onchange="$('#date-encerramento').val().length > 0 ? $('#button-send-date-encerramento').attr('disabled', false) : $('#button-send-date-encerramento').attr('disabled', true)")
+                button(type="button" class="btn btn-mave1 col-12 p-2 mt-3" onclick="send('date-encerramento')" id="button-send-date-encerramento" disabled) #[span(class="material-icons") date_range] #[br] Definir
+          div(class="col-12 mb-5 border")
+            h1(class="p-2 m-2 mb-4 text-center border-bottom") Resoluções
+            if (resolutions.length > 0)
+              ul(class="list-group list-group-flush overflow-auto border" style="height: 30vh" id="ul-resolutions")
+                each resolution in resolutions
+                  li(class="list-group-item mb-2" style="white-space: pre-wrap;" id=`resolution-item-${++resolutionId}`)
+                    p(class="text-left p-2") #{resolution['message']}
+                    p(class="text-right border-top fw-bold") Data da postagem: #{resolution['dateposting']}
+                    div(class="text-right")
+                      button(type="button" class="btn btn-danger col-sm-12 col-md-12 col-lg-1 col-xl-1 p-2" onclick=`removeResolution('resolution-item-${resolutionId}', ${resolutionId})`) #[span(class="material-icons") delete] #[br] Deletar
+            else
+              p(class="fw-bold p-2 m-2 border") Nenhuma postagem encontrada.
+            div(class="row mt-2")
+              div(class="col-12 mt-3 mb-2")
+                textarea(class="form-control" id="textarea-resolution" rows="4" placeholder="Escreva uma nova resolução..." onkeyup="$('#textarea-resolution').val().length > 0 ? $('#button-send-resolution').attr('disabled', false) : $('#button-send-resolution').attr('disabled', true)")
+            div(class="text-left mb-5")
+              button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick="send('resolution')" id="button-send-resolution" disabled) #[span(class="material-icons") message] #[br] Postar
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    $(document).ready(() => {})
+
+    function gotoSystem() {
+      return document.location = `${baseurl}/system/clients?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function removeResolution(id, indexOf) {
+      $(`#${id}`).fadeOut("slow", function() {
+        $(`#${id}`).remove();
+        loading(true);
+
+        axios.request({
+          method: 'POST',
+          url: `${baseurl}/system/clients/inactive/resolutions/remove`,
+          headers: {
+            "Content-Type": "application/json",
+            "usr_token": localStorage.getItem('usr-token'),
+            "usr_internetadress": localStorage.getItem('usr-internetadress')
+          },
+          data: {
+            "id": "#{clientId}",
+            "resolutionIndexOf": --indexOf
+          }
+        })
+        .then(response => document.location.reload())
+        .catch(error => {
+          alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+          console.log(error);
+          loading(false);
+        })        
+      });      
+    }
+
+    let send_interval = null,
+      send_valid = null;
+
+    function send(type) {
+      let resolutionId = "#{resolutionId}";
+
+      send_valid = true;
+
+      if (type === 'resolution') {
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/clients/inactive/resolutions`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": "#{clientId}",
+          "resolution": $('#textarea-resolution').val()
+        }
+      })
+      .then(response => document.location.reload())
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+      } else if (type === 'date-encerramento') {
+        loading(true);
+
+        axios.request({
+          method: 'POST',
+          url: `${baseurl}/system/clients/inactive/closingdate`,
+          headers: {
+            "Content-Type": "application/json",
+            "usr_token": localStorage.getItem('usr-token'),
+            "usr_internetadress": localStorage.getItem('usr-internetadress')
+          },
+          data: {
+            "id": "#{clientId}",
+            "closingdate": $('#date-encerramento').val()
+          }
+        })
+        .then(response => document.location.reload())
+        .catch(error => {
+          alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+          console.log(error);
+          loading(false);
+        })
+      }
+    }

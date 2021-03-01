@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+  <style>
+    .bs-callout {
+      margin: 20px 0;
+      padding: 15px 30px 15px 15px;
+      border-left: 5px solid rgb(17, 160, 255);
+    }
+
+    .bs-callout h4 {
+      margin-top: 0;
+    }
+
+    .bs-callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .bs-callout code,
+    .bs-callout .highlight {
+      background-color: #fff;
+    }
+
+    /* Themes for different contexts */
+    .bs-callout-danger {
+      background-color: #fcf2f2;
+      border-color: #dFb5b4;
+    }
+
+    .bs-callout-warning {
+      background-color: #fefbed;
+      border-color: #f1e7bc;
+    }
+
+    .bs-callout-info {
+      background-color: #f0f7fd;
+      border-color: #d0e3f0;
+    }
+  </style>
+
+  <title>Grupo Mave - Manual GLPI</title>
+</head>
+
+<body style="background-color: rgb(43, 43, 43);">
+  <div class="container-fluid text-white">
+    <div class="row" style="height: 100vh;">
+      <div class="d-print-none col-sm-12 col-md-12 col-lg-3 col-xl-3 col-xxl-3 border">
+        <div class="nav flex-column nav-pills my-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <h5 class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">Conceitos Básicos</h5>
+          <a class="nav-link text-white active" id="v-pills-1-tab" data-bs-toggle="pill" href="#v-pills-1" role="tab"
+            aria-controls="v-pills-1" aria-selected="true">O que é GLPI?</a>
+          <a class="nav-link text-white" id="v-pills-2-tab" data-bs-toggle="pill" href="#v-pills-2" role="tab"
+            aria-controls="v-pills-2" aria-selected="true">Como Acessar</a>
+          <h5 class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">Chamados</h5>
+          <a class="nav-link text-white" id="v-pills-3-tab" data-bs-toggle="pill" href="#v-pills-3" role="tab"
+            aria-controls="v-pills-3" aria-selected="true">Status do Chamado</a>
+          <a class="nav-link text-white" id="v-pills-4-tab" data-bs-toggle="pill" href="#v-pills-4" role="tab"
+            aria-controls="v-pills-4" aria-selected="true">Abrir um Chamado</a>
+          <a class="nav-link text-white" id="v-pills-5-tab" data-bs-toggle="pill" href="#v-pills-5" role="tab"
+            aria-controls="v-pills-5" aria-selected="true">Acompanhar um Chamado</a>
+          <h5 class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">Projetos</h5>
+          <a class="nav-link text-white" id="v-pills-6-tab" data-bs-toggle="pill" href="#v-pills-6" role="tab"
+            aria-controls="v-pills-6" aria-selected="true">Acompanhar um Projeto</a>
+        </div>
+        <div class="fixed-top">
+          <div class="d-grid gap-2">
+            <button class="btn btn-dark bg-gradient" type="button" onclick="window.print();"
+              onmouseover="this.style.opacity = 1" onmouseout="this.style.opacity = .5" style="opacity:  .5;">
+              Imprimir > Painel de Leitura Atual
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg col-xl col-xxl p-3 border">
+        <div class="tab-content" id="v-pills-tabContent">
+          <div class="tab-pane fade show active" id="v-pills-1" role="tabpanel" aria-labelledby="v-pills-1-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              GLPi é um sistema de código aberto para Gerenciamento de Ativos de TI, rastreamento de problemas e central
+              de serviços. Este software é escrito em PHP e distribuído sob a GNU General Public License. Como uma
+              tecnologia de código aberto, qualquer pessoa pode executar, modificar ou desenvolver o código.
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6" height="315"
+                src="https://www.youtube.com/embed/gQMfPbMB0wY" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+              <iframe class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6" height="315"
+                src="https://www.youtube.com/embed/GPC0Ti9_qJc" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-2" role="tabpanel" aria-labelledby="v-pills-2-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Acesse <a href="https://grupomavedigital.com.br/glpi/">https://grupomavedigital.com.br/glpi/</a>
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-12" height="315" src="https://www.youtube.com/embed/2-gJkpE1jZE" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-3" role="tabpanel" aria-labelledby="v-pills-3-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Chamado esperando sua aprovação: Todo chamado que está pendente de sua aprovação.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Novo: Todo chamado registrado sem atribuição de técnico.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Processado (Atribuído): Chamado atribuído ao técnico responsável.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Processado (Planejado): O chamado foi atribuído, porém será atendido conforme o planejamento técnico.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Pendente: Status que sinaliza a dependência de terceiros, equipamentos ou algo que não esteja relacionado
+              com o usuário ou o técnico.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Solucionado: Chamado solucionado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Fechado: Chamado fechado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Excluido: Chamado excluido.
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-12" height="315" src="https://www.youtube.com/embed/1pfdQLHFZNk" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-4" role="tabpanel" aria-labelledby="v-pills-4-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Na tela inicial, clique no ícone “Cria um Chamado” e a seguinte tela se apresentará:
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Preencher no mínimo os campos obrigatórios;
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Type”: corresponde a classificação do chamado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Categoria”: corresponde a classificação dos itens do catálogo de serviços da organização, por exemplo,
+              Acesso à Internet, Problemas com token, Suporte a Computador, Suporte a Impressora.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Urgência”: corresponde a classificação de prioridade do chamado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Elementos associados”: corresponde aos perifericos como mouse, teclado, software e etc, associado ao
+              chamado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Observadores”: corresponde aos usuarios associados ao chamado, os mesmos receberão o acompanhamento do
+              chamado.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Título”: (geralmente colocamos um nome que resume o motivo do chamado);
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Descrição”: Descreva o problema ou incidente, não se esquecer de colocar o ramal para contato e o nome do
+              setor. Se possível informar também o endereço IP da máquina, caso o suporte seja para a mesma. Dependendo
+              da categoria, serão inseridas no corpo da descrição as informações que deverão ser preenchidas para um
+              melhor atendimento.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              “Arquivo”: Caso seja necessário poderá ser anexado um arquivo junto ao chamado. Clicar no botão “Enviar
+              mensagem”, logo após, aparecerá uma mensagem confirmando a abertura do chamado.
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-12" height="315" src="https://www.youtube.com/embed/ZXCdjua2ygE" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-5" role="tabpanel" aria-labelledby="v-pills-5-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Na barra de Menu: Clicar em “Chamados”.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Caso não liste o chamado que deseja Acompanhar (abrir/visualizar), verifique o filtro de chamados.
+              A lista de chamados listada depende da opção selecionada no filtro. Para melhor visualização, veja a
+              abaixo a barra de filtro:
+              <img src="https://i.imgur.com/mMFyQiB.png" class="img-fluid" alt="filtro de chamados">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Parar detalhar um chamado vá até a coluna “Titulo”, clique sobre o nome do chamado desejado para abri-lo.
+              <img src="https://i.imgur.com/qsJIy7A.png" class="img-fluid" alt="">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Na tela seguinte, clique na opção “Chamado” localizada no MENU do lado esquerdo. A tela abrirá várias
+              informações referentes ao chamado, como por exemplo “Atribuído para”, nesse campo é possível visualizar
+              qual técnico irá atender o chamado, caso essa opção esteja vazia significa que o chamado ainda não foi
+              atribuído para ninguém.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Excluir chamado.</b> Novamente no MENU do lado esquerdo,
+              clique na opção “Chamado”. Ao final da tela haverá um botão “Colocar na lixeira”.
+              <img src="https://i.imgur.com/mC2jzJC.png" class="img-fluid" alt="">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Acompanhar uma Tarefa ou Acompanhamento.</b> Novamente no MENU do lado esquerdo,
+              clique na opção “Processando
+              chamado”. Nessa opção é possível visualizar os acompanhamentos e as tarefas adicionadas referentes ao
+              chamando. Quando a caixa de texto for da cor amarela refere-se a uma “Tarefa”, quando for cinza refere-se
+              a um “Acompanhamento”.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Adicionar um Acompanhamento ou Documento.</b> Esse é o recurso do GLPI para troca
+              de informações entre o usuário e o técnico. Para cada resposta ou informação a respeito do problema ou
+              solicitação o usuário deverá incluir um novo “Acompanhamento”.
+
+              Clique na opção “Processando chamado” no MENU do lado esquerdo, do lado direito do MENU irá aparecer o
+              texto “Adicionar:”, logo abaixo terá a opção “Acompanhamento” que serve para adicionar um texto ao
+              chamado, e a opção “Documento” que serve para anexar um arquivo.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Solução.</b> Quando o chamado é solucionado, a solução aplicada pelo técnico
+              estará visível na opção “Processando chamado” do MENU esquerdo.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Satisfação.</b> Após a aprovação da solução do chamado, no MENU esquerdo aparecerá
+              a opção
+              “Satisfação”, nela o solicitante poderá avaliar a satisfação referente ao atendimento recebido.
+
+              A avaliação pode variar de 1 á 5 estrelas. Onde 1 estrela significa Muito Ruim e 5 estrelas significa
+              Muito Satisfeito. Marque a quantidade de estrela desejada.
+
+              Logo abaixo, tem um quadro onde o solicitante pode escrever observações referente a sua avaliação.
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6" height="315"
+                src="https://www.youtube.com/embed/DYDaTd28Iug" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+              <iframe class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6" height="315"
+                src="https://www.youtube.com/embed/hw6pICW7c2Y" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-6" role="tabpanel" aria-labelledby="v-pills-6-tab">
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Membros com acesso
+            </p>
+            <p class="text-wrap fs-6 text-info font-monospace">
+              - Carlins Ferraz <b class="text-warning">(Presidente)</b> <br />
+              - Adriano Patrocínio <b class="text-warning">(Gerente Administrativo)</b> <br />
+              - Jefferson Juliano <b class="text-warning">(Administrador de Redes)</b> <br />
+              - Luiz Guilherme <b class="text-warning">(Jovem Aprendiz)</b> <br />
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Na barra de Menu: Clicar em “Ferramentas > Projetos”.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Caso não liste o projeto que deseja Acompanhar (abrir/visualizar), verifique o filtro de projetos.
+              A lista de projetos listada depende da opção selecionada no filtro. Para melhor visualização, veja a
+              abaixo a barra de filtro:
+              <img src="https://imgur.com/gYfI0xF.png" class="img-fluid" alt="filtro de projetos">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Parar detalhar um projeto vá até a coluna “Nome”, clique sobre o nome do projeto desejado para
+              visualiza-lo.
+              <img src="https://imgur.com/Msm4urN.png" class="img-fluid" alt="">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              Na tela seguinte, clique na opção “Projeto” localizada no MENU do lado esquerdo. A tela abrirá várias
+              informações referentes ao projeto, como por exemplo “Gerente”, nesse campo é possível visualizar
+              qual responsável está encarregado pelo projeto, caso essa opção esteja vazia significa que o projeto ainda
+              não foi atribuído para ninguém.
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Acompanhar as Tarefas.</b> Novamente no MENU do lado esquerdo,
+              clique na opção “Tarefas do projeto”. Nessa opção é possível visualizar as tarefas adicionadas
+              referentes ao projeto. Para detalhar uma tarefa vá até a coluna “Tarefas do projeto”, clique sobre
+              o nome da tarefa desejada para visualiza-la.
+              <img src="https://imgur.com/yBUHfQ4.png" class="img-fluid" alt="">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Visualizar a equipe do projeto.</b> Novamente no MENU do lado esquerdo,
+              clique na opção “Equipe do projeto”. Nessa opção é possível visualizar todos os colaboradores
+              associados ao projeto. Para detalhar um colaborador vá até a coluna “Membros”, clique sobre
+              o nome do colaborador desejado para visualiza-lo.
+              <img src="https://imgur.com/WY8MD17.png" class="img-fluid" alt="">
+            </p>
+            <p class="text-wrap fs-5 fw-bold font-monospace p-2 bs-callout">
+              <b class="text-warning">Acompanhar no calendário.</b> Novamente no MENU do lado esquerdo,
+              clique na opção “GANTT”. Nessa opção é possível visualizar todas as tarefas a partir
+              do calendário do projeto. Para detalhar uma tarefa, clique sobre o nome da tarefa
+              desejada para visualiza-la.
+              <img src="https://imgur.com/OO47OpD.png" class="img-fluid" alt="">
+            </p>
+            <div class="d-lg-flex d-xl-flex d-xxl-flex justify-content-center">
+              <iframe class="col-12" height="315" src="https://www.youtube.com/embed/hY4Z1tmM-8g" frameborder="1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"
+    integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous">
+    </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js"
+    integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,142 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage col-sm-12 col-md-12 col-lg-6 col-xl-6 nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Configurações Gerais
+        a(class="menu-storage col-sm-12 col-md-12 col-lg-6 col-xl-6 nav-link" id="nav-security-tab" data-bs-toggle="tab" href="#nav-security" role="tab" aria-controls="nav-security" aria-selected="false") Configurações de Segurança
+        a(class="menu-storage col-12 nav-link" id="nav-documents-tab" data-bs-toggle="tab" href="#nav-documents" role="tab" aria-controls="nav-documents" aria-selected="false") Documentos para Aprovação
+    div(class="tab-content col-12" id="nav-tabContent")
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="col-12 mt-3 border-bottom")
+          p(class="mt-3") Em processo de desenvolvimento.
+      div(class="tab-pane fade" id="nav-security" role="tabpanel" aria-labelledby="nav-security-tab")
+        div(class="col-12 mt-3 border-bottom")
+          p(class="mt-3") Em processo de desenvolvimento.
+      div(class="tab-pane fade" id="nav-documents" role="tabpanel" aria-labelledby="nav-documents-tab")
+        div(class="col-12 mt-3 border-bottom")
+          ul(class="list-group" id="ul-docs")
+            if (docsCount.length > 0)
+              each doc in docs
+                if (doc['data']['acordo_de_confidencialidade'] && doc['data']['acordo_de_confidencialidade']['reading'] === 'pending')
+                  li(class="list-group-item col-12 mt-3 mb-3 border")
+                    h5(class="fw-bold text-center text-muted border-bottom p-2") ACORDO DE CONFIDENCIALIDADE (#{doc['user']['name']})
+                    button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick=`docEvaluate('${doc['user']['auth']}', '${doc['user']['name']}', 'ACORDO DE CONFIDENCIALIDADE', '${doc['data']['acordo_de_confidencialidade']['postdate']}')`) #[span(class="material-icons") chrome_reader_mode] #[br] Avaliar
+                if (doc['data']['acordo_de_parceria'] && doc['data']['acordo_de_parceria']['reading'] === 'pending')
+                  li(class="list-group-item col-12 mt-3 mb-3 border")
+                    h4(class="fw-bold text-center text-muted border-bottom p-2") ACORDO DE PARCERIA (#{doc['user']['name']})
+                    button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick="docEvaluate()") #[span(class="material-icons") chrome_reader_mode] #[br] Avaliar
+            else
+              p Não existem documentos a serem analisados.
+  //- MODALS
+  //- Tipo de serviço
+  div(id="modal-1" class="modal fade mt-5" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true")
+    div(class="modal-dialog modal-xl modal-dialog-scrollable")
+      div(class="modal-content")
+        div(class="modal-header")
+          h5(class="modal-title") Avaliação de documento
+        div(id="modal-1-scrollable" class="modal-body")
+          div(class="col mt-2 mb-4")
+            label(for="client-location-zipcode") Código Exclusivo
+            input(type="text" class="form-control" id="doc-auth" disabled)
+          div(class="col mt-2 mb-4")
+            label(for="client-location-zipcode") Autor
+            input(type="text" class="form-control" id="doc-user" disabled)
+          div(class="col mt-2 mb-4")
+            label(for="client-location-zipcode") Título
+            input(type="text" class="form-control" id="doc-title" disabled)
+          div(class="col mt-2 mb-4")
+            label(for="client-location-zipcode") Data de postagem
+            input(type="text" class="form-control" id="doc-date" disabled)
+            div(class="col mt-4 mb-4")
+              label(for="client-location-zipcode") Motivo de Recusar (Obrigatório)
+              textarea(class="form-control" id="doc-textarea" rows="4")
+          div(class="text-center")
+            button(type="button" class="btn btn-info col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" onclick="docDownload()") Analisar
+            button(type="button" class="btn btn-success col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" onclick="docApprove()") Aprovar
+            button(type="button" class="btn btn-danger col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" onclick="docRefuse()") Recusar
+            button(type="button" class="btn btn-mave1 col-12 mt-3" data-bs-dismiss="modal") Voltar
+  script.
+    $(document).ready(() => {
+      storage_menu_start('admin');
+      })
+
+      function gotoSystem() {
+        document.location = `${baseurl}/system/?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+      }
+
+      function docEvaluate(auth, username, title, postdate) {
+        $('#doc-auth').val(auth);
+        $('#doc-user').val(username);
+        $('#doc-title').val(title);
+        $('#doc-date').val(postdate);
+
+        modalOpen('modal-1');
+      }
+
+      function docDownload() {
+        alerting('O download iniciara em breve...');
+        window.open(
+          `${baseurl}/system/admin/docs/download?authorization=${String($('#doc-auth').val())}&docname=${String($('#doc-title').val())}&usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`, 
+          "_blank"
+        );
+      }
+
+      function docApprove() {
+        axios.request({
+          method: 'POST',
+          url: `${baseurl}/user/docs/approve`,
+          headers: {
+            "Content-Type": "application/json",
+            "usr_token": localStorage.getItem('usr-token'),
+            "usr_internetadress": localStorage.getItem('usr-internetadress')
+          },
+          data: {
+            authorization: $('#doc-auth').val(),
+            docname: $('#doc-title').val()
+          }
+        })
+        .then(response => {
+          create_notifications($('#doc-auth').val(), title = `Avaliação de documento (${$('#doc-title').val()})`, subtitle = 'Seu documento foi analisado com sucesso.', body = 'O documento foi aprovado.', background = 'secondary', expires = '1 ms');
+          alerting(`O documento ${$('#doc-title').val()} (${$('#doc-user').val()}) foi aprovado. O usuário foi notificado.`);
+          return document.location.reload();
+        })
+        .catch(error => {
+          if (error.response && error.response.data && error.response.data.error != undefined) {
+            console.log('Erro no sistema de notificação', error.response.data);
+          } else {
+            console.log('Erro no sistema de notificação', error);
+          }
+        })
+      }
+
+      function docRefuse() {
+        if ($('#doc-textarea').val().length <= 0)
+          return alerting(`Você não declarou o motivo de recusar o documento.`);
+        axios.request({
+          method: 'POST',
+          url: `${baseurl}/user/docs/reject`,
+          headers: {
+            "Content-Type": "application/json",
+            "usr_token": localStorage.getItem('usr-token'),
+            "usr_internetadress": localStorage.getItem('usr-internetadress')
+          },
+          data: {
+            authorization: $('#doc-auth').val(),
+            docname: $('#doc-title').val()
+          }
+        })
+        .then(response => {
+          create_notifications($('#doc-auth').val(), title = `Avaliação de documento (${$('#doc-title').val()})`, subtitle = 'Seu documento foi analisado com sucesso.', body = `O documento foi recusado. ∟ Motivo:<br />${$('#doc-textarea').val()}`, background = 'secondary', expires = '1 ms');
+          alerting(`O documento ${$('#doc-title').val()} (${$('#doc-user').val()}) foi recusado. O usuário foi notificado.`);
+          return document.location.reload();
+        })
+        .catch(error => {
+          if (error.response && error.response.data && error.response.data.error != undefined) {
+            console.log('Erro no sistema de notificação', error.response.data);
+          } else {
+            console.log('Erro no sistema de notificação', error);
+          }
+        })
+      }

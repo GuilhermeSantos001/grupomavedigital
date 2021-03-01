@@ -1,0 +1,222 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Informações Gerais
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Informações Gerais
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="row border-bottom mt-3")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-ID") Código
+            input(type="text" class="form-control" id="equipments-ID" placeholder="???" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-depreciation") Depreciação
+            input(type="number" class="form-control" id="equipments-depreciation" value="1" min="1" max="36")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-segment") Segmento
+            input(type="text" class="form-control" id="equipments-segment")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-description") Descrição
+            input(type="text" class="form-control" id="equipments-description")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-quantity") Quantidade
+            input(type="number" class="form-control" id="equipments-quantity" value="1" min="1" max="999")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-investment") Investimento
+            input(type="text" class="form-control" id="equipments-investment" value="0")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-amortization") Amortização
+            input(type="text" class="form-control" id="equipments-amortization" value="0" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="equipments-investmentTotal") Investimento Total
+            input(type="text" class="form-control" id="equipments-investmentTotal" value="0" disabled)
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let equipments = JSON.parse(LZString.decompressFromBase64(`#{equipments}`));
+
+    $(document).ready(() => {
+      $("#equipments-ID").val(StringPadZero(equipments.length + 1, 6));
+
+      $('#equipments-investment, #equipments-amortization, #equipments-investmentTotal').priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+      });
+
+      $('#equipments-depreciation').change(function (e) {
+        if ($(e.target).val() <= 0) {
+          $(e.target).val(1);
+        } else if ($(e.target).val() > 36) {
+          $(e.target).val(36);
+        }
+      })
+
+      $('#equipments-quantity').change(function (e) {
+        if ($(e.target).val() <= 0) {
+          $(e.target).val(1);
+        } else if ($(e.target).val() > 999) {
+          $(e.target).val(999);
+        }
+      })
+
+      $('#equipments-investment, #equipments-amortization, #equipments-investmentTotal').change(function (e) {
+        if ($(e.target).val() <= 0)
+          $(e.target).val(0);
+      })
+
+      //- Calculo da amortização
+      $('#equipments-depreciation, \
+        #equipments-quantity, \
+        #equipments-investment \
+      ').change(function() {
+        let investment = Number($('#equipments-investment').unmask()),
+          depreciation = Number($('#equipments-depreciation').val().slice(0, 2)),
+          quantity = Number($('#equipments-quantity').val().slice(0, 2)),
+          calculate = Math.round(Number(investment/depreciation*quantity).toFixed(2));
+
+        $('#equipments-amortization').val(calculate).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+
+      //- Calculo do investimento total
+      $('#equipments-depreciation, \
+        #equipments-quantity, \
+        #equipments-investment \
+      ').change(function() {
+        let investment = Number($('#equipments-investment').unmask()),
+          quantity = Number($('#equipments-quantity').val().slice(0, 2)),
+          calculate = Math.round(Number(investment*quantity).toFixed(2));
+
+        $('#equipments-investmentTotal').val(calculate).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+    })
+
+    function gotoSystem() {
+      return document.location = `${baseurl}/system/equipments?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    let send_interval = null,
+      send_valid = null,
+      send_details = {};
+
+    function send() {
+      send_valid = true;
+
+      if ($('#equipments-ID').val().length <= 0) {
+        $('#equipments-ID').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-depreciation').val().length <= 0) {
+        $('#equipments-depreciation').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-segment').val().length <= 0) {
+        $('#equipments-segment').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-description').val().length <= 0) {
+        $('#equipments-description').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-quantity').val().length <= 0) {
+        $('#equipments-quantity').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-investment').val().length <= 0) {
+        $('#equipments-investment').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-amortization').val().length <= 0) {
+        $('#equipments-amortization').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#equipments-investmentTotal').val().length <= 0) {
+        $('#equipments-investmentTotal').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if (!send_valid) {
+        alerting('Existem campos obrigatórios não preenchidos e/ou invalidos.');
+
+        if (send_interval) {
+          clearTimeout(send_interval);
+          send_interval = null;
+        }
+
+        send_interval = setTimeout(function() {
+          $('\
+            #equipments-ID, \
+            #equipments-depreciation, \
+            #equipments-segment, \
+            #equipments-description, \
+            #equipments-quantity, \
+            #equipments-investment, \
+            #equipments-amortization, \
+            #equipments-investmentTotal \
+          '.trim()).removeClass('is-invalid');
+        }, 1000)
+      }
+
+      if (!send_valid) return;
+
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/equipments/register`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          'id': String($("#equipments-ID").val()),
+          'depreciation': Number($("#equipments-depreciation").val()),
+          'segment': String($("#equipments-segment").val()),
+          'description': String($("#equipments-description").val()),
+          'quantity': Number($("#equipments-quantity").val()),
+          'investment': Number($("#equipments-investment").unmask()),
+          'amortization': Number($("#equipments-amortization").unmask()),
+          'investmentTotal': Number($("#equipments-investmentTotal").unmask())
+        }
+      })
+      .then(() => {
+        alerting(`Equipamento registrado com sucesso!`);
+
+        equipments.push({});
+        $("#equipments-ID").val(StringPadZero(equipments.length + 1, 6));
+        $("#equipments-depreciation").val(1);
+        $("#equipments-segment").val('');
+        $("#equipments-description").val('');
+        $("#equipments-quantity").val(1);
+        $("#equipments-investment, #equipments-amortization, #equipments-investmentTotal").val(0).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+
+        loading(false);
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }

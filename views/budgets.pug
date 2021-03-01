@@ -1,0 +1,115 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="menu-storage nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Orçamentos
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Orçamentos
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        //- Mobile [❌] - Tablet [✔️] - Notebook [✔️] - PC [✔️] - TV [✔️]
+        div(class="col-12 mt-3 d-none d-md-block d-lg-block d-xl-block d-xxl-block")
+          ul(class="list-group list-group-horizontal")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-1 text-light fw-bold text-truncate") Status
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-2 text-light fw-bold text-truncate") Código
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-2 text-light fw-bold text-truncate") Cliente
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-2 text-light fw-bold text-truncate") Versão
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-5 text-light fw-bold text-truncate") Descrição
+          ul(class="list-group list-group-horizontal")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-1 text-dark fw-bold text-truncate")
+              div(class="mv-status-circle bg-secondary bg-gradient mt-2")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-2 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-ID")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-2 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-client")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-2 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-version")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-5 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-description")
+          ul(class="list-group list-group-horizontal")
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              p(class="text-muted fw-bold text-center p-2 m-2") Não existem orçamentos criados.
+        //- Mobile [✔️] - Tablet [❌] - Notebook [❌] - PC [❌] - TV [❌]
+        div(class="col-12 mt-3 d-block d-md-none d-lg-none d-xl-none d-xxl-none")
+          ul(class="list-group")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-12 text-light fw-bold text-truncate") Status
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              div(class="mv-status-circle bg-secondary bg-gradient")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-12 text-light fw-bold text-truncate") Código
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-mobile-ID")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-12 text-light fw-bold text-truncate") Cliente
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-mobile-client")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-12 text-light fw-bold text-truncate") Versão
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-mobile-version")
+            li(class="list-group-item border border-end border-dark bg-mave1 bg-gradient col-12 text-light fw-bold text-truncate") Descrição
+            li(class="list-group-item border border-end border-dark bg-Light bg-gradient col-12 text-dark fw-bold text-truncate")
+              input(type="text" class="form-control" id="filter-mobile-description")
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    $(document).ready(() => {
+      storage_menu_start('budgets');
+    })
+
+    function gotoSystem() {
+      document.location = `${baseurl}/system/?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function register() {
+      document.location = `${baseurl}/system/budgets/register?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    function equipmentsEdit(id) {
+      document.location = `${baseurl}/system/budgets/edit/${id}?&usr_token=${localStorage.getItem('usr-token')}`;
+    }
+
+    function equipmentsRemove(id) {
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/equipments/remove`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": id
+        }
+      })
+      .then(response => document.location.reload())
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
+
+    /** 
+      Equipamentos
+    */
+    function filter_description() {
+      var input, filter, ul, li, a, i, txtValue;
+      input = document.getElementById("filter_description");
+      filter = input.value.toUpperCase();
+      ul = document.getElementById("ul-equipments");
+      li = ul.getElementsByTagName("li");
+
+      for (i = 0; i < li.length; i++) {
+        let valid = true;
+
+        a = li[i].getElementsByTagName("h4")[0];
+        txtValue = a.textContent || a.innerText;
+
+        if (valid)
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+          } else {
+            li[i].style.display = "none";
+          }
+      }
+    }

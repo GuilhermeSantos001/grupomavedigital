@@ -1,0 +1,402 @@
+extends layout
+
+block content
+  div(class="row" style="margin-top: -100vh;")
+    nav(class="col-12 mt-2")
+      div(class="nav nav-tabs" id="nav-tab" role="tablist")
+        a(class="nav-item nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Informações Gerais
+        a(class="nav-item nav-link" id="nav-additionalcategory-tab" data-bs-toggle="tab" href="#nav-additionalcategory" role="tab" aria-controls="nav-additionalcategory" aria-selected="false") Adicionais da Categoria
+        a(class="nav-item nav-link" id="nav-uniforms-tab" data-bs-toggle="tab" href="#nav-uniforms" role="tab" aria-controls="nav-uniforms" aria-selected="false") Informações do uniforme
+    div(class="tab-content col-12" id="nav-tabContent")
+      //- Informações Gerais
+      div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
+        div(class="row border-bottom mt-3")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-ID") Código
+            input(type="text" class="form-control" id="workdata-ID" placeholder="???" disabled)
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-jobtitle") Cargo/Função
+            input(type="text" class="form-control" id="workdata-jobtitle")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-scale") Escala
+            select(class="form-select" id="workdata-scale")
+              option(select) 4x2
+              option 5x1
+              option 5x2
+              option 6x1
+              option 6x2
+              option 12x36
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-salary") Piso Salarial
+            input(type="text" class="form-control" id="workdata-salary" value="0")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-time-start") Horario de entrada
+            input(type="time" class="form-control" id="workdata-time-start")
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-time-end") Horario de saida
+            input(type="time" class="form-control" id="workdata-time-end")
+          div(class="col-12 mb-5")
+            label(for="workdata-dayswork") Dias de trabalho
+            input(type="number" class="form-control" id="workdata-dayswork" value="20" min="1" max="26" disabled)
+      //- Adicionais da categoria
+      div(class="tab-pane fade show" id="nav-additionalcategory" role="tabpanel" aria-labelledby="nav-additionalcategory-tab")
+        div(class="row border-bottom mt-3")
+          div(class="col-12 mb-2")
+            h4(class="fw-bold text-center text-muted border-bottom p-2") Adicional Noturno
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-additionalnight-status") Status
+            select(class="form-select" id="workdata-additionalnight-status")
+              option(value="true") Habilitado
+              option(value="false" selected) Desabilitado
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-additionalnight-value") Valor
+            input(type="text" class="form-control" id="workdata-additionalnight-value" value="0" disabled)
+          div(class="col-12 mb-2")
+            h4(class="fw-bold text-center text-muted border-bottom p-2") Gratificação
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-gratification-status") Status
+            select(class="form-select" id="workdata-gratification-status")
+              option(value="true") Habilitado
+              option(value="false" selected) Desabilitado
+          div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+            label(for="workdata-gratification-value") Valor
+            input(type="text" class="form-control" id="workdata-gratification-value" value="0" disabled)
+      //- Informações do uniforme
+      div(class="tab-pane fade show" id="nav-uniforms" role="tabpanel" aria-labelledby="nav-uniforms-tab")
+        if (uniforms.length) > 0
+          div(class="row mt-3")
+            div(class="col-12 mb-3")
+              label(for="uniforms-monthlycost") Custo Mensal
+              input(type="text" class="form-control" id="uniforms-monthlycost" value="0" disabled)
+          h4(class="fw-bold text-center text-muted border-bottom p-2") Lista de uniformes
+          ul(class="list-group p-2 mb-5" id="ul-uniforms")
+            each uniform in uniforms
+              li(class="list-group-item mb-3")
+                div(class="row border-bottom mt-3")
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-ID-${uniform['id']}`) Código
+                    input(type="text" class="form-control" id=`uniform-ID-${uniform['id']}` value=`${uniform['id']}` disabled)
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-description-${uniform['id']}`) Descrição
+                    input(type="text" class="form-control" id=`uniform-description-${uniform['id']}` value=`${uniform['description']}` disabled)
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-quantity-${uniform['id']}`) Quantidade
+                    input(type="number" class="form-control" id=`uniform-quantity-${uniform['id']}` value=`${uniform['quantity']}` disabled)
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-unitary-${uniform['id']}`) Valor unitario
+                    input(type="text" class="form-control" id=`uniform-unitary-${uniform['id']}` value=`${uniform['unitary']}` disabled)
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-total-${uniform['id']}`) Valor total
+                    input(type="text" class="form-control" id=`uniform-total-${uniform['id']}` value=`${uniform['total']}` disabled)
+                  div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
+                    label(for=`uniform-monthlycost-${uniform['id']}`) Custo Mensal
+                    input(type="text" class="form-control" id=`uniform-monthlycost-${uniform['id']}` value=`${uniform['monthlycost']}` disabled)
+                  div(class="col-12 mb-5")
+                    div(class="custom-control custom-checkbox")
+                      input(type="checkbox" class="custom-control-input" id=`uniform-checkbox-${uniform['id']}` onclick=`selectUniform('${uniform['id']}', '${uniform['ref']}')`)
+                      label(class="custom-control-label" for=`uniform-checkbox-${uniform['id']}`) Atribuir
+        else
+          p(class="mt-3") Não existem uniformes registrados.
+  script(src="/javascripts/lz-string.min.js")
+  script.
+    let workdata = JSON.parse(LZString.decompressFromBase64(`#{workdata}`)),
+      uniformslength = Number("#{uniformslength}");
+
+    $(document).ready(() => {
+      $("#workdata-ID").val(StringPadZero(workdata.length + 1, 6));
+
+      $('#workdata-salary, \
+        #workdata-additionalnight-value, \
+        #workdata-gratification-value, \
+        #uniforms-monthlycost \
+      ').priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+      });
+
+      let i = 0, l = uniformslength;
+      for(; i < l; i++) {
+        $(`#uniform-unitary-${StringPadZero(i + 1, 6)}, \
+          #uniform-total-${StringPadZero(i + 1, 6)}, \
+          #uniform-monthlycost-${StringPadZero(i + 1, 6)} \
+        `).priceFormat({
+        prefix: 'R$ ',
+        centsSeparator: ',',
+        thousandsSeparator: '.'
+        });
+      }
+
+      $('#workdata-dayswork').change(function (e) {
+        if ($(e.target).val() <= 0) {
+          $(e.target).val(1);
+        } else if ($(e.target).val() > 26) {
+          $(e.target).val(26);
+        }
+      })
+
+      //- Calculo do adicional noturno
+      $('#workdata-additionalnight-status, \
+        #workdata-gratification-status, \
+        #workdata-salary, \
+        #workdata-time-start, \
+        #workdata-time-end, \
+        #workdata-dayswork \
+      ').change(function() {
+        let salary = Number($('#workdata-salary').unmask()),
+          time_start = Number($('#workdata-time-start').val().slice(0, 2)),
+          time_end = Number($('#workdata-time-end').val().slice(0, 2)),
+          time_diference = time_diference_hours(time_start < 22 ? 22 : time_start, time_end == 22 || time_end == 23 || time_end == 0 ? time_end : time_end > 5 ? 5 : time_end),
+          dayswork = Number($('#workdata-dayswork').val()),
+          calculate = Math.round(Number(salary/192*0.2*1.142857*time_diference*dayswork).toFixed(2));
+
+        if (eval($('#workdata-gratification-status').val()))
+          calculate += Number($('#workdata-gratification-value').unmask());
+
+        $('#workdata-additionalnight-value').val(calculate).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+
+      //- Calculo da gratificação
+      $('#workdata-gratification-status, \
+        #workdata-salary \
+      ').change(function() {
+        let salary = $('#workdata-salary').unmask(),
+          calculate = Math.round(Number(salary*0.2).toFixed(2));
+
+        $('#workdata-gratification-value').val(calculate).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+      });
+
+      $('#workdata-scale').change(function(e) {
+        switch($(e.target).val()) {
+          case '4x2':
+            return $('#workdata-dayswork').val(20)
+          case '5x1':
+            return $('#workdata-dayswork').val(25)
+          case '5x2':
+            return $('#workdata-dayswork').val(22)
+          case '6x1':
+            return $('#workdata-dayswork').val(26)
+          case '6x2':
+            return $('#workdata-dayswork').val(25)
+          case '12x36':
+            return $('#workdata-dayswork').val(15)
+        }
+      })
+
+      $(window).bind('beforeunload', function() {
+        return 'Você tem certeza de que quer sair?';
+      });
+    })
+
+    function gotoSystem() {
+      return document.location = `${baseurl}/system/workdata?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    }
+
+    let uniforms_selected = [];
+    function selectUniform(id, ref) {
+      if ($(`#uniform-checkbox-${id}`).prop('checked')) {
+        if (!uniformGet(id)) {
+          let monthlycost_total = Number($('#uniforms-monthlycost').unmask()) * 0.01,
+            uniform_monthlycost = Number($(`#uniform-monthlycost-${id}`).unmask()) * 0.01;
+
+          monthlycost_total = Number(monthlycost_total + uniform_monthlycost).toFixed(2);
+
+          $('#uniforms-monthlycost').val(monthlycost_total).priceFormat({
+            prefix: 'R$ ',
+            centsSeparator: ',',
+            thousandsSeparator: '.'
+          });
+
+          uniforms_selected.push({
+            id,
+            ref
+          })
+        }
+      } else {
+        let monthlycost_total = Number($('#uniforms-monthlycost').unmask()) * 0.01,
+          uniform_monthlycost = Number($(`#uniform-monthlycost-${id}`).unmask()) * 0.01;
+
+        monthlycost_total = Number(monthlycost_total - uniform_monthlycost).toFixed(2);
+
+        $('#uniforms-monthlycost').val(monthlycost_total).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+
+        uniforms_selected = uniformRemove(id);
+      }
+    }
+
+    function uniformsRefs() {
+      return uniforms_selected.map(uniform => uniform['ref']);
+    }
+
+    function uniformGet(id) {
+      return uniforms_selected.filter(uniform => uniform['id'] == id).length > 0;
+    }
+
+    function uniformRemove(id) {
+      return uniforms_selected.filter(uniform => uniform['id'] != id);
+    }
+
+    let send_interval = null,
+      send_valid = null;
+
+    function send() {
+      send_valid = true;
+
+      if ($('#workdata-ID').val().length <= 0) {
+        $('#workdata-ID').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-jobtitle').val().length <= 0) {
+        $('#workdata-jobtitle').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-scale').val().length <= 0) {
+        $('#workdata-scale').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-salary').val().length <= 0) {
+        $('#workdata-salary').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-time-start').val().length <= 0) {
+        $('#workdata-time-start').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-time-end').val().length <= 0) {
+        $('#workdata-time-end').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-dayswork').val().length <= 0) {
+        $('#workdata-dayswork').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-additionalnight-value').val().length <= 0) {
+        $('#workdata-additionalnight-value').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if ($('#workdata-gratification-value').val().length <= 0) {
+        $('#workdata-gratification-value').addClass('is-invalid');
+        send_valid = false;
+      }
+
+      if (!send_valid) {
+        alerting('Existem campos obrigatórios não preenchidos e/ou invalidos.');
+
+        if (send_interval) {
+          clearTimeout(send_interval);
+          send_interval = null;
+        }
+
+        send_interval = setTimeout(function() {
+          $('\
+            #workdata-ID, \
+            #workdata-jobtitle, \
+            #workdata-scale, \
+            #workdata-salary, \
+            #workdata-time-start, \
+            #workdata-time-end, \
+            #workdata-dayswork, \
+            #workdata-additionalnight-value, \
+            #workdata-gratification-value \
+          '.trim()).removeClass('is-invalid');
+        }, 1000)
+      }
+
+      if (!send_valid) return;
+
+      if (uniforms_selected.length <= 0)
+        return alerting('Nenhum uniforme foi atribuído.');
+
+      loading(true);
+
+      axios.request({
+        method: 'POST',
+        url: `${baseurl}/system/workdata/register`,
+        headers: {
+          "Content-Type": "application/json",
+          "usr_token": localStorage.getItem('usr-token'),
+          "usr_internetadress": localStorage.getItem('usr-internetadress')
+        },
+        data: {
+          "id": String($("#workdata-ID").val()),
+          "jobtitle": String($("#workdata-jobtitle").val()),
+          "scale": String($("#workdata-scale").val()),
+          "salary": Number($("#workdata-salary").unmask()),
+          "time": Object({
+            start: $("#workdata-time-start").val(),
+            end: $("#workdata-time-end").val()
+          }),
+          "dayswork": Number($("#workdata-dayswork").val()),
+          "overtime": Object({
+            fifty: 0,
+            hundred: 0
+          }),
+          "accumulation": Object({
+            value: 0,
+            enabled: false
+          }),
+          "additionalnight": Object({
+            value: $("#workdata-additionalnight-value").unmask(),
+            enabled: eval($("#workdata-additionalnight-status").val())
+          }),
+          "gratification": Object({
+            value: $("#workdata-gratification-value").unmask(),
+            enabled: eval($("#workdata-gratification-status").val())
+          }),
+          "dangerousness": Object({
+            value: 0,
+            enabled: false
+          }),
+          "insalubrity": Object({
+            value: 0,
+            enabled: false
+          }),
+          "dsr": Object({
+            value: 0,
+            enabled: false
+          }),
+          "uniforms": uniformsRefs()
+        }
+      })
+      .then(() => {
+        alerting(`Dado trabalhista registrado com sucesso!`);
+
+        workdata.push({});
+        $("#workdata-ID").val(StringPadZero(workdata.length + 1, 6));
+        $("#workdata-jobtitle").val('');
+        $('#workdata-salary, #workdata-additionalnight-value, #workdata-gratification-value').val(0).priceFormat({
+          prefix: 'R$ ',
+          centsSeparator: ',',
+          thousandsSeparator: '.'
+        });
+        $("#workdata-time-start, #workdata-time-end").val('');
+        $("#workdata-additionalnight-status, #workdata-gratification-status").val('false');
+
+        loading(false);
+      })
+      .catch(error => {
+        alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
+        console.log(error);
+        loading(false);
+      })
+    }
