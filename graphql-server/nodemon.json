@@ -1,7 +1,6 @@
 {
-    "ext": "js",
-    "ignore": [
-        "public/*",
+    "ext": "js, graphql",
+    "watch": [
         "graphql-server/*"
     ],
     "env": {

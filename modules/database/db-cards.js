@@ -1,14 +1,14 @@
 module.exports = (mongoose, uri, schema_cards) => {
     return {
-        register: ( // Registro dos Cartões
+        register: ( // Registro dos Cartões Digitais
             id,
             photo,
             name,
             jobtitle,
             phones,
             whatsapp,
-            footer,
-            socialmedia
+            vcard,
+            footer
         ) => {
             return new Promise((resolve, reject) => {
                 mongoose.connect(uri, {
@@ -32,10 +32,51 @@ module.exports = (mongoose, uri, schema_cards) => {
                         photo: String(photo),
                         name: String(name),
                         jobtitle: String(jobtitle),
-                        phones: phones,
+                        phones: [phones[0], phones[1]],
                         whatsapp: String(whatsapp),
-                        footer: footer,
-                        socialmedia: socialmedia
+                        vcard: {
+                            firstname: String(vcard['firstname']),
+                            lastname: String(vcard['lastname']),
+                            organization: String(vcard['organization']),
+                            photo: {
+                                path: String(vcard['photo']['path']),
+                                file: String(vcard['photo']['file']),
+                            },
+                            logo: {
+                                path: String(vcard['logo']['path']),
+                                file: String(vcard['logo']['file']),
+                            },
+                            workPhone,
+                            birthday: {
+                                year: Number(vcard['birthday']['year']),
+                                month: Number(vcard['birthday']['month']),
+                                day: Number(vcard['birthday']['day']),
+                            },
+                            title: String(vcard['title']),
+                            url: String(vcard['url']),
+                            workUrl: String(vcard['workUrl']),
+                            workEmail: String(vcard['workEmail']),
+                            workAddress: {
+                                label: String(vcard['workAddress']['label']),
+                                street: String(vcard['workAddress']['street']),
+                                city: String(vcard['workAddress']['city']),
+                                stateProvince: String(vcard['workAddress']['stateProvince']),
+                                postalCode: String(vcard['workAddress']['postalCode']),
+                                countryRegion: String(vcard['workAddress']['countryRegion']),
+                            },
+                            socialUrls,
+                            file: {
+                                name: String(vcard['file']['name']),
+                                path: String(vcard['file']['path']),
+                            }
+                        },
+                        footer: {
+                            email: String(footer['email']),
+                            location: String(footer['location']),
+                            website: String(footer['website']),
+                            attachment: String(footer['attachment']),
+                            socialmedia: footer['socialmedia'],
+                        }
                     });
                     cards.validate((err) => {
                         if (err) {

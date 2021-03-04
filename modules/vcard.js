@@ -30,14 +30,14 @@ module.exports = async (callback, vcard, logotipo = {}, fotoPerfil = {}) => {
     vCard.birthday = new Date(vcard['birthday']['year'], vcard['birthday']['month'], vcard['birthday']['day']);
     vCard.title = vcard['title'];
     vCard.url = vcard['url'];
-    vCard.workUrl = 'https://grupomavedigital.com.br';
+    vCard.workUrl = vcard['workUrl'];
     vCard.workEmail = vcard['email'];
-    vCard.workAddress.label = 'Work Address';
+    vCard.workAddress.label = vcard['label'];
     vCard.workAddress.street = vcard['street'];
     vCard.workAddress.city = vcard['city'];
     vCard.workAddress.stateProvince = vcard['stateProvince'];
     vCard.workAddress.postalCode = vcard['postalCode'];
-    vCard.workAddress.countryRegion = 'Brazil';
+    vCard.workAddress.countryRegion = vcard['countryRegion'];
     vCard.socialUrls = vcard['socialUrls'];
     //save to file
     vCard.filename = String(`${vcard['firstName']}_${vcard['lastName']}_${vcard['organization']}.vcf`).replace(/\s{1,}/g, '_');

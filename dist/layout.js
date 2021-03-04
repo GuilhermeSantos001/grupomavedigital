@@ -41,25 +41,56 @@
         }
     }
 
-    function alerting(message = '???', delay = 3000, callback = function () { }) {
+    /**
+     * Alertas
+     */
+    let alerts = {
+        cache: [],
+        show: null,
+        interval: null,
+        clear: null
+    };
+
+
+    function alerting(message = '???', delay = 3600, callback = function () { }, saveCache = true) {
+        if (alerts.clear) return;
+
+        if (saveCache) alerts.cache.push({ message, delay, callback });
+
+        if (alerts.show) return;
+
+        if (!alerts.interval)
+            alerts.interval = setInterval(() => {
+                if (alerts.show) return;
+
+                if (alerts.cache.length > 0) {
+                    alerts.cache.splice(0, 1);
+                    return alerting(alerts.cache[0]['message'], alerts.cache[0]['delay'], alerts.cache[0]['callback'], false);
+                }
+                else
+                    return clearInterval(alerts.interval), alerts.interval = null;
+            }, 1000);
+
         $('body').append(`\
-        <div style="z-index: 9999;" class="alertDiv alert alert-secondary alert-dismissible fade show fixed-top m-2" role="alert">\
+        <div style="z-index: 9999;" class="alertDiv alert alert-mave alert-dismissible fade show shadow fixed-top m-2" role="alert">\
           <strong>${message}</strong>\
         </div>\
-        `);
+        `), alerts.show = true;
 
         setTimeout(function () {
             $('.alertDiv').fadeOut("slow", function () {
-                $('.alertDiv').remove();
-                callback();
+                return $('.alertDiv').remove(), callback(), alerts.show = null;
             });
         }, delay);
     }
 
     function clearAlerting(callback = function () { }) {
+        if (!alerts.clear) alerts.clear = true;
+
         $('.alertDiv').fadeOut("slow", function () {
-            $('.alertDiv').remove();
-            callback();
+            if (alerts.interval) clearInterval(alerts.interval), alerts.interval = null;
+            alerts = { cache: [], show: null, interval: null, clear: null };
+            $('.alertDiv').remove(), callback();
         });
     }
 
@@ -471,6 +502,8 @@
         title = 'Analista Programador',
         url = 'https://grupomave.com.br',
         email = 'suporte@grupomave.com.br',
+        label = 'Work Address',
+        countryRegion = 'Brazil',
         street = 'R. Barão de Itaúna, 397 - Lapa, São Paulo - SP, 05078-080',
         city = 'São Paulo',
         stateProvince = 'São Paulo',
@@ -480,6 +513,137 @@
             'linkedin': 'https://www.linkedin.com/company/grupo-mave/?originalSubdomain=pt',
             'instagram': 'https://www.instagram.com/grupo.mave/',
             'facebook': 'https://www.facebook.com/grupomaveoficial/'
+        }
+    ) {
+        return new Promise((resolve, reject) => {
+            axios.request({
+                method: 'POST',
+                url: `${baseurl}/cards/vcard/register`,
+                headers: {
+                    "Content-Type": "application/json",
+                    "usr_token": localStorage.getItem('usr-token'),
+                    "usr_internetadress": localStorage.getItem('usr-internetadress')
+                },
+                data: {
+                    firstName: String(firstName),
+                    lastName: String(lastName),
+                    organization: String(organization),
+                    photo: { path: photo.path, file: photo.file },
+                    logo: { path: logo.path, file: logo.file },
+                    workPhone: workPhone,
+                    birthday: { year: birthday.year, month: birthday.month, day: birthday.day },
+                    title: String(title),
+                    url: String(url),
+                    email: String(email),
+                    label: String(label),
+                    countryRegion: String(countryRegion),
+                    street: String(street),
+                    city: String(city),
+                    stateProvince: String(stateProvince),
+                    postalCode: String(postalCode),
+                    socialUrls: socialUrls
+                }
+            })
+                .then(res => resolve(res.data))
+                .catch(error => {
+                    if (error.response && error.response.data && error.response.data.error != undefined) {
+                        return reject('Erro na criação do vCard', error.response.data)
+                    } else {
+                        return reject('Erro na criação do vCard', error)
+                    }
+                })
+        })
+    }
+
+    /**
+     * Cartão Digital
+     */
+    function cardCreate(
+        photo = {
+            path: String('assets/perfil/'),
+            file: String('guilherme.jpg')
+        },
+        name = String('Luiz Guilherme'),
+        jobtitle = String('Analista Programador'),
+        phones = [
+            String('11 3683-3408'),
+            String('11 98497-9536')
+        ],
+        whatsapp = {
+            phone: String('11 947841110'),
+            text: String('Olá tudo bem? como representante comercial do Grupo Mave, estou aqui para ajudar no que for possível. Qual sua dúvida?')
+        },
+        vcard = {
+            firstname: String('Luiz'),
+            lastname: String('Guilherme dos Santos'),
+            organization: String('Grupo Mave'),
+            photo: {
+                path: String('assets/perfil/'),
+                file: String('guilherme.jpg')
+            },
+            logo: {
+                path: String('images/'),
+                file: String('favicon.png')
+            },
+            workPhone: [
+                String('11 3683-3408'),
+                String('11 98497-9536')
+            ],
+            birthday: {
+                year: Number(1999),
+                month: Number(1),
+                day: Number(17)
+            },
+            title: String('Analista Programador'),
+            url: String('https://grupomave.com.br'),
+            workUrl: String('https://grupomave.com.br'),
+            workEmail: String('suporte@grupomave.com.br'),
+            workAddress: {
+                label: String('Work Address'),
+                street: String($('#input-vcard-prop-rua').val()),
+                city: String($('#input-vcard-prop-cidade').val()),
+                stateProvince: String($('#input-vcard-prop-estado').val()),
+                postalCode: String($('#input-vcard-prop-cep').val()),
+                countryRegion: String('Brazil')
+            },
+            socialUrls: {
+                'youtube': String($('#input-address-socialmedia-youtube').val()),
+                'linkedin': String($('#input-address-socialmedia-linkedin').val()),
+                'instagram': String($('#input-address-socialmedia-instagram').val()),
+                'facebook': String($('#input-address-socialmedia-facebook').val())
+            },
+            file: {
+                name: String,
+                path: String,
+            }
+        },
+        footer = {
+            email: String($('#input-email').val()),
+            location: String($('#input-localization').val()),
+            website: String($('#input-localization').val()),
+            attachment: String($('#input-website').val()),
+            socialmedia: [
+                {
+                    name: 'Youtube',
+                    value: String($('#input-address-socialmedia-youtube').val()),
+                    enabled: Boolean($('#check-input-socialmedia-youtube').is(':checked'))
+                },
+                {
+                    name: 'Linkedin',
+                    value: String($('#input-address-socialmedia-linkedin').val()),
+                    enabled: Boolean($('#check-input-socialmedia-linkedin').is(':checked'))
+                },
+                {
+                    name: 'Instagram',
+                    value: String($('#input-address-socialmedia-instagram').val()),
+                    enabled: Boolean($('#check-input-socialmedia-instagram').is(':checked'))
+                },
+                {
+                    name: 'Facebook',
+                    value: String($('#input-address-socialmedia-facebook').val()),
+                    enabled: Boolean($('#check-input-socialmedia-facebook').is(':checked'))
+                }
+            ]
         }
     ) {
         return new Promise((resolve, reject) => {
@@ -682,6 +846,7 @@
         { 'alias': 'storage_menu_start', 'function': storage_menu_start },
         { 'alias': 'fileUpload', 'function': fileUpload },
         { 'alias': 'vcardCreate', 'function': vcardCreate },
+        { 'alias': 'cardCreate', 'function': cardCreate },
         { 'alias': 'time_diference_hours', 'function': time_diference_hours },
         { 'alias': 'gotoSystem', 'function': gotoSystem },
         { 'alias': 'login', 'function': login },

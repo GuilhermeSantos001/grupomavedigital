@@ -146,7 +146,7 @@ module.exports = {
         update: db_cards.update,
         remove: db_cards.remove,
         get: db_cards.get
-    },    
+    },
     clients: {
         register: db_clients.register,
         update: db_clients.update,

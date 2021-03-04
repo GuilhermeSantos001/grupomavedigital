@@ -54,6 +54,7 @@
         filePath = '/assets/Apresentação/APRESENTACAO_MAVE.pdf',
         fileVCF = '',
         photoPerfil = { path: 'assets/perfil/', file: 'avatar.png' },
+        photoLogo = { path: 'images/', file: 'favicon.png' },
         whatsappAPI = {
             'base': `https://api.whatsapp.com/send?text=`,
             'text': 'Olá, este é o cartão de visita digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!',
@@ -116,6 +117,11 @@
             }
         },
         {
+            'alias': 'cardGetVCF', 'function': () => {
+                return fileVCF;
+            }
+        },
+        {
             'alias': 'cardOpenVCF', 'function': () => {
                 if (fileVCF.length > 0)
                     return window.open(`/vcf/${fileVCF}`, '_blank');
@@ -174,6 +180,11 @@
         {
             'alias': 'cardGetPhoto', 'function': () => {
                 return photoPerfil;
+            }
+        },
+        {
+            'alias': 'cardGetPhotoLogo', 'function': () => {
+                return photoLogo;
             }
         },
         {

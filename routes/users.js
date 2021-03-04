@@ -705,6 +705,9 @@ router.get(['/auth'], async (req, res) => {
   })
 });
 
+/**
+ * Migrado para GraphQL em 04/03/2021
+ */
 router.post(['/auth/login'], async (req, res) => {
   let {
     usr_authorization,

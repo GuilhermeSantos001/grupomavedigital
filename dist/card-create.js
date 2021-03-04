@@ -194,6 +194,8 @@
             title = $('#input-vcard-prop-titulo').val(),
             url = $('#input-vcard-prop-website').val(),
             email = $('#input-vcard-prop-email').val(),
+            label = 'Work Address',
+            countryRegion = 'Brazil',
             street = $('#input-vcard-prop-rua').val(),
             city = $('#input-vcard-prop-cidade').val(),
             stateProvince = $('#input-vcard-prop-estado').val(),
@@ -213,6 +215,8 @@
             title.length <= 0 ||
             url.length <= 0 ||
             email.length <= 0 ||
+            label.length <= 0 ||
+            countryRegion.length <= 0 ||
             street.length <= 0 ||
             city.length <= 0 ||
             stateProvince.length <= 0 ||
@@ -232,6 +236,8 @@
             title,
             url,
             email,
+            label,
+            countryRegion,
             street,
             city,
             stateProvince,
@@ -242,6 +248,126 @@
                 window.app.cardChangeVCF(filename);
                 window.app.loading(false);
                 window.app.alerting('vCard definido com sucesso!');
+            })
+            .catch((err, details) => console.error(err, details))
+    };
+
+    document.getElementById('card-register').onclick = function () {
+        if (window.app.cardGetVCF().length <= 0)
+            return window.app.alerting('Gere o vCard primeiro!');
+
+        const
+            photo = {
+                path: String(window.app.cardGetPhoto()['path']),
+                file: String(window.app.cardGetPhoto()['file'])
+            },
+            name = String($('#input-username').val()),
+            jobtitle = String($('#input-jobtitle').val()),
+            phones = [
+                String($('#input-phone1').val()),
+                String($('#input-phone2').val())
+            ],
+            whatsapp = {
+                phone: String($('#input-phone3').val()),
+                text: String($('#input-phone3-text').val())
+            },
+            vcard = {
+                firstname: String($('#input-vcard-prop-primeiro-nome').val()),
+                lastname: String($('#input-vcard-prop-último-nome').val()),
+                organization: String($('#input-vcard-prop-organização').val()),
+                photo: {
+                    path: String(window.app.cardGetPhoto()['path']),
+                    file: String(window.app.cardGetPhoto()['file'])
+                },
+                logo: {
+                    path: String(window.app.cardGetPhotoLogo()['path']),
+                    file: String(window.app.cardGetPhotoLogo()['file'])
+                },
+                workPhone: [
+                    String($('#input-vcard-prop-telefone-de-trabalho').val()),
+                    String($('#input-vcard-prop-telefone-de-trabalho-2').val())
+                ],
+                birthday: {
+                    year: Number(document.getElementById('input-vcard-prop-data-de-aniversario').value.split('-')[0]),
+                    month: Number(document.getElementById('input-vcard-prop-data-de-aniversario').value.split('-')[1]) - 1,
+                    day: Number(document.getElementById('input-vcard-prop-data-de-aniversario').value.split('-')[2])
+                },
+                title: String($('#input-vcard-prop-titulo').val()),
+                url: String($('#input-vcard-prop-website').val()),
+                workUrl: String($('#input-vcard-prop-email').val()),
+                workEmail: String($('#input-vcard-prop-email').val()),
+                workAddress: {
+                    label: String('Work Address'),
+                    street: String($('#input-vcard-prop-rua').val()),
+                    city: String($('#input-vcard-prop-cidade').val()),
+                    stateProvince: String($('#input-vcard-prop-estado').val()),
+                    postalCode: String($('#input-vcard-prop-cep').val()),
+                    countryRegion: String('Brazil')
+                },
+                socialUrls: {
+                    'youtube': String($('#input-address-socialmedia-youtube').val()),
+                    'linkedin': String($('#input-address-socialmedia-linkedin').val()),
+                    'instagram': String($('#input-address-socialmedia-instagram').val()),
+                    'facebook': String($('#input-address-socialmedia-facebook').val())
+                },
+                file: {
+                    name: String(window.app.cardGetVCF()),
+                    path: String('vcf/'),
+                }
+            },
+            footer = {
+                email: String($('#input-email').val()),
+                location: String($('#input-localization').val()),
+                website: String($('#input-localization').val()),
+                attachment: String($('#input-website').val()),
+                socialmedia: [
+                    {
+                        name: 'Youtube',
+                        value: String($('#input-address-socialmedia-youtube').val()),
+                        enabled: Boolean($('#check-input-socialmedia-youtube').is(':checked'))
+                    },
+                    {
+                        name: 'Linkedin',
+                        value: String($('#input-address-socialmedia-linkedin').val()),
+                        enabled: Boolean($('#check-input-socialmedia-linkedin').is(':checked'))
+                    },
+                    {
+                        name: 'Instagram',
+                        value: String($('#input-address-socialmedia-instagram').val()),
+                        enabled: Boolean($('#check-input-socialmedia-instagram').is(':checked'))
+                    },
+                    {
+                        name: 'Facebook',
+                        value: String($('#input-address-socialmedia-facebook').val()),
+                        enabled: Boolean($('#check-input-socialmedia-facebook').is(':checked'))
+                    }
+                ]
+            };
+
+        if (
+            photo,
+            name,
+            jobtitle,
+            phones,
+            whatsapp,
+            vcard,
+            footer
+        )
+            return window.app.alerting('Está faltando dados para importar contato!');
+
+        window.app.loading(true);
+        window.app.cardCreate(
+            photo,
+            name,
+            jobtitle,
+            phones,
+            whatsapp,
+            vcard,
+            footer
+        )
+            .then(url => {
+                window.app.loading(false);
+                window.app.alerting('Cartão Digital Criado com sucesso');
             })
             .catch((err, details) => console.error(err, details))
     };

@@ -8,6 +8,7 @@ const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
 const vcard = require('../modules/vcard');
 const compareObject = require('../modules/compareObject');
+const randomId = require('../modules/randomId');
 
 router.get(['/register'], middlewareToken, async (req, res) => {
   let {
@@ -63,23 +64,21 @@ router.get(['/register'], middlewareToken, async (req, res) => {
 
 router.post('/register', middlewareToken, async (req, res) => {
   let {
-    id,
     photo,
     name,
     jobtitle,
     phones,
     whatsapp,
-    footer,
-    socialmedia
+    vcard,
+    footer
   } = getReqProps(req, [
-    'id',
     'photo',
     'name',
     'jobtitle',
     'phones',
     'whatsapp',
-    'footer',
-    'socialmedia'
+    'vcard',
+    'footer'
   ]);
 
   try {
@@ -87,14 +86,57 @@ router.post('/register', middlewareToken, async (req, res) => {
      * Validação dos parametros
      */
     if (
-      typeof id != 'string' ||
       typeof photo != 'string' ||
       typeof name != 'string' ||
       typeof jobtitle != 'string' ||
-      phones instanceof Array !== true ||
-      typeof whatsapp != 'string' ||
-      typeof footer != 'object' ||
-      socialmedia instanceof Array !== true
+      !phones instanceof Array ||
+      !compareObject(whatsapp, {
+        phone: String,
+        text: String
+      }) ||
+      !compareObject(vcard, {
+        firstname: String,
+        lastname: String,
+        organization: String,
+        photo: {
+          path: String,
+          file: String,
+        },
+        logo: {
+          path: String,
+          file: String,
+        },
+        workPhone: Array,
+        birthday: {
+          year: Number,
+          month: Number,
+          day: Number,
+        },
+        title: String,
+        url: String,
+        workUrl: String,
+        workEmail: String,
+        workAddress: {
+          label: String,
+          street: String,
+          city: String,
+          stateProvince: String,
+          postalCode: String,
+          countryRegion: String,
+        },
+        socialUrls: Object,
+        file: {
+          name: String,
+          path: String,
+        }
+      }) ||
+      !compareObject(footer, {
+        email: String,
+        location: String,
+        website: String,
+        attachment: String,
+        socialmedia: Array
+      })
     )
       return res.status(400).send('Grupo Mave Digital - Parameters values is not valid.');
 
@@ -137,6 +179,8 @@ router.post('/vcard/register', middlewareToken, async (req, res) => {
     title,
     url,
     email,
+    label,
+    countryRegion,
     street,
     city,
     stateProvince,
@@ -154,6 +198,8 @@ router.post('/vcard/register', middlewareToken, async (req, res) => {
     'title',
     'url',
     'email',
+    'label',
+    'countryRegion',
     'street',
     'city',
     'stateProvince',
@@ -166,17 +212,19 @@ router.post('/vcard/register', middlewareToken, async (req, res) => {
      * Validação dos parametros
      */
     if (
-      !compareObject(token, { 'data': { 'privilege': '', 'auth': '', 'pass': '' }, 'iat': '', 'exp': '' }) ||
+      !compareObject(token, { 'data': { 'privilege': String, 'auth': String, 'pass': String }, 'iat': String, 'exp': String }) ||
       typeof firstName !== 'string' ||
       typeof lastName !== 'string' ||
       typeof organization !== 'string' ||
-      !compareObject(photo, { 'path': '', 'file': '' }) ||
-      !compareObject(logo, { 'path': '', 'file': '' }) ||
+      !compareObject(photo, { 'path': String, 'file': String }) ||
+      !compareObject(logo, { 'path': String, 'file': String }) ||
       !workPhone instanceof Array ||
-      !compareObject(birthday, { 'year': '', 'month': '', 'day': '' }) ||
+      !compareObject(birthday, { 'year': String, 'month': String, 'day': String }) ||
       typeof title !== 'string' ||
       typeof url !== 'string' ||
       typeof email !== 'string' ||
+      typeof label !== 'string' ||
+      typeof countryRegion !== 'string' ||
       typeof street !== 'string' ||
       typeof city !== 'string' ||
       typeof stateProvince !== 'string' ||
@@ -203,6 +251,8 @@ router.post('/vcard/register', middlewareToken, async (req, res) => {
       title,
       url,
       email,
+      label,
+      countryRegion,
       street,
       city,
       stateProvince,

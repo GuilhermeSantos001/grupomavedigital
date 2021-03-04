@@ -1,0 +1,31 @@
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    website: String!
+}
+
+type Query {
+    users(limit: Int!): [User!]!
+        @cost(multipliers: ["limit"], complexity: 10)
+    user(id: ID!): User
+        @auth(roles: ["p=lv0jujo2p4XlZaprEMOruf9iSabABr*xaWrUbUSPlrOBr_7lxEtrlPhubiVLju"])
+        @cost(complexity: 10)
+    userLogin(usr_auth: String!, pwd: String!, twofactortoken: String, locationIP: String!, internetAdress: String!): String
+        @auth(roles: ["SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"])
+        @cost(complexity: 10)
+}
+
+type Mutation {
+    createUser(name: String!, email: String!): User
+}
+
+directive @auth(
+    roles: [String!]!
+) on FIELD_DEFINITION
+
+directive @cost(
+    complexity: Int
+    useMultipliers: Boolean
+    multipliers: [String!]
+) on FIELD_DEFINITION
