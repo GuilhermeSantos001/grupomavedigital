@@ -1,16 +1,32 @@
 extends layout
 
+block head
+  style.
+    .visibility-password {
+      color: #004a6e;
+      cursor: pointer;
+    }
+
+    .visibility-password:hover {
+      color: #f6d816;
+    }
+
 block content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Insira suas informações de entrada
   div(class="d-flex flex-column col-12 mt-3")
-    div(class="form-floating mt-auto mb-3")
-      input(type="text" class="form-control" id="input_authorization" aria-describedby="authorizationHelp" placeholder="Código exclusivo de acesso")
-      label(for="input_authorization") Autorização
+    div(class="mb-3")
+      label(class="visually-hidden" for="input_authorization") Autorização
+      div(class="input-group")
+        div(class="input-group-text text-mave1") #[span(class="material-icons" style="font-size: 2rem;") person_pin]
+        input(type="text" class="form-control" id="input_authorization" aria-describedby="authorizationHelp" placeholder="Código exclusivo de acesso")
       small(id="authorizationHelp" class="form-text text-muted") Caso tenha perdido o seu código fale com o administrador do sistema.
-    div(class="form-floating mt-auto mb-3")
-      input(type="password" class="form-control" id="input_password" aria-describedby="passwordHelp" placeholder="Sua senha...")
-      label(class="mt-2" for="input_password") Password
-      small(id="passwordHelp" class="form-text text-danger")
+    div(class="mb-3")
+      label(class="visually-hidden" for="input_password") Password
+      div(class="input-group")
+        div(class="input-group-text text-mave1") #[span(class="material-icons" style="font-size: 2rem;") lock]
+        input(type="password" class="form-control" id="input_password" aria-describedby="passwordHelp" placeholder="Sua senha...")
+        div(class="input-group-text visibility-password") #[span(class="material-icons" style="font-size: 2rem;") visibility_off]
+      small(id="passwordHelp" class="form-text text-muted") Nunca mostre sua senha a ninguém e nem passe por e-mail.
     button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick="window.app.login()") #[span(class="material-icons") login]
   script(src="/javascripts/public/login.js")

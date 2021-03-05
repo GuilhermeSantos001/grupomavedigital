@@ -63,7 +63,7 @@ app.use(cors(corsOptions));
 require('./routes/index')(app);
 
 // Import public/scripts
-require('./modules/obfuscator');
+require('./modules/obfuscator')(process.env.NODE_ENV);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

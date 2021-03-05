@@ -1,6 +1,16 @@
 (function () {
     "use strict";
 
+    // ======================================================================
+    // Default Variables
+    //
+    const
+        DEFAULT_DELAY = 3600,
+        ONE_SECOND_DELAY = 1000;
+
+    // ======================================================================
+    // Default Functions
+    //
     function lockClosePage() {
         return window.onbeforeunload = function (e) {
             // Cancelar o evento
@@ -29,7 +39,7 @@
 
             $(".loadingDiv").animate({
                 'opacity': 1
-            }, 1000);
+            }, ONE_SECOND_DELAY);
         } else {
             $("#spinnerLoading").animate({
                 'marginTop': "-100vh"
@@ -41,9 +51,9 @@
         }
     }
 
-    /**
-     * Alertas
-     */
+    // ======================================================================
+    // Alerts
+    //
     let alerts = {
         cache: [],
         show: null,
@@ -51,8 +61,7 @@
         clear: null
     };
 
-
-    function alerting(message = '???', delay = 3600, callback = function () { }, saveCache = true) {
+    function alerting(message = '???', delay = DEFAULT_DELAY, callback = function () { }, saveCache = true) {
         if (alerts.clear) return;
 
         if (saveCache) alerts.cache.push({ message, delay, callback });
@@ -69,10 +78,10 @@
                 }
                 else
                     return clearInterval(alerts.interval), alerts.interval = null;
-            }, 1000);
+            }, ONE_SECOND_DELAY);
 
         $('body').append(`\
-        <div style="z-index: 9999;" class="alertDiv alert alert-mave alert-dismissible fade show shadow fixed-top m-2" role="alert">\
+        <div style="z-index: 9999; font-size: 18px;" class="alertDiv alert alert-mave alert-dismissible fade show shadow fixed-top m-2" role="alert">\
           <strong>${message}</strong>\
         </div>\
         `), alerts.show = true;
@@ -94,9 +103,17 @@
         });
     }
 
+    // ======================================================================
+    // General Functions
+    //
+
     function sendemail(email) {
         return window.open(`mailto:${email}`, '_blank');
     }
+
+    // ======================================================================
+    // Authentication - TwoFactor
+    //
 
     function twofactor(callback = () => { }, usr_authorization) {
         $('body').append(`\
@@ -118,17 +135,17 @@
                     $("#twofactor-text")
                         .animate({
                             'opacity': 1
-                        }, 1000)
+                        }, ONE_SECOND_DELAY)
                         .delay(3000)
                         .animate({
                             'opacity': 0
-                        }, 1000);
+                        }, ONE_SECOND_DELAY);
                 }, usr_authorization);
         };
 
         $(".twofactorDiv").animate({
             'opacity': 1
-        }, 1000);
+        }, ONE_SECOND_DELAY);
     }
 
     function retrievetwofactor(callback = () => { }, usr_authorization) {
@@ -156,6 +173,10 @@
             })
     }
 
+    // ======================================================================
+    // Default Events
+    //
+
     $(document).ready(() => {
         setTimeout(() => {
             if (localStorage.getItem('usr-token')) {
@@ -179,12 +200,18 @@
             }, 400);
         });
 
+        defaultSetters();
         getLocationIP();
 
         setTimeout(() => {
             loading(false);
-        }, 1000);
+        }, ONE_SECOND_DELAY);
     })
+
+    function defaultSetters() {
+        if (document.getElementById('usr-name'))
+            document.getElementById('usr-name').innerText = localStorage.getItem("usr-name");
+    }
 
     var baseurl = String(location.origin);
 
@@ -412,15 +439,15 @@
                     notification_timeout = setTimeout(() => {
                         process_notifications();
                         clearTimeout(notification_timeout);
-                    }, 1000);
+                    }, ONE_SECOND_DELAY);
                 });
             })
         }
     }
 
-    /**
-      Storage Menu
-    **/
+    // ======================================================================
+    // Storage
+    //
 
     function storage_menu_set(menu = '', value = false) {
         if (menu === '')
@@ -458,9 +485,9 @@
         })
     }
 
-    /**
-     * File
-     */
+    // ======================================================================
+    // File - Upload
+    //
     let uploadProcess = null;
     function fileUpload(files = [], custompath) {
         return new Promise((resolve, reject) => {
@@ -488,9 +515,9 @@
         })
     };
 
-    /**
-     * vCard
-     */
+    // ======================================================================
+    // vCard
+    //
     function vcardCreate(
         firstName = 'Luiz',
         lastName = 'Guilherme dos Santos',
@@ -555,9 +582,9 @@
         })
     }
 
-    /**
-     * Cartão Digital
-     */
+    // ======================================================================
+    // Cartão Digital
+    //
     function cardCreate(
         photo = {
             path: String('assets/perfil/'),
@@ -684,9 +711,9 @@
         })
     }
 
-    /**
-      Time
-    **/
+    // ======================================================================
+    // Time
+    //
 
     //- Diferença entre horas
     function time_diference_hours(time1, time2) {
@@ -713,6 +740,9 @@
         return --next;
     }
 
+    // ======================================================================
+    // General Functions
+    //
     function gotoSystem() {
         if (localStorage.getItem('usr-token')) {
             let path = typeof window.app.pagedata('path') === 'string' ? window.app.pagedata('path') : '';
@@ -725,7 +755,7 @@
 
     function login() {
         localStorage.clear();
-        document.location = `${baseurl}/user/auth`;
+        document.location = `${window.app.baseurl}/user/auth`;
     }
 
     function admin() {
@@ -828,7 +858,10 @@
     };
 
     [
+        { 'alias': 'DEFAULT_DELAY', 'function': DEFAULT_DELAY },
+        { 'alias': 'ONE_SECOND_DELAY', 'function': ONE_SECOND_DELAY },
         { 'alias': 'baseurl', 'function': baseurl },
+        { 'alias': 'graphqlUrl', 'function': baseurl.replace(':3000', ':4080') },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
         { 'alias': 'loading', 'function': loading },
         { 'alias': 'alerting', 'function': alerting },
@@ -851,6 +884,7 @@
         { 'alias': 'gotoSystem', 'function': gotoSystem },
         { 'alias': 'login', 'function': login },
         { 'alias': 'perfil', 'function': perfil },
+        { 'alias': 'securityApp', 'function': securityApp },
         { 'alias': 'cards_register', 'function': cards_register },
     ].forEach(prop => window.app[prop['alias']] = prop['function']);
 })();

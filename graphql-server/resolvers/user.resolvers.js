@@ -11,6 +11,8 @@ const users = [
 const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
 const mongoDB = require('../../modules/mongodb');
 const jwt = require('../../modules/jwt');
+const bcrypt = require('../../modules/bcrypt');
+const LZString = require('lz-string');
 
 module.exports = {
     Query: {
@@ -29,8 +31,14 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        userLogin: async (source, { usr_auth, pwd, twofactortoken, locationIP, internetAdress }, { request }) => {
+        authLogin: async (source, { usr_auth, pwd, twofactortoken, locationIP, internetAdress }, { request }) => {
             try {
+                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
+                pwd = LZString.decompressFromEncodedURIComponent(pwd) || pwd;
+                twofactortoken = LZString.decompressFromEncodedURIComponent(twofactortoken) || twofactortoken;
+                locationIP = LZString.decompressFromEncodedURIComponent(locationIP) || locationIP;
+                internetAdress = LZString.decompressFromEncodedURIComponent(internetAdress) || internetAdress;
+
                 let { user } = await mongoDB.users.cpassword(usr_auth, pwd);
 
                 if (user['authentication']['twofactor']['enabled'] && twofactortoken.length <= 0) {
@@ -44,7 +52,7 @@ module.exports = {
                         "pass": pwd
                     }, `${user['session']['cache']['tmp']}${user['session']['cache']['unit']}`);
 
-                    return await mongoDB.users.connected(usr_auth, {
+                    await mongoDB.users.connected(usr_auth, {
                         ip: getClientAddress(request),
                         token: user['token'],
                         device: request.device['type'],
@@ -55,6 +63,13 @@ module.exports = {
                             os: request.device.parser.useragent['os']['family']
                         }
                     });
+
+                    return {
+                        authorization: user['authorization'],
+                        username: user['username'],
+                        token: user['token'],
+                        name: user['name']
+                    }
                 }
 
                 /**
@@ -103,6 +118,29 @@ module.exports = {
                 );
 
                 return users[id]
+            } catch (error) {
+                throw new Error(error);
+            }
+        },
+        changePassword: async (parent, { usr_auth, pwd, new_pwd }, { req }) => {
+            try {
+                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
+                pwd = LZString.decompressFromEncodedURIComponent(pwd) || pwd;
+                new_pwd = LZString.decompressFromEncodedURIComponent(new_pwd) || new_pwd;
+
+                return bcrypt.crypt(new_pwd)
+                    .then(async password_encode => {
+                        try {
+                            await mongoDB.users.cpassword(usr_auth, pwd);
+
+                            return mongoDB.users.changepassword(usr_auth, password_encode)
+                                .then(() => { return `Senha alterada com sucesso!` })
+                                .catch(err => { throw new Error(err) })
+                        } catch {
+                            throw new Error('Não foi possível alterar a senha. Verifique as informações e tente novamente!');
+                        }
+                    })
+                    .catch(err => { throw new Error(err) })
             } catch (error) {
                 throw new Error(error);
             }

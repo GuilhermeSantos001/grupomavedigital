@@ -4539,6 +4539,21 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
         ]
       },
       {
+        type: 'collapse',
+        icon: 'settings',
+        first: false,
+        enabled: true,
+        title: 'Configurações',
+        items: [
+          {
+            title: 'Segurança',
+            icon: 'shield',
+            enabled: true,
+            onclick: 'securityApp()'
+          }
+        ]
+      },
+      {
         type: 'normal',
         icon: 'log-out',
         first: false,

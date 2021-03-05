@@ -922,7 +922,8 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
       return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
 
     const {
-      auth
+      auth,
+      privilege
     } = token['data'];
 
     mongoDB.users.get('authorization', auth)
@@ -937,8 +938,19 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
 
         return res.status(200).render('auth-security', {
           title: 'Grupo Mave Digital',
+          router: 'Configurações/Segurança.',
+          privilege,
           menus: [{
             type: 'normal',
+            icon: 'shield',
+            first: true,
+            enabled: true,
+            title: 'Segurança',
+            onclick: ""
+          },
+          {
+            type: 'normal',
+            icon: 'chevron-left',
             first: false,
             enabled: true,
             title: 'Voltar',
@@ -1192,6 +1204,7 @@ router.get(['/auth/security/retrieve/twofactor', '/auth/security/retrieve/twofac
   }
 });
 
+// Migrado para GraphQL em 05/03/2021
 router.post(['/auth/security/change/password'], middlewareToken, async (req, res) => {
   let {
     usr_authorization,

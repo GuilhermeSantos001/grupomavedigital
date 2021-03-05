@@ -3,14 +3,26 @@ const { defaultFieldResolver } = require('graphql');
 
 module.exports = class AuthDirective extends SchemaDirectiveVisitor {
     visitFieldDefinition(field) {
-        const { resolve = defaultFieldResolver } = field
-        const { roles: expectedRoles = [] } = this.args
+        const { resolve = defaultFieldResolver } = field;
+        const { keys: expectedKeys = [] } = this.args;
         field.resolve = (...args) => {
-            const [, , context] = args
+            const [, , context] = args;
 
             if (
-                expectedRoles.length === 0 ||
-                expectedRoles.some(r => context.request.headers['authorization'] === r)
+                expectedKeys.length === 0 ||
+                expectedKeys.some(r => {
+                    let result = false,
+                        data = String(context.request.headers['authorization']).split(','),
+                        i = 0,
+                        l = data.length;
+
+                    for (; i < l; i++) {
+                        if (data[i] === r)
+                            return result = true;
+                    }
+
+                    return result;
+                })
             ) {
                 // Call original resolver if role check has passed
                 return resolve.apply(this, args)

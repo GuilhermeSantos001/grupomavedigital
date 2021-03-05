@@ -11,83 +11,70 @@
             return document.location = `${window.app.baseurl}/system?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
     })
 
-    let loginTimeout = {
-        exe: () => {
-            $('#input_authorization, #input_password').removeClass('is-invalid');
-            $('#passwordHelp').text('');
-        },
-        timeout: null,
-        verify: () => {
-            if (loginTimeout.timeout) {
-                clearTimeout(loginTimeout.timeout);
-                loginTimeout.exe();
-                loginTimeout.timeout = null;
-            }
-        },
-        define: () => {
-            loginTimeout.timeout = setTimeout(loginTimeout.exe, 1000);
-        }
-    }
-
     function login(usr_twofactortoken = '') {
         window.app.loading(true);
-        loginTimeout.verify();
 
-        axios.request({
-            method: 'POST',
-            url: `${window.app.baseurl}/user/auth/login`,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            data: {
-                'usr_authorization': LZString.compressToEncodedURIComponent($('#input_authorization').val()),
-                'password': LZString.compressToEncodedURIComponent($('#input_password').val()),
-                'usr_twofactortoken': LZString.compressToEncodedURIComponent(usr_twofactortoken),
-                'locationIP': LZString.compressToEncodedURIComponent(localStorage.getItem('usr-locationIP')),
-                'internetAdress': localStorage.getItem('usr-internetadress')
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(String($('#input_authorization').val())),
+            usr_pwd = LZString.compressToEncodedURIComponent(String($('#input_password').val())),
+            usr_locationIP = LZString.compressToEncodedURIComponent(String(localStorage.getItem('usr-locationIP'))),
+            usr_internetadress = String(localStorage.getItem('usr-internetadress')); // Já está compressado
+
+        if (usr_auth.length <= 0 || usr_pwd.length <= 0) {
+            window.app.loading(false);
+
+            if (!$('#input_authorization, #input_password').hasClass('is-invalid')) {
+                $('#input_authorization, #input_password').addClass('is-invalid');
+                let clear = setTimeout(function () {
+                    $('#input_authorization, #input_password').removeClass('is-invalid');
+                    clearTimeout(clear);
+                }, window.app.DEFAULT_DELAY);
             }
+
+            return window.app.alerting('Preencha os campos obrigatórios. Tente novamente!')
+        }
+
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"
+            },
+            "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization username name token } }\"}`
         })
-            .then(response => {
-                console.log(response);
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
 
-                let { data } = response['data'];
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
 
-                if (data === 'exceeded') {
-                    window.app.alerting('Você excedeu o limite de sessões');
-                    return window.app.loading(false);
-                } else if (data === 'deviceblocked') {
-                    window.app.alerting('Esse dispositivo não está habilitado a se conectar');
-                    return window.app.loading(false);
-                } else if (data === 'twofactorVerify') {
-                    window.app.twofactor(login, $('#input_authorization').val());
-                    return loading(false);
-                } else if (data === 'twofactorDenied') {
-                    window.app.alerting('Seu código não está correto, tente novamente.');
-                    return window.app.loading(false);
-                }
+                const { user } = data || {};
+                localStorage.setItem("usr-auth", user['authorization']);
+                localStorage.setItem("usr-username", user['username']);
+                localStorage.setItem("usr-token", user['token']);
+                localStorage.setItem("usr-name", user['name']);
 
-                if (data && data['user']) {
-                    localStorage.setItem("usr-auth", data['user']['authorization']);
-                    localStorage.setItem("usr-username", data['user']['username']);
-                    localStorage.setItem("usr-token", data['user']['token']);
-                    localStorage.setItem("usr-name", data['user']['name']);
-                    document.location = `${window.app.baseurl}/system?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-                    window.app.loading(false);
-                } else {
-                    window.app.loading(false);
-                    $('#input_authorization, #input_password').addClass('is-invalid');
-                    if (jsondata && jsondata['error'][1] === '401 - By email not verify')
-                        $('#passwordHelp').text('Você precisa confirmar o seu endereço de email. Verifique sua caixa de entrada!');
-                    else
-                        $('#passwordHelp').text('Autorização ou Senha está incorreto.');
-                    loginTimeout.define();
-                }
+                return document.location = `${window.app.baseurl}/system?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
             })
             .catch(err => {
-                console.error(err);
-                window.app.loading(false);
-                $('#passwordHelp').text('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
-            })
+                throw new Error(err);
+            });
+    }
+
+    // ======================================================================
+    // Events
+    //
+    document.getElementsByClassName('visibility-password')[0].onclick = e => {
+        let span = $(e.target).children().length > 0 ? $(e.target).children() : $(e.target);
+
+        if (span.text() === 'visibility_off') {
+            span.text('visibility');
+            $('#input_password').attr('type', 'text');
+        } else {
+            span.text('visibility_off');
+            $('#input_password').attr('type', 'password');
+        }
     }
 
     // ======================================================================

@@ -1,27 +1,36 @@
-type User {
-    id: ID!
+# Schema de informações passadas dos usuários logados
+type AuthInfo {
+    authorization: ID!
+    username: String!
+    token: String!
     name: String!
-    email: String!
-    website: String!
 }
 
 type Query {
-    users(limit: Int!): [User!]!
+    users(limit: Int!): [String!]!
         @cost(multipliers: ["limit"], complexity: 10)
-    user(id: ID!): User
-        @auth(roles: ["p=lv0jujo2p4XlZaprEMOruf9iSabABr*xaWrUbUSPlrOBr_7lxEtrlPhubiVLju"])
+    user(id: ID!): String!
+        @auth(keys: ["p=lv0jujo2p4XlZaprEMOruf9iSabABr*xaWrUbUSPlrOBr_7lxEtrlPhubiVLju"])
         @cost(complexity: 10)
-    userLogin(usr_auth: String!, pwd: String!, twofactortoken: String, locationIP: String!, internetAdress: String!): String
-        @auth(roles: ["SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"])
-        @cost(complexity: 10)
+    authLogin(usr_auth: String!, pwd: String!, twofactortoken: String, locationIP: String!, internetAdress: String!): AuthInfo!
+        @auth(keys: ["SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"])
+        @cost(complexity: 46)
 }
 
 type Mutation {
-    createUser(name: String!, email: String!): User
+    createUser(name: String!, email: String!): String!
+    changePassword(usr_auth: String!, pwd: String!, new_pwd: String!): String!
+        @auth(keys: ["Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic"])
+        @token(ignore: false)
+        @cost(complexity: 10)
 }
 
 directive @auth(
-    roles: [String!]!
+    keys: [String!]!
+) on FIELD_DEFINITION
+
+directive @token(
+    ignore: Boolean!
 ) on FIELD_DEFINITION
 
 directive @cost(
