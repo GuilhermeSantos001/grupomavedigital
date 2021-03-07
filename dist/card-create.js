@@ -7,11 +7,6 @@
     window.app = window.app || {};
 
     // ======================================================================
-    // Setters
-    //
-    document.getElementById('usr-name').innerText = localStorage.getItem("usr-name");
-
-    // ======================================================================
     // Functions
     //
     function phoneChange(alias, e) {

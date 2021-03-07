@@ -750,11 +750,11 @@ module.exports = (mongoose, uri, schema_users) => {
                                 resolve(await __twofactor.verify(twofactor['secret'], userToken));
                                 return mongoose.connection.close();
                             } catch (err) {
-                                reject([`Nâo foi possível verificar a autenticação de dois fatores do usuário com a autorização(${authorization}), erro: ${err}.`]);
+                                reject(`Nâo foi possível verificar a autenticação de dois fatores do usuário com a autorização(${authorization}), erro: ${err}.`);
                                 return mongoose.connection.close();
                             }
                         } else {
-                            reject([`Usuário com a autorização(${authorization}) não existe no banco de dados.`]);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });
@@ -816,11 +816,11 @@ module.exports = (mongoose, uri, schema_users) => {
                                     return mongoose.connection.close();
                                 });
                             } else {
-                                reject([`Usuário com a autorização(${authorization}) não possui uma autenticação de dois fatores registrada.`]);
+                                reject(`Usuário com a autorização(${authorization}) não possui uma autenticação de dois fatores registrada.`);
                                 return mongoose.connection.close();
                             }
                         } else {
-                            reject([`Usuário com a autorização(${authorization}) não existe no banco de dados.`]);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });

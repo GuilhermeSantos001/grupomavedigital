@@ -34,7 +34,7 @@
     "express-device": "^0.4.2",
     "geoip-lite": "^1.4.2",
     "javascript-obfuscator": "^2.10.7",
-    "mongoose": "^5.11.18",
+    "mongoose": "^5.11.19",
     "nodemon": "^2.0.7",
     "qrcode": "^1.4.4",
     "request": "^2.88.2",

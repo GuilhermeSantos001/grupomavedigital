@@ -1,7 +1,27 @@
+# Folders
 **/node_modules/**
 **/public/javascripts/public/**
 
+# Developer
 **/test/**
-*.test.*
+*.test*
 *.env*
+
+# Common Configurations
+
+# Audio
+*.wav*
+*.mp3*
+*.wma*
+
+# Video
+*.wmv*
+*.mpg*
+*.mpeg*
 *.mp4*
+*.mov*
+*.flv*
+*.avi*
+*.ogv*
+*.ogg*
+*.webm*

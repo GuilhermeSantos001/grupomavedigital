@@ -16,7 +16,7 @@ module.exports = class TokenDirective extends SchemaDirectiveVisitor {
                 return resolve.apply(this, args);
 
             const
-                token = String(context.request.headers['token']),
+                token = LZString.decompressFromEncodedURIComponent(String(context.request.headers['token'])) || String(context.request.headers['token']),
                 internetadress = LZString.decompressFromEncodedURIComponent(String(context.request.headers['internetadress'])) || String(context.request.headers['internetadress']);
 
             return jwt.verify(token)

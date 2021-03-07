@@ -1,0 +1,20 @@
+{
+  "editor.cursorShape": "line",
+  "editor.fontFamily": "Fira Code",
+  "editor.fontSize": 14,
+  "editor.reuseHeaders": true,
+  "editor.theme": "light",
+  "general.betaUpdates": false,
+  "prettier.printWidth": 80,
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false,
+  "request.credentials": "omit",
+  "schema.disableComments": true,
+  "schema.polling.enable": true,
+  "schema.polling.endpointFilter": "*localhost*",
+  "schema.polling.interval": 2000,
+  "tracing.hideTracingResponse": true,
+  "tracing.tracingSupported": true,
+  "editor.fontLigatures": true,
+  "editor.fontWeight": "400"
+}

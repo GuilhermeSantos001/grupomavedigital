@@ -11,14 +11,14 @@
             return document.location = `${window.app.baseurl}/system?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
     })
 
-    function login(usr_twofactortoken = '') {
+    function login(usr_twofactortoken) {
         window.app.loading(true);
 
         const
             usr_auth = LZString.compressToEncodedURIComponent(String($('#input_authorization').val())),
             usr_pwd = LZString.compressToEncodedURIComponent(String($('#input_password').val())),
             usr_locationIP = LZString.compressToEncodedURIComponent(String(localStorage.getItem('usr-locationIP'))),
-            usr_internetadress = String(localStorage.getItem('usr-internetadress')); // Já está compressado
+            usr_internetadress = LZString.compressToEncodedURIComponent(String(localStorage.getItem('usr-internetadress')));
 
         if (usr_auth.length <= 0 || usr_pwd.length <= 0) {
             window.app.loading(false);
@@ -40,7 +40,7 @@
                 "Content-Type": "application/json",
                 "authorization": "SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"
             },
-            "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization username name token } }\"}`
+            "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", twofactortoken: \\\"${LZString.compressToEncodedURIComponent(usr_twofactortoken)}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization username name token } }\"}`
         })
             .then(response => response.json())
             .then(({ data, errors }) => {
@@ -50,6 +50,13 @@
                     return errors.forEach(error => window.app.alerting(error.message));
 
                 const { user } = data || {};
+
+
+                if (user['token'] === 'twofactorVerify')
+                    return window.app.twofactor(login, usr_auth);
+                else if (user['token'] === 'twofactorDenied')
+                    return window.app.alerting('O código informado está inválido. Tente Novamente!')
+
                 localStorage.setItem("usr-auth", user['authorization']);
                 localStorage.setItem("usr-username", user['username']);
                 localStorage.setItem("usr-token", user['token']);

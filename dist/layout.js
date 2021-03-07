@@ -115,7 +115,7 @@
     // Authentication - TwoFactor
     //
 
-    function twofactor(callback = () => { }, usr_authorization) {
+    function twofactor(callback = () => { }, usr_auth) {
         $('body').append(`\
         <div style="z-index: 9999; height: 100vh; opacity: 0;" class="twofactorDiv bg-alert fixed-top col-12 overflow-auto"> \
           <h1 class="text-white text-center fs-1 fw-bold m-5">Autenticação de dois fatores está ativada. Por gentileza, insira seu código de segurança.</h1><br />\
@@ -140,7 +140,7 @@
                         .animate({
                             'opacity': 0
                         }, ONE_SECOND_DELAY);
-                }, usr_authorization);
+                }, usr_auth);
         };
 
         $(".twofactorDiv").animate({
@@ -148,29 +148,34 @@
         }, ONE_SECOND_DELAY);
     }
 
-    function retrievetwofactor(callback = () => { }, usr_authorization) {
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/security/retrieve/twofactor`,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            data: {
-                usr_authorization
-            }
-        })
-            .then(() => {
-                callback(true);
-            })
-            .catch(error => {
-                if (error.response && error.response.data && error.response.data.error != undefined) {
-                    console.log(error.response.data);
-                } else {
-                    console.log(error);
-                }
+    function retrievetwofactor(callback = () => { }, usr_auth) {
+        window.app.loading(true);
 
-                callback(false);
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip"
+            },
+            "body": `{\"query\":\"mutation { authRetrieveTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
+        })
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                if (data['authRetrieveTwofactor']) {
+                    callback();
+                    return window.app.alerting(`Email de recuperação da conta enviado!`);
+                } else {
+                    return window.app.alerting(`Email de recuperação da conta não pode ser enviado!`);
+                }
             })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     // ======================================================================
@@ -209,8 +214,8 @@
     })
 
     function defaultSetters() {
-        if (document.getElementById('usr-name'))
-            document.getElementById('usr-name').innerText = localStorage.getItem("usr-name");
+        if (document.getElementById('usr-username'))
+            document.getElementById('usr-username').innerText = localStorage.getItem("usr-username");
     }
 
     var baseurl = String(location.origin);
@@ -228,7 +233,7 @@
         })
             .then(response => {
                 localStorage.setItem('usr-locationIP', `${response['data']['country']}(${response['data']['city']}/${response['data']['region']})`);
-                localStorage.setItem('usr-internetadress', LZString.compressToEncodedURIComponent(`${response['data']['ip']}`));
+                localStorage.setItem('usr-internetadress', `${response['data']['ip']}`);
             })
             .catch(error => {
                 alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
@@ -242,58 +247,79 @@
     }
 
     function logout() {
-        loading(true);
-
-        if (!localStorage.getItem('usr-token'))
-            return document.location = `${baseurl}/user/auth`;
-
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/logout`,
-            headers: {
-                "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
-            },
-            data: {
-                logout: true
-            }
-        })
-            .then(() => {
-                localStorage.clear();
-                document.location = `${baseurl}/user/auth`;
-            })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
-    }
-
-    function expired() {
-        loading(true);
+        window.app.loading(true);
 
         if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
             return document.location = `${baseurl}/user/auth`;
 
-        const gotoAuth = () => {
-            localStorage.clear();
-            document.location = `${baseurl}/user/auth`;
-        }
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
 
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/expired`,
-            headers: {
-                "Content-Type": "application/json"
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
             },
-            data: {
-                usr_authorization: localStorage.getItem('usr-auth'),
-                usr_token: localStorage.getItem('usr-token')
-            }
+            "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
         })
-            .then(gotoAuth.call(this))
-            .catch(gotoAuth.call(this))
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                if (data['authLogout']) {
+                    localStorage.clear();
+                    return document.location = `${baseurl}`;
+                }
+                else
+                    return window.app.alerting('Não foi possível desconectar. Tente Novamente mais tarde!');
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
+    }
+
+    function expired() {
+        window.app.loading(true);
+
+        if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
+            return document.location = `${baseurl}/user/auth`;
+
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
+
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+            },
+            "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
+        })
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                if (data['authExpired']) {
+                    localStorage.clear();
+                    return document.location = `${baseurl}`;
+                }
+                else
+                    return window.app.alerting('Não foi possível desconectar. Tente Novamente mais tarde!');
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function modalOpen(id) {

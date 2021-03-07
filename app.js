@@ -38,7 +38,7 @@ const cors = require('cors');
 const corsOptions = {
   "origin": function (origin, callback) {
     if ([
-      `http://${process.env.ADDRESS}:${process.env.PORT}`,
+      `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
       'file://',
       undefined
     ].indexOf(origin) !== -1) {

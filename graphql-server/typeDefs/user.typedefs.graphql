@@ -6,23 +6,82 @@ type AuthInfo {
     name: String!
 }
 
+# Schema de informações para os locais
+type Location {
+    street: ID!
+    number: Int!
+    complement: String!
+    district: String!
+    state: String!
+    city: String!
+    zipcode: String!
+}
+
 type Query {
     users(limit: Int!): [String!]!
         @cost(multipliers: ["limit"], complexity: 10)
     user(id: ID!): String!
         @auth(keys: ["p=lv0jujo2p4XlZaprEMOruf9iSabABr*xaWrUbUSPlrOBr_7lxEtrlPhubiVLju"])
         @cost(complexity: 10)
-    authLogin(usr_auth: String!, pwd: String!, twofactortoken: String, locationIP: String!, internetAdress: String!): AuthInfo!
+    authLogin(
+        usr_auth: String!,
+        pwd: String!,
+        twofactortoken: String,
+        locationIP: String!,
+        internetAdress: String!
+    ): AuthInfo!
         @auth(keys: ["SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"])
         @cost(complexity: 46)
+    authLogout(usr_auth: String!, usr_token: String!): Boolean!
+        @auth(keys: ["vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    authExpired(usr_auth: String!, usr_token: String!): Boolean!
+        @auth(keys: ["5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip"])
+        @cost(complexity: 50)
+    emailResendConfirm(usr_auth: String!): Boolean!
+        @auth(keys: ["p4YIfr$zoG9buqUD0Ochodu1enex2ZOCh8Y1C8beMlDIbrIqU4OThLsTe6LMEB@+"])
+        @cost(complexity: 50)
 }
 
 type Mutation {
-    createUser(name: String!, email: String!): String!
+    registerUser(
+        usr_authorization: String!,
+        privilege: String!,
+        fotoPerfil: String,
+        username: String!,
+        password: String!,
+        name: String!,
+        surname: String!,
+        email: String!,
+        cpfcnpj: String!,
+        location: [String!]! # [street, number, complement, district, state, city, zipcode]
+    ): String!
+        @auth(keys: ["brufiT87+uchUfI9eFlPhificRi+OzawIwrIfriTH2Fr0ke0&fodrispl8Lc0IZo"])
+        @cost(complexity: 50)
     changePassword(usr_auth: String!, pwd: String!, new_pwd: String!): String!
         @auth(keys: ["Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic"])
         @token(ignore: false)
-        @cost(complexity: 10)
+        @cost(complexity: 50)
+    authSignTwofactor(usr_auth: String!): String!
+        @auth(keys: ["bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    authVerifyTwofactor(usr_auth: String!, usr_qrcode: String!): Boolean!
+        @auth(keys: ["duhoHU4o#3!oCHogLw*6WUbrE2radr2CrlpLD+P7Ka*R-veSEB75lsT6PeblPuko"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    authEnabledTwofactor(usr_auth: String!): String!
+        @auth(keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    authDisableTwofactor(usr_auth: String!): String!
+        @auth(keys: ["ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    authRetrieveTwofactor(usr_auth: String!): Boolean!
+        @auth(keys: ["nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip"])
+        @cost(complexity: 50)
 }
 
 directive @auth(

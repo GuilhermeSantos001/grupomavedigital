@@ -25,7 +25,7 @@
                 $('#password-new').val() !== $('#password-new-confirm').val()
             ) {
                 $('#password-new, #password-new-confirm').addClass('is-invalid');
-                alerting('As senhas não coincidem!', 3000, () => { $('#password-new, #password-new-confirm').removeClass('is-invalid'); });
+                window.app.alerting('As senhas não coincidem!', 3000, () => { $('#password-new, #password-new-confirm').removeClass('is-invalid'); });
             }
         });
 
@@ -55,15 +55,11 @@
                 "method": "POST",
                 "headers": {
                     "Content-Type": "application/json",
-                    "authorization": "SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"
+                    "authorization": "Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic",
+                    "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
                 },
-                "body": `\
-                {\"mutation\":\
-                \"{ changePassword(\
-                    usr_auth: \\\"${usr_auth}\\\", \
-                    pwd: \\\"${usr_pwd}\\\", \
-                    new_pwd: \\\"${usr_newPwd}\\\") \
-                }\"}`
+                "body": `{\"query\":\"mutation { changePassword(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", new_pwd: \\\"${usr_newPwd}\\\") }\"}`
             })
                 .then(response => response.json())
                 .then(({ data, errors }) => {
@@ -72,7 +68,8 @@
                     if (errors)
                         return errors.forEach(error => window.app.alerting(error.message));
 
-                    return window.app.alerting(data);
+                    $('#password-actual, #password-new, #password-new-confirm').val('');
+                    return window.app.alerting(data['changePassword']);
                 })
                 .catch(err => {
                     throw new Error(err);
@@ -86,9 +83,9 @@
           <h1 class="text-white text-center fs-1 fw-bold m-5">Escaneie o seu QRCode com um aplicativo de autenticação, por exemplo, Google Authenticator.</h1><br />\
           <img src="${qrcode}" class="img-thumbnail border border-5 border-primary mx-auto mb-2 d-block" alt="Escaneie seu QRCODE"><br/> \
           <div class="col-10 mx-auto mb-5"> \
-            <label for="qrcode-usertoken">Insira o código que aparece em seu visor</label> \
+            <label class="fs-4 fw-bold" for="qrcode-usertoken">Insira o código que aparece em seu visor</label> \
             <input type="tel" class="form-control mb-2" id="qrcode-usertoken"> \
-            <button type="button" class="btn btn-mave1 col-12" onclick="verifytwofactor()">Validar</button> \
+            <button type="button" class="btn btn-mave1 col-12" onclick="window.app.verifytwofactor()">Validar</button> \
         </div>\
         `);
 
@@ -98,139 +95,141 @@
     }
 
     function signtwofactor() {
-        loading(true);
+        window.app.loading(true);
 
         if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
             return document.location = `${baseurl}/user/auth`;
 
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/security/sign/twofactor`,
-            headers: {
-                "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
-            },
-            data: {
-                usr_authorization: localStorage.getItem('usr-auth')
-            }
-        })
-            .then(response => {
-                loading(false);
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
 
-                try {
-                    showQRCode(response['data']['qrcode']);
-                } catch (err) {
-                    alerting(`Não foi possível gerar seu QRCode, fale com o administrador do sistema.`);
-                    console.log(err);
-                }
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+            },
+            "body": `{\"query\":\"mutation { authSignTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
+        })
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                return showQRCode(data['authSignTwofactor']);
             })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function verifytwofactor() {
-        loading(true);
+        window.app.loading(true);
 
         if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
             return document.location = `${baseurl}/user/auth`;
 
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/security/verify/twofactor`,
-            headers: {
-                "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
-            },
-            data: {
-                usr_authorization: localStorage.getItem('usr-auth'),
-                usertoken: $('#qrcode-usertoken').val()
-            }
-        })
-            .then(response => {
-                loading(false);
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth')),
+            usr_qrcode = LZString.compressToEncodedURIComponent($('#qrcode-usertoken').val());
 
-                try {
-                    if (!response['data']) {
-                        alerting(`Seu código não está correto, tente novamente.`);
-                    } else {
-                        $(".twofactor").fadeOut(500, function () {
-                            $(".twofactor").remove();
-                            enabledtwofactor();
-                        });
-                    }
-                } catch (err) {
-                    alerting(`Não foi possível verificar seu código, tente novamente mais tarde.`);
-                    console.log(err);
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "authorization": "duhoHU4o#3!oCHogLw*6WUbrE2radr2CrlpLD+P7Ka*R-veSEB75lsT6PeblPuko",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+            },
+            "body": `{\"query\":\"mutation { authVerifyTwofactor(usr_auth: \\\"${usr_auth}\\\", usr_qrcode: \\\"${usr_qrcode}\\\") }\"}`
+        })
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                if (!data['authVerifyTwofactor']) {
+                    window.app.alerting('O código informado está inválido. Tente novamente!');
+                } else {
+                    return enabledtwofactor();
                 }
             })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function enabledtwofactor() {
-        loading(true);
+        window.app.loading(true);
 
         if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
             return document.location = `${baseurl}/user/auth`;
 
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/security/enabled/twofactor`,
-            headers: {
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
+
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
                 "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
+                "authorization": "TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
             },
-            data: {
-                usr_authorization: localStorage.getItem('usr-auth')
-            }
+            "body": `{\"query\":\"mutation { authEnabledTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
-            .then(() => {
-                loading(false);
-                alerting(`Sua autenticação de dois fatores, está ativada!`, 1000, function () { document.location.reload(); });
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                return window.app.alerting(`Sua autenticação de dois fatores, está ativada!`, 1000, function () { document.location.reload(); });
             })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function disabledtwofactor() {
-        loading(true);
+        window.app.loading(true);
 
         if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
             return document.location = `${baseurl}/user/auth`;
 
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/auth/security/disabled/twofactor`,
-            headers: {
+
+        const
+            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
+
+        fetch(window.app.graphqlUrl, {
+            "method": "POST",
+            "headers": {
                 "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
+                "authorization": "ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr",
+                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
             },
-            data: {
-                usr_authorization: localStorage.getItem('usr-auth')
-            }
+            "body": `{\"query\":\"mutation { authDisableTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
-            .then(() => {
-                loading(false);
-                alerting(`Sua autenticação de dois fatores, está desativada!`, 1000, function () { document.location.reload(); });
+            .then(response => response.json())
+            .then(({ data, errors }) => {
+                window.app.loading(false);
+
+                if (errors)
+                    return errors.forEach(error => window.app.alerting(error.message));
+
+                return window.app.alerting(`Sua autenticação de dois fatores, está desativada!`, 1000, function () { document.location.reload(); });
             })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     // ======================================================================
@@ -238,6 +237,7 @@
     //
     [
         { 'alias': 'signtwofactor', 'function': signtwofactor },
+        { 'alias': 'verifytwofactor', 'function': verifytwofactor },
         { 'alias': 'disabledtwofactor', 'function': disabledtwofactor },
     ].forEach(prop => window.app[prop['alias']] = prop['function']);
 })();

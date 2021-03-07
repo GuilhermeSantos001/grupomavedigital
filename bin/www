@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.APP_PORT || '3000');
 app.set('port', port);
 
 /**
@@ -81,7 +81,7 @@ function onError(error) {
 
 function onListening() {
   const path = require('../modules/localPath'), sound = require("sound-play");
-  debug('Listening on ' + process.env.ADDRESS);
-  console.log(`\n\r> Express started on http://${process.env.ADDRESS}` + ':' + app.get('port') + '; press Ctrl-C to terminate.\n\r');
+  debug('Listening on ' + process.env.APP_ADDRESS);
+  console.log(`\n\r> Express started on http://${process.env.APP_ADDRESS}` + ':' + app.get('port') + '; press Ctrl-C to terminate.\n\r');
   sound.play(path.localPath('sounds/startup.mp3'));
 }
