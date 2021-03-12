@@ -686,22 +686,24 @@ router.post(['/docs/reject'], middlewareToken, async (req, res) => {
 router.get(['/auth'], async (req, res) => {
   return res.status(200).render('login', {
     title: 'Grupo Mave Digital',
-    menus: [{
-      type: 'normal',
-      icon: 'home',
-      first: false,
-      enabled: true,
-      title: 'Home',
-      onclick: "home()"
-    },
-    {
-      type: 'normal',
-      icon: 'power',
-      first: true,
-      enabled: true,
-      title: 'Acessar',
-      onclick: ""
-    }]
+    menus: [
+      {
+        type: 'normal',
+        icon: 'power',
+        first: true,
+        enabled: true,
+        title: 'Acessar',
+        onclick: ""
+      },
+      {
+        type: 'normal',
+        icon: 'chevron-left',
+        first: false,
+        enabled: true,
+        title: 'Voltar',
+        onclick: 'home()'
+      }
+    ]
   })
 });
 

@@ -103,7 +103,7 @@ block content
       uniformslength = Number("#{uniformslength}"),
       uniformsSelected = JSON.parse(LZString.decompressFromBase64(`#{uniformsSelected}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#workdata-ID").val(workdata['id']);
       $("#workdata-jobtitle").val(workdata['jobtitle']);
       $("#workdata-scale").val(workdata['scale']);

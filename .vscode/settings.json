@@ -7,8 +7,8 @@
     "editor.mouseWheelZoom": true,
     "editor.renderLineHighlightOnlyWhenFocus": true,
     "editor.renderControlCharacters": true,
-    "debug.console.fontSize": 18,
-    "markdown.preview.fontSize": 18,
+    "debug.console.fontSize": 12,
+    "markdown.preview.fontSize": 12,
     "editor.wrappingIndent": "indent",
     "editor.wordWrapColumn": 200,
     "cSpell.allowCompoundWords": true,
@@ -23,7 +23,7 @@
     ],
     "workbench.editor.scrollToSwitchTabs": true,
     "workbench.iconTheme": "macos-classic-icons",
-    "editor.fontSize": 14,
+    "editor.fontSize": 12,
     "editor.lineHeight": 24,
     "editor.letterSpacing": 0.5,
     "editor.fontFamily": "Fira Code",
@@ -40,13 +40,11 @@
     "explorer.confirmDragAndDrop": false,
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
-    // Formatting Optional.
-    "editor.formatOnSave": true,
     // MacOS Only Settings.
     "terminal.integrated.macOptionIsMeta": true,
     // The default syntax (TextMate) highlighter classifies many tokens as variables and these are now (since VSCode 1.43) resolved into namespaces, classes, parameters, and so on. This is called Semantic highlighting support for TypeScript and JavaScript. But many themes and language extensions seem broken with single-colored syntax. This came as a surprise to me. It's set `true` by default. I recommend disabling this for now.
     "editor.semanticHighlighting.enabled": false,
-    "workbench.colorTheme": "MacOS Modern Dark - Big Sur Xcode",
+    "workbench.colorTheme": "Dracula",
     "cSpell.words": [
         "APRESENTACAO",
         "Caamano",
@@ -57,5 +55,7 @@
         "ipinfo",
         "vcard",
         "vcardprop"
-    ]
+    ],
+    "editor.minimap.enabled": false,
+    "editor.minimap.renderCharacters": false
 }

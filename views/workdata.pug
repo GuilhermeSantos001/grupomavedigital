@@ -114,7 +114,7 @@ block content
       uniformslength = Number("#{uniformslength}"),
       monthlycost_total = Number("#{monthlycost_total}");
 
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('workdata');
 
       $('#uniforms-monthlycost').val(monthlycost_total).priceFormat({
@@ -183,7 +183,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Filtros
     */
     function filter_description() {

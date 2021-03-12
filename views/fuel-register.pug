@@ -28,7 +28,7 @@ block content
   script.
     let fuel = JSON.parse(LZString.decompressFromBase64(`#{fuel}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#fuel-ID").val(StringPadZero(fuel.length + 1, 6));
 
       $('#fuel-unitary, #fuel-total').priceFormat({

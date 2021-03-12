@@ -10,16 +10,21 @@ module.exports = (prefix = 'id_', length = 10) => {
         numbers = [
             1, 2, 3, 4, 5, 6, 7, 8, 9
         ],
-        getWord = (length, str) => {
-            while (length > 0)
-                str += letters[Math.floor(Math.random() * letters.length)], length--;
-            return str;
-        },
-        getNumber = (length, str = '') => {
-            while (length > 0)
-                str += numbers[Math.floor(Math.random() * numbers.length)], length--;
-            return str;
-        }
+        getWord = (str) => {
+            while (length > 0) {
+                if (Math.floor(Math.random() * 10) >= 5) {
+                    if (Math.floor(Math.random() * 10) >= 5)
+                        str += String(letters[Math.floor(Math.random() * letters.length)]).toLowerCase();
+                    else
+                        str += String(letters[Math.floor(Math.random() * letters.length)]).toUpperCase();
 
-    return `${getWord(Math.floor(length / 2), prefix)}_${getNumber(Math.floor(length / 2))}`;
+                    length--;
+                }
+                else
+                    str += numbers[Math.floor(Math.random() * numbers.length)], length--;
+            }
+            return str;
+        };
+
+    return `${getWord(prefix)}`;
 }

@@ -36,6 +36,8 @@ module.exports = class TokenDirective extends SchemaDirectiveVisitor {
                         } else if (err['code'] === 3) {
                             throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de IP.');
                         }
+
+                        throw new Error(err);
                     }
                 })
                 .catch(error => { throw new Error(error) });

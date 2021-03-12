@@ -175,7 +175,7 @@ block content
             p(class="mt-3") Não existem clientes inativos.
   script(src="/javascripts/lz-string.min.js")
   script.
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('clients');
     })
 
@@ -219,10 +219,10 @@ block content
         alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
         console.log(error);
         loading(false);
-      })      
+      })
     }
 
-    /** 
+    /**
       Clientes Ativos
     */
     let filter_cnpj_active = [],
@@ -306,7 +306,7 @@ block content
       }
     }
 
-    /** 
+    /**
       Clientes Inativos
     */
     let filter_inactive_cnpj_active = [],

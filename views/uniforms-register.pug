@@ -31,7 +31,7 @@ block content
   script.
     let uniforms = JSON.parse(LZString.decompressFromBase64(`#{uniforms}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#uniform-ID").val(StringPadZero(uniforms.length + 1, 6));
 
       $('#uniform-unitary, #uniform-total, #uniform-monthlycost').priceFormat({

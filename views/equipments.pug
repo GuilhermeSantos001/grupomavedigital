@@ -58,7 +58,7 @@ block content
   script.
     let equipmentslength = Number("#{equipmentslength}");
 
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('equipments');
 
       let i = 0, l = equipmentslength;
@@ -109,7 +109,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Equipamentos
     */
     function filter_description() {

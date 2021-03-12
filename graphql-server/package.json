@@ -5,7 +5,7 @@
   "description": "",
   "scripts": {
     "installer": "npm i",
-    "start": "nodemon -r dotenv/config ./index dotenv_config_path=../.env"
+    "start": "nodemon index dotenv_config_path=../.env"
   },
   "dependencies": {
     "cors": "^2.8.5",

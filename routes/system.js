@@ -7,10 +7,8 @@ const middlewareAPI = require('../middlewares/api');
 const middlewareToken = require('../middlewares/token');
 const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
-const nodemailer = require('../modules/nodemailer');
 const LZString = require('lz-string');
 const pdf = require('../modules/pdf');
-const mongodb = require('../modules/mongodb');
 
 /**
  * Estados
@@ -4485,10 +4483,10 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
       {
         type: 'normal',
         icon: 'home',
-        first: true,
+        first: false,
         enabled: true,
-        title: 'Tela Inicial',
-        onclick: ""
+        title: 'Home',
+        onclick: "home()"
       },
       {
         type: 'collapse',
@@ -4512,31 +4510,12 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
         ]
       },
       {
-        type: 'collapse',
+        type: 'normal',
         icon: 'credit-card',
         first: false,
         enabled: privilege === 'administrador' || privilege === 'moderador' ? true : false,
         title: 'Cartões Digitais',
-        items: [
-          {
-            title: 'Criar',
-            icon: 'plus-square',
-            enabled: true,
-            onclick: 'cards_register()'
-          },
-          {
-            title: 'Editar',
-            icon: 'edit',
-            enabled: true,
-            onclick: ''
-          },
-          {
-            title: 'Remover',
-            icon: 'x-square',
-            enabled: true,
-            onclick: ''
-          }
-        ]
+        onclick: "cards_control()"
       },
       {
         type: 'collapse',

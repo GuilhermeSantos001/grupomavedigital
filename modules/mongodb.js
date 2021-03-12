@@ -48,7 +48,7 @@ var schema_states = require('../models/states'),
  * @description Endereço de DNS do mongoDB
  * @default `mongodb://${configMongoDB.user.name}:${configMongoDB.user.password}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`
  */
-var uri = `mongodb://${configMongoDB.user.name}:${configMongoDB.user.password}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`;
+var uri = `mongodb://${configMongoDB.user.name}:${encodeURIComponent(configMongoDB.user.password)}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`;
 
 //================================================================================
 // EVENTOS DE CONEXÃO COM O MONGODB

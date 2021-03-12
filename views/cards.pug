@@ -2,11 +2,23 @@ extends layout
 
 block content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
-    h1(class="h2") Ambiente Digital Interativo.
-  div(class="list-group")
-    a(href="#" class="list-group-item list-group-item-action" aria-current="true")
-      div(class="d-flex w-100 justify-content-between")
-        h5(class="mb-1") Carlins Ferraz
-        small Layout. 1.0
-      p(class="mb-1") Presidente
-      small Clique para visualizar.
+    h1(class="h2") Cartões Digitais Interativos.
+  mixin card(id, photo, name, jobtitle, version)
+    a(class="list-group-item list-group-item-action col-12" aria-current="true" onclick=`window.app.openCard("${id}")` style="cursor: pointer;")
+      div(class="d-flex flex-lg-row flex-sm-column justify-content-between")
+        div(class="col-sm-12 col-lg-1 border-end")
+          img(src=`/${photo['path']}${photo['name']}` class="rounded-circle mx-auto mt-2 d-block shadow" width="80" height="80")
+        div(class="d-flex flex-column col-sm-12 col-lg p-2 text-lg-start text-sm-center")
+          h5(class="mb-1") #{name || '???'}
+          p(class="mb-1") #{jobtitle || '???'}
+          small Clique para visualizar.
+        small(class="text-sm-center") Layout: #{version || '???'}
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-search") #[i(class="fas fa-search")]
+    input(type="text" class="form-control col-6" id="input-search" placeholder="Procurar..." aria-label="span-search" aria-describedby="span-search" value="" disabled=cards.length <= 0 ? true: false)
+  div(class="list-group border-top p-2" id="list-cards")
+    each card in cards
+      +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+    if (cards.length <= 0)
+      p.text-muted Nenhum cartão digital encontrado.
+  script(src="/javascripts/cards.min.js")

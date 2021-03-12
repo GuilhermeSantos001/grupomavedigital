@@ -21,11 +21,10 @@ block content
           div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-5")
             label(for="benefits-total") R$ Total
             input(type="text" class="form-control" id="benefits-total" value="0" disabled)
-  script(src="/javascripts/lz-string.min.js")
   script.
     let benefit = JSON.parse(LZString.decompressFromBase64(`#{benefit}`));
 
-    $(document).ready(() => {
+    $(() => {
       $('#benefits-description').val(benefit['description']);
       if (benefit['quantity'] <= 0) {
         $('#benefits-quantity').attr('type', 'text').val('-');

@@ -44,7 +44,7 @@ block content
             button(type="button" class="btn btn-mave1 col-12 p-2 m-2" onclick="gotoSystem()") #[span(class="material-icons") reply_all] #[br] Concluir
   script(src="/javascripts/lz-string.min.js")
   script.
-    $(document).ready(() => {
+    $(() => {
       $(window).bind('beforeunload', function() {
         return 'Você tem certeza de que quer sair?';
       });

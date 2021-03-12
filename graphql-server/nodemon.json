@@ -1,4 +1,7 @@
 {
+    "execMap": {
+        "js": "node --inspect=9239 -r dotenv/config"
+    },
     "ext": "js, graphql",
     "watch": [
         "graphql-server/*"

@@ -39,6 +39,11 @@ let schema = new Schema({
         unique: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
+    version: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
     photo: {
         type: new Schema({
             path: {
@@ -46,7 +51,7 @@ let schema = new Schema({
                 trim: true,
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
-            file: {
+            name: {
                 type: String,
                 trim: true,
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
@@ -76,7 +81,13 @@ let schema = new Schema({
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
             text: {
-                type: Boolean,
+                type: String,
+                trim: true,
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            message: {
+                type: String,
+                trim: true,
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             }
         }),
@@ -106,7 +117,7 @@ let schema = new Schema({
                         trim: true,
                         required: [true, '{PATH} este campo é obrigatório para sua segurança']
                     },
-                    file: {
+                    name: {
                         type: String,
                         trim: true,
                         required: [true, '{PATH} este campo é obrigatório para sua segurança']
@@ -121,7 +132,7 @@ let schema = new Schema({
                         trim: true,
                         required: [true, '{PATH} este campo é obrigatório para sua segurança']
                     },
-                    file: {
+                    name: {
                         type: String,
                         trim: true,
                         required: [true, '{PATH} este campo é obrigatório para sua segurança']
@@ -170,57 +181,53 @@ let schema = new Schema({
                 trim: true,
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
-            workEmail: {
+            email: {
                 type: String,
                 trim: true,
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
-            workAddress: {
-                type: new Schema({
-                    label: {
-                        type: String,
-                        trim: true,
-                        default: 'Work Address',
-                        enum: [
-                            'Work Address',
-                            'Home Address'
-                        ],
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    },
-                    street: {
-                        type: String,
-                        trim: true,
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    },
-                    city: {
-                        type: String,
-                        trim: true,
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    },
-                    stateProvince: {
-                        type: String,
-                        trim: true,
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    },
-                    postalCode: {
-                        type: String,
-                        trim: true,
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    },
-                    countryRegion: {
-                        type: String,
-                        trim: true,
-                        default: 'Brazil',
-                        enum: [
-                            'Brazil'
-                        ],
-                        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-                    }
-                }),
+            label: {
+                type: String,
+                trim: true,
+                default: 'Work Address',
+                enum: [
+                    'Work Address',
+                    'Home Address'
+                ],
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            street: {
+                type: String,
+                trim: true,
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            city: {
+                type: String,
+                trim: true,
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            stateProvince: {
+                type: String,
+                trim: true,
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            postalCode: {
+                type: String,
+                trim: true,
+                required: [true, '{PATH} este campo é obrigatório para sua segurança']
+            },
+            countryRegion: {
+                type: String,
+                trim: true,
+                default: 'Brazil',
+                enum: [
+                    'Brazil'
+                ],
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
             socialUrls: {
-                type: Object,
+                type: Array,
+                default: [],
                 required: [true, '{PATH} este campo é obrigatório para sua segurança']
             },
             file: new Schema({

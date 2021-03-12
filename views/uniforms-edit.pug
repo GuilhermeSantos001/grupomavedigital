@@ -31,7 +31,7 @@ block content
   script.
     let uniform = JSON.parse(LZString.decompressFromBase64(`#{uniform}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#uniform-ID").val(uniform['id']);
       $("#uniform-description").val(uniform['description']);
       $("#uniform-quantity").val(uniform['quantity']);

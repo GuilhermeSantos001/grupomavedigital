@@ -1,0 +1,111 @@
+# Schema de input para os vCards
+input file {
+    path: String!
+    name: String!
+}
+
+input birthday {
+    year: Int!
+    month: Int!
+    day: Int!
+}
+
+input socialURL {
+    media: String!
+    url: String!
+}
+
+input socialmedia {
+    name: String!
+    value: String!
+    enabled: Boolean!
+}
+
+input whatsapp {
+    phone: String!
+    text: String!
+    message: String!
+}
+
+input cardFooter {
+    email: String!
+    location: String!
+    website: String!
+    attachment: String!
+    socialmedia: [socialmedia!]!
+}
+
+input vcard {
+    firstname: String!
+    lastname: String!
+    organization: String!
+    photo: file!
+    logo: file!
+    workPhone: [String!]!
+    birthday: birthday!
+    title: String!
+    url: String!
+    workUrl: String!
+    email: String!
+    label: String!
+    countryRegion: String!
+    street: String!
+    city: String!
+    stateProvince: String!
+    postalCode: String!
+    socialUrls: [socialURL!]!
+    file: file
+}
+
+input card {
+    id: String
+    version: String!
+    photo: file!
+    name: String!
+    jobtitle: String!
+    phones: [String!]!
+    whatsapp: whatsapp!
+    vcard: vcard!
+    footer: cardFooter!
+}
+
+type Mutation {
+    vcardCreate(data: vcard!): String!
+        @auth(keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"])
+        @privilege(keys: ["administrador", "moderador"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    cardCreate(data: card!): String!
+        @auth(keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC"])
+        @privilege(keys: ["administrador", "moderador"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    cardUpdate(data: card!): String!
+        @auth(keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"])
+        @privilege(keys: ["administrador", "moderador"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+    cardRemove(id: String!): Boolean!
+        @auth(keys: ["fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv"])
+        @privilege(keys: ["administrador", "moderador"])
+        @token(ignore: false)
+        @cost(complexity: 50)
+}
+
+directive @auth(
+    keys: [String!]!
+) on FIELD_DEFINITION
+
+directive @token(
+    ignore: Boolean!
+) on FIELD_DEFINITION
+
+directive @privilege(
+    keys: [String!]!
+) on FIELD_DEFINITION
+
+directive @cost(
+    complexity: Int
+    useMultipliers: Boolean
+    multipliers: [String!]
+) on FIELD_DEFINITION

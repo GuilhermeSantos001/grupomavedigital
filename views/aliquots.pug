@@ -47,7 +47,7 @@ block content
   script.
     let aliquotslength = Number("#{aliquotslength}");
 
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('aliquots');
 
       let i = 0, l = aliquotslength;
@@ -99,7 +99,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Filtros
     */
     function filter_city() {

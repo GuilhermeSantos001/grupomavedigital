@@ -39,7 +39,7 @@ block content
               button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" onclick="send('resolution')" id="button-send-resolution" disabled) #[span(class="material-icons") message] #[br] Postar
   script(src="/javascripts/lz-string.min.js")
   script.
-    $(document).ready(() => {})
+    $(() => {})
 
     function gotoSystem() {
       return document.location = `${baseurl}/system/clients?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
@@ -68,8 +68,8 @@ block content
           alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
           console.log(error);
           loading(false);
-        })        
-      });      
+        })
+      });
     }
 
     let send_interval = null,
