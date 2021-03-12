@@ -25,7 +25,7 @@ block content
     let aliquot = JSON.parse(LZString.decompressFromBase64(`#{aliquot}`)),
       cities = JSON.parse(LZString.decompressFromBase64(`#{cities}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#aliquot-code").val(aliquot['code']);
       $("#aliquot-percentage").val(aliquot['percentage']);
       $("#aliquot-state").val(aliquot['state']);

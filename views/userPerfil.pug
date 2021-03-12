@@ -4,11 +4,12 @@ block content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Suas Informações Pessoais.
   div(class="col-12")
-    p(class="text-wrap") 
-      | Olá #[b(class="text-mave1 text-capitalize") #{name}]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+    p(class="text-wrap")
+      | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
   div(class="d-flex flex-column col-12 p-2")
     img(src=`/assets/perfil/${fotoPerfil}` class="img-fluid mt-2 mx-auto d-block border border-5 shadow" style="height: 15%; border-radius: 50%;")
     h1(class="text-center mt-2") #{name} #{surname}
+    h4(class="text-center text-mave1 text-capitalize fw-bold") (#{privilege})
     label(for="input_email" disabled) Email
     input(type="text" class="form-control mx-auto" id="input_email" placeholder="Endereço de email" value=`${email}` disabled)
     label(for="input_username" class="mt-2") Nome de usuário
@@ -33,3 +34,4 @@ block content
     input(type="text" class="form-control mx-auto" id="input_location_city" placeholder="Cidade" value=`${location['city']}` disabled)
     label(for="input_location_zipcode" class="mt-2") CEP
     input(type="text" class="form-control mx-auto" id="input_location_zipcode" placeholder="CEP" value=`${location['zipcode']}` disabled)
+  script(src="/javascripts/userPerfil.min.js")

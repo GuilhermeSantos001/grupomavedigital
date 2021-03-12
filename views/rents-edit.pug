@@ -28,7 +28,7 @@ block content
   script.
     let rental = JSON.parse(LZString.decompressFromBase64(`#{rental}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#rental-ID").val(rental['id']);
       $("#rental-description").val(rental['description']);
       $("#rental-quantity").val(rental['quantity']);

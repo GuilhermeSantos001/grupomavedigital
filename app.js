@@ -38,7 +38,7 @@ const cors = require('cors');
 const corsOptions = {
   "origin": function (origin, callback) {
     if ([
-      `http://${process.env.ADDRESS}:${process.env.PORT}`,
+      `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
       'file://',
       undefined
     ].indexOf(origin) !== -1) {
@@ -61,9 +61,6 @@ app.use(cors(corsOptions));
 
 // Import Routes
 require('./routes/index')(app);
-
-// Import public/scripts
-require('./modules/obfuscator');
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -4,8 +4,7 @@ block content
   div(class="d-flex flex-column col-12 bg-medium")
     h1(class="text-center mt-auto") #{title}
     h6(class="text-center mb-auto") #{message}
-  script(src="/javascripts/lz-string.min.js")
   script.
-    $(document).ready(()=> {
+    $(()=> {
       console.info("#{error}");
     })

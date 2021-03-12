@@ -203,10 +203,7 @@ module.exports = (mongoose, uri, schema_users) => {
                     useCreateIndex: true
                 }, (err, db) => {
                     if (err) {
-                        reject([
-                            `Não foi possível conectar com o mongoDB (Database ${db})`,
-                            err
-                        ])
+                        reject(`Não foi possível conectar com o mongoDB (Database ${db})`)
                         return mongoose.connection.close();
                     }
                     mongooseConnected();
@@ -217,10 +214,7 @@ module.exports = (mongoose, uri, schema_users) => {
                         authorization: String(authorization)
                     }, (err, user) => {
                         if (err) {
-                            reject([
-                                `Não foi possível verificar se o usuário com a autorização(${authorization}) já foi registrado.`,
-                                err
-                            ]);
+                            reject(`Não foi possível verificar se o usuário com a autorização(${authorization}) já foi registrado.`);
                             return mongoose.connection.close();
                         }
 
@@ -245,19 +239,11 @@ module.exports = (mongoose, uri, schema_users) => {
                                             }
                                         });
                                     else if (result && !valid)
-                                        return reject([
-                                            `Usuário com a autorização(${authorization}) não está liberado para acesso.`,
-                                            '401 - By email not verify'
-                                        ]);
+                                        return reject(`Usuário com a autorização(${authorization}) não está liberado para acesso, a conta ainda não foi confirmada por e-mail.`);
                                     else
                                         return reject(`Usuário com a autorização(${authorization}) não está liberado para acesso.`);
                                 })
-                                .catch(err => {
-                                    reject([
-                                        `Não foi possível verificar se o usuário com a autorização(${authorization}) está autorizado a acessar o sistema.`,
-                                        err
-                                    ]);
-                                })
+                                .catch(err => reject(`Não foi possível verificar se o usuário com a autorização(${authorization}) está autorizado a acessar o sistema.`))
                             return mongoose.connection.close();
                         } else {
                             reject(`Usuário com o email(${authorization}) não existe no banco de dados.`);
@@ -354,23 +340,16 @@ module.exports = (mongoose, uri, schema_users) => {
                         }
 
                         if (user) {
-                            user['password'] = new_password;
-
                             schema_users.updateOne({
                                 authorization: String(authorization)
                             }, {
-                                password: user['password']
+                                password: new_password
                             }, (err) => {
                                 if (err) {
-                                    reject([
-                                        `Não é possível trocar a senha da conta com a autorização(${authorization}).`,
-                                        err
-                                    ]);
+                                    reject(`Não é possível trocar a senha da conta com a autorização(${authorization}).`);
                                     return mongoose.connection.close();
                                 }
-                                resolve(
-                                    `A conta com a autorização(${authorization}) teve a senha alterada.`
-                                );
+                                resolve(`A conta com a autorização(${authorization}) teve a senha alterada.`);
                                 return mongoose.connection.close();
                             });
                         } else {
@@ -403,10 +382,7 @@ module.exports = (mongoose, uri, schema_users) => {
                         authorization: String(authorization)
                     }, async (err, user) => {
                         if (err) {
-                            reject([
-                                `Não foi possível verificar se o usuário com a autorização(${authorization}) já foi registrado.`,
-                                err
-                            ]);
+                            reject(`Não foi possível verificar se o usuário com a autorização(${authorization}) já foi registrado.`);
                             return mongoose.connection.close();
                         }
 
@@ -423,10 +399,7 @@ module.exports = (mongoose, uri, schema_users) => {
                             if (!cache['history']) cache['history'] = {};
 
                             if (devices['allowed'].filter(device => device === String(options['device'])).length <= 0) {
-                                reject([
-                                    `Usuário com a autorização(${authorization}), está utilizando um dispositivo não permitido há estabelecer sessões.`,
-                                    'deviceblocked'
-                                ]);
+                                reject(`Usuário com a autorização(${authorization}), está utilizando um dispositivo não permitido há estabelecer sessões.`);
                                 return mongoose.connection.close();
                             }
 
@@ -451,10 +424,7 @@ module.exports = (mongoose, uri, schema_users) => {
                                 });
 
                             if (connected >= limit) {
-                                reject([
-                                    `Usuário com a autorização(${authorization}), excedeu o limite de sessões.`,
-                                    'exceeded'
-                                ]);
+                                reject(`Usuário com a autorização(${authorization}), excedeu o limite de sessões.`);
                                 return mongoose.connection.close();
                             } else {
                                 ++connected;
@@ -506,19 +476,14 @@ module.exports = (mongoose, uri, schema_users) => {
                                 session: updateSession
                             }, (err) => {
                                 if (err) {
-                                    reject([
-                                        `Não é possível conectar a sessão do usuário com a autorização(${authorization}).`,
-                                        err
-                                    ]);
+                                    reject(`Não é possível conectar a sessão do usuário com a autorização(${authorization}).`);
                                     return mongoose.connection.close();
                                 }
-                                resolve(
-                                    `A sessão do usuário com a autorização(${authorization}), foi conectada.`
-                                );
+                                resolve(`A sessão do usuário com a autorização(${authorization}), foi conectada.`);
                                 return mongoose.connection.close();
                             });
                         } else {
-                            reject([`Usuário com a autorização(${authorization}) não existe no banco de dados.`]);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });
@@ -785,11 +750,11 @@ module.exports = (mongoose, uri, schema_users) => {
                                 resolve(await __twofactor.verify(twofactor['secret'], userToken));
                                 return mongoose.connection.close();
                             } catch (err) {
-                                reject([`Nâo foi possível verificar a autenticação de dois fatores do usuário com a autorização(${authorization}), erro: ${err}.`]);
+                                reject(`Nâo foi possível verificar a autenticação de dois fatores do usuário com a autorização(${authorization}), erro: ${err}.`);
                                 return mongoose.connection.close();
                             }
                         } else {
-                            reject([`Usuário com a autorização(${authorization}) não existe no banco de dados.`]);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });
@@ -851,11 +816,11 @@ module.exports = (mongoose, uri, schema_users) => {
                                     return mongoose.connection.close();
                                 });
                             } else {
-                                reject([`Usuário com a autorização(${authorization}) não possui uma autenticação de dois fatores registrada.`]);
+                                reject(`Usuário com a autorização(${authorization}) não possui uma autenticação de dois fatores registrada.`);
                                 return mongoose.connection.close();
                             }
                         } else {
-                            reject([`Usuário com a autorização(${authorization}) não existe no banco de dados.`]);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });

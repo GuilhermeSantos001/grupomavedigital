@@ -28,7 +28,7 @@ module.exports = (req, res, next) => {
                 });
 
             try {
-                await mongoDB.users.verifytoken(result['data']['auth'], token, LZString.decompressFromEncodedURIComponent(internetAdress), getClientAddress(req))
+                await mongoDB.users.verifytoken(result['data']['auth'], token, internetAdress, getClientAddress(req))
 
                 req.params['token'] = result;
 

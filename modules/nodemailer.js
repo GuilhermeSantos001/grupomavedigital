@@ -1,11 +1,11 @@
 const nodemailer = require("nodemailer");
 const smtp = {
-    'host': String(process.env.SMTP_CONNECTION_HOST),
-    'port': Number(process.env.SMTP_CONNECTION_PORT),
-    'secure': Boolean(eval(String(process.env.SMTP_CONNECTION_SECURE).toLowerCase())),
+    'host': String(process.env.SMTP_HOST),
+    'port': Number(process.env.SMTP_PORT),
+    'secure': Boolean(eval(String(process.env.SMTP_SECURE).toLowerCase())),
     'auth': {
-        'user': String(process.env.SMTP_CONNECTION_AUTH_USER),
-        'pass': String(process.env.SMTP_CONNECTION_AUTH_PASS)
+        'user': String(process.env.SMTP_USERNAME),
+        'pass': String(process.env.SMTP_PASSWORD)
     }
 };
 
@@ -49,7 +49,7 @@ module.exports = {
                         text: `Prezado(a) ${username}, por gentileza clique no link a baixo para confirmar sua conta!`,
                         html: `
                         <b>Prezado(a) ${username}, por gentileza clique no link a baixo para confirmar sua conta!</b><br />
-                        <a href="http://${process.env.ADDRESS}:${process.env.PORT}/user/email/confirm/${token}">Acesse sua conta</a><br />
+                        <a href="http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}/user/email/confirm/${token}">Acesse sua conta</a><br />
                         Esse link está valido por 7 dias. Após esse periodo você deverá solicitar ao administrador outro email de confirmação.<br />
                         Caso você não tenha feito essa solicitação, ignore este e-mail.<br />
                         - Atenciosamente, Equipe de TI.
@@ -108,7 +108,7 @@ module.exports = {
                         text: `Prezado(a) ${username}, por gentileza clique no link a baixo para recuperar sua conta!`,
                         html: `
                         <b>Prezado(a) ${username}, por gentileza clique no link a baixo para recuperar sua conta!</b><br />
-                        <a href="http://${process.env.ADDRESS}:${process.env.PORT}/user/auth/security/retrieve/twofactor/${token}">Recuperar a Conta!</a><br />
+                        <a href="http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}/user/auth/security/retrieve/twofactor/${token}">Recuperar a Conta!</a><br />
                         Esse link está valido por 7 dias. Após esse periodo você deverá solicitar outro email de recuperação.<br />
                         Caso você não tenha feito essa solicitação, ignore este e-mail.<br />
                         - Atenciosamente, Equipe de TI.

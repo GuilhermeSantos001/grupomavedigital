@@ -100,7 +100,7 @@ let schema = new Schema({
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança'],
         maxlength: [33, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
+        minlength: [4, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     password: { // Senha de usuário
         type: String,
@@ -112,14 +112,14 @@ let schema = new Schema({
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança'],
         maxlength: [33, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
+        minlength: [4, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     surname: { // Sobrenome
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança'],
         maxlength: [33, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
+        minlength: [4, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     email: { // Email
         type: subSchema_email,

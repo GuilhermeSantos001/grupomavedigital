@@ -58,7 +58,7 @@ block content
             button(type="button" class="btn btn-danger col-sm-12 col-md-12 col-lg-2 col-xl-2 p-2 mt-2 m-lg-2 m-xl-2" onclick="docRefuse()") Recusar
             button(type="button" class="btn btn-mave1 col-12 mt-3" data-bs-dismiss="modal") Voltar
   script.
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('admin');
       })
 
@@ -78,7 +78,7 @@ block content
       function docDownload() {
         alerting('O download iniciara em breve...');
         window.open(
-          `${baseurl}/system/admin/docs/download?authorization=${String($('#doc-auth').val())}&docname=${String($('#doc-title').val())}&usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`, 
+          `${baseurl}/system/admin/docs/download?authorization=${String($('#doc-auth').val())}&docname=${String($('#doc-title').val())}&usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`,
           "_blank"
         );
       }

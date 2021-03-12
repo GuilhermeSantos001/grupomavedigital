@@ -5,11 +5,12 @@ block content
     h1(class="h2") Definições do novo cartão digital.
   div(class="col-12")
     p(class="text-wrap")
-      | Olá #[b(class="text-mave1 text-capitalize" id="usr-name")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+      | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
   div(class="d-flex flex-column bg-danger col-12 pt-2")
     p(class="text-center text-white fw-bold fs-6 mb-0") A página a baixo é uma prévia do cartão digital.
     p(class="text-center text-white fw-bold") (Durante o modo de prévia não será possível visualizar como o layout se comporta em vários dispositivos)
-  include includes/card-layout-1.pug
+  div(class="shadow border")
+    include includes/card-layout-1.pug
   div(class="list-group mt-3")
     a(href="#" class="list-group-item list-group-item-action disabled" aria-current="true")
       div(class="d-flex w-100 justify-content-between")
@@ -19,21 +20,21 @@ block content
   div(class="accordion mt-1" id="accordion_main")
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_1")
-        button(class="accordion-button text-mave1 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
+        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne")
           | Redes Sociais
           span(class="badge bg-mave1 rounded-pill ms-2") Habilitar/Desabilitar
-      div(id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
+      div(id="collapseOne" class="accordion-collapse collapse" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
         div(class="accordion-body")
           mixin socialmedia(media, enabled)
             div(class="form-check col-12 mx-auto py-2")
               input(class="form-check-input" type="checkbox" value="" id=`check-input-socialmedia-${media}` checked=enabled)
               label(class="form-check-label" for=`check-input-socialmedia-${media}`)
-                | #[i(class=`fab fa-${media}`)] #{media}
+                | #[i(class=`fab fa-${media.toLowerCase()}`)] #{media}
           div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
-            +socialmedia('facebook', true)
-            +socialmedia('youtube', true)
-            +socialmedia('linkedin', true)
-            +socialmedia('instagram', true)
+            +socialmedia('Youtube', true)
+            +socialmedia('Linkedin', true)
+            +socialmedia('Instagram', true)
+            +socialmedia('Facebook', true)
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_2")
         button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_2" aria-expanded="false" aria-controls="collapse_2")
@@ -46,10 +47,10 @@ block content
               input(type="text" class="form-control" id=`input-address-socialmedia-${media}` placeholder=`${address}` value=address)
               label(for=`input-address-socialmedia-${media}`) #{media}
           div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
-            +socialmedia('facebook', 'https://www.facebook.com/grupomaveoficial/')
-            +socialmedia('youtube', 'https://www.youtube.com/channel/UC5y4IOAlxQ4eictbudG785g')
-            +socialmedia('linkedin', 'https://www.linkedin.com/company/grupo-mave/?originalSubdomain=pt')
-            +socialmedia('instagram', 'https://www.instagram.com/grupo.mave/')
+            +socialmedia('Youtube', 'https://www.youtube.com/channel/UC5y4IOAlxQ4eictbudG785g')
+            +socialmedia('Linkedin', 'https://www.linkedin.com/company/grupo-mave/?originalSubdomain=pt')
+            +socialmedia('Instagram', 'https://www.instagram.com/grupo.mave/')
+            +socialmedia('Facebook', 'https://www.facebook.com/grupomaveoficial/')
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_3")
         button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_3" aria-expanded="false" aria-controls="collapse_3")
@@ -132,4 +133,4 @@ block content
   div(class="input-group flex-nowrap my-3")
     button(type="button" class="btn btn-mave2 col-12 fs-5" id="card-register")
       | #[i(class="fas fa-cloud-upload-alt")] Registrar o Cartão Digital
-  script(src="/javascripts/public/card-create.js")
+  script(src="/javascripts/card-create.min.js")

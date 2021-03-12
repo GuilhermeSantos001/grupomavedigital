@@ -19,7 +19,7 @@ block content
   script.
     let esocial = JSON.parse(LZString.decompressFromBase64(`#{esocial}`));
 
-    $(document).ready(() => {
+    $(() => {
       $('#esocial-description').val(esocial['description']);
 
       $('#esocial-percentage').val(esocial['percentage']).priceFormat({

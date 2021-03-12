@@ -5,10 +5,69 @@ const router = express.Router({
 });
 const middlewareToken = require('../middlewares/token');
 const getReqProps = require('../modules/getReqProps');
-const mongoDB = require('../modules/mongodb');
-const vcard = require('../modules/vcard');
-const compareObject = require('../modules/compareObject');
-const randomId = require('../modules/randomId');
+const mongodb = require('../modules/mongodb');
+const LZString = require('lz-string');
+
+router.get(['/control'], middlewareToken, async (req, res) => {
+  let {
+    token
+  } = getReqProps(req, [
+    'token'
+  ]);
+
+  const
+    { privilege } = token['data'],
+    { cards } = await mongodb.cards.get();
+
+  if (privilege !== 'administrador' && privilege !== 'moderador')
+    return res.status(400).render('error', {
+      title: 'Grupo Mave Digital - Acesso Negado!',
+      message: 'Você não tem privilégio para acessar a pagina.',
+      menus: [{
+        type: 'normal',
+        icon: 'rotate-ccw',
+        first: false,
+        enabled: true,
+        title: 'Voltar',
+        onclick: "gotoSystem()"
+      }],
+      error: ''
+    })
+  else
+    return res.status(200).render('cards-control', {
+      title: 'Grupo Mave Digital',
+      router: 'Sistema/Cartões Digitais/Gerenciamento.',
+      privilege,
+      baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+      cards,
+      cardItems: cards.map(card => card['id']).join(','),
+      cardsCompressData: LZString.compressToEncodedURIComponent(JSON.stringify(cards)),
+      menus: [{
+        type: 'normal',
+        icon: 'layers',
+        first: true,
+        enabled: true,
+        title: 'Gerenciamento',
+        onclick: ""
+      },
+      {
+        type: 'normal',
+        icon: 'plus-square',
+        first: false,
+        enabled: true,
+        title: 'Criar',
+        onclick: "cards_register()"
+      },
+      {
+        type: 'normal',
+        icon: 'chevron-left',
+        first: false,
+        enabled: true,
+        title: 'Voltar',
+        onclick: 'gotoSystem()'
+      }]
+    })
+});
 
 router.get(['/register'], middlewareToken, async (req, res) => {
   let {
@@ -23,10 +82,6 @@ router.get(['/register'], middlewareToken, async (req, res) => {
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital - Acesso Negado!',
       message: 'Você não tem privilégio para acessar a pagina.',
-      router: 'Sistema/Cartões Digitais/Criar.',
-      defaults: {
-
-      },
       menus: [{
         type: 'normal',
         icon: 'rotate-ccw',
@@ -56,219 +111,110 @@ router.get(['/register'], middlewareToken, async (req, res) => {
         first: false,
         enabled: true,
         title: 'Voltar',
-        onclick: 'gotoSystem()'
+        onclick: 'cards_control()'
       }]
     })
 });
 
-
-router.post('/register', middlewareToken, async (req, res) => {
+router.get(['/card/', '/card', '/card/:id'], async (req, res) => {
   let {
-    photo,
-    name,
-    jobtitle,
-    phones,
-    whatsapp,
-    vcard,
-    footer
+    id
   } = getReqProps(req, [
-    'photo',
-    'name',
-    'jobtitle',
-    'phones',
-    'whatsapp',
-    'vcard',
-    'footer'
+    'id'
   ]);
 
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof photo != 'string' ||
-      typeof name != 'string' ||
-      typeof jobtitle != 'string' ||
-      !phones instanceof Array ||
-      !compareObject(whatsapp, {
-        phone: String,
-        text: String
-      }) ||
-      !compareObject(vcard, {
-        firstname: String,
-        lastname: String,
-        organization: String,
-        photo: {
-          path: String,
-          file: String,
-        },
-        logo: {
-          path: String,
-          file: String,
-        },
-        workPhone: Array,
-        birthday: {
-          year: Number,
-          month: Number,
-          day: Number,
-        },
-        title: String,
-        url: String,
-        workUrl: String,
-        workEmail: String,
-        workAddress: {
-          label: String,
-          street: String,
-          city: String,
-          stateProvince: String,
-          postalCode: String,
-          countryRegion: String,
-        },
-        socialUrls: Object,
-        file: {
-          name: String,
-          path: String,
-        }
-      }) ||
-      !compareObject(footer, {
-        email: String,
-        location: String,
-        website: String,
-        attachment: String,
-        socialmedia: Array
-      })
-    )
-      return res.status(400).send('Grupo Mave Digital - Parameters values is not valid.');
+  const
+    { cards } = await mongodb.cards.get('id', id);
 
-    mongoDB.cards.register(
-      id,
-      photo,
-      name,
-      jobtitle,
-      phones,
-      whatsapp,
-      footer,
-      socialmedia
-    )
-      .then(details => res.status(200).send({
-        message: 'Grupo Mave Digital - Success!!!',
-        details
-      }))
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
+  if (cards.length <= 0)
+    return res.status(400).render('error', {
+      title: 'Grupo Mave Digital - Erro!',
+      message: 'Não foi possível retornar as informações do cartão digital.',
+      menus: [{
+        type: 'normal',
+        icon: 'home',
+        first: false,
+        enabled: true,
+        title: 'Home',
+        onclick: "home()"
+      }],
+      error: ''
+    })
+  else
+    var card = cards[0];
+
+  return res.status(200).render('card-view', {
+    title: 'Grupo Mave Digital - Cartão Digital',
+    baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+    id: card['id'],
+    version: card['version'],
+    photoPath: card['photo']['path'],
+    photoName: card['photo']['name'],
+    username: card['name'],
+    jobtitle: card['jobtitle'],
+    phone_1: card['phones'][0],
+    phone_2: card['phones'][1],
+    whatsapp_phone: card['whatsapp']['phone'],
+    whatsapp_text: card['whatsapp']['text'],
+    whatsapp_message: card['whatsapp']['message'],
+    email: card['footer']['email'],
+    location: card['footer']['location'],
+    website: card['footer']['website'],
+    socialmedia_youtube_link: card['footer']['socialmedia'][0]['value'],
+    socialmedia_youtube_enabled: card['footer']['socialmedia'][0]['enabled'],
+    socialmedia_linkedin_link: card['footer']['socialmedia'][1]['value'],
+    socialmedia_linkedin_enabled: card['footer']['socialmedia'][1]['enabled'],
+    socialmedia_instagram_link: card['footer']['socialmedia'][2]['value'],
+    socialmedia_instagram_enabled: card['footer']['socialmedia'][2]['enabled'],
+    socialmedia_facebook_link: card['footer']['socialmedia'][3]['value'],
+    socialmedia_facebook_enabled: card['footer']['socialmedia'][3]['enabled'],
+    attachment: card['footer']['attachment'],
+    fileVCF: card['vcard']['file']['name']
+  })
 });
 
-router.post('/vcard/register', middlewareToken, async (req, res) => {
-  let {
-    token,
-    firstName,
-    lastName,
-    organization,
-    photo,
-    logo,
-    workPhone,
-    birthday,
-    title,
-    url,
-    email,
-    label,
-    countryRegion,
-    street,
-    city,
-    stateProvince,
-    postalCode,
-    socialUrls
-  } = getReqProps(req, [
-    'token',
-    'firstName',
-    'lastName',
-    'organization',
-    'photo',
-    'logo',
-    'workPhone',
-    'birthday',
-    'title',
-    'url',
-    'email',
-    'label',
-    'countryRegion',
-    'street',
-    'city',
-    'stateProvince',
-    'postalCode',
-    'socialUrls'
-  ]);
+router.get(['/'], async (req, res) => {
+  const
+    { cards } = await mongodb.cards.get();
 
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      !compareObject(token, { 'data': { 'privilege': String, 'auth': String, 'pass': String }, 'iat': String, 'exp': String }) ||
-      typeof firstName !== 'string' ||
-      typeof lastName !== 'string' ||
-      typeof organization !== 'string' ||
-      !compareObject(photo, { 'path': String, 'file': String }) ||
-      !compareObject(logo, { 'path': String, 'file': String }) ||
-      !workPhone instanceof Array ||
-      !compareObject(birthday, { 'year': String, 'month': String, 'day': String }) ||
-      typeof title !== 'string' ||
-      typeof url !== 'string' ||
-      typeof email !== 'string' ||
-      typeof label !== 'string' ||
-      typeof countryRegion !== 'string' ||
-      typeof street !== 'string' ||
-      typeof city !== 'string' ||
-      typeof stateProvince !== 'string' ||
-      typeof postalCode !== 'string' ||
-      !socialUrls instanceof Array
-    )
-      return res.status(400).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    const { privilege } = token['data'];
-
-    if (!privilege) {
-      return res.status(401).send({
-        message: 'Grupo Mave Digital - Você não tem autorização para acessar essa rota!',
-        error: `Seu Nível de acesso: ${privilege}.`
-      });
-    }
-
-    return vcard((filename => res.status(200).send(filename)), {
-      firstName,
-      lastName,
-      organization,
-      workPhone,
-      birthday,
-      title,
-      url,
-      email,
-      label,
-      countryRegion,
-      street,
-      city,
-      stateProvince,
-      postalCode,
-      socialUrls
-    }, logo, photo);
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
+  return res.status(200).render('cards', {
+    title: 'Grupo Mave Digital',
+    router: 'Sistema/Cartões Digitais.',
+    baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+    cards,
+    menus: [{
+      type: 'normal',
+      icon: 'eye',
+      first: true,
+      enabled: true,
+      title: 'Visualizar',
+      onclick: ""
+    },
+    {
+      type: 'normal',
+      icon: 'chevron-left',
+      first: false,
+      enabled: true,
+      title: 'Voltar',
+      onclick: 'home()'
+    }]
+  })
 });
 
 router.use(['*'], async (req, res) => {
-  return res.status(404).send('API CARD PRIME - This route not exist.');
+  return res.status(404).render('error', {
+    title: 'Grupo Mave Digital',
+    menus: [{
+      type: 'normal',
+      icon: 'rotate-ccw',
+      first: false,
+      enabled: true,
+      title: 'Voltar',
+      onclick: "gotoSystem()"
+    }],
+    message: 'Página não encontrada 404',
+    error: null
+  });
 });
 
 module.exports = (app) => app.use('/cards', router);

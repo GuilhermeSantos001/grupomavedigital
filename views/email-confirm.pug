@@ -1,11 +1,11 @@
 extends layout
 
 block content
-  div(class="d-flex flex-column col-12 bg-medium")
-    h1(class="text-center mt-auto") #{title}
-    h6(class="text-center mb-auto") #{message}
-  script(src="/javascripts/lz-string.min.js")
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") title
+  div(class="col-12")
+    p(class="text-wrap") #{message}
   script.
-    $(document).ready(()=> {
+    $(()=> {
       console.info("#{error}");
     })

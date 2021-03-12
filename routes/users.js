@@ -686,220 +686,25 @@ router.post(['/docs/reject'], middlewareToken, async (req, res) => {
 router.get(['/auth'], async (req, res) => {
   return res.status(200).render('login', {
     title: 'Grupo Mave Digital',
-    menus: [{
-      type: 'normal',
-      icon: 'home',
-      first: false,
-      enabled: true,
-      title: 'Home',
-      onclick: "home()"
-    },
-    {
-      type: 'normal',
-      icon: 'power',
-      first: true,
-      enabled: true,
-      title: 'Acessar',
-      onclick: ""
-    }]
+    menus: [
+      {
+        type: 'normal',
+        icon: 'power',
+        first: true,
+        enabled: true,
+        title: 'Acessar',
+        onclick: ""
+      },
+      {
+        type: 'normal',
+        icon: 'chevron-left',
+        first: false,
+        enabled: true,
+        title: 'Voltar',
+        onclick: 'home()'
+      }
+    ]
   })
-});
-
-/**
- * Migrado para GraphQL em 04/03/2021
- */
-router.post(['/auth/login'], async (req, res) => {
-  let {
-    usr_authorization,
-    password,
-    usr_twofactortoken,
-    locationIP,
-    internetAdress
-  } = getReqProps(req, [
-    'usr_authorization',
-    'password',
-    'usr_twofactortoken',
-    'locationIP',
-    'internetAdress'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    usr_authorization = LZString.decompressFromEncodedURIComponent(usr_authorization);
-    password = LZString.decompressFromEncodedURIComponent(password);
-    usr_twofactortoken = LZString.decompressFromEncodedURIComponent(usr_twofactortoken);
-    locationIP = LZString.decompressFromEncodedURIComponent(locationIP);
-    internetAdress = LZString.decompressFromEncodedURIComponent(internetAdress);
-
-    if (
-      typeof usr_authorization != 'string' ||
-      typeof password != 'string' ||
-      typeof locationIP != 'string' ||
-      typeof internetAdress != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.cpassword(usr_authorization, password)
-      .then(response => {
-        let user = response['user'],
-          data = response;
-
-        if (user['authentication']['twofactor']['enabled'] && usr_twofactortoken.length <= 0) {
-          return res.status(200).send({
-            message: 'Grupo Mave Digital - Success!!!',
-            data: 'twofactorVerify'
-          })
-        } else if (user['authentication']['twofactor']['enabled'] && usr_twofactortoken.length > 0) {
-          mongoDB.users.verifytwofactor(usr_authorization, usr_twofactortoken)
-            .then(response => {
-              if (!response)
-                return res.status(200).send({
-                  message: 'Grupo Mave Digital - Success!!!',
-                  data: 'twofactorDenied'
-                })
-              else
-                __next();
-            })
-            .catch(err => res.status(400).send({
-              message: 'Grupo Mave Digital - Error!!!',
-              error: err
-            }))
-        } else {
-          __next();
-        }
-
-        async function __next() {
-          try {
-            user['token'] = jwt.sign({
-              "privilege": user['privilege'],
-              "auth": usr_authorization,
-              "pass": password
-            }, `${user['session']['cache']['tmp']}${user['session']['cache']['unit']}`);
-
-            await mongoDB.users.connected(usr_authorization, {
-              ip: getClientAddress(req),
-              token: user['token'],
-              device: req.device['type'],
-              location: {
-                locationIP,
-                internetAdress,
-                browser: req.device.parser.useragent['family'],
-                os: req.device.parser.useragent['os']['family']
-              }
-            });
-
-            return res.status(200).send({
-              message: 'Grupo Mave Digital - Success!!!',
-              data: data
-            })
-          } catch (e) {
-            if (e[1] === 'exceeded')
-              return res.status(200).send({
-                message: 'Grupo Mave Digital - Success!!!',
-                data: 'exceeded'
-              })
-            else if (e[1] === 'deviceblocked')
-              return res.status(200).send({
-                message: 'Grupo Mave Digital - Success!!!',
-                data: 'deviceblocked'
-              })
-            else
-              return res.status(200).send({
-                message: 'Grupo Mave Digital - Success!!!',
-                data: e
-              })
-          }
-        }
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/logout'], middlewareToken, async (req, res) => {
-  let {
-    token,
-    usr_token
-  } = getReqProps(req, [
-    'token',
-    'usr_token'
-  ]);
-
-  const usr_authorization = token['data']['auth'];
-
-  try {
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.disconnected(usr_authorization, {
-      ip: getClientAddress(req),
-      token: usr_token
-    })
-      .then(async () => {
-        return res.status(200).send({
-          message: 'Grupo Mave Digital - Success!!!',
-          data: null
-        })
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/expired'], async (req, res) => {
-  let {
-    usr_authorization,
-    usr_token
-  } = getReqProps(req, [
-    'usr_authorization',
-    'usr_token'
-  ]);
-
-  try {
-    if (
-      typeof usr_authorization != 'string' ||
-      typeof usr_token != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.disconnected(usr_authorization, {
-      ip: getClientAddress(req),
-      token: usr_token
-    })
-      .then(() => {
-        return res.status(200).send({
-          message: 'Grupo Mave Digital - Success!!!',
-          data: null
-        })
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
 });
 
 /**
@@ -922,7 +727,8 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
       return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
 
     const {
-      auth
+      auth,
+      privilege
     } = token['data'];
 
     mongoDB.users.get('authorization', auth)
@@ -937,8 +743,19 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
 
         return res.status(200).render('auth-security', {
           title: 'Grupo Mave Digital',
+          router: 'Configurações/Segurança.',
+          privilege,
           menus: [{
             type: 'normal',
+            icon: 'shield',
+            first: true,
+            enabled: true,
+            title: 'Segurança',
+            onclick: ""
+          },
+          {
+            type: 'normal',
+            icon: 'chevron-left',
             first: false,
             enabled: true,
             title: 'Voltar',
@@ -946,175 +763,6 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
           }],
           twofactor_enabled: twofactor['enabled']
         })
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/sign/twofactor'], middlewareToken, async (req, res) => {
-  let {
-    usr_authorization
-  } = getReqProps(req, [
-    'usr_authorization'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.signtwofactor(usr_authorization)
-      .then(response => res.status(200).send(response))
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/verify/twofactor'], middlewareToken, async (req, res) => {
-  let {
-    usr_authorization,
-    usertoken
-  } = getReqProps(req, [
-    'usr_authorization',
-    'usertoken'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string' ||
-      typeof usertoken != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.verifytwofactor(usr_authorization, usertoken)
-      .then(response => res.status(200).send(response))
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/enabled/twofactor'], middlewareToken, async (req, res) => {
-  let {
-    usr_authorization
-  } = getReqProps(req, [
-    'usr_authorization'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.enabledtwofactor(usr_authorization)
-      .then(response => res.status(200).send(response))
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/disabled/twofactor'], middlewareToken, async (req, res) => {
-  let {
-    usr_authorization
-  } = getReqProps(req, [
-    'usr_authorization'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.disabledtwofactor(usr_authorization)
-      .then(response => res.status(200).send(response))
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/retrieve/twofactor'], async (req, res) => {
-  let {
-    usr_authorization
-  } = getReqProps(req, [
-    'usr_authorization'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.get('authorization', usr_authorization)
-      .then(response => {
-        let users = response['users'] != undefined ? response['users'] : response['user'];
-
-        if (users.length >= 1) users = users[0];
-
-        const {
-          email,
-          username
-        } = users;
-
-        nodemailer.usr_account_retrieve_twofactor(email, username, jwt.sign({
-          'econfirm': true,
-          'authorization': usr_authorization
-        }, '7d'))
-          .then(info => console.log(`Email de recuperação da conta enviado para ${email}`, info))
-          .catch(err => console.log(`Email de recuperação da conta não pode ser enviado para ${email}`, err))
       })
       .catch(err => res.status(400).send({
         message: 'Grupo Mave Digital - Error!!!',
@@ -1187,185 +835,6 @@ router.get(['/auth/security/retrieve/twofactor', '/auth/security/retrieve/twofac
         onclick: "gotoSystem()"
       }],
       message: 'Ocorreu um erro com o servidor, tente novamente mais tarde!',
-      error: err
-    });
-  }
-});
-
-router.post(['/auth/security/change/password'], middlewareToken, async (req, res) => {
-  let {
-    usr_authorization,
-    password,
-    new_password
-  } = getReqProps(req, [
-    'usr_authorization',
-    'password',
-    'new_password'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof usr_authorization != 'string' ||
-      typeof password != 'string' ||
-      typeof new_password != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    bcrypt.crypt(new_password)
-      .then(async password_encode => {
-        try {
-          await mongoDB.users.cpassword(usr_authorization, password);
-
-          mongoDB.users.changepassword(usr_authorization, password_encode)
-            .then(() => res.status(200).send(true))
-            .catch(err => res.status(400).send({
-              message: 'Grupo Mave Digital - Error!!!',
-              error: err
-            }))
-        } catch {
-          return res.status(200).send(false);
-        }
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/register'], middlewareAPI, async (req, res) => {
-  let {
-    usr_authorization,
-    privilege,
-    fotoPerfil,
-    username,
-    password,
-    name,
-    surname,
-    email,
-    cnpj,
-    location
-  } = getReqProps(req, [
-    'usr_authorization',
-    'privilege',
-    'fotoPerfil',
-    'username',
-    'password',
-    'name',
-    'surname',
-    'email',
-    'cnpj',
-    'location'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-
-    if (!fotoPerfil) fotoPerfil = 'avatar.png';
-
-    if (
-      typeof usr_authorization != 'string' ||
-      typeof privilege != 'string' ||
-      typeof username != 'string' ||
-      typeof password != 'string' ||
-      typeof name != 'string' ||
-      typeof surname != 'string' ||
-      typeof email != 'string' ||
-      typeof cnpj != 'string' ||
-      typeof location != 'object'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    bcrypt.crypt(password)
-      .then(password_encode => {
-        mongoDB.users.register(
-          usr_authorization,
-          privilege,
-          fotoPerfil,
-          username,
-          password_encode,
-          name,
-          surname, {
-          value: email
-        },
-          cnpj,
-          location
-        )
-          .then(async response => {
-            let users = response['users'] != undefined ? response['users'] : response['user'];
-
-            // Envia o email de confirmação da conta
-            await usr_econfirm(users['email'], users['username'], usr_authorization);
-
-            return res.status(200).send({
-              message: 'Grupo Mave Digital - Success!!!',
-              data: users
-            })
-          })
-          .catch(err => res.status(400).send({
-            message: 'Grupo Mave Digital - Error!!!',
-            error: err
-          }))
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/email/resend/confirm'], middlewareAPI, async (req, res) => {
-  let {
-    usr_authorization
-  } = getReqProps(req, [
-    'usr_authorization'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-
-    if (
-      typeof usr_authorization != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    mongoDB.users.get('authorization', usr_authorization)
-      .then(async response => {
-        let users = response['users'] != undefined ? response['users'] : response['user'];
-
-        if (users.length >= 1) users = users[0];
-
-        const email = users['email'],
-          username = users['username'];
-
-        await usr_econfirm(email, username, usr_authorization);
-
-        return res.status(200).send(`Foi enviada uma solicitação de envio de email. Para confirmação da conta do ${username} com o email ${email}.`);
-      })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
       error: err
     });
   }

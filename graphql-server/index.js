@@ -18,19 +18,15 @@ server.express.use(device.capture({
 })), useragent(true);
 
 server.express.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', process.env.GRAPHQL_ADDRESS_ORIGIN);
-    res.header(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, authorization, usr_token, usr_internetadress'
-    );
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, authorization, usr_token, usr_internetadress");
     next();
 });
 
 server.start({
     port: process.env.GRAPHQL_PORT,
     cors: {
-        credentials: true,
-        origin: [process.env.GRAPHQL_ADDRESS_ORIGIN]
+        origin: '*'
     },
     validationRules: (req) => [
         costAnalysis({

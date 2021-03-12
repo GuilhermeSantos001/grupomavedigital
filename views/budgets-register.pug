@@ -328,7 +328,7 @@ block content
       rents_total = 0,
       fuel_total = [0, 0];
 
-    $(document).ready(() => {
+    $(() => {
       // - Configura a lista de dados trabalhistas
       if (workdata.length > 0) {
         workdata.map(data => {
@@ -1138,7 +1138,7 @@ block content
           })
 
           total_effective['proc'] = false;
-        } 
+        }
 
         if(total_effective['proc']) fin();
 
@@ -1300,7 +1300,7 @@ block content
             case 'Benefícios Social Familiar Segurança':
             case 'PLR Facilities':
             case 'PLR Segurança':
-            case 'Seguro de vida Segurança':        
+            case 'Seguro de vida Segurança':
             case 'Vale Transporte (escala 4x2)':
             case 'Vale Transporte (escala 5x2)':
             case 'Vale Transporte (escala 6x1)':
@@ -2494,7 +2494,7 @@ block content
         data = LZString.compressToEncodedURIComponent(JSON.stringify({
           'budgetDesc': $('#budgets-description').val(),
           'budgetID': $('#budgets-ID').val(),
-          'clientname': (() => { 
+          'clientname': (() => {
             let client = clients.filter(e => e['id'] === $('#budgets-client-selected').val());
 
             return `${client['name']}(${client['cpfcnpj']})`;
@@ -2531,7 +2531,7 @@ block content
           'totalcost': $('#fuel-vehicles-total-all').val(),
           'taxes': (() => {
             let n = Number(
-              Number($('#charges-aliquots-iss-value').unmask()) + 
+              Number($('#charges-aliquots-iss-value').unmask()) +
               Number($('#charges-aliquots-pis-value').unmask()) +
               Number($('#charges-aliquots-cofins-value').unmask()) +
               Number($('#charges-aliquots-ir-value').unmask()) +
@@ -2550,7 +2550,7 @@ block content
 
               if (layerAppend.indexOf(work['id']) != -1)
                 visibility = false;
-              else 
+              else
                 layerAppend.push(work['id']);
 
                 __data.push({
@@ -2605,7 +2605,7 @@ block content
 
               if (layerAppend.indexOf(benefit['id']) != -1)
                 visibility = false;
-              else 
+              else
                 layerAppend.push(benefit['id']);
 
                 __data.push({

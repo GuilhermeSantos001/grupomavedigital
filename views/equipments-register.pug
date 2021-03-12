@@ -37,7 +37,7 @@ block content
   script.
     let equipments = JSON.parse(LZString.decompressFromBase64(`#{equipments}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#equipments-ID").val(StringPadZero(equipments.length + 1, 6));
 
       $('#equipments-investment, #equipments-amortization, #equipments-investmentTotal').priceFormat({

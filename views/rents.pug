@@ -49,7 +49,7 @@ block content
   script.
     let rentslength = Number("#{rentslength}");
 
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('rents');
 
       let i = 0, l = rentslength;
@@ -99,7 +99,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Alocações
     */
     function filter_description() {

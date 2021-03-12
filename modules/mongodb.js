@@ -16,12 +16,12 @@ var mongoose = require('mongoose');
  */
 var configMongoDB = {
     'user': {
-        'name': process.env.MONGODB_USER_NAME,
-        'password': process.env.MONGODB_USER_PASSWORD
+        'name': process.env.DB_USERNAME,
+        'password': process.env.DB_PASSWORD
     },
-    'address': process.env.MONGODB_CONNECTION_ADDRESS,
-    'port': process.env.MONGODB_CONNECTION_PORT,
-    'db': process.env.MONGODB_CONNECTION_DB
+    'address': process.env.DB_HOST,
+    'port': process.env.DB_PORT,
+    'db': process.env.DB_NAME
 };
 
 /**
@@ -48,7 +48,7 @@ var schema_states = require('../models/states'),
  * @description Endereço de DNS do mongoDB
  * @default `mongodb://${configMongoDB.user.name}:${configMongoDB.user.password}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`
  */
-var uri = `mongodb://${configMongoDB.user.name}:${configMongoDB.user.password}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`;
+var uri = `mongodb://${configMongoDB.user.name}:${encodeURIComponent(configMongoDB.user.password)}@${configMongoDB.address}:${configMongoDB.port}/${configMongoDB.db}?authSource=admin`;
 
 //================================================================================
 // EVENTOS DE CONEXÃO COM O MONGODB

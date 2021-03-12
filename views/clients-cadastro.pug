@@ -79,12 +79,11 @@ block content
                 option MAVE SYSTEMS
                 option QUALITY
             button(type="button" class="btn btn-mave1 col-12" data-bs-dismiss="modal" disabled id="centro_custo_btn" onclick="setCentroCusto()") Definir
-  script(src="/javascripts/lz-string.min.js")
   script.
     let clients = JSON.parse(LZString.decompressFromBase64(`#{clients}`)),
       cpfcnpj_trigger = '';
 
-    $(document).ready(() => {
+    $(() => {
       let cities = JSON.parse(LZString.decompressFromBase64(`#{cities}`));
 
       modalOpen("modal-1");

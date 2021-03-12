@@ -50,7 +50,7 @@ block content
               input(type="text" class="form-control" id="filter-mobile-description")
   script(src="/javascripts/lz-string.min.js")
   script.
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('budgets');
     })
 
@@ -89,7 +89,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Equipamentos
     */
     function filter_description() {

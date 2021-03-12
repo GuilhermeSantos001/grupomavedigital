@@ -1,4 +1,4 @@
-const code = process.env.API_AUTHORIZATION;
+const code = process.env.APP_AUTHORIZATION;
 const getReqProps = require('../modules/getReqProps');
 
 module.exports = (req, res, next) => {

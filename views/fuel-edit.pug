@@ -28,7 +28,7 @@ block content
   script.
     let fuel = JSON.parse(LZString.decompressFromBase64(`#{fuel}`));
 
-    $(document).ready(() => {
+    $(() => {
       $("#fuel-ID").val(fuel['id']);
       $("#fuel-description").val(fuel['description']);
       $("#fuel-tank").val(fuel['tank']);

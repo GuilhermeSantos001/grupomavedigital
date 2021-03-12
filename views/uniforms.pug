@@ -52,7 +52,7 @@ block content
   script.
     let uniformslength = Number("#{uniformslength}");
 
-    $(document).ready(() => {
+    $(() => {
       storage_menu_start('uniforms');
 
       let i = 0, l = uniformslength;
@@ -103,7 +103,7 @@ block content
       })
     }
 
-    /** 
+    /**
       Filtros
     */
     function filter_description() {
