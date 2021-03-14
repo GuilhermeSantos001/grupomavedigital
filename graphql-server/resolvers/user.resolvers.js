@@ -7,7 +7,7 @@ const LZString = require('lz-string');
 
 module.exports = {
     Query: {
-        users: (source, { limit }, { req }) => {
+        users: (source, { limit }, { request }) => {
             return users.slice(0, limit);
         },
         user: async (source, { id }) => {
@@ -129,7 +129,7 @@ module.exports = {
             email,
             cpfcnpj,
             location
-        }, { req }) => {
+        }, { request }) => {
             try {
                 usr_authorization = LZString.decompressFromEncodedURIComponent(usr_authorization) || usr_authorization;
                 privilege = LZString.decompressFromEncodedURIComponent(privilege) || privilege;
@@ -140,7 +140,7 @@ module.exports = {
                 surname = LZString.decompressFromEncodedURIComponent(surname) || surname;
                 email = LZString.decompressFromEncodedURIComponent(email) || email;
                 cpfcnpj = LZString.decompressFromEncodedURIComponent(cpfcnpj) || cpfcnpj;
-                location = JSON.parse(LZString.decompressFromEncodedURIComponent(location)) || location;
+                location = typeof location === 'string' ? JSON.parse(LZString.decompressFromEncodedURIComponent(location)) : location;
 
                 location = {
                     street: String(location[0]),
@@ -184,7 +184,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        changePassword: async (parent, { usr_auth, pwd, new_pwd }, { req }) => {
+        changePassword: async (parent, { usr_auth, pwd, new_pwd }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
                 pwd = LZString.decompressFromEncodedURIComponent(pwd) || pwd;
@@ -199,7 +199,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        authSignTwofactor: async (parent, { usr_auth }, { req }) => {
+        authSignTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
 
@@ -210,7 +210,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        authVerifyTwofactor: async (parent, { usr_auth, usr_qrcode }, { req }) => {
+        authVerifyTwofactor: async (parent, { usr_auth, usr_qrcode }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
                 usr_qrcode = LZString.decompressFromEncodedURIComponent(usr_qrcode) || usr_qrcode;
@@ -220,7 +220,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        authEnabledTwofactor: async (parent, { usr_auth }, { req }) => {
+        authEnabledTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
 
@@ -229,7 +229,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        authDisableTwofactor: async (parent, { usr_auth }, { req }) => {
+        authDisableTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
 
@@ -238,7 +238,7 @@ module.exports = {
                 throw new Error(error);
             }
         },
-        authRetrieveTwofactor: async (parent, { usr_auth }, { req }) => {
+        authRetrieveTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
 

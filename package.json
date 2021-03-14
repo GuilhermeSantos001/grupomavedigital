@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "installer": "npm i",
+    "installer": "npm i && npm i --global gulp-cli",
     "update": "npm i -g npm-check-updates && ncu -u",
-    "gulp": "gulp",
     "dev": "nodemon app",
     "start": "node -r dotenv/config bin/www"
   },
@@ -26,11 +25,13 @@
     "lz-string": "^1.4.4",
     "morgan": "~1.10.0",
     "nodemailer": "^6.5.0",
-    "npm-check-updates": "^11.2.2",
+    "npm-check-updates": "^11.3.0",
+    "object-hash": "^2.1.1",
     "pdf-creator-node": "^2.2.2",
     "pug": "^3.0.2",
     "sib-api-v3-sdk": "^8.2.0",
     "sound-play": "^1.1.0",
+    "uuid": "^3.4.0",
     "vcards-js": "^2.10.0"
   },
   "devDependencies": {

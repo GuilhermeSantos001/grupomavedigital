@@ -69,6 +69,12 @@ input card {
     footer: cardFooter!
 }
 
+type Query {
+    cardGet(lastIndex: String, limit: Int!): String!
+        @auth(keys: ["cnR{rrCHWtcB{/9tx^nG<sM6Km]Mc_RcE$-?.3}g;_N<T(]Grw97.jczDR?>gy&]"])
+        @cost(complexity: 50)
+}
+
 type Mutation {
     vcardCreate(data: vcard!): String!
         @auth(keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"])

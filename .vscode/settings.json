@@ -57,5 +57,6 @@
         "vcardprop"
     ],
     "editor.minimap.enabled": false,
-    "editor.minimap.renderCharacters": false
+    "editor.minimap.renderCharacters": false,
+    "workbench.preferredDarkColorTheme": "Dracula"
 }

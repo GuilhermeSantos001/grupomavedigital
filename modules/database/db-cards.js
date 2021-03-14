@@ -306,7 +306,7 @@ module.exports = (mongoose, uri, schema_cards) => {
 
                     if (field != '') filter[field] = value;
 
-                    schema_cards.find({ _id: { $gt: '604a862685257f2ea0309b18' } })
+                    schema_cards.find(filter)
                         .limit(limit)
                         .exec((err, cards) => {
                             if (err) {

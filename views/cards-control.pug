@@ -22,11 +22,15 @@ block content
   div(class="input-group flex-nowrap my-3")
     span(class="input-group-text" id="span-search") #[i(class="fas fa-search")]
     input(type="text" class="form-control col-6" id="input-search" placeholder="Procurar..." aria-label="span-search" aria-describedby="span-search" value="" disabled=cards.length <= 0 ? true: false)
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-limit") #[i(class="fas fa-filter")] Itens exibidos por vez
+    input(type="number" class="form-control col-6" id="input-limit" aria-label="span-limit" aria-describedby="span-limit" value="10" min="1" max="100" disabled=cards.length <= 0 ? true: false)
   div(class="list-group border-top p-2" id="list-cards")
-    each card in cards
-      +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
     if (cards.length <= 0)
       p.text-muted Nenhum cartão digital encontrado.
+    else
+      each card in cards
+        +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
   script.
     (function () {
       'use strict';

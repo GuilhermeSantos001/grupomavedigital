@@ -6,17 +6,6 @@ type AuthInfo {
     name: String!
 }
 
-# Schema de informações para os locais
-type Location {
-    street: ID!
-    number: Int!
-    complement: String!
-    district: String!
-    state: String!
-    city: String!
-    zipcode: String!
-}
-
 type Query {
     users(limit: Int!): [String!]!
         @cost(multipliers: ["limit"], complexity: 10)

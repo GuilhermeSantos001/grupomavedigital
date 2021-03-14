@@ -862,23 +862,55 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
         if (decoded['data'] && decoded['data']['econfirm']) {
           mongoDB.users.cemail(decoded['data']['email'], decoded['data']['authorization'])
             .then(() => res.status(200).render('email-confirm', {
+              'title': 'Bem-vindo(a) a nossa plataforma digital!',
               'message': 'Sua conta foi verificada, obrigado. Você já pode fechar essa janela!',
-              'menus': []
+              'menus': [{
+                type: 'normal',
+                icon: 'home',
+                first: false,
+                enabled: true,
+                title: 'Home',
+                onclick: "home()"
+              }]
             }))
             .catch(err => res.status(400).render('email-confirm', {
+              'title': 'Desculpe por isso!',
               'message': 'Sua conta não pode ser verificada. Fale com o administrador.',
-              'menus': [],
+              'menus': [{
+                  type: 'normal',
+                  icon: 'chevron-left',
+                  first: false,
+                  enabled: true,
+                  title: 'Voltar',
+                  onclick: 'home()'
+                }],
               'error': err
             }))
         } else
           return res.status(400).render('email-confirm', {
-            'message': 'Link de confirmação da conta está invalido!',
-            'menus': []
+              'title': 'Talvez seja necessário pedir outro email para o administrador.',
+              'message': 'Link de confirmação da conta está invalido!',
+            'menus': [{
+              type: 'normal',
+              icon: 'chevron-left',
+              first: false,
+              enabled: true,
+              title: 'Voltar',
+              onclick: 'home()'
+            }],
           })
       })
       .catch(err => res.status(400).render('email-confirm', {
-        'message': 'Link de confirmação da conta está expirado. Solicite um novo email de confirmação da conta para o administrador.',
-        'menus': [],
+              'title': 'Não se preocupe, você poderá ativar sua conta em outro momento.',
+              'message': 'Link de confirmação da conta está expirado. Solicite um novo email de confirmação da conta para o administrador.',
+        'menus': [{
+          type: 'normal',
+          icon: 'chevron-left',
+          first: false,
+          enabled: true,
+          title: 'Voltar',
+          onclick: 'home()'
+        }],
         'error': err
       }));
   } catch (err) {
@@ -890,7 +922,7 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
         first: false,
         enabled: true,
         title: 'Voltar',
-        onclick: "gotoSystem()"
+        onclick: "home()"
       }],
       message: 'Ocorreu um erro com o servidor, tente novamente mais tarde!',
       error: err

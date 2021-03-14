@@ -147,7 +147,7 @@ module.exports = (mongoose, uri, schema_users) => {
                                 return mongoose.connection.close();
                             });
                         } else {
-                            reject(`Usuário com o email(${authorization}) não existe no banco de dados.`);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });
@@ -246,7 +246,7 @@ module.exports = (mongoose, uri, schema_users) => {
                                 .catch(err => reject(`Não foi possível verificar se o usuário com a autorização(${authorization}) está autorizado a acessar o sistema.`))
                             return mongoose.connection.close();
                         } else {
-                            reject(`Usuário com o email(${authorization}) não existe no banco de dados.`);
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
                             return mongoose.connection.close();
                         }
                     });

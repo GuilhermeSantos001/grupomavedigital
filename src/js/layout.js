@@ -254,7 +254,7 @@
             }
         }, 180000);
 
-        $(window).scroll(function () {
+        $(window).on('scroll', function () {
             if ($(window).scrollTop() > 0) {
                 $('#buttonToTop').addClass('show');
             } else {
