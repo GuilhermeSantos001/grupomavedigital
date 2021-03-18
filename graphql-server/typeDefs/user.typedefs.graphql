@@ -7,11 +7,6 @@ type AuthInfo {
 }
 
 type Query {
-    users(limit: Int!): [String!]!
-        @cost(multipliers: ["limit"], complexity: 10)
-    user(id: ID!): String!
-        @auth(keys: ["p=lv0jujo2p4XlZaprEMOruf9iSabABr*xaWrUbUSPlrOBr_7lxEtrlPhubiVLju"])
-        @cost(complexity: 10)
     authLogin(
         usr_auth: String!,
         pwd: String!,

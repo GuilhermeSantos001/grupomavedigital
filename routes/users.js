@@ -12,7 +12,7 @@ const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
 const nodemailer = require('../modules/nodemailer');
 const LZString = require('lz-string');
-const pdf = require('../modules/pdf');
+const pdf = null;
 
 function usr_econfirm(email, username, authorization) {
   return nodemailer.usr_econfirm(email, username, jwt.sign({

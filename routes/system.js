@@ -8,7 +8,7 @@ const middlewareToken = require('../middlewares/token');
 const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
 const LZString = require('lz-string');
-const pdf = require('../modules/pdf');
+const pdf = null;
 
 /**
  * Estados
@@ -4337,10 +4337,13 @@ router.post(['/upload/file'], middlewareToken, async (req, res) => {
     const
       path = require('../modules/localPath'),
       fs = require('fs'),
+      randomId = require('../modules/randomId'),
       file = req.files.attachment,
       folder = typeof custompath === 'string' ? path.localPath(`public/${custompath}`) : path.localPath('public/uploads');
 
     if (!fs.existsSync(folder)) fs.mkdirSync(folder);
+
+    console.log(randomId(null, null, 'hash', file.name));
 
     file.mv(`${folder}\\${file.name}`, (error) => {
       if (error)

@@ -1,4 +1,5 @@
 const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+const getReqProps = require('../../modules/getReqProps');
 const mongoDB = require('../../modules/mongodb');
 const jwt = require('../../modules/jwt');
 const bcrypt = require('../../modules/bcrypt');
@@ -7,21 +8,6 @@ const LZString = require('lz-string');
 
 module.exports = {
     Query: {
-        users: (source, { limit }, { request }) => {
-            return users.slice(0, limit);
-        },
-        user: async (source, { id }) => {
-            try {
-                const filter = users.filter(user => String(user.id) === String(id));
-
-                if (filter.length <= 0)
-                    throw new Error(`User with ID(${id}) not found!`);
-
-                return filter[0];
-            } catch (error) {
-                throw new Error(error);
-            }
-        },
         authLogin: async (source, { usr_auth, pwd, twofactortoken, locationIP, internetAdress }, { request }) => {
             try {
                 usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
@@ -131,16 +117,20 @@ module.exports = {
             location
         }, { request }) => {
             try {
-                usr_authorization = LZString.decompressFromEncodedURIComponent(usr_authorization) || usr_authorization;
-                privilege = LZString.decompressFromEncodedURIComponent(privilege) || privilege;
-                fotoPerfil = LZString.decompressFromEncodedURIComponent(fotoPerfil) || fotoPerfil;
-                username = LZString.decompressFromEncodedURIComponent(username) || username;
-                password = LZString.decompressFromEncodedURIComponent(password) || password;
-                name = LZString.decompressFromEncodedURIComponent(name) || name;
-                surname = LZString.decompressFromEncodedURIComponent(surname) || surname;
-                email = LZString.decompressFromEncodedURIComponent(email) || email;
-                cpfcnpj = LZString.decompressFromEncodedURIComponent(cpfcnpj) || cpfcnpj;
-                location = typeof location === 'string' ? JSON.parse(LZString.decompressFromEncodedURIComponent(location)) : location;
+                const { encodeuri } = getReqProps(request, ['encodeuri']);
+
+                if (eval(String(encodeuri))) {
+                    usr_authorization = LZString.decompressFromEncodedURIComponent(usr_authorization);
+                    privilege = LZString.decompressFromEncodedURIComponent(privilege);
+                    fotoPerfil = LZString.decompressFromEncodedURIComponent(fotoPerfil);
+                    username = LZString.decompressFromEncodedURIComponent(username);
+                    password = LZString.decompressFromEncodedURIComponent(password);
+                    name = LZString.decompressFromEncodedURIComponent(name);
+                    surname = LZString.decompressFromEncodedURIComponent(surname);
+                    email = LZString.decompressFromEncodedURIComponent(email);
+                    cpfcnpj = LZString.decompressFromEncodedURIComponent(cpfcnpj);
+                    location = JSON.parse(LZString.decompressFromEncodedURIComponent(location));
+                }
 
                 location = {
                     street: String(location[0]),

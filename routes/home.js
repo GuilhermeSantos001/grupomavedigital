@@ -56,36 +56,30 @@ router.get(`/`, async (req, res) => {
       type: 'collapse',
       icon: 'pen-tool',
       first: false,
-      enabled: false,
+      enabled: true,
       title: 'Material Gráfico',
       items: [
         {
-          title: 'Grupo Mave',
-          icon: 'box',
+          title: 'S. Mave',
+          icon: 'bookmark',
           enabled: true,
           onclick: ''
         },
         {
-          title: 'S MAVE',
-          icon: 'box',
-          enabled: true,
-          onclick: ''
-        },
-        {
-          title: 'V MAVE',
-          icon: 'box',
+          title: 'V. Mave',
+          icon: 'bookmark',
           enabled: true,
           onclick: ''
         },
         {
           title: 'Mave Systems',
-          icon: 'box',
+          icon: 'bookmark',
           enabled: true,
           onclick: ''
         },
         {
           title: 'Mav Quality',
-          icon: 'box',
+          icon: 'bookmark',
           enabled: true,
           onclick: ''
         }
@@ -98,17 +92,635 @@ router.get(`/`, async (req, res) => {
       title: 'Precisa de Ajuda?',
       items: [
         {
-          title: 'suporte@grupomave.com.br',
-          icon: 'mail',
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
           enabled: true,
-          onclick: 'sendemail("suporte@grupomave.com.br")'
+          onclick: ''
         },
         {
-          title: 'ti@grupomave.com.br',
-          icon: 'mail',
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
           enabled: true,
-          onclick: 'sendemail("ti@grupomave.com.br")'
-        }
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
+        {
+          title: 'HelpDesk/TI (GLPI)',
+          icon: 'tool',
+          enabled: true,
+          onclick: ''
+        },
       ]
     }]
   });

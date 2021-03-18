@@ -1,6 +1,6 @@
 const hash = require('object-hash');
 
-module.exports = (prefix = 'id_', length = 10, type = '') => {
+module.exports = (prefix = 'id_', length = 10, type = '', ...words) => {
     const
         letters = [
             'a', 'b', 'c', 'd', 'e', 'f',
@@ -31,5 +31,5 @@ module.exports = (prefix = 'id_', length = 10, type = '') => {
     if (type === '')
         return `${getWord(prefix)}`;
     else if (type === 'hash')
-        return `${hash({ 'word': getWord(prefix) })}`;
+        return `${hash({ 'word': getWord(prefix) + words.toString() })}`;
 }

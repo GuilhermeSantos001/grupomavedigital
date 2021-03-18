@@ -52,10 +52,12 @@ html
     script(src="/javascripts/layout.min.js")
     //- Fixed navbar
     header(
-      class="navbar navbar-dark bg-mave1 fixed-top flex-md-nowrap p-0 shadow"
+      class="navbar navbar-dark bg-mave1 sticky-top flex-md-nowrap p-0 shadow"
     )
-      a(class="navbar-brand col-12 me-0 px-3 text-left disabled")
-        img(src="/assets/logo.png" class="img-fluid mx-auto" width="250")
+      a(class="navbar-brand d-md-flex flex-row col-12 me-0 px-3 disabled")
+        img(src="/assets/logo.png" class="img-fluid mt-4 mt-md-0" width="340")
+        p(class="text-center fs-3 my-auto flex-fill")
+          | Ambiente Digital Interativo
       button(
         class="navbar-toggler position-absolute d-md-none collapsed my-4" type="button"
         data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
@@ -64,101 +66,72 @@ html
         span(class="navbar-toggler-icon")
     div(class="container-fluid")
       div(class="row")
-        nav(id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light overflow-auto sidebar collapse")
-          div(class="position-sticky py-sm-2 py-md-2 py-lg-5 py-xl-5 py-xxl-5")
-            ul(class="nav flex-column")
+        nav(id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="overflow-x: hidden; overflow-y: auto;")
+          div(style="height: 88vh;")
+            ul(class="nav flex-column col-12 bg-light bg-gradient")
               each menu in menus
-                li(class="nav-item" role="presentation")
+                li(class="nav-item col-12" role="presentation")
                   if (menu['first'])
                     if (menu['type'] === 'collapse')
-                      li(class="nav-item dropdown")
+                      li(class="nav-item dropdown col-12")
                         a(
-                          class=`nav-link active dropdown-toggle ${menu['enabled'] ? '' : 'text-muted disabled'}`
+                          title=`${menu['title']}`
+                          class=`nav-link active dropdown-toggle text-truncate ${menu['enabled'] ? '' : 'text-muted disabled'}`
                           data-bs-toggle="dropdown"
                           role="presentation"
                           aria-expanded="false"
                         )
                           | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-                        ul(class="dropdown-menu ms-3")
+                        ul(class="dropdown-menu col-12 bg-light bg-gradient border-secondary shadow overflow-auto" style="max-height: 30vh;")
                           each item in menu['items']
-                            li
+                            li(class="nav-item col-12")
                               a(
-                                class=`dropdown-item ${item['enabled'] ? '' : 'text-muted disabled'}`
+                                title=`${item['title']}`
+                                class=`dropdown-item text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
                                 onclick=`${item['onclick'] ? `window.app.${item['onclick']}` : ''}`
                               )
                                 | #[span(data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
                     else
-                      a(
-                        class=`nav-link active ${menu['enabled'] ? '' : 'text-muted disabled'}`
-                        aria-current="page"
-                        role="presentation"
-                        onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
-                      )
-                        | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
+                      li(class="nav-item dropdown col-12")
+                        a(
+                          title=`${menu['title']}`
+                          class=`nav-link active text-truncate ${menu['enabled'] ? '' : 'text-muted disabled'}`
+                          aria-current="page"
+                          role="presentation"
+                          onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
+                        )
+                          | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
                   else
                     if (menu['type'] === 'collapse')
-                      li(class="nav-item dropdown")
+                      li(class="nav-item dropdown col-12")
                         a(
-                          class=`nav-link dropdown-toggle ${menu['enabled'] ? '' : 'text-muted disabled'}`
+                          title=`${menu['title']}`
+                          class=`nav-link dropdown-toggle text-truncate ${menu['enabled'] ? '' : 'text-muted disabled'}`
                           data-bs-toggle="dropdown"
                           role="presentation"
                           aria-expanded="false"
                         )
                           | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-                        ul(class="dropdown-menu ms-3")
+                        ul(class="dropdown-menu col-12 bg-light bg-gradient border-secondary shadow overflow-auto" style="max-height: 30vh;")
                           each item in menu['items']
-                            li
+                            li(class="nav-item col-12")
                               a(
-                                class=`dropdown-item ${item['enabled'] ? '' : 'text-muted disabled'}`
+                                title=`${item['title']}`
+                                class=`dropdown-item text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
                                 onclick=`${item['onclick'] ? `window.app.${item['onclick']}` : ''}`
                               )
                                 | #[span(data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
                     else
-                      a(
-                        class=`nav-link ${menu['enabled'] ? '' : 'text-muted disabled'}`
-                        role="presentation"
-                        onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
-                      )
-                        | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-            ul(class="nav flex-column")
-              h6(class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-muted")
-                span Redes Sociais
-                a(class="link-secondary" aria-label="Add a new report") #[span(data-feather="message-circle")]
-              ul(class="nav flex-column mb-2")
-                li(class="nav-item")
-                  a(class="nav-link" href="https://www.youtube.com/channel/UC5y4IOAlxQ4eictbudG785g" target="_blank")
-                    |  #[span(data-feather="youtube")] Youtube
-                li(class="nav-item")
-                  a(class="nav-link" href="https://www.instagram.com/grupo.mave/" target="_blank")
-                    |  #[span(data-feather="linkedin")] Linkedin
-                li(class="nav-item")
-                  a(class="nav-link" href="https://www.instagram.com/grupo.mave/" target="_blank")
-                    |  #[span(data-feather="instagram")] Instagram
-                li(class="nav-item")
-                  a(class="nav-link" href="https://www.facebook.com/grupomaveoficial/" target="_blank")
-                    |  #[span(data-feather="facebook")] Facebook
-              h6(class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 mb-1 text-muted")
-                span Precisa de Ajuda?
-                a(class="link-secondary" aria-label="Add a new report") #[span(data-feather="help-circle")]
-              ul(class="nav flex-column mb-2")
-                li(class="nav-item")
-                  a(class="nav-link" href="https://grupomavedigital.com.br/glpi" target="_blank")
-                    |  #[span(data-feather="coffee")] HelpDesk/TI (GLPI)
-                li(class="nav-item")
-                  a(class="nav-link" href="mailto:ti@grupomave.com.br" target="_blank")
-                    |  #[span(data-feather="mail")] ti@grupomave.com.br
-                li(class="nav-item")
-                  a(class="nav-link" href="mailto:suporte@grupomave.com.br" target="_blank")
-                    |  #[span(data-feather="mail")] suporte@grupomave.com.br
-              h6(class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 mb-1 text-muted")
-                span Sobre
-                a(class="link-secondary" aria-label="Add a new report") #[span(data-feather="alert-octagon")]
-              ul(class="nav flex-column mb-2")
-                li(class="nav-item")
-                  a(class="nav-link" href="https://grupomave.com.br" target="_blank")
-                    |  #[span(data-feather="hexagon")] Grupo Mave - 2021 © Todos direitos reservados.
+                      li(class="nav-item col-12")
+                        a(
+                          title=`${menu['title']}`
+                          class=`nav-link text-truncate ${menu['enabled'] ? '' : 'text-muted disabled'}`
+                          role="presentation"
+                          onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
+                        )
+                          | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
         main(class="col-md-9 ms-sm-auto col-lg-10 px-md-4")
-          div(class="container-fluid" style="padding-top: 100px;")
+          div(class="container-fluid")
             block content
     script.
       (function () {
