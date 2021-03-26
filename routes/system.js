@@ -4341,29 +4341,30 @@ router.post(['/upload/file'], middlewareToken, async (req, res) => {
       file = req.files.attachment,
       folder = typeof custompath === 'string' ? path.localPath(`public/${custompath}`) : path.localPath('public/uploads');
 
-    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder);
+    }
 
-    console.log(randomId(null, null, 'hash', file.name));
+    let filename = randomId(undefined, undefined, 'hash', file.name),
+      filepath = `${folder}\\${filename}`;
 
-    file.mv(`${folder}\\${file.name}`, (error) => {
-      if (error)
+    file.mv(filepath, async (error) => {
+      if (error) {
         return res.status(400).send({
           success: false,
           data: error
         });
+      }
 
       return res.status(200).send({
         success: true,
-        data: file.name
+        data: filename
       })
     })
   } catch (err) {
-    return res.status(400).render('systemError', {
-      title: errorMessages.systemError.title,
-      username: email,
-      errorResume: errorMessages.systemError.errorResume,
-      error: err,
-      restoreSession: true
+    return res.status(400).send({
+      success: false,
+      data: err
     });
   }
 });

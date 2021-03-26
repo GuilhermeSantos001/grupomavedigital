@@ -3,7 +3,7 @@ const { defaultFieldResolver } = require('graphql');
 const jwt = require('../../modules/jwt');
 const LZString = require('lz-string');
 
-module.exports = class AuthDirective extends SchemaDirectiveVisitor {
+module.exports = class PrivilegeDirective extends SchemaDirectiveVisitor {
     visitFieldDefinition(field) {
         const { resolve = defaultFieldResolver } = field;
         const { keys: expectedKeys = [] } = this.args;

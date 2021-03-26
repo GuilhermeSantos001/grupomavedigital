@@ -475,7 +475,7 @@
                                 $('#input-photo, #button-upload-photo').attr('disabled', true);
                                 window.app.loading(true);
 
-                                window.app.fileUpload(input.files, 'assets/perfil')
+                                window.app.fileUpload(input.files, 'assets/perfil', { type: 'temporary', index: `page-card-create-input-upload-photo-user`, origin: localStorage.getItem('usr-internetadress') })
                                     .then(data => {
                                         $('#input-photo')
                                             .attr('disabled', false)
@@ -515,7 +515,7 @@
                                 $('#input-file, #button-upload-file, #button-open-file').attr('disabled', true);
                                 window.app.loading(true);
 
-                                window.app.fileUpload(input.files, 'assets/Apresentação')
+                                window.app.fileUpload(input.files, 'assets/Apresentação', { type: 'temporary', index: `page-card-create-input-upload-file-user`, origin: localStorage.getItem('usr-internetadress') })
                                     .then(data => {
                                         $('#input-file')
                                             .attr('disabled', false)

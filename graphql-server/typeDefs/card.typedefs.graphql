@@ -70,31 +70,57 @@ input card {
 }
 
 type Query {
+    # #### Headers(`Obrigatórios`):
+    # + `authorization(String | Array(String))`: Códigos de autorização da solicitação
     cardGet(lastIndex: String, limit: Int!): String!
         @auth(keys: ["cnR{rrCHWtcB{/9tx^nG<sM6Km]Mc_RcE$-?.3}g;_N<T(]Grw97.jczDR?>gy&]"])
         @cost(complexity: 50)
 }
 
 type Mutation {
+    # #### Headers(`Obrigatórios`):
+    # + `authorization(String | Array(String))`: Códigos de autorização da solicitação
+    # + `token(String)`: Token exclusivo de segurança da solicitação
+    # + `internetadress(String)`: Informa o endereço de IP da solicitação
+    # + `encodeuri(Boolean)`: Usado para informar se os parametros estão comprimidos
     vcardCreate(data: vcard!): String!
         @auth(keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"])
         @privilege(keys: ["administrador", "moderador"])
         @token(ignore: false)
+        @encodeuri(method: "lz-string")
         @cost(complexity: 50)
+    # #### Headers(`Obrigatórios`):
+    # + `authorization(String | Array(String))`: Códigos de autorização da solicitação
+    # + `token(String)`: Token exclusivo de segurança da solicitação
+    # + `internetadress(String)`: Informa o endereço de IP da solicitação
+    # + `encodeuri(Boolean)`: Usado para informar se os parametros estão comprimidos
     cardCreate(data: card!): String!
         @auth(keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC"])
         @privilege(keys: ["administrador", "moderador"])
         @token(ignore: false)
+        @encodeuri(method: "lz-string")
         @cost(complexity: 50)
+    # #### Headers(`Obrigatórios`):
+    # + `authorization(String | Array(String))`: Códigos de autorização da solicitação
+    # + `token(String)`: Token exclusivo de segurança da solicitação
+    # + `internetadress(String)`: Informa o endereço de IP da solicitação
+    # + `encodeuri(Boolean)`: Usado para informar se os parametros estão comprimidos
     cardUpdate(data: card!): String!
         @auth(keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"])
         @privilege(keys: ["administrador", "moderador"])
         @token(ignore: false)
+        @encodeuri(method: "lz-string")
         @cost(complexity: 50)
+    # #### Headers(`Obrigatórios`):
+    # + `authorization(String | Array(String))`: Códigos de autorização da solicitação
+    # + `token(String)`: Token exclusivo de segurança da solicitação
+    # + `internetadress(String)`: Informa o endereço de IP da solicitação
+    # + `encodeuri(Boolean)`: Usado para informar se os parametros estão comprimidos
     cardRemove(id: String!): Boolean!
         @auth(keys: ["fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv"])
         @privilege(keys: ["administrador", "moderador"])
         @token(ignore: false)
+        @encodeuri(method: "lz-string")
         @cost(complexity: 50)
 }
 

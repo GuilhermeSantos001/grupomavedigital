@@ -42,7 +42,9 @@
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
-                "authorization": "SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"
+                "authorization": "SweteNlPut4uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u",
+                "internetadress": usr_internetadress,
+                "encodeuri": true
             },
             "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", twofactortoken: \\\"${LZString.compressToEncodedURIComponent(usr_twofactortoken)}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization username name token } }\"}`
         })

@@ -1,13 +1,13 @@
 extends layout
 
-block head
+append head
   style.
     .bg-twofactor {
       color: rgba(255, 255, 255, 1);
       background-color: rgba(0, 0, 0, .5);
     }
 
-block content
+append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Definições de Segurança
   div(class="col-12")

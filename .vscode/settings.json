@@ -22,7 +22,7 @@
         "vcards"
     ],
     "workbench.editor.scrollToSwitchTabs": true,
-    "workbench.iconTheme": "macos-classic-icons",
+    "workbench.iconTheme": "vscode-icons",
     "editor.fontSize": 12,
     "editor.lineHeight": 24,
     "editor.letterSpacing": 0.5,
@@ -53,10 +53,12 @@
         "Ordine",
         "esocial",
         "ipinfo",
+        "modernizr",
         "vcard",
         "vcardprop"
     ],
     "editor.minimap.enabled": false,
     "editor.minimap.renderCharacters": false,
-    "workbench.preferredDarkColorTheme": "Dracula"
+    "workbench.preferredDarkColorTheme": "Dracula",
+    "totvsLanguageServer.welcomePage": false
 }

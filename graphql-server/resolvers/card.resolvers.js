@@ -28,8 +28,8 @@ module.exports = {
         },
         cardCreate: async (parent, { data }, { request }) => {
             try {
-                const id = randomId('');
-                const { version, photo, name, jobtitle, phones, whatsapp, vcard, footer } = data;
+                const id = randomId(''),
+                    { version, photo, name, jobtitle, phones, whatsapp, vcard, footer } = data;
 
                 await mongoDB.cards.register(id, version, photo, name, jobtitle, phones, whatsapp, vcard, footer);
 

@@ -334,12 +334,12 @@ module.exports = (mongoose, uri, schema_cards) => {
                                 });
 
                                 resolve({
-                                    message: `Informações dos cartões digitais pelo campo(${field}) com o valor: ${value}. Retornados com sucesso!`,
+                                    message: `Informações dos cartões digitais pelo campo(${field}) com o valor: ${typeof value === 'object' ? JSON.stringify(value) : value}. Retornados com sucesso!`,
                                     cards: data
                                 });
                                 return mongoose.connection.close();
                             } else {
-                                reject(`Cartões Digitais com o campo(${field}) com o valor: ${value}. não existem no banco de dados.`);
+                                reject(`Cartões Digitais com o campo(${field}) com o valor: ${typeof value === 'object' ? JSON.stringify(value) : value}. não existem no banco de dados.`);
                                 return mongoose.connection.close();
                             }
                         })

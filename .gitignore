@@ -1,6 +1,8 @@
 # Folders
 **/node_modules/**
 **/public/javascripts/public/**
+**/log/**
+**/db/**
 
 # Developer
 **/test/**

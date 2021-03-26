@@ -5,6 +5,7 @@ module.exports = (vcard) => {
             const vCardsJS = require('vcards-js'),
                 fs = require('fs'),
                 path = require('./localPath'),
+                randomId = require('../modules/randomId'),
                 vCard = vCardsJS(),
                 formatterIMG = (filename) => {
                     if (String(filename).indexOf('.png') != -1)
@@ -53,13 +54,12 @@ module.exports = (vcard) => {
                 return value;
             })();
             //save to file
-            vCard.filename = String(`${vcard['firstname']}_${vcard['lastName']}_${vcard['organization']}.vcf`).replace(/\s{1,}/g, '_');
+            vCard.filename = randomId(undefined, undefined, 'hash', String(`${vcard['firstname']}_${vcard['lastname']}_${vcard['organization']}.vcf`).replace(/\s{1,}/g, '_'));
             vCard.filepath = path.localPath(`public/vcf/${vCard.filename}`);
             await vCard.saveToFile(vCard.filepath);
-
-            resolve(vCard.filename);
+            return resolve(vCard.filename);
         } catch (error) {
-            reject(error);
+            return reject(error);
         }
     });
 }

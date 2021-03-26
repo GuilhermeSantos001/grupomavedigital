@@ -52,6 +52,16 @@ body {
   font-size: 0.875rem;
 }
 
+.pg-loading-screen.pg-loading .pg-loading-logo-header,
+.pg-loading-screen.pg-loading .pg-loading-html:not(.pg-loaded) {
+  -webkit-animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+  animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+}
+
+.sk-grid {
+  transform: scale(1.5);
+}
+
 .feather {
   width: 16px;
   height: 16px;

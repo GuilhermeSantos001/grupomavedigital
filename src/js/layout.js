@@ -20,34 +20,33 @@
         };
     }
 
-    function loading(state) {
+    const loading = function (state) {
         if (state) {
-            $('body').append('\
-            <div style="z-index: 9999; height: 100vh; opacity: 0;" class="loadingDiv card bg-loading fixed-top col-12">\
-              <div class="card-body" style="margin-top: -100vh;" id="spinnerLoading">\
-                <div class="d-flex justify-content-center">\
-                  <div class="spinner-border" style="width: 10rem; height: 10rem;" role="status">\
-                    <span class="visually-hidden">Loading...</span>\
-                  </div>\
-                </div>\
-              </div>\
-            </div>\
-            ');
-            $("#spinnerLoading").animate({
-                'marginTop': 0
-            }, 720);
-
-            $(".loadingDiv").animate({
-                'opacity': 1
-            }, ONE_SECOND_DELAY);
-        } else {
-            $("#spinnerLoading").animate({
-                'marginTop': "-100vh"
-            }, 720);
-
-            $(".loadingDiv").fadeOut(1000, function () {
-                $(".loadingDiv").remove();
+            window.loading_screen = window.pleaseWait({
+                logo: '',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                loadingHtml: ` \
+                    <div id="sk-flex" class="d-flex flex-column mx-3"> \
+                        <div class="sk-grid align-self-center"> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                            <div class="sk-grid-cube bg-light"></div> \
+                        </div> \
+                    </div> \
+                    <p class='loading-message my-3 text-light'> \
+                      Carregando... \
+                    </p> \
+                    `
             });
+        } else {
+            if (window.loading_screen)
+                window.loading_screen.finish();
         }
     }
 
@@ -219,7 +218,9 @@
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
-                "authorization": "nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip"
+                "authorization": "nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip",
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"mutation { authRetrieveTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
@@ -245,7 +246,6 @@
     // ======================================================================
     // Default Events
     //
-
     $(() => {
         setTimeout(() => {
             if (localStorage.getItem('usr-token')) {
@@ -272,10 +272,8 @@
         defaultSetters();
         getLocationIP();
 
-        setTimeout(() => {
-            loading(false);
-        }, ONE_SECOND_DELAY);
-    })
+        window.app.loading(false);
+    });
 
     function defaultSetters() {
         if (document.getElementById('usr-username'))
@@ -284,26 +282,22 @@
 
     var baseurl = String(location.origin);
 
-    loading(true);
-
     function getLocationIP() {
-        axios.request({
-            method: 'GET',
-            url: `${baseurl}/ipinfo`,
-            headers: {
+        fetch(`${baseurl}/ipinfo`, {
+            "method": "GET",
+            "headers": {
                 "Content-Type": "application/json"
             },
-            data: {}
+            "params": `{}`
         })
-            .then(response => {
-                localStorage.setItem('usr-locationIP', `${response['data']['country']}(${response['data']['city']}/${response['data']['region']})`);
-                localStorage.setItem('usr-internetadress', `${response['data']['ip']}`);
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('usr-locationIP', `${data['country']}(${data['city']}/${data['region']})`);
+                localStorage.setItem('usr-internetadress', `${data['ip']}`);
             })
-            .catch(error => {
-                alerting(`Ocorreu um erro inesperado, fale com o administrador do sistema.`);
-                console.log(error);
-                loading(false);
-            })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function home() {
@@ -325,7 +319,8 @@
                 "Content-Type": "application/json",
                 "authorization": "vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
         })
@@ -363,7 +358,8 @@
                 "Content-Type": "application/json",
                 "authorization": "5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
         })
@@ -425,80 +421,65 @@
 
     function load_notifications() {
         if (localStorage.getItem('usr-token'))
-            axios.request({
-                method: 'GET',
-                url: `${baseurl}/user/notifications`,
-                headers: {
+            fetch(`${baseurl}/user/notifications`, {
+                "method": "GET",
+                "headers": {
                     "Content-Type": "application/json",
                     "usr_token": localStorage.getItem('usr-token'),
                     "usr_internetadress": localStorage.getItem('usr-internetadress')
                 },
-                params: {}
+                "params": `{}`
             })
-                .then(response => {
-                    notifications = response['data']['notifications'] || [];
+                .then(response => response.json())
+                .then(data => {
+                    notifications = data['notifications'] || [];
                     process_notifications();
                 })
-                .catch(error => {
-                    if (error.response && error.response.data && error.response.data.error != undefined) {
-                        console.log('Erro no sistema de notificação', error.response.data);
-                    } else {
-                        console.log('Erro no sistema de notificação', error);
-                    }
-                })
+                .catch(err => {
+                    throw new Error(err);
+                });
     }
 
     function create_notifications(authorization = localStorage.getItem('usr-token'), title = '???', subtitle = '???', body = '???', background = 'secondary', expires = '1 min') {
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/notifications/create`,
-            headers: {
+        fetch(`${baseurl}/user/notifications/create`, {
+            "method": "POST",
+            "headers": {
                 "Content-Type": "application/json",
                 "usr_token": localStorage.getItem('usr-token'),
                 "usr_internetadress": localStorage.getItem('usr-internetadress')
             },
-            data: {
-                authorization: String(authorization),
-                title: String(title),
-                subtitle: String(subtitle),
-                body: String(body),
-                background: String(background),
-                expires: String(expires)
-            }
+            "body": `{
+                authorization: "${authorization}",
+                title: "${title}",
+                subtitle: "${subtitle}",
+                body: "${body}",
+                background: "${background}",
+                expires: "${expires}"
+            }`
         })
-            .then(response => { })
-            .catch(error => {
-                if (error.response && error.response.data && error.response.data.error != undefined) {
-                    console.log('Erro no sistema de notificação', error.response.data);
-                } else {
-                    console.log('Erro no sistema de notificação', error);
-                }
-            })
+            .then(() => { })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function remove_notifications(indexOf) {
-        axios.request({
-            method: 'POST',
-            url: `${baseurl}/user/notifications/remove`,
-            headers: {
+        fetch(`${baseurl}/user/notifications/remove`, {
+            "method": "POST",
+            "headers": {
                 "Content-Type": "application/json",
                 "usr_token": localStorage.getItem('usr-token'),
                 "usr_internetadress": localStorage.getItem('usr-internetadress')
             },
-            data: {
-                id: Number(indexOf)
-            }
+            "body": `{
+                id: ${Number(indexOf)}
+            }`
         })
-            .then(response => {
-                console.log(response);
-            })
-            .catch(error => {
-                if (error.response && error.response.data && error.response.data.error != undefined) {
-                    console.log('Erro no sistema de notificação', error.response.data);
-                } else {
-                    console.log('Erro no sistema de notificação', error);
-                }
-            })
+            .then(response => response.json())
+            .then(({ data }) => { console.log(data); })
+            .catch(err => {
+                throw new Error(err);
+            });
     }
 
     function process_notifications() {
@@ -674,7 +655,8 @@
                     "Content-Type": "application/json",
                     "authorization": "fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br",
                     "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "encodeuri": false
                 },
                 "body": JSON.stringify({
                     query: `mutation { filename: vcardCreate(data: { \
@@ -809,7 +791,8 @@
                     "Content-Type": "application/json",
                     "authorization": "6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC",
                     "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "encodeuri": false
                 },
                 "body": JSON.stringify({
                     query: `mutation { url: cardCreate(data: { \
@@ -958,7 +941,8 @@
                     "Content-Type": "application/json",
                     "authorization": "ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT",
                     "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "encodeuri": false
                 },
                 "body": JSON.stringify({
                     query: `mutation { url: cardUpdate(data: { \
@@ -1021,7 +1005,8 @@
                     "Content-Type": "application/json",
                     "authorization": "fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv",
                     "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "encodeuri": false
                 },
                 "body": JSON.stringify({
                     query: `mutation { success: cardRemove(id: \"${id}\" ) }`

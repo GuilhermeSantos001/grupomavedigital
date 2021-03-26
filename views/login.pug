@@ -1,6 +1,6 @@
 extends layout
 
-block head
+append head
   style.
     .visibility-password {
       color: #004a6e;
@@ -11,7 +11,7 @@ block head
       color: #f6d816;
     }
 
-block content
+append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Insira suas informações de entrada
   div(class="d-flex flex-column col-12 mt-3")

@@ -1,6 +1,5 @@
 var createError = require('http-errors');
 var express = require('express');
-var bodyParser = require('body-parser');
 var path = require('path');
 var fileupload = require('express-fileupload');
 var cookieParser = require('cookie-parser');
@@ -20,13 +19,18 @@ app.set('view options', {
 app.set('trust proxy', true);
 
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
+app.use(express.json());
+app.use(express.urlencoded({
   extended: true
 }));
 app.use(fileupload());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  setHeaders: function (res, path, stat) {
+    res.set('x-timestamp', Date.now());
+  }
+}));
 app.use(device.capture({
   parseUserAgent: true
 })), useragent(true);

@@ -57,7 +57,8 @@
                     "Content-Type": "application/json",
                     "authorization": "Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic",
                     "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "encodeuri": true
                 },
                 "body": `{\"query\":\"mutation { changePassword(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", new_pwd: \\\"${usr_newPwd}\\\") }\"}`
             })
@@ -109,7 +110,8 @@
                 "Content-Type": "application/json",
                 "authorization": "bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"mutation { authSignTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
@@ -143,7 +145,8 @@
                 "Content-Type": "application/json",
                 "authorization": "duhoHU4o#3!oCHogLw*6WUbrE2radr2CrlpLD+P7Ka*R-veSEB75lsT6PeblPuko",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"mutation { authVerifyTwofactor(usr_auth: \\\"${usr_auth}\\\", usr_qrcode: \\\"${usr_qrcode}\\\") }\"}`
         })
@@ -180,7 +183,8 @@
                 "Content-Type": "application/json",
                 "authorization": "TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"mutation { authEnabledTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
@@ -214,7 +218,8 @@
                 "Content-Type": "application/json",
                 "authorization": "ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr",
                 "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress'))
+                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "encodeuri": true
             },
             "body": `{\"query\":\"mutation { authDisableTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })

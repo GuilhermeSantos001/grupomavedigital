@@ -1,21 +1,16 @@
-const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
-const getReqProps = require('../../modules/getReqProps');
-const mongoDB = require('../../modules/mongodb');
-const jwt = require('../../modules/jwt');
-const bcrypt = require('../../modules/bcrypt');
-const nodemailer = require('../../modules/nodemailer');
-const LZString = require('lz-string');
+const
+    getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress,
+    getReqProps = require('../../modules/getReqProps'),
+    mongoDB = require('../../modules/mongodb'),
+    jwt = require('../../modules/jwt'),
+    bcrypt = require('../../modules/bcrypt'),
+    nodemailer = require('../../modules/nodemailer'),
+    LZString = require('lz-string');
 
 module.exports = {
     Query: {
         authLogin: async (source, { usr_auth, pwd, twofactortoken, locationIP, internetAdress }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-                pwd = LZString.decompressFromEncodedURIComponent(pwd) || pwd;
-                twofactortoken = LZString.decompressFromEncodedURIComponent(twofactortoken) || twofactortoken;
-                locationIP = LZString.decompressFromEncodedURIComponent(locationIP) || locationIP;
-                internetAdress = LZString.decompressFromEncodedURIComponent(internetAdress) || internetAdress;
-
                 let { user } = await mongoDB.users.cpassword(usr_auth, pwd),
                     userInfo = {
                         authorization: user['authorization'],

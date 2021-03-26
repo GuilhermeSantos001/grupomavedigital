@@ -1,4 +1,5 @@
-const __twofactor = require('../twofactor');
+const __twofactor = require('../twofactor'),
+    __router_users_logger = require('../log4').log.router.users;
 
 module.exports = (mongoose, uri, schema_users) => {
     return {
@@ -398,6 +399,7 @@ module.exports = (mongoose, uri, schema_users) => {
                             if (!cache['tokens']) cache['tokens'] = {};
                             if (!cache['history']) cache['history'] = {};
 
+                            // - Verifica se o dispositivo está liberado para acesso
                             if (devices['allowed'].filter(device => device === String(options['device'])).length <= 0) {
                                 reject(`Usuário com a autorização(${authorization}), está utilizando um dispositivo não permitido há estabelecer sessões.`);
                                 return mongoose.connection.close();
