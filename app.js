@@ -14,10 +14,7 @@ app.set('view engine', 'pug');
 app.set('view options', {
   layout: false
 });
-
-// Proxy setup
 app.set('trust proxy', true);
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({

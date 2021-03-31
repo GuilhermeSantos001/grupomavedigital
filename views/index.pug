@@ -2,8 +2,9 @@ extends layout
 
 append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
-    h1(class="h2") Ambiente Digital Interativo!
-  img(src="/assets/Aniversarios.png" class="img-fluid mb-2 h-60" alt="Parabéns!")
+    h1(class="h2") Ambiente Digital Interativo
+  video(class="col-12" playsinline controls crossorigin data-poster="/assets/Aniversarios.png")
+    source(ref="source" src="/teste.m3u8" type="application/x-mpegURL")
   table(class="table")
     thead
       tr

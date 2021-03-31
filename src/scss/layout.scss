@@ -18,6 +18,8 @@
 // Import all of Bootstrap's CSS
 
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css");
+@import "../../node_modules/plyr/src/sass/plyr.scss";
 
 // Create your own map
 $custom-colors: (
@@ -27,6 +29,12 @@ $custom-colors: (
 
 // Merge the maps
 $theme-colors: map-merge($theme-colors, $custom-colors);
+
+:root {
+  --plyr-color-main: map-get($theme-colors, "mave2");
+  --plyr-captions-text-color: map-get($theme-colors, "mave2");
+  --plyr-captions-background: rgba(0, 0, 0, 0.8);
+}
 
 .bd-placeholder-img {
   font-size: 1.125rem;
@@ -395,11 +403,11 @@ input:disabled {
 }
 
 .border-mave1 {
-  border-color: #004a6e !important;
+  border-color: map-get($theme-colors, "mave1") !important;
 }
 
 .border-mave2 {
-  border-color: #f6d816 !important;
+  border-color: map-get($theme-colors, "mave2") !important;
 }
 
 .mv-status-circle {
@@ -414,7 +422,7 @@ input:disabled {
 }
 
 .dropdown-menu a:hover {
-  color: #004a6e !important;
+  color: map-get($theme-colors, "mave1") !important;
   background-color: #d9d9d9 !important;
 }
 

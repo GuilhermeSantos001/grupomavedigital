@@ -44,7 +44,7 @@
     "terminal.integrated.macOptionIsMeta": true,
     // The default syntax (TextMate) highlighter classifies many tokens as variables and these are now (since VSCode 1.43) resolved into namespaces, classes, parameters, and so on. This is called Semantic highlighting support for TypeScript and JavaScript. But many themes and language extensions seem broken with single-colored syntax. This came as a surprise to me. It's set `true` by default. I recommend disabling this for now.
     "editor.semanticHighlighting.enabled": false,
-    "workbench.colorTheme": "Dracula",
+    "workbench.colorTheme": "Monokai",
     "cSpell.words": [
         "APRESENTACAO",
         "Caamano",

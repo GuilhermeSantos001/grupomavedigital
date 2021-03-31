@@ -8,6 +8,7 @@ html
     meta(http-equiv="X-UA-Compatible" content="ie=edge")
     meta(name="description" content="Olá, venha conhecer o ambiente digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!")
     meta(property="og:title" content="Cartão Digital do Grupo Mave")
+    meta(property="og:site_name" content="Grupo Mave Digital")
     meta(property="og:url" content="https://grupomavedigital.com.br")
     meta(property="og:description" content="Olá, venha conhecer o ambiente digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!")
     meta(property="og:image" content="https://i.imgur.com/CK5gmRJ.png")
@@ -27,7 +28,7 @@ html
     link(rel="apple-touch-startup-image" href="/favicon/favicon256x256.png")
     link(rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons')
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css")
-    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css")
+    link(rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css")
     link(rel="stylesheet" href="/stylesheets/plugins/all.min.css")
     link(rel="stylesheet" href="/stylesheets/plugins/Chart.min.css")
     link(rel="stylesheet" href="/stylesheets/plugins/jquery-ui.min.css")
@@ -44,26 +45,146 @@ html
     script(type="text/javascript" src="/javascripts/plugins/please-wait.min.js")
     script.
       window.loading_screen = window.pleaseWait({
-          logo: '',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          loadingHtml: ` \
-              <div id="sk-flex" class="d-flex flex-column mx-3"> \
-                  <div class="sk-grid align-self-center"> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                      <div class="sk-grid-cube bg-light"></div> \
-                  </div> \
-              </div> \
-              <p class='loading-message my-3 text-light'> \
-                Carregando... \
-              </p> \
-              `
+        logo: '',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        loadingHtml: ` \
+          <div id="sk-flex" class="d-flex flex-column mx-3"> \
+            <div class="sk-grid align-self-center"> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+              <div class="sk-grid-cube bg-light"></div> \
+            </div> \
+          </div> \
+          <p class='loading-message my-3 text-light'> \
+            Carregando... \
+          </p> \
+          `
+      });
+    script(src="https://cdn.jsdelivr.net/npm/hls.js")
+    script(src="https://cdn.plyr.io/3.6.4/plyr.js")
+    script.
+      document.addEventListener("DOMContentLoaded", () => {
+        const video = document.querySelector("video");
+        const source = video.getElementsByTagName("source")[0].src;
+
+        // For more options see: https://github.com/sampotts/plyr/#options
+        // captions.update is required for captions to work with hls.js
+        const defaultOptions = {
+          title: 'Grupo Mave - Facilities',
+          captions: {
+            active: true,
+          },
+          tooltips: { controls: true, seek: true },
+          storage: { enabled: true, key: 'plyr' },
+          seekTime: 5,
+          controls: [
+            'play-large',
+            'restart',
+            'rewind',
+            'play',
+            'fast-forward',
+            'progress',
+            'current-time',
+            'duration',
+            'mute',
+            'volume',
+            'captions',
+            'settings',
+            'pip',
+            'airplay',
+            //- 'download',
+            'fullscreen',
+          ],
+          i18n: {
+            restart: 'Restartar',
+            rewind: 'Rewind {seektime}s',
+            play: 'Play',
+            pause: 'Pause',
+            fastForward: 'Forward {seektime}s',
+            seek: 'Seek',
+            seekLabel: '{currentTime} of {duration}',
+            played: 'Played',
+            buffered: 'Buffered',
+            currentTime: 'Current time',
+            duration: 'Duration',
+            volume: 'Volume',
+            mute: 'Mute',
+            unmute: 'Unmute',
+            enableCaptions: 'Enable captions',
+            disableCaptions: 'Disable captions',
+            download: 'Download',
+            enterFullscreen: 'Enter fullscreen',
+            exitFullscreen: 'Exit fullscreen',
+            frameTitle: 'Player for {title}',
+            captions: 'Captions',
+            settings: 'Settings',
+            pip: 'PIP',
+            menuBack: 'Go back to previous menu',
+            speed: 'Speed',
+            normal: 'Normal',
+            quality: 'Quality',
+            loop: 'Loop',
+            start: 'Start',
+            end: 'End',
+            all: 'All',
+            reset: 'Reset',
+            disabled: 'Disabled',
+            enabled: 'Enabled',
+            advertisement: 'Ad',
+            qualityBadge: {
+              2160: '4K',
+              1440: 'HD',
+              1080: 'HD',
+              720: 'HD',
+              576: 'SD',
+              480: 'SD',
+            },
+            },
+            previewThumbnails: { enabled: true, src: "/thumbs/thumb.vtt" }
+        };
+
+        if (!Hls.isSupported()) {
+          video.src = source
+          } else {
+            const hls = new Hls()
+            hls.loadSource(source)
+            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+              const availableQualities = hls.levels.map((l) => l.height)
+
+              defaultOptions.quality = {
+                default: availableQualities[0],
+                options: availableQualities,
+                forced: true,
+                onChange: (e) => updateQuality(e),
+              }
+
+              defaultOptions.captions = {
+                active: true,
+                update: true,
+                language: 'pt',
+              }
+              const player = new Plyr(video, defaultOptions)
+              player.on('languagechange', () => {
+                setTimeout(() => (hls.subtitleTrack = player.currentTrack), 50)
+              })
+              hls.attachMedia(video);
+              window.hls = hls;
+              window.player = player;
+            })
+            function updateQuality(newQuality) {
+              hls.levels.forEach((level, levelIndex) => {
+                if (level.height === newQuality) {
+                  hls.currentLevel = levelIndex
+                }
+              })
+            }
+          }
       });
     div
       header(
