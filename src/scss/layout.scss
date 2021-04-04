@@ -30,12 +30,6 @@ $custom-colors: (
 // Merge the maps
 $theme-colors: map-merge($theme-colors, $custom-colors);
 
-:root {
-  --plyr-color-main: map-get($theme-colors, "mave2");
-  --plyr-captions-text-color: map-get($theme-colors, "mave2");
-  --plyr-captions-background: rgba(0, 0, 0, 0.8);
-}
-
 .bd-placeholder-img {
   font-size: 1.125rem;
   text-anchor: middle;
@@ -403,11 +397,11 @@ input:disabled {
 }
 
 .border-mave1 {
-  border-color: map-get($theme-colors, "mave1") !important;
+  border-color: map-get($theme-colors, "mave1");
 }
 
 .border-mave2 {
-  border-color: map-get($theme-colors, "mave2") !important;
+  border-color: map-get($theme-colors, "mave2");
 }
 
 .mv-status-circle {
@@ -422,7 +416,7 @@ input:disabled {
 }
 
 .dropdown-menu a:hover {
-  color: map-get($theme-colors, "mave1") !important;
+  color: map-get($theme-colors, "mave1");
   background-color: #d9d9d9 !important;
 }
 
@@ -446,12 +440,14 @@ input:disabled {
 ::-webkit-scrollbar-track {
   background: #d9d9d9;
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: map-get($theme-colors, "mave1");
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
 /* Handle on hover */

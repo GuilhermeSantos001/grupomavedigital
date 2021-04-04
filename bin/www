@@ -33,8 +33,7 @@ server.on('listening', onListening);
  * HTTP Live Streaming
  */
 
-const hls_server = require('../modules/hls-server')(server);
-hls_server.on('error', (error) => { console.error(error); });
+require('../modules/hls-server')(server);
 
 /**
  * Normalize a port into a number, string, or false.

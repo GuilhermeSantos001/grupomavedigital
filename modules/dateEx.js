@@ -17,7 +17,7 @@ var padZero = function (string, length) {
 
 /**
  * @private Restrito ao escopo global
- * @description Retorna um texto, uma data completa, dia da semana, dia do 
+ * @description Retorna um texto, uma data completa, dia da semana, dia do
  * mes, mes, ano e hora
  * @author GuilhermeSantos
  * @version 1.0.0
@@ -57,37 +57,9 @@ var now = function () {
     return `${dataDia} de ${data} de ${ano}, na ${dia} as ${h}Horas, ${m}Minutos e ${s}Segundos`;
 };
 
-var nowToPDF = function (filter) {
-    var mes = [
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro"
-    ];
-    var date = new Date();
-    var ano = date.getFullYear();
-    var data = mes[date.getMonth()] || '???';
-    var dataDia = date.getDate();
-    if (filter === 'day') {
-        return `${dataDia}`;
-    } else if (filter === 'month') {
-        return `${data}`;
-    } else if (filter === 'year') {
-        return `${ano}`;
-    }
-};
-
 /**
  * @private Restrito ao escopo global
- * @description Retorna um texto, uma data completa, dia da semana, dia do 
+ * @description Retorna um texto, uma data completa, dia da semana, dia do
  * mes, mes, ano e hora para o login
  * @author GuilhermeSantos
  * @version 1.0.0
@@ -129,6 +101,5 @@ function nowToLogin() {
 
 module.exports = {
     now,
-    nowToPDF,
     nowToLogin
 }

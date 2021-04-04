@@ -66,126 +66,6 @@ html
           </p> \
           `
       });
-    script(src="https://cdn.jsdelivr.net/npm/hls.js")
-    script(src="https://cdn.plyr.io/3.6.4/plyr.js")
-    script.
-      document.addEventListener("DOMContentLoaded", () => {
-        const video = document.querySelector("video");
-        const source = video.getElementsByTagName("source")[0].src;
-
-        // For more options see: https://github.com/sampotts/plyr/#options
-        // captions.update is required for captions to work with hls.js
-        const defaultOptions = {
-          title: 'Grupo Mave - Facilities',
-          captions: {
-            active: true,
-          },
-          tooltips: { controls: true, seek: true },
-          storage: { enabled: true, key: 'plyr' },
-          seekTime: 5,
-          controls: [
-            'play-large',
-            'restart',
-            'rewind',
-            'play',
-            'fast-forward',
-            'progress',
-            'current-time',
-            'duration',
-            'mute',
-            'volume',
-            'captions',
-            'settings',
-            'pip',
-            'airplay',
-            //- 'download',
-            'fullscreen',
-          ],
-          i18n: {
-            restart: 'Restartar',
-            rewind: 'Rewind {seektime}s',
-            play: 'Play',
-            pause: 'Pause',
-            fastForward: 'Forward {seektime}s',
-            seek: 'Seek',
-            seekLabel: '{currentTime} of {duration}',
-            played: 'Played',
-            buffered: 'Buffered',
-            currentTime: 'Current time',
-            duration: 'Duration',
-            volume: 'Volume',
-            mute: 'Mute',
-            unmute: 'Unmute',
-            enableCaptions: 'Enable captions',
-            disableCaptions: 'Disable captions',
-            download: 'Download',
-            enterFullscreen: 'Enter fullscreen',
-            exitFullscreen: 'Exit fullscreen',
-            frameTitle: 'Player for {title}',
-            captions: 'Captions',
-            settings: 'Settings',
-            pip: 'PIP',
-            menuBack: 'Go back to previous menu',
-            speed: 'Speed',
-            normal: 'Normal',
-            quality: 'Quality',
-            loop: 'Loop',
-            start: 'Start',
-            end: 'End',
-            all: 'All',
-            reset: 'Reset',
-            disabled: 'Disabled',
-            enabled: 'Enabled',
-            advertisement: 'Ad',
-            qualityBadge: {
-              2160: '4K',
-              1440: 'HD',
-              1080: 'HD',
-              720: 'HD',
-              576: 'SD',
-              480: 'SD',
-            },
-            },
-            previewThumbnails: { enabled: true, src: "/thumbs/thumb.vtt" }
-        };
-
-        if (!Hls.isSupported()) {
-          video.src = source
-          } else {
-            const hls = new Hls()
-            hls.loadSource(source)
-            hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-              const availableQualities = hls.levels.map((l) => l.height)
-
-              defaultOptions.quality = {
-                default: availableQualities[0],
-                options: availableQualities,
-                forced: true,
-                onChange: (e) => updateQuality(e),
-              }
-
-              defaultOptions.captions = {
-                active: true,
-                update: true,
-                language: 'pt',
-              }
-              const player = new Plyr(video, defaultOptions)
-              player.on('languagechange', () => {
-                setTimeout(() => (hls.subtitleTrack = player.currentTrack), 50)
-              })
-              hls.attachMedia(video);
-              window.hls = hls;
-              window.player = player;
-            })
-            function updateQuality(newQuality) {
-              hls.levels.forEach((level, levelIndex) => {
-                if (level.height === newQuality) {
-                  hls.currentLevel = levelIndex
-                }
-              })
-            }
-          }
-      });
     div
       header(
         class="navbar navbar-dark bg-mave1 sticky-top flex-md-nowrap p-0 shadow"
@@ -284,6 +164,8 @@ html
                   integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE"
                   crossorigin="anonymous"
                 )
+                script(src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.0/hls.min.js" integrity="sha512-uM0ewIqsiljk+lbRkzsxcx3eriM5HBN6JKMIcM9wX2L1qa1/+JlzR1qubm4YqnC6Zpn6ElVmNr1+VxUFrCRICQ==" crossorigin="anonymous")
+                script(src="https://cdn.plyr.io/3.6.4/plyr.js")
                 script(src="/javascripts/layout.min.js")
                 script.
                   (function () {

@@ -1,24 +1,9 @@
-const
-    ffmpeg = require('../modules/ffmpeg');
-
+const ffmpeg = require('./ffmpeg');
 class HLS_SERVER {
     constructor(server) {
-        this.error = function (error) { throw new Error(error); };
         this.folderPath = 'public\\assets\\hls';
+        this.error = function (error) { throw new Error(error); };
         this.define(server);
-        ffmpeg.encode(
-            `public/assets/teste.mp4`,
-            {
-                title: 'godzilla',
-                resolution: "144p",
-                caption: `WEBVTT \
-                \n\n00:00:00.000 --> 00:00:03.000 \
-                \n- [Locutor] Grupo Mave Apresenta... \
-                \n\n00:00:02.000 --> 00:00:31.000 \
-                \nThis is a subtitle`
-            })
-            .then(data => console.info(data))
-            .catch(error => { throw new Error(error); })
     }
 
     define(server) {
@@ -35,13 +20,13 @@ class HLS_SERVER {
                         const ext = req.url.split('.').pop(),
                             filePath = path.localPath(folderPath + '\\' + req.url);
 
-                        if (ext !== 'm3u8' && ext !== 'ts') {
+                        if (ext !== 'm3u8' && ext !== 'ts' && ext !== '.vtt') {
                             return cb(null, true);
                         }
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist', filePath);
+                                onError('HLS - File not exist');
                                 return cb(null, false);
                             }
 
@@ -53,7 +38,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist', filePath);
+                                onError('HLS - File not exist');
                                 return cb(null, false);
                             }
 
@@ -65,7 +50,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist', filePath);
+                                onError('HLS - File not exist');
                                 return cb(null, false);
                             }
 
@@ -74,13 +59,6 @@ class HLS_SERVER {
                     }
                 }
             });
-    }
-
-    on(type, f) {
-        switch (String(type).toLowerCase()) {
-            case 'error':
-                return this.error = f || function (error) { throw new Error(error); };
-        }
     }
 }
 
