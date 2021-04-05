@@ -8,6 +8,8 @@
         DEFAULT_DELAY = 3600,
         ONE_SECOND_DELAY = 1000;
 
+    let MAIN_MENU = {};
+
     // ======================================================================
     // Default Functions
     //
@@ -174,6 +176,22 @@
         return window.open(`mailto:${email}`, '_blank');
     }
 
+    const animateCSS = (element, animation, prefix = 'animate__') =>
+        new Promise((resolve, reject) => {
+            const animationName = `${prefix}${animation}`;
+            const node = document.querySelector(element);
+
+            node.classList.add(`${prefix}animated`, animationName);
+
+            function handleAnimationEnd(event) {
+                event.stopPropagation();
+                node.classList.remove(`${prefix}animated`, animationName);
+                resolve('Animation ended');
+            }
+
+            node.addEventListener('animationend', handleAnimationEnd, { once: true });
+        });
+
     // ======================================================================
     // Authentication - TwoFactor
     //
@@ -267,6 +285,43 @@
             $('html, body').animate({
                 scrollTop: 0
             }, 400);
+        });
+
+        $('#buttonMenu').on('click', function (e) {
+            if (MAIN_MENU['width'] === undefined)
+                MAIN_MENU['width'] = Math.floor($('#app-menu').width());
+            if (MAIN_MENU['class'] === undefined)
+                MAIN_MENU['class'] = 'col-md-9 col-lg-10';
+            if (MAIN_MENU['freeze'] === undefined)
+                MAIN_MENU['freeze'] = false;
+
+            animateCSS('#buttonMenu', 'jello');
+
+            if (!MAIN_MENU['freeze'] && $('#app-menu').position().left == 0) {
+                MAIN_MENU['freeze'] = true;
+                $('#buttonMenu').text('menu');
+                $('#app-menu').animate({
+                    opacity: 0,
+                    left: `-=${MAIN_MENU['width']}`
+                }, window.app.ONE_SECOND_DELAY / 2, function () {
+                    console.log('HIDE!!!');
+                    $('#app-menu').hide();
+                    $('#app-content').removeClass(MAIN_MENU['class']);
+                    MAIN_MENU['freeze'] = false;
+                });
+            } else if (!MAIN_MENU['freeze'] && $('#app-menu').position().left < 0) {
+                MAIN_MENU['freeze'] = true;
+                $('#buttonMenu').text('menu_open');
+                $('#app-menu').show();
+                $('#app-menu').animate({
+                    opacity: 1,
+                    left: `+=${MAIN_MENU['width']}`
+                }, window.app.ONE_SECOND_DELAY / 2, function () {
+                    console.log('SHOW!!!');
+                    $('#app-content').addClass(MAIN_MENU['class']);
+                    MAIN_MENU['freeze'] = false;
+                });
+            }
         });
 
         defaultSetters();
@@ -1229,6 +1284,7 @@
     [
         { 'alias': 'DEFAULT_DELAY', 'function': DEFAULT_DELAY },
         { 'alias': 'ONE_SECOND_DELAY', 'function': ONE_SECOND_DELAY },
+        { 'alias': 'MAIN_MENU', 'function': MAIN_MENU },
         { 'alias': 'baseurl', 'function': baseurl },
         { 'alias': 'graphqlUrl', 'function': baseurl.replace(':3000', ':4080') },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
@@ -1236,6 +1292,7 @@
         { 'alias': 'alerting', 'function': alerting },
         { 'alias': 'clearAlerting', 'function': clearAlerting },
         { 'alias': 'sendemail', 'function': sendemail },
+        { 'alias': 'animateCSS', 'function': animateCSS },
         { 'alias': 'twofactor', 'function': twofactor },
         { 'alias': 'home', 'function': home },
         { 'alias': 'logout', 'function': logout },

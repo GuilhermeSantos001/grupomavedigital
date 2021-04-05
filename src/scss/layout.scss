@@ -321,7 +321,7 @@ input:disabled {
   transition: background-color 0.3s, opacity 0.5s, visibility 0.5s;
   opacity: 0;
   visibility: hidden;
-  z-index: 1000;
+  z-index: 99999;
 }
 
 #buttonToTop::after {
@@ -344,6 +344,11 @@ input:disabled {
 #buttonToTop.show {
   opacity: 1;
   visibility: visible;
+}
+
+#buttonMenu:hover {
+  cursor: pointer;
+  color: map-get($theme-colors, "mave2");
 }
 
 .bd-callout {

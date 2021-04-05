@@ -19,13 +19,15 @@ html
     meta(name="apple-mobile-web-app-title" content="Grupo Mave Digital")
     meta(name="apple-mobile-web-app-capable" content="yes")
     meta(name="apple-mobile-web-app-status-bar-style" content="#004a6e")
+    link(rel="manifest" href="/manifest.webmanifest")
     link(rel="stylesheet" href="/stylesheets/plugins/please-wait.css")
-    link(rel="icon" sizes="192x192" href="/favicon/favicon256x256.png")
-    link(rel="icon" href="/favicon/favicon256x256.png")
+    link(rel="stylesheet" href="/stylesheets/plugins/fira_code.css")
+    link(rel="icon" sizes="192x192" href="/favicon/favicon256.png")
+    link(rel="icon" href="/favicon/favicon256.png")
     link(rel="shortcut icon" href="/assets/favicon64x64.ico" type="image/x-icon")
-    link(rel="icon" type="image/png" sizes="32x30" href="/favicon/favicon256x256.png")
-    link(rel="apple-touch-icon" sizes="128x128" href="/favicon/favicon256x256.png")
-    link(rel="apple-touch-startup-image" href="/favicon/favicon256x256.png")
+    link(rel="icon" type="image/png" sizes="32x30" href="/favicon/favicon256.png")
+    link(rel="apple-touch-icon" sizes="128x128" href="/favicon/favicon256.png")
+    link(rel="apple-touch-startup-image" href="/favicon/favicon256.png")
     link(rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons')
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css")
     link(rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css")
@@ -41,13 +43,21 @@ html
         function onLoad() {
           window.app.loading(true);
         }
+      script.
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/javascripts/workers/sw.js').then(function (reg) {
+            console.log('Yey!', reg);
+          }).catch(function (err) {
+            console.log('Boo!', err);
+          });
+        }
   body(onbeforeunload="return onLoad();")
     script(type="text/javascript" src="/javascripts/plugins/please-wait.min.js")
     script.
       window.loading_screen = window.pleaseWait({
-        logo: '',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        loadingHtml: ` \
+        logo: ''
+        , backgroundColor: 'rgba(0, 0, 0, 0.5);'
+        , loadingHtml: `\
           <div id="sk-flex" class="d-flex flex-column mx-3"> \
             <div class="sk-grid align-self-center"> \
               <div class="sk-grid-cube bg-light"></div> \
@@ -71,18 +81,20 @@ html
         class="navbar navbar-dark bg-mave1 sticky-top flex-md-nowrap p-0 shadow"
       )
         a(class="navbar-brand d-md-flex flex-row col-12 me-0 px-3 disabled")
+          div(class="col-1 d-none d-lg-flex justify-content-center")
+            p(class="my-auto") #[span(id="buttonMenu" class="material-icons fs-1") menu_open]
           img(src="/assets/logo.png" class="img-fluid mt-4 mt-md-0" width="340")
           p(class="text-center fs-3 my-auto flex-fill")
             | Ambiente Digital Interativo
         button(
           class="navbar-toggler position-absolute d-md-none collapsed my-4" type="button"
-          data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+          data-bs-toggle="collapse" data-bs-target="#app-menu" aria-controls="app-menu" aria-expanded="false"
           aria-label="Toggle navigation"
         )
           span(class="navbar-toggler-icon")
       div(class="container-fluid")
         div(class="row")
-          nav(id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="overflow-x: hidden; overflow-y: auto;")
+          nav(id="app-menu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="overflow-x: hidden; overflow-y: auto;")
             div(style="height: 88vh;")
               ul(class="nav flex-column col-12 bg-light bg-gradient")
                 each menu in menus
@@ -146,10 +158,10 @@ html
                             onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
                           )
                             | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-          main(class="col-md-9 ms-sm-auto col-lg-10 px-md-4")
+          main(id="app-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4")
             div(class="container-fluid")
               block content
-                a(id="buttonToTop" style="z-index: 9999;") #[span(class="material-icons" style="font-size: 2rem;") keyboard_arrow_up]
+                a(id="buttonToTop") #[span(class="material-icons" style="font-size: 2rem;") keyboard_arrow_up]
                 script(type="text/javascript" src="/javascripts/plugins/modernizr-custom.js")
                 script(src="/javascripts/plugins/jquery-3.5.1.min.js")
                 script(src="/javascripts/plugins/jquery-ui.min.js")
