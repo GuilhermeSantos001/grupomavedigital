@@ -1,6 +1,6 @@
 # Folders
 **/node_modules/**
-**/public/javascripts/public/**
+**/public/javascripts/**.min**
 **/public/assets/hls/**
 **/log/**
 **/db/**
