@@ -1,0 +1,66 @@
+@import "../layout.scss";
+
+.app-page-cards {
+    @extend .d-flex;
+    @extend .justify-content-between;
+    @extend .flex-wrap;
+    @extend .flex-md-nowrap;
+    @extend .align-items-center;
+    @extend .py-3;
+    @extend .mb-3;
+    @extend .border-bottom;
+}
+
+.app-container-card {
+    @extend .list-group-item;
+    @extend .list-group-item-action;
+    @extend .col-12;
+    cursor: pointer;
+    .app-content-card {
+        @extend .d-flex;
+        @extend .flex-lg-row;
+        @extend .flex-sm-column;
+        @extend .justify-content-between;
+        .app-content-group-1-card {
+            @extend .col-sm-12;
+            @extend .col-lg-1;
+            @extend .border-end;
+            img {
+                @extend .rounded-circle;
+                @extend .mx-auto;
+                @extend .mt-2;
+                @extend .d-block;
+                @extend .shadow;
+            }
+        }
+        .app-content-group-2-card {
+            @extend .d-flex;
+            @extend .flex-column;
+            @extend .col-sm-12;
+            @extend .col-lg;
+            @extend .p-2;
+            @extend .text-lg-start;
+            @extend .text-sm-center;
+            h5,
+            p {
+                @extend .mb-1;
+            }
+        }
+    }
+}
+
+.app-container-search {
+    @extend .input-group;
+    @extend .flex-nowrap;
+    @extend .my-3;
+    input#app-input-search {
+        @extend .form-control;
+        @extend .col-6;
+    }
+}
+
+#list-cards {
+    @extend .list-group;
+    @extend .border-top;
+    @extend .p-2;
+}

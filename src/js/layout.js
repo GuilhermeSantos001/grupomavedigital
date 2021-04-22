@@ -138,8 +138,8 @@
                 <div id="modalSelect" class="modal fade" tabindex="-1"> \
                     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> \
                         <div class="modal-content shadow"> \
-                            <div class="modal-header"> \
-                                <h5 class="modal-title">${title}</h5> \
+                            <div class="modal-header bg-mave1 shadow"> \
+                                <h5 class="modal-title text-mave2 fw-bold">${title}</h5> \
                                 ${dismiss ? '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
                             </div> \
                             <div class="modal-body"> \
@@ -229,16 +229,18 @@
         }, ONE_SECOND_DELAY);
     }
 
-    function retrievetwofactor(callback = () => { }, usr_auth) {
+    async function retrievetwofactor(callback = () => { }, usr_auth) {
         window.app.loading(true);
+
+        const { internetadress } = await window.app.storage_get_userInfo();
 
         fetch(window.app.graphqlUrl, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip",
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
-                "encodeuri": true
+                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                "encodeuri": false
             },
             "body": `{\"query\":\"mutation { authRetrieveTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
         })
@@ -265,10 +267,11 @@
     // Default Events
     //
     $(() => {
-        setTimeout(() => {
-            if (localStorage.getItem('usr-token')) {
+        setTimeout(async () => {
+            const { token } = await window.app.storage_get_userInfo();
+            if (token) {
                 load_notifications();
-                console.log(localStorage.getItem('usr-token'));
+                console.log(token);
             }
         }, 180000);
 
@@ -330,9 +333,11 @@
         window.app.loading(false);
     });
 
-    function defaultSetters() {
-        if (document.getElementById('usr-username'))
-            document.getElementById('usr-username').innerText = localStorage.getItem("usr-username");
+    async function defaultSetters() {
+        if (document.getElementById('usr-username')) {
+            const { username } = await window.app.storage_get_userInfo();
+            document.getElementById('usr-username').innerText = username;
+        }
     }
 
     var baseurl = String(location.origin);
@@ -346,10 +351,10 @@
             "params": `{}`
         })
             .then(response => response.json())
-            .then(data => {
-                localStorage.setItem('usr-locationIP', `${data['country']}(${data['city']}/${data['region']})`);
-                localStorage.setItem('usr-internetadress', `${data['ip']}`);
-            })
+            .then(data => window.app.storage_set_userInfo({
+                locationIP: `${data['country']}(${data['city']}/${data['region']})`,
+                internetadress: `${data['ip']}`
+            }))
             .catch(err => {
                 throw new Error(err);
             });
@@ -359,35 +364,34 @@
         return document.location = `${window.app.baseurl}`;
     }
 
-    function logout() {
+    async function logout() {
         window.app.loading(true);
 
-        if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
-            return document.location = `${baseurl}/user/auth`;
+        const { auth, token, internetadress } = await window.app.storage_get_userInfo();
 
-        const
-            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
+        if (!auth && !token)
+            return document.location = `${baseurl}/user/auth`;
 
         fetch(window.app.graphqlUrl, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4",
-                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "token": LZString.compressToEncodedURIComponent(token),
+                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                 "encodeuri": true
             },
-            "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
+            "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${LZString.compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(token)}\\\") }\"}`
         })
             .then(response => response.json())
-            .then(({ data, errors }) => {
+            .then(async ({ data, errors }) => {
                 window.app.loading(false);
 
                 if (errors)
                     return errors.forEach(error => window.app.alerting(error.message));
 
                 if (data['authLogout']) {
-                    localStorage.clear();
+                    await window.app.storage_clear_userInfo();
                     return document.location = `${baseurl}`;
                 }
                 else
@@ -398,35 +402,34 @@
             });
     }
 
-    function expired() {
+    async function expired() {
         window.app.loading(true);
 
-        if (!localStorage.getItem('usr-auth') && !localStorage.getItem('usr-token'))
-            return document.location = `${baseurl}/user/auth`;
+        const { auth, token, internetadress } = await window.app.storage_get_userInfo();
 
-        const
-            usr_auth = LZString.compressToEncodedURIComponent(localStorage.getItem('usr-auth'));
+        if (!auth && !token)
+            return document.location = `${baseurl}/user/auth`;
 
         fetch(window.app.graphqlUrl, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip",
-                "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                "token": LZString.compressToEncodedURIComponent(token),
+                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                 "encodeuri": true
             },
-            "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${usr_auth}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token'))}\\\") }\"}`
+            "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${LZString.compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(token)}\\\") }\"}`
         })
             .then(response => response.json())
-            .then(({ data, errors }) => {
+            .then(async ({ data, errors }) => {
                 window.app.loading(false);
 
                 if (errors)
                     return errors.forEach(error => window.app.alerting(error.message));
 
                 if (data['authExpired']) {
-                    localStorage.clear();
+                    await window.app.storage_clear_userInfo();
                     return document.location = `${baseurl}/user/auth`;
                 }
                 else
@@ -474,14 +477,16 @@
     let notifications = [],
         notification_timeout = null;
 
-    function load_notifications() {
-        if (localStorage.getItem('usr-token'))
+    async function load_notifications() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        if (token)
             fetch(`${baseurl}/user/notifications`, {
                 "method": "GET",
                 "headers": {
                     "Content-Type": "application/json",
-                    "usr_token": localStorage.getItem('usr-token'),
-                    "usr_internetadress": localStorage.getItem('usr-internetadress')
+                    "usr_token": token,
+                    "usr_internetadress": internetadress
                 },
                 "params": `{}`
             })
@@ -495,16 +500,18 @@
                 });
     }
 
-    function create_notifications(authorization = localStorage.getItem('usr-token'), title = '???', subtitle = '???', body = '???', background = 'secondary', expires = '1 min') {
+    async function create_notifications(title = '???', subtitle = '???', body = '???', background = 'secondary', expires = '1 min') {
+        const { auth, token, internetadress } = await window.app.storage_get_userInfo();
+
         fetch(`${baseurl}/user/notifications/create`, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
+                "usr_token": token,
+                "usr_internetadress": internetadress
             },
             "body": `{
-                authorization: "${authorization}",
+                authorization: "${auth}",
                 title: "${title}",
                 subtitle: "${subtitle}",
                 body: "${body}",
@@ -518,13 +525,15 @@
             });
     }
 
-    function remove_notifications(indexOf) {
+    async function remove_notifications(indexOf) {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
         fetch(`${baseurl}/user/notifications/remove`, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json",
-                "usr_token": localStorage.getItem('usr-token'),
-                "usr_internetadress": localStorage.getItem('usr-internetadress')
+                "usr_token": token,
+                "usr_internetadress": internetadress
             },
             "body": `{
                 id: ${Number(indexOf)}
@@ -573,61 +582,58 @@
 
     // ======================================================================
     // Storage
-    //
-
-    function storage_menu_set(menu = '', value = false) {
-        if (menu === '')
-            return false;
-
-        return localStorage.setItem(`app-menu-${menu}`, value);
-    }
-
-    function storage_menu_get(menu = '') {
-        if (menu === '')
-            return false;
-
-        return localStorage.getItem(`app-menu-${menu}`);
-    }
-
-    function storage_menu_compare(menu = '', value = false) {
-        if (menu === '')
-            return false;
-
-        return localStorage.getItem(`app-menu-${menu}`) === value;
-    }
-
-    function storage_menu_start(menu = '???') {
-        if (storage_menu_get(menu) != undefined)
-            document.getElementById(`nav-${storage_menu_get(menu)}-tab`).click();
-
-        $('a.menu-storage.nav-link').click(function (event) {
-            let id = event.target['id'],
-                regex = new RegExp('-(.*?)-', 'g'),
-                result;
-
-            while ((result = regex.exec(id))) {
-                storage_menu_set(menu, result[1]);
+    // Manager all application memory
+    function storage_get_userInfo() {
+        if (window.app.indexedDB_users) {
+            return window.app.indexedDB_users.getUserInfo();
+        } else {
+            return {
+                username: localStorage.getItem('usr-username'),
+                name: localStorage.getItem('usr-name'),
+                auth: localStorage.getItem('usr-auth'),
+                token: localStorage.getItem('usr-token'),
+                locationIP: localStorage.getItem('usr-locationIP'),
+                internetadress: localStorage.getItem('usr-internetadress')
             }
-        })
+        }
+    }
+
+    function storage_set_userInfo(info) {
+        if (window.app.indexedDB_users) {
+            window.app.indexedDB_users.setUserInfo(info);
+        } else {
+            Object
+                .keys(info)
+                .forEach(key => localStorage.setItem(`usr-${key}`, info[key]));
+        }
+    }
+
+    function storage_clear_userInfo() {
+        if (window.app.indexedDB_users) {
+            window.app.indexedDB_users.clearUserInfo();
+        } else {
+            localStorage.clear();
+        }
     }
 
     // ======================================================================
     // File - Upload
     //
-    let uploadProcess = null;
     function fileUpload(files = [], custompath) {
-        return new Promise((resolve, reject) => {
-            if (uploadProcess || files.length <= 0) return;
+        return new Promise(async (resolve, reject) => {
+            if (files.length <= 0) return;
 
             const formData = new FormData();
 
             formData.append('attachment', files[0]);
 
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
             fetch(`${baseurl}/system/upload/file`, {
                 "method": "POST",
                 "headers": {
-                    "usr_token": localStorage.getItem('usr-token'),
-                    "usr_internetadress": localStorage.getItem('usr-internetadress'),
+                    "usr_token": token,
+                    "usr_internetadress": internetadress,
                     "custompath": custompath
                 },
                 "body": formData
@@ -703,14 +709,16 @@
             }
         ]
     ) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
             fetch(window.app.graphqlUrl, {
                 "method": "POST",
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br",
-                    "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "token": LZString.compressToEncodedURIComponent(token),
+                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -839,14 +847,16 @@
             ]
         }
     ) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
             fetch(window.app.graphqlUrl, {
                 "method": "POST",
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC",
-                    "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "token": LZString.compressToEncodedURIComponent(token),
+                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -989,14 +999,16 @@
             ]
         }
     ) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
             fetch(window.app.graphqlUrl, {
                 "method": "POST",
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT",
-                    "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "token": LZString.compressToEncodedURIComponent(token),
+                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -1053,14 +1065,16 @@
     }
 
     function cardRemove(id) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
             fetch(window.app.graphqlUrl, {
                 "method": "POST",
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv",
-                    "token": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-token')),
-                    "internetadress": LZString.compressToEncodedURIComponent(localStorage.getItem('usr-internetadress')),
+                    "token": LZString.compressToEncodedURIComponent(token),
+                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -1082,8 +1096,6 @@
 
     // ======================================================================
     // Time
-    //
-
     //- Diferença entre horas
     function time_diference_hours(time1, time2) {
         let clock = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
@@ -1159,91 +1171,71 @@
     // ======================================================================
     // General Functions
     //
-    function gotoSystem() {
-        if (localStorage.getItem('usr-token')) {
+    async function gotoSystem() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        if (token) {
             let path = typeof window.app.pagedata('path') === 'string' ? window.app.pagedata('path') : '';
 
-            document.location = `${window.app.baseurl}/system${path}?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+            document.location = `${window.app.baseurl}/system${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
         } else {
             document.location = `${window.app.baseurl}/user/auth`;
         }
     }
 
-    function login() {
-        localStorage.clear();
+    async function login() {
+        await window.app.storage_clear_userInfo();
         document.location = `${window.app.baseurl}/user/auth`;
     }
 
-    function admin() {
-        document.location = `${window.app.baseurl}/system/admin?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    function helpdesk() {
+        return window.open(`https://grupomavedigital.com.br/glpi`, '_blank');
     }
 
-    function perfil() {
-        document.location = `${window.app.baseurl}/user/perfil?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    async function perfil() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/user/perfil?usr_token=${token}&usr_internetadress=${internetadress}`;
     }
 
-    function docs() {
-        document.location = `${window.app.baseurl}/user/docs?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
+    async function securityApp() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
 
-    function budgets() {
-        document.location = `${window.app.baseurl}/system/budgets?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function clients() {
-        document.location = `${window.app.baseurl}/system/clients?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function aliquots() {
-        document.location = `${window.app.baseurl}/system/aliquots?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function esocial() {
-        document.location = `${window.app.baseurl}/system/esocial?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function benefits() {
-        document.location = `${window.app.baseurl}/system/benefits?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function uniforms() {
-        document.location = `${window.app.baseurl}/system/uniforms?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function workdata() {
-        document.location = `${window.app.baseurl}/system/workdata?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function equipments() {
-        document.location = `${window.app.baseurl}/system/equipments?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function rents() {
-        document.location = `${window.app.baseurl}/system/rents?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function fuel() {
-        document.location = `${window.app.baseurl}/system/fuel?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function securityApp() {
-        document.location = `${window.app.baseurl}/user/auth/security?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
-    }
-
-    function helpApp() {
-        document.location = `${window.app.baseurl}/system/help?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+        document.location = `${window.app.baseurl}/user/auth/security?usr_token=${token}&usr_internetadress=${internetadress}`;
     }
 
     function cards() {
         return document.location = `${window.app.baseurl}/cards`;
     }
 
-    function cards_control() {
-        return document.location = `${window.app.baseurl}/cards/control?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    async function cards_control() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        return document.location = `${window.app.baseurl}/cards/control?usr_token=${token}&usr_internetadress=${internetadress}`;
     }
 
-    function cards_register() {
-        return document.location = `${window.app.baseurl}/cards/register?usr_token=${localStorage.getItem('usr-token')}&usr_internetadress=${localStorage.getItem('usr-internetadress')}`;
+    async function cards_register() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        return document.location = `${window.app.baseurl}/cards/register?usr_token=${token}&usr_internetadress=${internetadress}`;
+    }
+
+    async function app_meu_rh() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/system/rh/appMeuRH?usr_token=${token}&usr_internetadress=${internetadress}`;
+    }
+
+    async function manuals(id) {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/system/manuals/${id}?usr_token=${token}&usr_internetadress=${internetadress}`;
+    }
+
+    async function materials(id) {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/system/materials/${id}?usr_token=${token}&usr_internetadress=${internetadress}`;
     }
 
     // ======================================================================
@@ -1286,6 +1278,9 @@
         { 'alias': 'ONE_SECOND_DELAY', 'function': ONE_SECOND_DELAY },
         { 'alias': 'MAIN_MENU', 'function': MAIN_MENU },
         { 'alias': 'baseurl', 'function': baseurl },
+        { 'alias': 'storage_get_userInfo', 'function': storage_get_userInfo },
+        { 'alias': 'storage_set_userInfo', 'function': storage_set_userInfo },
+        { 'alias': 'storage_clear_userInfo', 'function': storage_clear_userInfo },
         { 'alias': 'graphqlUrl', 'function': baseurl.replace(':3000', ':4080') },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
         { 'alias': 'loading', 'function': loading },
@@ -1302,8 +1297,6 @@
         { 'alias': 'formatMoney', 'function': formatMoney },
         { 'alias': 'StringPadZero', 'function': StringPadZero },
         { 'alias': 'create_notifications', 'function': create_notifications },
-        { 'alias': 'storage_menu_compare', 'function': storage_menu_compare },
-        { 'alias': 'storage_menu_start', 'function': storage_menu_start },
         { 'alias': 'fileUpload', 'function': fileUpload },
         { 'alias': 'vcardCreate', 'function': vcardCreate },
         { 'alias': 'cardCreate', 'function': cardCreate },
@@ -1313,10 +1306,14 @@
         { 'alias': 'filter_input', 'function': filter_input },
         { 'alias': 'gotoSystem', 'function': gotoSystem },
         { 'alias': 'login', 'function': login },
+        { 'alias': 'helpdesk', 'function': helpdesk },
         { 'alias': 'perfil', 'function': perfil },
         { 'alias': 'securityApp', 'function': securityApp },
         { 'alias': 'cards', 'function': cards },
         { 'alias': 'cards_control', 'function': cards_control },
-        { 'alias': 'cards_register', 'function': cards_register }
+        { 'alias': 'cards_register', 'function': cards_register },
+        { 'alias': 'app_meu_rh', 'function': app_meu_rh },
+        { 'alias': 'manuals', 'function': manuals },
+        { 'alias': 'materials', 'function': materials }
     ].forEach(prop => window.app[prop['alias']] = prop['function']);
 })();

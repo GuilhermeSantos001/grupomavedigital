@@ -1,149 +1,125 @@
-// Override Bootstrap's Sass default variables
-//
-// Nearly all variables in Bootstrap are written with the `!default` flag.
-// This allows you to override the default values of those variables before
-// you import Bootstrap's source Sass files.
-//
-// Overriding the default variable values is the best way to customize your
-// CSS without writing _new_ styles. For example, change you can either change
-// `$body-color` or write more CSS that override's Bootstrap's CSS like so:
-// `body { color: red; }`.
-
-//
-// Bring in Bootstrap
-//
-
-// Option 1
-//
-// Import all of Bootstrap's CSS
-
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css");
 @import "../../node_modules/plyr/src/sass/plyr.scss";
-
-// Create your own map
-$custom-colors: (
-  "mave1": #004a6e,
-  "mave2": #f6d816,
-);
-
-// Merge the maps
-$theme-colors: map-merge($theme-colors, $custom-colors);
+@import './plugins/themes/default.scss';
+@import "./icons.scss";
 
 .bd-placeholder-img {
-  font-size: 1.125rem;
-  text-anchor: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 @media (min-width: 768px) {
-  .bd-placeholder-img-lg {
-    font-size: 3.5rem;
-  }
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
 }
 
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
-  color: map-get($theme-colors, "mave1");
-  background-color: rgba(0, 0, 0, 0);
+    color: map-get($theme-colors, "mave1");
+    background-color: rgba(0, 0, 0, 0);
 }
 
 body {
-  font-size: 0.875rem;
+    background-color: var(--body-color);
+    color: var(--body-text-color);
+    font-size: 0.875rem;
 }
 
 .pg-loading-screen.pg-loading .pg-loading-logo-header,
 .pg-loading-screen.pg-loading .pg-loading-html:not(.pg-loaded) {
-  -webkit-animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
-  animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+    -webkit-animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
+    animation: pgAnimLoading 0.5s cubic-bezier(0.7, 0, 0.3, 1) both;
 }
 
 .sk-grid {
-  transform: scale(1.5);
+    transform: scale(1.5);
 }
 
 .feather {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
 }
 
 /*
-* Sidebar
-*/
+  * Sidebar
+  */
 .sidebar {
-  position: fixed;
-  z-index: 100;
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.5);
+    position: fixed;
+    z-index: 100;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.5);
 }
 
 .sidebar .nav-link {
-  font-weight: 500;
-  color: #333;
-  cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
 }
 
 .sidebar .nav-link:hover {
-  color: #727272;
+    color: #727272;
 }
 
 .sidebar .nav-link .feather {
-  margin-right: 4px;
-  color: #727272;
+    margin-right: 4px;
+    color: #727272;
 }
 
 .sidebar .nav-link.active {
-  color: #007bff;
+    color: #007bff;
 }
 
 .sidebar .nav-link:hover .feather,
 .sidebar .nav-link.active .feather {
-  color: inherit;
+    color: inherit;
 }
 
 .sidebar-heading {
-  font-size: 0.75rem;
-  text-transform: uppercase;
+    font-size: 0.75rem;
+    text-transform: uppercase;
 }
 
 /*
-* Navbar
-*/
+  * Navbar
+  */
 .navbar-brand {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  font-size: 1rem;
-  background-color: rgba(0, 0, 0, 0.25);
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 1rem;
+    background-color: rgba(0, 0, 0, 0.25);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
 }
 
 .navbar .navbar-toggler {
-  top: 0.25rem;
-  right: 1rem;
+    top: 0.25rem;
+    right: 1rem;
 }
 
 .navbar .form-control {
-  padding: 0.75rem 1rem;
-  border-width: 0;
-  border-radius: 0;
+    padding: 0.75rem 1rem;
+    border-width: 0;
+    border-radius: 0;
 }
 
 .form-control-dark {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-control-dark:focus {
-  border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
 }
 
 /*
-* All \*
-*/
+  * All \*
+  */
 
 h1,
 h2,
@@ -151,311 +127,245 @@ h3,
 h4,
 h5,
 h6 {
-  color: map-get($theme-colors, "mave1");
+    color: map-get($theme-colors, "mave1");
 }
 
 .bg-mave1 {
-  background-color: map-get($theme-colors, "mave1");
+    background-color: map-get($theme-colors, "mave1");
 }
 
 .bg-mave2 {
-  background-color: map-get($theme-colors, "mave2");
+    background-color: map-get($theme-colors, "mave2");
 }
 
 .text-mave1 {
-  color: map-get($theme-colors, "mave1");
+    color: map-get($theme-colors, "mave1");
 }
 
 .text-mave2 {
-  color: map-get($theme-colors, "mave2");
+    color: map-get($theme-colors, "mave2");
 }
 
 .bg-loading {
-  font-size: 100px;
-  color: rgba(255, 255, 255, 1);
-  background-color: rgba(0, 0, 0, 0.5);
+    font-size: 100px;
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .bg-alert {
-  color: rgba(255, 255, 255, 1);
-  background-color: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .bg-buttons {
-  background-color: map-get($theme-colors, "mave1");
-  position: fixed;
-  left: 0;
-  bottom: 0;
+    background-color: map-get($theme-colors, "mave1");
+    position: fixed;
+    left: 0;
+    bottom: 0;
 }
 
 .ui-autocomplete {
-  margin-bottom: 10vh;
-  max-height: 20vh;
-  overflow-y: auto; /* prevent horizontal scrollbar */
-  overflow-x: hidden; /* add padding to account for vertical scrollbar */
-  z-index: 1000 !important;
+    margin-bottom: 10vh;
+    max-height: 20vh;
+    overflow-y: auto; /* prevent horizontal scrollbar */
+    overflow-x: hidden; /* add padding to account for vertical scrollbar */
+    z-index: 1000 !important;
 }
 
 .list-group-item-mave1 {
-  color: #4c4c4c;
-  background-color: #e0e0e0;
-  border-color: rgba(0, 0, 0, 0);
+    color: #4c4c4c;
+    background-color: #e0e0e0;
+    border-color: rgba(0, 0, 0, 0);
 }
 
 .list-group-item-mave1.list-group-item-action:hover,
 .list-group-item-mave1.list-group-item-action:focus {
-  color: #4c4c4c;
-  background-color: #ababab;
-  border-color: rgba(0, 0, 0, 0);
+    color: #4c4c4c;
+    background-color: #ababab;
+    border-color: rgba(0, 0, 0, 0);
 }
 
 .list-group-item-mave1.list-group-item-action.active {
-  color: map-get($theme-colors, "mave2");
-  background-color: map-get($theme-colors, "mave1");
-  border-color: rgba(0, 0, 0, 0);
-}
-
-.btn-mave1 {
-  color: #000000;
-  background-color: #ababab;
-  border-color: #ababab;
-}
-
-.btn-mave1:hover {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave1");
-}
-
-.btn-mave1:focus,
-.btn-mave1.focus {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave1");
-  box-shadow: 0 0 0 0.2rem rgba(58, 176, 195, 0.5);
-}
-
-.btn-mave1.disabled,
-.btn-mave1:disabled {
-  color: #4c4c4c;
-  background-color: #ababab;
-  border-color: #ababab;
-}
-
-.btn-mave1:not(:disabled):not(.disabled):active,
-.btn-mave1:not(:disabled):not(.disabled).active,
-.show > .btn-mave1.dropdown-toggle {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave1");
-}
-
-.btn-mave1:not(:disabled):not(.disabled):active:focus,
-.btn-mave1:not(:disabled):not(.disabled).active:focus,
-.show > .btn-mave1.dropdown-toggle:focus {
-  box-shadow: 0 0 0 0.2rem rgba(58, 176, 195, 0.5);
-}
-
-.btn-mave2 {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave1");
-}
-
-.btn-mave2:hover {
-  color: #ffffff;
-  background-color: #ababab;
-  border-color: #ababab;
-}
-
-.btn-mave2:focus,
-.btn-mave2.focus {
-  color: #000000;
-  background-color: #ababab;
-  border-color: #ababab;
-  box-shadow: 0 0 0 0.2rem rgba(192, 192, 192, 0.3);
-}
-
-.btn-mave2.disabled,
-.btn-mave2:disabled {
-  color: #4c4c4c;
-  background-color: #ababab;
-  border-color: #ababab;
-}
-
-.btn-mave2:not(:disabled):not(.disabled):active,
-.btn-mave2:not(:disabled):not(.disabled).active,
-.show > .btn-mave1.dropdown-toggle {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave1");
-}
-
-.btn-mave2:not(:disabled):not(.disabled):active:focus,
-.btn-mave2:not(:disabled):not(.disabled).active:focus,
-.show > .btn-mave1.dropdown-toggle:focus {
-  box-shadow: 0 0 0 0.2rem rgba(58, 176, 195, 0.5);
+    color: map-get($theme-colors, "mave2");
+    background-color: map-get($theme-colors, "mave1");
+    border-color: rgba(0, 0, 0, 0);
 }
 
 input[type="file"] {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 button:disabled,
 a:disabled,
 input:disabled {
-  cursor: not-allowed;
+    cursor: not-allowed;
 }
 
 #buttonToTop {
-  display: inline-block;
-  background-color: map-get($theme-colors, "mave1");
-  color: #ffffff;
-  width: 50px;
-  height: 50px;
-  text-align: center;
-  border-radius: 10px;
-  position: fixed;
-  bottom: -20px;
-  right: 10px;
-  transition: background-color 0.3s, opacity 0.5s, visibility 0.5s;
-  opacity: 0;
-  visibility: hidden;
-  z-index: 99999;
+    display: inline-block;
+    background-color: map-get($theme-colors, "mave1");
+    color: #ffffff;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    border-radius: 10px;
+    position: fixed;
+    bottom: -20px;
+    right: 10px;
+    transition: background-color 0.3s, opacity 0.5s, visibility 0.5s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 99999;
 }
 
 #buttonToTop::after {
-  font-weight: normal;
-  font-style: normal;
-  font-size: 5em;
-  line-height: 50px;
-  color: #fff;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 5em;
+    line-height: 50px;
+    color: #fff;
 }
 
 #buttonToTop:hover {
-  cursor: pointer;
-  background-color: map-get($theme-colors, "mave2");
+    cursor: pointer;
+    background-color: map-get($theme-colors, "mave2");
 }
 
 #buttonToTop:active {
-  background-color: map-get($theme-colors, "mave2");
+    background-color: map-get($theme-colors, "mave2");
 }
 
 #buttonToTop.show {
-  opacity: 1;
-  visibility: visible;
+    opacity: 1;
+    visibility: visible;
 }
 
 #buttonMenu:hover {
-  cursor: pointer;
-  color: map-get($theme-colors, "mave2");
+    cursor: pointer;
+    color: map-get($theme-colors, "mave2");
 }
 
 .bd-callout {
-  padding: 1.25rem;
-  margin-top: 1.25rem;
-  margin-bottom: 1.25rem;
-  border: 1px solid #eee;
-  border-left-width: 0.25rem;
-  border-radius: 0.25rem;
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #eee;
+    border-left-width: 0.25rem;
+    border-radius: 0.25rem;
 }
 
 .bd-callout h4 {
-  margin-top: 0;
-  margin-bottom: 0.25rem;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
 }
 
 .bd-callout p:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .bd-callout code {
-  border-radius: 0.25rem;
+    border-radius: 0.25rem;
 }
 
 .bd-callout + .bd-callout {
-  margin-top: -0.25rem;
+    margin-top: -0.25rem;
+}
+
+.bd-callout-mave1 {
+    border-left-color: map-get($theme-colors, "mave1");
+}
+
+.bd-callout-mave1 h4 {
+    color: map-get($theme-colors, "mave1");
+}
+
+.bd-callout-mave2 {
+    border-left-color: map-get($theme-colors, "mave2");
+}
+
+.bd-callout-mave2 h4 {
+    color: map-get($theme-colors, "mave2");
 }
 
 .bd-callout-info {
-  border-left-color: #5bc0de;
+    border-left-color: #5bc0de;
 }
 
 .bd-callout-info h4 {
-  color: #5bc0de;
+    color: #5bc0de;
 }
 
 .bd-callout-warning {
-  border-left-color: #f0ad4e;
+    border-left-color: #f0ad4e;
 }
 
 .bd-callout-warning h4 {
-  color: #f0ad4e;
+    color: #f0ad4e;
 }
 
 .bd-callout-danger {
-  border-left-color: #d9534f;
+    border-left-color: #d9534f;
 }
 
 .bd-callout-danger h4 {
-  color: #d9534f;
+    color: #d9534f;
 }
 
 .border-mave1 {
-  border-color: map-get($theme-colors, "mave1");
+    border-color: map-get($theme-colors, "mave1") !important;
 }
 
 .border-mave2 {
-  border-color: map-get($theme-colors, "mave2");
+    border-color: map-get($theme-colors, "mave2") !important;
 }
 
 .mv-status-circle {
-  width: 20px;
-  height: 20px;
-  margin: auto;
-  border-radius: 10px;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    border-radius: 10px;
 }
 
 .dropdown-menu a {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .dropdown-menu a:hover {
-  color: map-get($theme-colors, "mave1");
-  background-color: #d9d9d9 !important;
+    color: map-get($theme-colors, "mave1");
+    background-color: #d9d9d9 !important;
 }
 
 .alert-mave {
-  color: #ffffff;
-  background-color: map-get($theme-colors, "mave1");
-  border-color: map-get($theme-colors, "mave2");
+    color: #ffffff;
+    background-color: map-get($theme-colors, "mave1");
+    border-color: map-get($theme-colors, "mave2");
 }
 
 .alert-mave .alert-link {
-  color: map-get($theme-colors, "mave2");
+    color: map-get($theme-colors, "mave2");
 }
 
 /* width */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+    width: 12px;
+    height: 12px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #d9d9d9;
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background: #d9d9d9;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: map-get($theme-colors, "mave1");
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    background: map-get($theme-colors, "mave1");
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: map-get($theme-colors, "mave2");
+    background: map-get($theme-colors, "mave2");
 }

@@ -1,0 +1,37 @@
+extends ../layout
+
+append content
+  div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+    h1(class="h2") Suas Informações Pessoais.
+  div(class="col-12")
+    p(class="text-wrap")
+      | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+  div(class="d-flex flex-column col-12 p-2")
+    img(src=`/assets/perfil/${fotoPerfil}` class="img-fluid mt-2 mx-auto d-block border border-5 shadow" style="height: 15%; border-radius: 50%;")
+    h1(class="text-center mt-2") #{name} #{surname}
+    h4(class="text-center text-mave1 text-capitalize fw-bold") (#{privilege})
+    label(for="input_email" disabled) Email
+    input(type="text" class="form-control mx-auto" id="input_email" placeholder="Endereço de email" value=`${email}` disabled)
+    label(for="input_username" class="mt-2") Nome de usuário
+    input(type="text" class="form-control mx-auto" id="input_username" placeholder="Nome de usuário" value=`${username}` disabled)
+    label(for="input_name" class="mt-2") Primeiro nome
+    input(type="text" class="form-control mx-auto" id="input_name" placeholder="Primeiro Nome" value=`${name}` disabled)
+    label(for="input_surname" class="mt-2") Sobrenome
+    input(type="text" class="form-control mx-auto" id="input_surname" placeholder="Sobrenome" value=`${surname}` disabled)
+    label(for="input_cnpj" class="mt-2") CNPJ
+    input(type="text" class="form-control mx-auto" id="input_cnpj" placeholder="CNPJ" value=`${cnpj}` disabled)
+    label(for="input_location_street" class="mt-2") Endereço
+    input(type="text" class="form-control mx-auto" id="input_location_street" placeholder="Endereço" value=`${location['street']}` disabled)
+    label(for="input_location_number" class="mt-2") Número
+    input(type="text" class="form-control mx-auto" id="input_location_number" placeholder="Número" value=`${location['number']}` disabled)
+    label(for="input_location_complement" class="mt-2") Complemento
+    input(type="text" class="form-control mx-auto" id="input_location_complement" placeholder="Complemento" value=`${location['complement']}` disabled)
+    label(for="input_location_district" class="mt-2") Bairro
+    input(type="text" class="form-control mx-auto" id="input_location_district" placeholder="Bairro" value=`${location['district']}` disabled)
+    label(for="input_location_state" class="mt-2") Estado
+    input(type="text" class="form-control mx-auto" id="input_location_state" placeholder="Estado" value=`${location['state']}` disabled)
+    label(for="input_location_city" class="mt-2") Cidade
+    input(type="text" class="form-control mx-auto" id="input_location_city" placeholder="Cidade" value=`${location['city']}` disabled)
+    label(for="input_location_zipcode" class="mt-2") CEP
+    input(type="text" class="form-control mx-auto" id="input_location_zipcode" placeholder="CEP" value=`${location['zipcode']}` disabled)
+  script(src="/javascripts/userPerfil.min.js")

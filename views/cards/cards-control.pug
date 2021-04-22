@@ -1,0 +1,42 @@
+extends ../layout
+
+append head
+    link(rel="stylesheet" href="/stylesheets/cards-control.min.css")
+append content
+  div(class="app-container-page")
+    h2 Gerenciamento dos Cartões Digitais Interativos.
+  div(class="app-content-title-page")
+    p Olá #[b(id="usr-username")]/#[b #{privilege} #{">"}] Seu caminho de navegação atual é #[b #{router}]
+  mixin card(id, photo, name, jobtitle, version)
+    a(class="app-container-card" aria-current="true" id=`container-card-${id}`)
+      div(class="app-content-card")
+        div(class="app-content-group-1-card")
+          img(id=`card-photo-${id}` src=`/${photo['path']}${photo['name']}` width="80" height="80")
+          button(type="button" onclick=`window.open('${baseurl}/cards/card/${id}', '_blank')`) Visualizar
+        div(class="app-content-group-2-card")
+          h5(id=`card-name-${id}`) #{name || '???'}
+          p(id=`card-jobtitle-${id}`) #{jobtitle || '???'}
+          div
+            button(type="button" class="first" id=`card-edit-${id}`) Editar
+            button(type="button" class="second" id=`card-remove-${id}`) Remover
+        small Layout: #{version || '???'}
+  div(class="app-content-page")
+    span(id="span-search") #[i(class="fas fa-search")]
+    input(type="text" id="input-search" placeholder="Procurar..." aria-label="span-search" aria-describedby="span-search" value="" disabled=cards.length <= 0 ? true: false)
+  div(class="app-content-page")
+    span(class="input-group-text" id="span-limit") #[i(class="fas fa-filter")] Itens exibidos por vez
+    input(type="number" id="input-limit" aria-label="span-limit" aria-describedby="span-limit" value="10" min="1" max="100" disabled=cards.length <= 0 ? true: false)
+  div(class="app-content-page-2" id="list-cards")
+    if (cards.length <= 0)
+      p.text-muted Nenhum cartão digital encontrado.
+    else
+      each card in cards
+        +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+  script.
+    (function () {
+      'use strict';
+      window.app = window.app || {};
+      window.app.cardItems = String("#{cardItems}").split(',');
+      window.app.cardsCompressData = JSON.parse(LZString.decompressFromEncodedURIComponent("#{cardsCompressData}"));
+    })();
+  script(src="/javascripts/cards-control.min.js")

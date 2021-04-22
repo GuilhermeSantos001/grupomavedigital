@@ -9,7 +9,15 @@ var useragent = require('useragent');
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [
+  path.join(__dirname, 'views'),
+  path.join(__dirname, 'views/errors'),
+  path.join(__dirname, 'views/cards'),
+  path.join(__dirname, 'views/users'),
+  path.join(__dirname, 'views/rh'),
+  path.join(__dirname, 'views/manuals'),
+  path.join(__dirname, 'views/materials'),
+]);
 app.set('view engine', 'pug');
 app.set('view options', { layout: false });
 app.set('trust proxy', true);
@@ -26,6 +34,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     res.set('x-timestamp', Date.now());
   }
 }));
+app.use(express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/feather-icons/dist')));
 app.use(device.capture({
   parseUserAgent: true
 })), useragent(true);
@@ -38,6 +48,7 @@ const corsOptions = {
   "origin": function (origin, callback) {
     if ([
       `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+      `https://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
       'file://',
       undefined
     ].indexOf(origin) !== -1) {

@@ -7,30 +7,6 @@
     window.app = window.app || {};
 
     document.addEventListener('DOMContentLoaded', () => {
-        const audio = document.querySelector('audio');
-        const playerAudio = new Plyr(audio, {
-            title: 'Reis da Revoada',
-            storage: { enabled: true, key: 'plyr_audio' },
-            tooltips: { controls: true, seek: true },
-            seekTime: 5,
-            controls: [
-                'play-large', // The large play button in the center
-                'restart', // Restart playback
-                'rewind', // Rewind by the seek time (default 10 seconds)
-                'play', // Play/pause playback
-                'fast-forward', // Fast forward by the seek time (default 10 seconds)
-                'progress', // The progress bar and scrubber for playback and buffering
-                'current-time', // The current time of playback
-                'duration', // The full duration of the media
-                'mute', // Toggle mute
-                'volume', // Volume control
-                'settings', // Settings menu
-            ]
-        });
-
-        // Expose player so it can be used from the console
-        window.playerAudio = playerAudio;
-
         const video = document.querySelector('video'),
             source = video.getElementsByTagName("source")[0].src;
 
@@ -50,7 +26,7 @@
                 // captions.update is required for captions to work with hls.js
                 const availableQualities = hls.levels.map((level) => Number(level.attrs.RESOLUTION_NAME)).reverse(),
                     customOptions = {
-                        title: 'Trailer do Godzilla vs King Kong | Abril, 2021',
+                        title: 'Grupo Mave - Institucional | Abril, 2021',
                         tooltips: { controls: true, seek: true },
                         storage: { enabled: true, key: 'plyr' },
                         seekTime: 5,
@@ -79,7 +55,7 @@
                             forced: true,
                             onChange: (newQuality) => updateQuality(newQuality)
                         },
-                        previewThumbnails: { enabled: true, src: "/thumbs/d419fbc3b1d4e01956322ca20b227fe176edbe9c1/thumb.vtt" },
+                        previewThumbnails: { enabled: true, src: "/thumbs/57a029c46fea73e49c20ac761807153310d1c55bl/thumb.vtt" },
                         invertTime: false
                     }
 

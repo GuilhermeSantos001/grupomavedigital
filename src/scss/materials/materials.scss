@@ -1,0 +1,69 @@
+@import "../layout.scss";
+
+.app-page-materials {
+    @extend .col-12;
+
+    .container-contents {
+        @extend .d-flex;
+        @extend .flex-column;
+        @extend .flex-lg-row;
+        @extend .col-12;
+        @extend .my-4;
+        @extend .border-bottom;
+
+        .container-content {
+            @extend .col-12;
+            @extend .col-lg;
+            @extend .me-2;
+
+            p {
+                @extend .border;
+                @extend .border-mave1;
+                @extend .text-mave1;
+                @extend .text-center;
+                @extend .fw-bold;
+                @extend .fs-5;
+                @extend .p-2;
+            }
+
+            a, button:not(.btn-close) {
+                @extend .btn;
+                @extend .btn-outline-mave1;
+                @extend .col-12;
+                @extend .mb-2;
+            }
+
+            div.modal {
+                .modal-content {
+                    @extend .shadow;
+                }
+
+                .modal-header {
+                    @extend .bg-mave1;
+                    @extend .border-mave1;
+
+                    button.btn-close {
+                        @extend .btn-close-white;
+                    }
+                }
+
+                .modal-title {
+                    @extend .text-mave2;
+                }
+
+                .modal-body img {
+                    @extend .img-fluid;
+                    @extend .mt-2;
+                    @extend .mx-auto;
+                    @extend .d-block;
+                    &.except {
+                        @extend .col-6;
+                    }
+                    &.normal {
+                        @extend .col-12;
+                    }
+                }
+            }
+        }
+    }
+}

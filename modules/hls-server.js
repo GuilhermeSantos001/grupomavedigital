@@ -26,7 +26,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist');
+                                onError(`HLS - File not exist ${filePath}`);
                                 return cb(null, false);
                             }
 
@@ -38,7 +38,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist');
+                                onError(`HLS - File not exist ${filePath}`);
                                 return cb(null, false);
                             }
 
@@ -50,7 +50,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError('HLS - File not exist');
+                                onError(`HLS - File not exist ${filePath}`);
                                 return cb(null, false);
                             }
 

@@ -1,0 +1,26 @@
+extends ../layout
+
+append head
+    link(rel="stylesheet" href="/stylesheets/cards.min.css")
+append content
+  div(class="app-page-cards")
+    h2 Cartões Digitais Interativos.
+  mixin card(id, photo, name, jobtitle, version)
+    a(class="app-container-card" aria-current="true" onclick=`window.app.openCard("${id}")`)
+      div(class="app-content-card")
+        div(class="app-content-group-1-card")
+          img(src=`/${photo['path']}${photo['name']}` width="80" height="80")
+        div(class="app-content-group-2-card")
+          h5 #{name || '???'}
+          p #{jobtitle || '???'}
+          small Clique para visualizar.
+        small(class="text-sm-center") Layout: #{version || '???'}
+  div(class="app-container-search")
+    span(class="input-group-text" id="app-input-search") #[i(class="fas fa-search")]
+    input(type="text" id="app-input-search" placeholder="Procurar..." aria-label="app-input-search" aria-describedby="app-input-search" value="" disabled=cards.length <= 0 ? true: false)
+  div(id="list-cards")
+    each card in cards
+      +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+    if (cards.length <= 0)
+      p.text-muted Nenhum cartão digital encontrado.
+  script(src="/javascripts/cards.min.js")

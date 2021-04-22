@@ -1,0 +1,47 @@
+@import "../layout.scss";
+
+.app-container-page {
+    @extend .d-flex;
+    @extend .justify-content-between;
+    @extend .flex-wrap;
+    @extend .flex-md-nowrap;
+    @extend .align-items-center;
+    @extend .pt-3;
+    @extend .pb-2;
+    @extend .mb-3;
+    @extend .border-bottom;
+}
+
+.app-content-tittle-page {
+    @extend .col-12;
+    p {
+        @extend .text-wrap;
+        b {
+            @extend .text-mave1;
+            @extend .text-capitalize;
+        }
+    }
+}
+
+.app-header-preview-card {
+    @extend .d-flex;
+    @extend .flex-column;
+    @extend .bg-danger;
+    @extend .col-12;
+    @extend .pt-2;
+    p {
+        @extend .text-center;
+        @extend .text-white;
+        @extend .fw-bold;
+        &.highlight {
+            @extend .fs-6;
+            @extend .mb-0;
+        }
+    }
+}
+
+.app-content-preview-card {
+    @extend .border;
+    @extend .border-mave1;
+    @extend .shadow;
+}

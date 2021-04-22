@@ -8,23 +8,23 @@
 # Developer
 **/test/**
 *.test*
-*.env*
+*.env
 
 # Common Configurations
 
 # Audio
-*.wav*
-*.mp3*
-*.wma*
+*.wav
+*.mp3
+*.wma
 
 # Video
-*.wmv*
-*.mpg*
-*.mpeg*
-*.mp4*
-*.mov*
-*.flv*
-*.avi*
-*.ogv*
-*.ogg*
-*.webm*
+*.wmv
+*.mpg
+*.mpeg
+*.mp4
+*.mov
+*.flv
+*.avi
+*.ogv
+*.ogg
+*.webm

@@ -2,35 +2,11 @@ extends layout
 
 append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
-    h1(class="h2") Ambiente Digital Interativo
+    h1(class="h2") Bem-Vindo(a)
   video(
-    class="col-12"
-    playsinline controls crossorigin data-poster="/assets/Godzilla vs King Kong.jpg"
+    class="col-12 d-print-none"
+    playsinline controls crossorigin data-poster="/assets/grupomave-background.png"
     style="--plyr-color-main: #f6d816; --plyr-captions-text-color: #f6d816; --plyr-captions-background: rgba(0, 0, 0, 0.8);"
   )
-    source(ref="source" src="/godzilla-trailer-2021.m3u8" type="application/x-mpegURL")
-  audio(
-    crossorigin playsinline
-    style="--plyr-color-main: #f6d816; --plyr-captions-text-color: #f6d816; --plyr-captions-background: rgba(0, 0, 0, 0.8);"
-  )
-    source(src='/stream2' type='audio/mpeg')
-  table(class="table")
-    thead
-      tr
-        th(scope="col") #
-        th(scope="col") Colaborador(a)
-        th(scope="col") Data de Aniversário
-    tbody
-      tr
-        th(scope="row") 1
-        td(class="text-wrap") Luiz Guilherme dos Santos
-        td(class="text-wrap") 17/02/2021
-      tr
-        th(scope="row") 2
-        td(class="text-wrap") Ewerton Jose Ordine de Arruda
-        td(class="text-wrap") 14/02/2021
-      tr
-        th(scope="row") 3
-        td(class="text-wrap") Guilherme Caamano da Silva
-        td(class="text-wrap") 10/02/2021
+    source(ref="source" src="/grupo-mave-institucional.m3u8" type="application/x-mpegURL")
   script(src="/javascripts/index.min.js")

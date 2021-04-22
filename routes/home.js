@@ -134,45 +134,6 @@ router.get(`/`, async (req, res) => {
       title: 'Cartões Digitais',
       onclick: "cards()"
     }, {
-      type: 'normal',
-      icon: 'cpu',
-      first: false,
-      enabled: true,
-      title: 'Softwares',
-      onclick: ""
-    }, {
-      type: 'collapse',
-      icon: 'pen-tool',
-      first: false,
-      enabled: true,
-      title: 'Material Gráfico',
-      items: [
-        {
-          title: 'S. Mave',
-          icon: 'bookmark',
-          enabled: true,
-          onclick: ''
-        },
-        {
-          title: 'V. Mave',
-          icon: 'bookmark',
-          enabled: true,
-          onclick: ''
-        },
-        {
-          title: 'Mave Systems',
-          icon: 'bookmark',
-          enabled: true,
-          onclick: ''
-        },
-        {
-          title: 'Mav Quality',
-          icon: 'bookmark',
-          enabled: true,
-          onclick: ''
-        }
-      ]
-    }, {
       type: 'collapse',
       icon: 'help-circle',
       first: false,
@@ -183,7 +144,7 @@ router.get(`/`, async (req, res) => {
           title: 'HelpDesk/TI (GLPI)',
           icon: 'tool',
           enabled: true,
-          onclick: ''
+          onclick: 'helpdesk()'
         }
       ]
     }]

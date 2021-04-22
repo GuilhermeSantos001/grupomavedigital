@@ -31,16 +31,7 @@ var configMongoDB = {
  */
 var schema_states = require('../models/states'),
     schema_users = require('../models/users'),
-    schema_cards = require('../models/cards'),
-    schema_clients = require('../models/clients'),
-    schema_aliquots = require('../models/aliquots'),
-    schema_esocial = require('../models/esocial'),
-    schema_benefits = require('../models/benefits'),
-    schema_equipments = require('../models/equipments'),
-    schema_rents = require('../models/rents'),
-    schema_fuel = require('../models/fuel'),
-    schema_uniforms = require('../models/uniforms'),
-    schema_workdata = require('../models/workdata');
+    schema_cards = require('../models/cards');
 
 /**
  * @private Restrito ao escopo global
@@ -103,16 +94,7 @@ process.on('SIGINT', function () {
 //================================================================================
 const db_states = require('./database/db-states')(mongoose, uri, schema_states),
     db_users = require('./database/db-users')(mongoose, uri, schema_users),
-    db_cards = require('./database/db-cards')(mongoose, uri, schema_cards),
-    db_clients = require('./database/db-clients')(mongoose, uri, schema_clients),
-    db_aliquots = require('./database/db-aliquots')(mongoose, uri, schema_aliquots),
-    db_esocial = require('./database/db-esocial')(mongoose, uri, schema_esocial),
-    db_benefits = require('./database/db-benefits')(mongoose, uri, schema_benefits),
-    db_equipments = require('./database/db-equipments')(mongoose, uri, schema_equipments),
-    db_rents = require('./database/db-rents')(mongoose, uri, schema_rents),
-    db_fuel = require('./database/db-fuel')(mongoose, uri, schema_fuel),
-    db_uniforms = require('./database/db-uniforms')(mongoose, uri, schema_uniforms),
-    db_workdata = require('./database/db-workdata')(mongoose, uri, schema_workdata);
+    db_cards = require('./database/db-cards')(mongoose, uri, schema_cards);
 
 //================================================================================
 // MODULO PARA EXPORTAR O SCRIPT
@@ -146,64 +128,5 @@ module.exports = {
         update: db_cards.update,
         remove: db_cards.remove,
         get: db_cards.get
-    },
-    clients: {
-        register: db_clients.register,
-        update: db_clients.update,
-        inactive: db_clients.inactive,
-        reactivate: db_clients.reactivate,
-        sendResolution: db_clients.sendResolution,
-        removeResolution: db_clients.removeResolution,
-        sendClosingdate: db_clients.sendClosingdate,
-        get: db_clients.get
-    },
-    aliquots: {
-        register: db_aliquots.register,
-        update: db_aliquots.update,
-        remove: db_aliquots.remove,
-        get: db_aliquots.get
-    },
-    esocial: {
-        register: db_esocial.register,
-        update: db_esocial.update,
-        remove: db_esocial.remove,
-        get: db_esocial.get
-    },
-    benefits: {
-        register: db_benefits.register,
-        update: db_benefits.update,
-        remove: db_benefits.remove,
-        get: db_benefits.get
-    },
-    uniforms: {
-        register: db_uniforms.register,
-        update: db_uniforms.update,
-        remove: db_uniforms.remove,
-        get: db_uniforms.get
-    },
-    workdata: {
-        register: db_workdata.register,
-        update: db_workdata.update,
-        remove: db_workdata.remove,
-        get: db_workdata.get,
-        getUniforms: db_workdata.getUniforms
-    },
-    equipments: {
-        register: db_equipments.register,
-        update: db_equipments.update,
-        remove: db_equipments.remove,
-        get: db_equipments.get
-    },
-    rents: {
-        register: db_rents.register,
-        update: db_rents.update,
-        remove: db_rents.remove,
-        get: db_rents.get
-    },
-    fuel: {
-        register: db_fuel.register,
-        update: db_fuel.update,
-        remove: db_fuel.remove,
-        get: db_fuel.get
     }
 };

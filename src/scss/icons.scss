@@ -1,0 +1,22 @@
+@import "./plugins/fontawesome/fontawesome.scss";
+@import "./plugins/fontawesome/regular.scss";
+@import "./plugins/fontawesome/solid.scss";
+@import "./plugins/fontawesome/brands.scss";
+
+.user {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-user);
+  }
+}
+
+.twitter {
+  @extend %fa-icon;
+  @extend .fab;
+
+  &:before {
+    content: fa-content($fa-var-twitter);
+  }
+}

@@ -1,10 +1,11 @@
 {
     "execMap": {
-        "js": "node --inspect=9229 -r dotenv/config bin/www"
+        "js": "node --inspect=9329 -r dotenv/config bin/www"
     },
     "ext": "js",
     "ignore": [
         "public/*",
+        "src/*",
         "graphql-server/*"
     ],
     "env": {

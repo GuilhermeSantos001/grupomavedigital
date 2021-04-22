@@ -1,0 +1,48 @@
+extends ../layout
+
+append content
+    div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+        h1(class="h2") TOTVS - Meu RH
+    div(class="col-12")
+        p(class="text-wrap")
+            | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+    img(src=`/images/meurh_logo.png` class="img-fluid mt-2 mx-auto d-block shadow d-print-none" style="height: 15%; border-radius: 30%;")
+    div(class="d-flex justify-content-center col-12 my-3")
+        button(type="button" class="btn btn-mave2 m-2 col-4 shadow d-print-none" onclick="window.open('https://play.google.com/store/apps/details?id=com.totvs.hr.mobile&hl=pt&gl=US', '_blank');")
+            | #[i(class="bi bi-download")] Google Play
+        button(type="button" class="btn btn-mave2 m-2 col-4 shadow d-print-none" onclick="window.open('https://apps.apple.com/br/app/totvs-meu-rh/id1263940937', '_blank');")
+            | #[i(class="bi bi-download")] Apple Store
+    button(id="web-link" type="button" class="btn btn-mave2 col-12 shadow d-print-none" onclick="window.open('http://smave103587.protheus.cloudtotvs.com.br:4020/#/login', '_blank');")
+        | Acesse pelo navegador
+    h4(class="fw-bold text-center my-3 border-bottom d-print-none") Apos instalar siga os passos para configurar seu aplicativo
+    h6(class="fw-bold text-danger text-center my-3") Atenção - Em seu aplicativo clique no botão: ler QR Code
+    iframe(
+        class="col-12 shadow d-print-none"
+        height="450"
+        src="https://www.youtube.com/embed/i8KZdUnhnyA?&autoplay=1&loop=1&rel=0&showinfo=0&color=white&iv_load_policy=3"
+        frameborder="0" allowfullscreen
+    )
+    div(class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true")
+        div(class="modal-dialog")
+            div(class="modal-content bg-mave1 shadow")
+                div(class="modal-header bg-mave2 border-mave1")
+                    h5(class="modal-title" id="exampleModalLabel") Escaneie o nosso QR CODE
+                    button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                div(class="modal-body")
+                    img(src=`/images/qr_code_app_meu_rh.png` class="img-fluid mt-2 mx-auto d-block shadow" style="height: 15%; border-radius: 30%;")
+    script.
+        (function() {
+            "use strict";
+
+            window.app = window.app || {};
+
+            window.app.openQRCode = () => {
+                var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+
+                myModal.show();
+            }
+        })();
