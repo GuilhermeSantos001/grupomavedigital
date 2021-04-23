@@ -9,6 +9,7 @@
 **/test/**
 *.test*
 *.env
+*ecosystem.config.js
 
 # Common Configurations
 

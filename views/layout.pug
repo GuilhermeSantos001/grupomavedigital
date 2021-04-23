@@ -19,7 +19,7 @@ html
     meta(name="apple-mobile-web-app-title" content="Grupo Mave Digital")
     meta(name="apple-mobile-web-app-capable" content="yes")
     meta(name="apple-mobile-web-app-status-bar-style" content="#004a6e")
-    link(rel="manifest" href="/manifest.webmanifest")
+    link(rel="manifest" href="/manifest.json")
     link(rel="stylesheet" href="/stylesheets/plugins/please-wait.css")
     link(rel="stylesheet" href="/stylesheets/plugins/fira_code.css")
     link(rel="icon" sizes="192x192" href="/favicon/favicon256.png")
@@ -38,14 +38,12 @@ html
     link(rel="stylesheet" href="/stylesheets/plugins/spinkit.min.css")
     link(rel="stylesheet" href="/stylesheets/layout.min.css")
     block head
-      //- script.
-      //-   if ('serviceWorker' in navigator) {
-      //-     navigator.serviceWorker.register('/javascripts/workers/sw.js').then(function (reg) {
-      //-       console.log('Yey!', reg);
-      //-     }).catch(function (err) {
-      //-       console.log('Boo!', err);
-      //-     });
-      //-   }
+      script.
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/javascripts/workers/pwabuilder-sw.js');
+          });
+        }
   body(onbeforeunload="window.app.loading(true);")
     script(type="text/javascript" src="/javascripts/plugins/please-wait.min.js")
     script.
