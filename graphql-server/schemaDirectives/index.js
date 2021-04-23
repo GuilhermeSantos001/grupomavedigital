@@ -1,8 +1,10 @@
+const { SchemaDirectiveVisitor } = require('graphql-tools');
+const { defaultFieldResolver } = require('graphql');
 
-const AuthDirective = require('./auth.directives');
-const TokenDirective = require('./token.directives');
-const PrivilegeDirective = require('./privilege.directives');
-const EncodeURIDirective = require('./encodeuri.directives');
+const AuthDirective = require('./auth.directives')(SchemaDirectiveVisitor, defaultFieldResolver);
+const TokenDirective = require('./token.directives')(SchemaDirectiveVisitor, defaultFieldResolver);
+const PrivilegeDirective = require('./privilege.directives')(SchemaDirectiveVisitor, defaultFieldResolver);
+const EncodeURIDirective = require('./encodeuri.directives')(SchemaDirectiveVisitor, defaultFieldResolver);
 
 module.exports = {
     auth: AuthDirective,

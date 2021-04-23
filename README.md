@@ -2,15 +2,17 @@
 Ambiente Digital Interativo do Grupo Mave.
 
 ## Instalar
-1º: baixar & Instalar [NPM](https://www.npmjs.com/)
+- baixar & Instalar [NPM](https://www.npmjs.com/)
 
-2º: baixar & Instalar [Git](https://git-scm.com/downloads)
+- baixar & Instalar [Yarn](https://classic.yarnpkg.com/en/docs/install#windows-stable)
 
-3º: baixar & Instalar [NodeJS](https://nodejs.org/en/)
+- baixar & Instalar [Git](https://git-scm.com/downloads)
 
-4º: baixar & Instalar [node-gyp](https://github.com/nodejs/node-gyp)
+- baixar & Instalar [NodeJS](https://nodejs.org/en/)
 
-5º: baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
+- baixar & Instalar [node-gyp](https://github.com/nodejs/node-gyp)
+
+- baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
 
 ## Executar
 ### !Caso não seja a primeira vez, exclua a pasta node_modules e o arquivo package-lock.json!

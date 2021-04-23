@@ -1,6 +1,3 @@
-const { SchemaDirectiveVisitor } = require('graphql-tools');
-const { defaultFieldResolver } = require('graphql');
-
 function decompress(method, value) {
     const LZString = require('lz-string');
 
@@ -10,31 +7,32 @@ function decompress(method, value) {
     }
 }
 
-module.exports = class EncodeURIDirective extends SchemaDirectiveVisitor {
-    visitFieldDefinition(field) {
-        const { resolve = defaultFieldResolver } = field;
-        const { method } = this.args;
+module.exports = (SchemaDirectiveVisitor, defaultFieldResolver) =>
+    class EncodeURIDirective extends SchemaDirectiveVisitor {
+        visitFieldDefinition(field) {
+            const { resolve = defaultFieldResolver } = field;
+            const { method } = this.args;
 
-        field.resolve = async (...args) => {
-            const
-                [, props, context] = args,
-                encodeuri = eval(String(context.request.headers['encodeuri']));
+            field.resolve = async (...args) => {
+                const
+                    [, props, context] = args,
+                    encodeuri = eval(String(context.request.headers['encodeuri']));
 
-            if (encodeuri) {
-                let newProps = {};
+                if (encodeuri) {
+                    let newProps = {};
 
-                Object
-                    .keys(props)
-                    .forEach(key => {
-                        newProps[key] = decompress(method, props[key])
-                    });
+                    Object
+                        .keys(props)
+                        .forEach(key => {
+                            newProps[key] = decompress(method, props[key])
+                        });
 
-                args[1] = newProps;
+                    args[1] = newProps;
 
-                return resolve.apply(this, args);
-            } else {
-                return resolve.apply(this, args);
+                    return resolve.apply(this, args);
+                } else {
+                    return resolve.apply(this, args);
+                }
             }
         }
     }
-}

@@ -1,8 +1,8 @@
 const { GraphQLServer } = require('graphql-yoga');
-const { default: costAnalysis } = require('graphql-cost-analysis');
+const schemaDirectives = require('./schemaDirectives/index');
 const typeDefs = require('./typeDefs/index');
 const resolvers = require('./resolvers/index');
-const schemaDirectives = require('./schemaDirectives/index');
+const { default: costAnalysis } = require('graphql-cost-analysis');
 const device = require('express-device');
 const useragent = require('useragent');
 

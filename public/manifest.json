@@ -1,7 +1,6 @@
 {
   "name": "Grupo Mave Digital",
   "short_name": "Grupo Mave",
-  "start_url": "/",
   "display": "standalone",
   "manifest_version": 3,
   "version": "1.0.0",

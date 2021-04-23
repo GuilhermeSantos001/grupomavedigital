@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "installer": "npm i && npm i --global gulp-cli",
-    "update": "npm i -g npm-check-updates && ncu -u",
+    "installer": "npm i --global gulp-cli && npm i --global yarn && yarn install --audit",
+    "update": "yarn upgrade --latest",
     "dev": "nodemon app",
     "start": "node -r dotenv/config bin/www"
   },
@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "csrf": "^3.1.0",
     "debug": "~4.3.1",
+    "dotenv-cli": "^4.0.0",
     "expires": "0.0.1",
     "express": "~4.17.1",
     "express-fileupload": "^1.2.1",
@@ -63,5 +64,9 @@
     "speakeasy": "^2.0.0",
     "useragent": "^2.3.0",
     "yamlparser": "0.0.2"
-  }
+  },
+  "main": "bin/www",
+  "repository": "https://github.com/GuilhermeSantos001/grupomavedigital.git",
+  "author": "GuilhermeSantos001 <luizgp120@hotmail.com>",
+  "license": "GPL-3.0 License"
 }
