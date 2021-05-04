@@ -30,6 +30,7 @@ var configMongoDB = {
  * @description Importa o modulo para criar o Schema de comandos
  */
 var schema_states = require('../models/states'),
+    schema_activities = require('../models/activities'),
     schema_users = require('../models/users'),
     schema_cards = require('../models/cards');
 
@@ -93,6 +94,7 @@ process.on('SIGINT', function () {
 // MÓDULOS DO BANCO DE DADOS
 //================================================================================
 const db_states = require('./database/db-states')(mongoose, uri, schema_states),
+    db_activities = require('./database/db-activities')(mongoose, uri, schema_activities),
     db_users = require('./database/db-users')(mongoose, uri, schema_users),
     db_cards = require('./database/db-cards')(mongoose, uri, schema_cards);
 
@@ -105,9 +107,13 @@ module.exports = {
         register: db_states.register,
         get: db_states.get
     },
+    activities: {
+        register: db_activities.register,
+        get: db_activities.get
+    },
     users: {
         register: db_users.register,
-        updateDoc: db_users.updateDoc,
+        updateData: db_users.updateData,
         cemail: db_users.cemail,
         cpassword: db_users.cpassword,
         changepassword: db_users.changepassword,

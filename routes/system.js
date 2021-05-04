@@ -6,6 +6,7 @@ const router = express.Router({
 const middlewareAPI = require('../middlewares/api');
 const middlewareToken = require('../middlewares/token');
 const getReqProps = require('../modules/getReqProps');
+const hasPrivilege = require('../modules/hasPrivilege');
 
 /**
  * States
@@ -14,7 +15,7 @@ require('./includes/states/all')(router, middlewareAPI);
 
 /**
  * FILES
- */
+*/
 require('./includes/files/all')(router, middlewareToken);
 
 /**
@@ -35,7 +36,7 @@ require('./includes/materials/all')(router, middlewareToken);
 /**
  * HOME
  */
-router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
+router.get(['/'], middlewareToken, async (req, res) => {
   let {
     token
   } = getReqProps(req, [
@@ -46,7 +47,7 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
 
   return res.status(200).render('system', {
     title: 'Grupo Mave Digital',
-    privilege,
+    privilege: hasPrivilege.alias(privilege.reverse()[0]),
     router: 'Sistema/Tela Inicial.',
     menus: [
       {
@@ -56,6 +57,14 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
         enabled: true,
         title: 'Home',
         onclick: "home()"
+      },
+      {
+        type: 'normal',
+        icon: 'settings',
+        first: false,
+        enabled: hasPrivilege.staff(privilege),
+        title: 'Painel de Controle',
+        onclick: "cpanel()"
       },
       {
         type: 'collapse',
@@ -80,10 +89,10 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
         title: 'Manuais',
         items: [
           {
-            title: 'GLPI',
+            title: 'HelpDesk',
             icon: 'book',
             enabled: true,
-            onclick: 'manuals(\'glpi\')'
+            onclick: 'manuals(\'helpdesk\')'
           },
           {
             title: 'Monday',
@@ -92,14 +101,6 @@ router.get(['/', '/:usr_token'], middlewareToken, async (req, res) => {
             onclick: 'manuals(\'monday\')'
           }
         ]
-      },
-      {
-        type: 'normal',
-        icon: 'credit-card',
-        first: false,
-        enabled: privilege === 'administrador' || privilege === 'moderador' ? true : false,
-        title: 'Cartões Digitais',
-        onclick: "cards_control()"
       },
       {
         type: 'collapse',

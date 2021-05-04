@@ -20,11 +20,9 @@ let Schema = mongoose.Schema;
 
 /**
  * @private Restrito ao escopo global
- * @type {{}}
- * @description Importa a classe Schema do mongoose
- * @default mongoose.Schema
+ * @description Timer
  */
-const dateEx = require('../modules/dateEx');
+const moment = require('../modules/moment');
 
 /**
  * @private Restrito ao escopo global
@@ -85,10 +83,9 @@ let schema = new Schema({
         unique: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
-    privilege: { // Tipo de acesso (administrator, comum e etc)
-        type: String,
-        trim: true,
-        default: 'comum'
+    privilege: { // Tipo de acesso (administrator, supervisor, moderador, comum e etc)
+        type: [String],
+        default: ['comum']
     },
     fotoPerfil: { // Foto de Perfil
         type: String,
@@ -105,7 +102,9 @@ let schema = new Schema({
     password: { // Senha de usuário
         type: String,
         trim: true,
-        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+        required: [true, '{PATH} este campo é obrigatório para sua segurança'],
+        maxlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
+        minlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
     },
     name: { // Nome
         type: String,
@@ -186,10 +185,14 @@ let schema = new Schema({
             twofactor: false
         }
     },
+    status: {
+        type: Boolean,
+        default: true
+    },
     created: {
         type: String,
         trim: true,
-        default: dateEx.now(),
+        default: moment.format(),
         required: [true, '{PATH} este campo é obrigatório']
     }
 });

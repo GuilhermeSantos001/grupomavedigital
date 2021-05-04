@@ -32,6 +32,7 @@ append content
     else
       each card in cards
         +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+  p(id="app-data-page" class=`path stringPath ${path}` style="display: none;")
   script.
     (function () {
       'use strict';

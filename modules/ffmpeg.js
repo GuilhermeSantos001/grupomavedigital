@@ -6,9 +6,13 @@ const fs = require('fs');
 const readline = require('readline');
 const path = require('./localPath');
 const randomId = require('./randomId');
-
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
+/**
+ * @class FFMPEG
+ * @author GuilhermeSantos001
+ * @description Usado para converter os videos em formato de streamer.
+ */
 class FFMPEG {
     constructor() {
         this.pathbase = 'public/assets/hls';

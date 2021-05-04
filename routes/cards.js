@@ -7,6 +7,9 @@ const middlewareToken = require('../middlewares/token');
 const getReqProps = require('../modules/getReqProps');
 const mongodb = require('../modules/mongodb');
 const LZString = require('lz-string');
+const hasPrivilege = require('../modules/hasPrivilege');
+// const baseurl = process.env.NODE_ENV != "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
+const baseurl = 'https://grupomavedigital.com.br';
 
 router.get(['/control'], middlewareToken, async (req, res) => {
   let {
@@ -19,10 +22,11 @@ router.get(['/control'], middlewareToken, async (req, res) => {
     { privilege } = token['data'],
     { cards } = await mongodb.cards.get();
 
-  if (privilege !== 'administrador' && privilege !== 'moderador')
+  if (!hasPrivilege.staff(privilege))
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital - Acesso Negado!',
       message: 'Você não tem privilégio para acessar a pagina.',
+      path: 'cpanel',
       menus: [{
         type: 'normal',
         icon: 'rotate-ccw',
@@ -37,8 +41,9 @@ router.get(['/control'], middlewareToken, async (req, res) => {
     return res.status(200).render('cards-control', {
       title: 'Grupo Mave Digital',
       router: 'Sistema/Cartões Digitais/Gerenciamento.',
-      privilege,
-      baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+      path: 'cpanel',
+      privilege: hasPrivilege.alias(privilege.reverse()[0]),
+      baseurl,
       cards,
       cardItems: cards.map(card => card['id']).join(','),
       cardsCompressData: LZString.compressToEncodedURIComponent(JSON.stringify(cards)),
@@ -78,10 +83,11 @@ router.get(['/register'], middlewareToken, async (req, res) => {
 
   const { privilege } = token['data'];
 
-  if (privilege !== 'administrador' && privilege !== 'moderador')
+  if (!hasPrivilege.staff(privilege))
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital - Acesso Negado!',
       message: 'Você não tem privilégio para acessar a pagina.',
+      path: 'cpanel',
       menus: [{
         type: 'normal',
         icon: 'rotate-ccw',
@@ -96,7 +102,8 @@ router.get(['/register'], middlewareToken, async (req, res) => {
     return res.status(200).render('cards-create', {
       title: 'Grupo Mave Digital',
       router: 'Sistema/Cartões Digitais/Criar.',
-      privilege,
+      privilege: hasPrivilege.alias(privilege.reverse()[0]),
+      path: 'cpanel',
       menus: [{
         type: 'normal',
         icon: 'plus-square',
@@ -145,7 +152,7 @@ router.get(['/card/', '/card', '/card/:id'], async (req, res) => {
 
   return res.status(200).render('card-view', {
     title: 'Grupo Mave Digital - Cartão Digital',
-    baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+    baseurl,
     id: card['id'],
     version: card['version'],
     photoPath: card['photo']['path'],
@@ -180,7 +187,7 @@ router.get(['/'], async (req, res) => {
   return res.status(200).render('cards', {
     title: 'Grupo Mave Digital',
     router: 'Sistema/Cartões Digitais.',
-    baseurl: `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+    baseurl,
     cards,
     menus: [{
       type: 'normal',

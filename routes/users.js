@@ -3,7 +3,8 @@ const router = express.Router({
   strict: true,
   caseSensitive: true
 });
-const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+const getClientAddress = require('../modules/getClientAddress');
+const debug = require('../modules/log4');
 const middlewareAPI = require('../middlewares/api');
 const middlewareToken = require('../middlewares/token');
 const jwt = require('../modules/jwt');
@@ -12,17 +13,7 @@ const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
 const nodemailer = require('../modules/nodemailer');
 const LZString = require('lz-string');
-const pdf = null;
-
-function usr_econfirm(email, username, authorization) {
-  return nodemailer.usr_econfirm(email, username, jwt.sign({
-    'econfirm': true,
-    'email': email,
-    'authorization': authorization
-  }, '7d'))
-    .then(info => console.log(`Email de confirmação da conta enviado para ${email}`, info))
-    .catch(err => console.log(`Email de confirmação da conta não pode ser enviado para ${email}`, err))
-}
+const hasPrivilege = require('../modules/hasPrivilege');
 
 router.get(['/perfil'], middlewareToken, async (req, res) => {
   let {
@@ -48,6 +39,8 @@ router.get(['/perfil'], middlewareToken, async (req, res) => {
           cnpj = users['cnpj'],
           location = users['location'];
 
+        debug.info('user', `Pagina de Perfil(${token['data']['auth']}) Entregue`, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/perfil`]);
+
         return res.status(200).render('userPerfil', {
           title: 'Grupo Mave Digital',
           router: 'Sistema/Minha Conta/Minhas Informações.',
@@ -66,7 +59,7 @@ router.get(['/perfil'], middlewareToken, async (req, res) => {
             title: 'Voltar',
             onclick: 'gotoSystem()'
           }],
-          privilege: privilege,
+          privilege: hasPrivilege.alias(privilege.reverse()[0]),
           fotoPerfil: fotoPerfil,
           email: email,
           username: username,
@@ -84,20 +77,26 @@ router.get(['/perfil'], middlewareToken, async (req, res) => {
           }
         })
       })
-      .catch(err => res.status(400).render('error', {
-        title: 'Grupo Mave Digital',
-        menus: [{
-          type: 'normal',
-          icon: 'rotate-ccw',
-          first: false,
-          enabled: true,
-          title: 'Voltar',
-          onclick: "gotoSystem()"
-        }],
-        message: 'A pagina não está disponível, tente novamente mais tarde!',
-        error: err
-      }))
+      .catch(err => {
+        debug.fatal('user', `Erro na entrega da pagina de Perfil(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/perfil`]);
+
+        return res.status(400).render('error', {
+          title: 'Grupo Mave Digital',
+          menus: [{
+            type: 'normal',
+            icon: 'rotate-ccw',
+            first: false,
+            enabled: true,
+            title: 'Voltar',
+            onclick: "gotoSystem()"
+          }],
+          message: 'A pagina não está disponível, tente novamente mais tarde!',
+          error: err
+        });
+      })
   } catch (err) {
+    debug.fatal('user', `Erro na entrega da pagina de Perfil(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/perfil`]);
+
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital',
       menus: [{
@@ -133,16 +132,24 @@ router.get(['/notifications'], middlewareToken, async (req, res) => {
 
         const notifications = users['notifications'];
 
+        debug.info('user', `Notificações da conta(${token['data']['auth']}) Entregue`, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/notifications`]);
+
         return res.status(200).send({
           message: 'Grupo Mave Digital',
           notifications
         })
       })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
+      .catch(err => {
+        debug.fatal('user', `Erro na hora de entregar as notificações da conta(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/notifications`]);
+
+        return res.status(400).send({
+          message: 'Grupo Mave Digital - Error!!!',
+          error: err
+        });
+      })
   } catch (err) {
+    debug.fatal('user', `Erro na hora de entregar as notificações da conta(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - GET`, `Path: /user/notifications`]);
+
     return res.status(400).send({
       message: 'Grupo Mave Digital - Error!!!',
       error: err
@@ -183,16 +190,24 @@ router.post(['/notifications/create'], middlewareToken, async (req, res) => {
 
     mongoDB.users.notificationCreate(authorization, title, subtitle, body, background, expires)
       .then(response => {
+        debug.info('user', `Notificação criada para a conta(${authorization})`, [`IP-Request: ${getClientAddress(req)}`, `Router - POST`, `Path: /user/notifications/create`]);
+
         return res.status(200).send({
           message: 'Grupo Mave Digital',
           data: response
         })
       })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
+      .catch(err => {
+        debug.fatal('user', `Erro na hora de criar a notificação para a conta(${authorization})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - POST`, `Path: /user/notifications/create`]);
+
+        return res.status(400).send({
+          message: 'Grupo Mave Digital - Error!!!',
+          error: err
+        });
+      })
   } catch (err) {
+    debug.fatal('user', `Erro na hora de criar a notificação para a conta(${authorization})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - POST`, `Path: /user/notifications/create`]);
+
     return res.status(400).send({
       message: 'Grupo Mave Digital - Error!!!',
       error: err
@@ -220,458 +235,24 @@ router.post(['/notifications/remove'], middlewareToken, async (req, res) => {
 
     mongoDB.users.notificationRemove(token['data']['auth'], id)
       .then(response => {
+        debug.info('user', `Notificação removida para a conta(${token['data']['auth']})`, `Notificação ID(${id})`, [`IP-Request: ${getClientAddress(req)}`, `Server - POST`, `Path: /user/notifications/remove`]);
+
         return res.status(200).send({
           message: 'Grupo Mave Digital',
           data: response
         })
       })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
+      .catch(err => {
+        debug.fatal('user', `Erro na hora de remover a notificação para a conta(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - POST`, `Path: /user/notifications/remove`]);
 
-/**
- * DOCS
- */
-router.get(['/docs'], middlewareToken, async (req, res) => {
-  let {
-    token
-  } = getReqProps(req, [
-    'token'
-  ]);
-
-  try {
-    mongoDB.users.get('authorization', token['data']['auth'])
-      .then(response => {
-        let users = response['users'] != undefined ? response['users'] : response['user'];
-
-        if (users.length >= 1) users = users[0];
-
-        const
-          authorization = token['data']['auth'],
-          name = users['name'],
-          surname = users['surname'],
-          cnpj = users['cnpj'],
-          location = users['location'],
-          dateEx = require('../modules/dateEx');
-
-        return res.status(200).render('userDocs', {
-          title: 'Grupo Mave Digital',
-          menus: [{
-            type: 'normal',
-            first: true,
-            enabled: true,
-            title: 'Meus Documentos',
-            onclick: ""
-          }, {
-            type: 'normal',
-            first: false,
-            enabled: true,
-            title: 'Voltar',
-            onclick: 'gotoSystem()'
-          }],
-          authorization: authorization,
-          day: dateEx.nowToPDF('day'),
-          month: dateEx.nowToPDF('month'),
-          year: dateEx.nowToPDF('year'),
-          name: name,
-          surname: surname,
-          street: location['street'],
-          number: location['number'],
-          district: location['district'],
-          state: location['state'],
-          city: location['city'],
-          zipcode: location['zipcode'],
-          cnpj: cnpj,
-          valor: '5.846,00',
-          acordo_de_confidencialidade: users['docs']['acordo_de_confidencialidade'] || {},
-          confidencialidade_assinado: ((filter) => {
-            if (
-              users['docs'][filter] &&
-              users['docs'][filter]['status']
-            )
-              return 'Assinado';
-            else if (
-              users['docs'][filter] &&
-              users['docs'][filter]['reading'] === 'pending'
-            )
-              return 'Aguardando Assinatura';
-            else if (
-              users['docs'][filter] &&
-              users['docs'][filter]['reading'] === 'analyze'
-            )
-              return 'Aguardando Aprovação';
-            else
-              return 'Disponível'
-          })('acordo_de_confidencialidade'),
-          acordo_de_parceria: users['docs']['acordo_de_parceria'] || {},
-          parceria_assinado: ((filter) => {
-            if (
-              users['docs'][filter] &&
-              users['docs'][filter]['status']
-            )
-              return 'Assinado';
-            else if (
-              users['docs'][filter] &&
-              users['docs'][filter]['reading'] === 'pending'
-            )
-              return 'Aguardando Assinatura';
-            else if (
-              users['docs'][filter] &&
-              users['docs'][filter]['reading'] === 'analyze'
-            )
-              return 'Aguardando Aprovação';
-            else
-              return 'Disponível';
-          })('acordo_de_parceria')
-        })
-      })
-      .catch(err => res.status(400).render('error', {
-        title: 'Grupo Mave Digital',
-        menus: [{
-          type: 'normal',
-          icon: 'rotate-ccw',
-          first: false,
-          enabled: true,
-          title: 'Voltar',
-          onclick: "gotoSystem()"
-        }],
-        message: 'A pagina não está disponível, tente novamente mais tarde!',
-        error: err
-      }))
-  } catch (err) {
-    return res.status(400).render('error', {
-      title: 'Grupo Mave Digital',
-      menus: [{
-        type: 'normal',
-        icon: 'rotate-ccw',
-        first: false,
-        enabled: true,
-        title: 'Voltar',
-        onclick: "gotoSystem()"
-      }],
-      message: 'Ocorreu um erro com o servidor, tente novamente mais tarde!',
-      error: err
-    });
-  }
-});
-
-router.get(['/docs/print'], middlewareToken, async (req, res) => {
-  let {
-    authorization,
-    docname,
-    name,
-    street,
-    number,
-    district,
-    state,
-    city,
-    zipcode,
-    cnpj,
-    day,
-    month,
-    year,
-    valor
-  } = getReqProps(req, [
-    'authorization',
-    'docname',
-    'name',
-    'street',
-    'number',
-    'district',
-    'state',
-    'city',
-    'zipcode',
-    'cnpj',
-    'day',
-    'month',
-    'year',
-    'valor'
-  ]);
-
-  try {
-    /**
-     * Validação dos parametros
-     */
-    if (
-      typeof authorization != 'string' ||
-      typeof docname != 'string' ||
-      typeof name != 'string' ||
-      typeof street != 'string' ||
-      typeof number != 'string' ||
-      typeof district != 'string' ||
-      typeof state != 'string' ||
-      typeof city != 'string' ||
-      typeof zipcode != 'string' ||
-      typeof cnpj != 'string' ||
-      typeof day != 'string' ||
-      typeof month != 'string' ||
-      typeof year != 'string' ||
-      typeof valor != 'string'
-    )
-      return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-    const
-      path = require('../modules/localPath'),
-      fs = require('fs'),
-      folder = path.localPath('public/docs'),
-      fileName = `${String(authorization).toLowerCase()} ${String(docname).toLowerCase()}`;
-
-    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
-
-    if (docname === 'ACORDO DE CONFIDENCIALIDADE') {
-      pdf.termo_confidencialidade(String(fileName).replace(/\s{1,}/g, '_').toLowerCase(), {
-        name,
-        street,
-        number,
-        district,
-        state,
-        city,
-        zipcode,
-        cnpj,
-        day,
-        month,
-        year
-      })
-        .then(() => pdf_send())
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    } else if (docname === 'ACORDO DE PARCERIA') {
-      pdf.contrato_de_parceria(String(fileName).replace(/\s{1,}/g, '_').toLowerCase(), {
-        name,
-        street,
-        number,
-        district,
-        state,
-        city,
-        zipcode,
-        cnpj,
-        day,
-        month,
-        year,
-        valor,
-        clientes: []
-      })
-        .then(() => pdf_send())
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    } else
-      return res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: `O nome do arquivo ${docname} não faz parte dos nossos layouts.`
-      });
-
-    function pdf_send() {
-      let file = `${folder}\\${String(fileName).replace(/\s{1,}/g, '_').toLowerCase()}.pdf`;
-
-      mongoDB.users.updateDoc(authorization, {
-        doc: '',
-        readuser: '',
-        reading: 'reading',
-        status: false,
-        postdate: ''
-      }, String(docname).replace(/\s{1,}/g, '_').toLowerCase())
-        .then(() => {
-          if (fs.existsSync(file)) {
-            return res.download(file);
-          } else {
-            return res.status(400).send({
-              message: 'Grupo Mave Digital - Error!!!',
-              error: `Arquivo ${file} não foi encontrado no servidor.`
-            });
-          }
-        })
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    }
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/docs/upload'], middlewareToken, async (req, res) => {
-  let {
-    authorization,
-    docname
-  } = getReqProps(req, [
-    'authorization',
-    'docname'
-  ]);
-
-  /**
-   * Validação dos parametros
-   */
-  if (
-    typeof authorization != 'string' ||
-    typeof docname != 'string'
-  )
-    return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-  try {
-    const
-      path = require('../modules/localPath'),
-      fs = require('fs'),
-      file = req.files.attachment,
-      folder = path.localPath('public/docs'),
-      fileName = `${String(authorization).toLowerCase()} ${String(docname).toLowerCase()}`,
-      fileFullPath = `${folder}\\${String(fileName).replace(/\s{1,}/g, '_').toLowerCase()}.pdf`,
-      dateEx = require('../modules/dateEx');
-
-    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
-
-    file.mv(fileFullPath, (error) => {
-      if (error)
         return res.status(400).send({
           message: 'Grupo Mave Digital - Error!!!',
           error: err
-        });
-
-      mongoDB.users.updateDoc(authorization, {
-        doc: fileFullPath,
-        reading: 'pending',
-        postdate: dateEx.now()
-      }, String(docname).replace(/\s{1,}/g, '_').toLowerCase())
-        .then(() => {
-          return res.status(200).send('Documento hospedado com sucesso!');
         })
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    })
+      })
   } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
+    debug.fatal('user', `Erro na hora de remover a notificação para a conta(${token['data']['auth']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Router - POST`, `Path: /user/notifications/remove`]);
 
-router.post(['/docs/approve'], middlewareToken, async (req, res) => {
-  let {
-    token,
-    authorization,
-    docname
-  } = getReqProps(req, [
-    'token',
-    'authorization',
-    'docname'
-  ]);
-
-  /**
-   * Validação dos parametros
-   */
-  if (
-    typeof authorization != 'string' ||
-    typeof docname != 'string'
-  )
-    return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-  try {
-    const
-      path = require('../modules/localPath'),
-      fs = require('fs'),
-      folder = path.localPath('public/docs'),
-      fileName = `${String(authorization).toLowerCase()} ${String(docname).toLowerCase()}`,
-      fileFullPath = `${folder}\\${String(fileName).replace(/\s{1,}/g, '_').toLowerCase()}.pdf`;
-
-    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
-
-    if (fs.existsSync(fileFullPath)) {
-      mongoDB.users.updateDoc(authorization, {
-        readuser: token['data']['auth'],
-        reading: 'approve',
-        status: true
-      }, String(docname).replace(/\s{1,}/g, '_').toLowerCase())
-        .then(() => {
-          return res.status(200).send('Documento aprovado com sucesso!');
-        })
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    } else {
-      return res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: `Arquivo ${fileFullPath} não foi encontrado no servidor.`
-      });
-    }
-  } catch (err) {
-    return res.status(400).send({
-      message: 'Grupo Mave Digital - Error!!!',
-      error: err
-    });
-  }
-});
-
-router.post(['/docs/reject'], middlewareToken, async (req, res) => {
-  let {
-    token,
-    authorization,
-    docname
-  } = getReqProps(req, [
-    'token',
-    'authorization',
-    'docname'
-  ]);
-
-  /**
-   * Validação dos parametros
-   */
-  if (
-    typeof authorization != 'string' ||
-    typeof docname != 'string'
-  )
-    return res.status(401).send('Grupo Mave Digital - Parameters values is not valid.');
-
-  try {
-    const
-      path = require('../modules/localPath'),
-      fs = require('fs'),
-      folder = path.localPath('public/docs'),
-      fileName = `${String(authorization).toLowerCase()} ${String(docname).toLowerCase()}`,
-      fileFullPath = `${folder}\\${String(fileName).replace(/\s{1,}/g, '_').toLowerCase()}.pdf`;
-
-    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
-
-    if (fs.existsSync(fileFullPath)) {
-      fs.unlinkSync(fileFullPath);
-
-      mongoDB.users.updateDoc(authorization, {
-        readuser: token['data']['auth'],
-        reading: '',
-        status: false
-      }, String(docname).replace(/\s{1,}/g, '_').toLowerCase())
-        .then(() => {
-          return res.status(200).send('Documento recusado com sucesso!');
-        })
-        .catch(err => res.status(400).send({
-          message: 'Grupo Mave Digital - Error!!!',
-          error: err
-        }))
-    } else {
-      return res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: `Arquivo ${fileFullPath} não foi encontrado no servidor.`
-      });
-    }
-  } catch (err) {
     return res.status(400).send({
       message: 'Grupo Mave Digital - Error!!!',
       error: err
@@ -684,6 +265,8 @@ router.post(['/docs/reject'], middlewareToken, async (req, res) => {
  */
 
 router.get(['/auth'], async (req, res) => {
+  debug.info('', `Pagina de Autenticação Entregue`, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth`]);
+
   return res.status(200).render('login', {
     title: 'Grupo Mave Digital',
     menus: [
@@ -741,10 +324,12 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
           twofactor
         } = users[0]['authentication'];
 
+        debug.info('user', `Pagina de Configurações de Segurança Entregue`, auth, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security`]);
+
         return res.status(200).render('auth-security', {
           title: 'Grupo Mave Digital',
           router: 'Configurações/Segurança.',
-          privilege,
+          privilege: hasPrivilege.alias(privilege.reverse()[0]),
           menus: [{
             type: 'normal',
             icon: 'shield',
@@ -764,11 +349,17 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
           twofactor_enabled: twofactor['enabled']
         })
       })
-      .catch(err => res.status(400).send({
-        message: 'Grupo Mave Digital - Error!!!',
-        error: err
-      }))
+      .catch(err => {
+        debug.fatal('user', `Erro na entrega da pagina de Configurações de Segurança`, auth, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security`]);
+
+        return res.status(400).send({
+          message: 'Grupo Mave Digital - Error!!!',
+          error: err
+        })
+      })
   } catch (err) {
+    debug.fatal('user', `Erro na entrega da pagina de Configurações de Segurança`, auth, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security`]);
+
     return res.status(400).send({
       message: 'Grupo Mave Digital - Error!!!',
       error: err
@@ -776,7 +367,7 @@ router.get(['/auth/security'], middlewareToken, async (req, res) => {
   }
 });
 
-router.get(['/auth/security/retrieve/twofactor', '/auth/security/retrieve/twofactor/:token'], async (req, res) => {
+router.get(['/auth/security/retrieve/twofactor'], async (req, res) => {
   let {
     token
   } = getReqProps(req, [
@@ -796,34 +387,55 @@ router.get(['/auth/security/retrieve/twofactor', '/auth/security/retrieve/twofac
     jwt.verify(token)
       .then(decoded => {
         if (decoded['data'] && decoded['data']['econfirm']) {
+          debug.info('user', `Pagina de Recuperação da Conta Entregue`, decoded['data']['authorization'], [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
           mongoDB.users.retrieve(decoded['data']['authorization'])
-            .then(() => res.status(200).render('account-retrieve', {
-              'message': 'Sua conta foi recuperada, obrigado. Você já pode fechar essa janela!',
-              'menus': []
-            }))
-            .catch(err => res.status(400).render('account-retrieve', {
-              'message': 'Sua conta não pode ser recuperada. Fale com o administrador.',
-              'menus': [],
-              'error': err
-            }))
-        } else
+            .then(() => {
+              debug.info('user', `Conta(${decoded['data']['authorization']}) Recuperada`, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
+              return res.status(200).render('account-retrieve', {
+                'message': 'Sua conta foi recuperada, obrigado. Você já pode fechar essa janela!',
+                'menus': []
+              })
+            })
+            .catch(err => {
+              debug.fatal('user', `Erro na hora de recuperar a conta(${decoded['data']['authorization']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
+              return res.status(400).render('account-retrieve', {
+                'message': 'Sua conta não pode ser recuperada. Fale com o administrador.',
+                'menus': [],
+                'error': err
+              })
+            })
+        } else {
+          debug.fatal('user', `Erro na hora de recuperar a conta`, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
           return res.status(400).render('account-retrieve', {
             'message': 'Link de recuperação da conta está invalido!',
             'menus': []
           })
+        }
       })
-      .catch(err => res.status(400).render('account-retrieve', {
-        'message': 'Link de recuperação da conta está expirado. Solicite um novo email de recuperação da conta.',
-        'menus': [{
-          type: 'normal',
-          first: false,
-          enabled: true,
-          title: 'Voltar',
-          onclick: 'gotoSystem()'
-        }],
-        'error': err
-      }));
+      .catch(err => {
+        let msg = 'Link de recuperação da conta está expirado. Solicite um novo email de recuperação da conta.';
+
+        debug.fatal('user', msg, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
+        return res.status(400).render('account-retrieve', {
+          'message': msg,
+          'menus': [{
+            type: 'normal',
+            first: false,
+            enabled: true,
+            title: 'Voltar',
+            onclick: 'gotoSystem()'
+          }],
+          'error': err
+        })
+      });
   } catch (err) {
+    debug.fatal('user', `Erro na exibição da pagina de recuperação da conta`, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/auth/security/retrieve/twofactor`]);
+
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital',
       menus: [{
@@ -840,7 +452,7 @@ router.get(['/auth/security/retrieve/twofactor', '/auth/security/retrieve/twofac
   }
 });
 
-router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
+router.get(['/email/confirm'], async (req, res) => {
   let {
     token
   } = getReqProps(req, [
@@ -861,22 +473,29 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
       .then(decoded => {
         if (decoded['data'] && decoded['data']['econfirm']) {
           mongoDB.users.cemail(decoded['data']['email'], decoded['data']['authorization'])
-            .then(() => res.status(200).render('email-confirm', {
-              'title': 'Bem-vindo(a) a nossa plataforma digital!',
-              'message': 'Sua conta foi verificada, obrigado. Você já pode fechar essa janela!',
-              'menus': [{
-                type: 'normal',
-                icon: 'home',
-                first: false,
-                enabled: true,
-                title: 'Home',
-                onclick: "home()"
-              }]
-            }))
-            .catch(err => res.status(400).render('email-confirm', {
-              'title': 'Desculpe por isso!',
-              'message': 'Sua conta não pode ser verificada. Fale com o administrador.',
-              'menus': [{
+            .then(() => {
+              debug.info('user', `Conta(${decoded['data']['authorization']}) confirmada`, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/email/confirm`]);
+
+              return res.status(200).render('email-confirm', {
+                'title': 'Bem-vindo(a) a nossa plataforma digital!',
+                'message': 'Sua conta foi verificada, obrigado. Você já pode fechar essa janela!',
+                'menus': [{
+                  type: 'normal',
+                  icon: 'home',
+                  first: false,
+                  enabled: true,
+                  title: 'Home',
+                  onclick: "home()"
+                }]
+              })
+            })
+            .catch(err => {
+              debug.fatal('user', `Erro na hora de confirmar a conta(${decoded['data']['authorization']})`, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/email/confirm`]);
+
+              return res.status(400).render('email-confirm', {
+                'title': 'Desculpe por isso!',
+                'message': 'Sua conta não pode ser verificada. Fale com o administrador.',
+                'menus': [{
                   type: 'normal',
                   icon: 'chevron-left',
                   first: false,
@@ -884,12 +503,17 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
                   title: 'Voltar',
                   onclick: 'home()'
                 }],
-              'error': err
-            }))
-        } else
+                'error': err
+              })
+            })
+        } else {
+          let msg = 'Link de confirmação da conta está invalido!';
+
+          debug.fatal('user', msg, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/email/confirm`]);
+
           return res.status(400).render('email-confirm', {
-              'title': 'Talvez seja necessário pedir outro email para o administrador.',
-              'message': 'Link de confirmação da conta está invalido!',
+            'title': 'Talvez seja necessário pedir outro email para o administrador.',
+            'message': msg,
             'menus': [{
               type: 'normal',
               icon: 'chevron-left',
@@ -899,21 +523,30 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
               onclick: 'home()'
             }],
           })
+        }
       })
-      .catch(err => res.status(400).render('email-confirm', {
-              'title': 'Não se preocupe, você poderá ativar sua conta em outro momento.',
-              'message': 'Link de confirmação da conta está expirado. Solicite um novo email de confirmação da conta para o administrador.',
-        'menus': [{
-          type: 'normal',
-          icon: 'chevron-left',
-          first: false,
-          enabled: true,
-          title: 'Voltar',
-          onclick: 'home()'
-        }],
-        'error': err
-      }));
+      .catch(err => {
+        let msg = 'Link de confirmação da conta está expirado. Solicite um novo email de confirmação da conta para o administrador.';
+
+        debug.fatal('user', msg, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/email/confirm`]);
+
+        return res.status(400).render('email-confirm', {
+          'title': 'Não se preocupe, você poderá ativar sua conta em outro momento.',
+          'message': msg,
+          'menus': [{
+            type: 'normal',
+            icon: 'chevron-left',
+            first: false,
+            enabled: true,
+            title: 'Voltar',
+            onclick: 'home()'
+          }],
+          'error': err
+        })
+      });
   } catch (err) {
+    debug.fatal('user', `Erro na exibição da pagina de confirmação da conta`, err, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /user/email/confirm`]);
+
     return res.status(400).render('error', {
       title: 'Grupo Mave Digital',
       menus: [{
@@ -931,6 +564,8 @@ router.get(['/email/confirm', '/email/confirm/:token'], async (req, res) => {
 });
 
 router.use(['*'], async (req, res) => {
+  debug.fatal('user', `Pagina não roteada solicitada`, req.originalUrl, [`IP-Request: ${getClientAddress(req)}`, `Server - *`, `Path: /user/*`]);
+
   return res.status(404).render('error', {
     title: 'Grupo Mave Digital',
     menus: [{

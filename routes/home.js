@@ -3,19 +3,27 @@ const router = express.Router({
   strict: true,
   caseSensitive: true
 });
-const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+
+const getClientAddress = require('../modules/getClientAddress');
+
+
 const geoip = require('geoip-lite');
+
+const debug = require('../modules/log4');
 
 router.get('/ipinfo', function (req, res) {
   let ip = getClientAddress(req),
-    info = geoip.lookup(ip) || { 'country': 'Unknow', 'region': 'Unknow', 'city': 'Unknow' };
+    geoIP = geoip.lookup(ip) || { 'country': 'Unknow', 'region': 'Unknow', 'city': 'Unknow' },
+    info = {
+      country: geoIP['country'],
+      region: geoIP['region'],
+      city: geoIP['city'],
+      ip
+    }
 
-  return res.status(200).send({
-    country: info['country'],
-    region: info['region'],
-    city: info['city'],
-    ip: ip
-  });
+  debug.info('', `Enviadas informações sobre o IP`, info, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /info`]);
+
+  return res.status(200).send(info);
 });
 
 router.get('/stream', function (req, res) {
@@ -107,7 +115,9 @@ router.get('/thumbs/*', function (req, res) {
 });
 
 /* GET home page. */
-router.get(`/`, async (req, res) => {
+router.get([`/`], async (req, res) => {
+  debug.info('', `Home Page Entregue`, [`IP-Request: ${getClientAddress(req)}`, `Server - GET`, `Path: /`]);
+
   return res.render('index', {
     title: 'Grupo Mave Digital',
     menus: [{

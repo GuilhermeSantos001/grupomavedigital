@@ -23,7 +23,7 @@ module.exports = (SchemaDirectiveVisitor, defaultFieldResolver) =>
                             throw new Error('Token informado está invalido!');
 
                         try {
-                            await mongoDB.users.verifytoken(result['data']['auth'], token, internetadress, internetadress)
+                            await mongoDB.users.verifytoken(result['data']['auth'], token, internetadress, internetadress);
 
                             return resolve.apply(this, args);
                         } catch (err) {

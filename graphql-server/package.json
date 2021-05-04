@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "",
+  "main": "index.js",
+  "author": "GuilhermeSantos001",
+  "license": "MIT",
   "scripts": {
     "installer": "npm i --global yarn && yarn install --audit",
     "update": "yarn upgrade --latest",
@@ -10,31 +13,18 @@
     "start": "node -r dotenv/config index dotenv_config_path=../.env"
   },
   "dependencies": {
-    "apollo-server-core": ">=2.23.0",
-    "apollo-server-express": ">=2.23.0",
-    "apollo-server-lambda": ">=2.23.0",
-    "cors": ">=2.8.5",
-    "express-device": ">=0.4.2",
-    "graphql": ">=15.5.0",
-    "graphql-cost-analysis": ">=1.0.3",
-    "graphql-playground-html": ">=1.6.29",
-    "graphql-yoga": ">=1.18.3",
-    "jpeg-js": ">=0.4.3",
-    "lz-string": ">=1.4.4",
-    "merge-graphql-schemas": ">=1.7.8",
-    "useragent": ">=2.3.0"
+    "express-device": "^0.4.2",
+    "graphql-cost-analysis": "^1.0.3",
+    "graphql-yoga": "^1.18.3",
+    "lz-string": "^1.4.4",
+    "merge-graphql-schemas": "^1.7.8",
+    "useragent": "^2.3.0"
   },
   "devDependencies": {
-    "dotenv": ">=8.2.0",
-    "nodemon": ">=2.0.7"
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.7"
   },
   "resolutions": {
-    "graphql": ">=15.5.0",
-    "apollo-server-core": ">=2.23.0",
-    "apollo-server-express": ">=2.23.0",
-    "apollo-server-lambda": ">=2.23.0"
-  },
-  "main": "index.js",
-  "author": "GuilhermeSantos001",
-  "license": "MIT"
+    "graphql": "^15.5.0"
+  }
 }

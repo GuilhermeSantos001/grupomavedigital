@@ -1,12 +1,5 @@
 extends ../layout
 
-append head
-  style.
-    .bg-twofactor {
-      color: rgba(255, 255, 255, 1);
-      background-color: rgba(0, 0, 0, .5);
-    }
-
 append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Definições de Segurança
@@ -16,42 +9,57 @@ append content
   div(class="d-flex flex-column col-12 mt-3")
     nav(class="col-12 mt-2")
       div(class="nav nav-tabs" id="nav-tab" role="tablist")
-        a(class="menu-storage col-12 nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Configurações Gerais
+        a(class="col-12 col-lg-6 nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true") Alteração de Senha
+        a(class="col-12 col-lg-6 nav-link" id="nav-home2-tab" data-bs-toggle="tab" href="#nav-home2" role="tab" aria-controls="nav-home2" aria-selected="false") Autenticação de dois fatores
     div(class="tab-content col-12" id="nav-tabContent")
       div(class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab")
         div(class="col-12 mt-3 border-bottom")
           div(class="row")
-            div(class="col-12 mb-2 fw-bold text-muted text-center")
-              h4(class="fw-bold text-center text-muted border-bottom p-2") Mudança de Senha
-            div(class="col-12 mb-3")
-              label(for="password-actual") Senha Atual
-              input(type="password" class="form-control mb-2" id="password-actual")
-            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-3")
-              label(for="password-new") Nova Senha
-              input(type="password" class="form-control" id="password-new")
-            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-2")
-              label(for="password-new-confirm") Confirme a nova senha
-              input(type="password" class="form-control mb-2" id="password-new-confirm")
-            div(class="col-12 text-muted")
-              div(class="alert alert-secondary" role="alert")
-                | Utilize senhas com letras, numeros, caracteres especiais.
-              div(class="alert alert-secondary" role="alert")
-                | Não utilize senhas conhecidas como: 123, abcd, a1b2b3...
-              div(class="alert alert-secondary" role="alert")
-                | Nós não temos posse de sua senha, lembre-se de armazenada em um local seguro, para se lembrar depois.
-            div(class="col-12 mb-3")
+            div(class="col-12 my-2")
+              h4(class="fw-bold text-center text-mave1 border-bottom p-2") Alteração de Senha
+            div(class="col-12 my-2")
+              label(for="password-new" class="py-1 fw-bold text-mave1") Senha Atual
+              div(class="input-group")
+                div(class="input-group-text text-mave1") #[span(class="material-icons" style="font-size: 2rem;") lock]
+                input(type="password" class="form-control" id="password-actual" placeholder="Sua senha...")
+                div(class="input-group-text visibility-password" id="visibility-password-1") #[span(class="material-icons" style="font-size: 2rem;") visibility_off]
+            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 my-2")
+              label(for="password-new" class="py-1 fw-bold text-mave1") Nova Senha
+              div(class="input-group")
+                div(class="input-group-text text-mave1") #[span(class="material-icons" style="font-size: 2rem;") enhanced_encryption]
+                input(type="password" class="form-control" id="password-new" placeholder="Digite a nova senha...")
+                div(class="input-group-text visibility-password" id="visibility-password-2") #[span(class="material-icons" style="font-size: 2rem;") visibility_off]
+            div(class="col-sm-12 col-md-12 col-lg-6 col-xl-6 my-2")
+              label(for="password-new" class="py-1 fw-bold text-mave1") Confirme a nova senha
+              div(class="input-group")
+                div(class="input-group-text text-mave1") #[span(class="material-icons" style="font-size: 2rem;") enhanced_encryption]
+                input(type="password" class="form-control" id="password-new-confirm" placeholder="Confirme a nova senha...")
+                div(class="input-group-text visibility-password" id="visibility-password-3") #[span(class="material-icons" style="font-size: 2rem;") visibility_off]
+            div(class="col-12 my-2")
               button(type="button" class="btn btn-mave1 col-12" id="button-define-new-password" disabled) Definir a nova senha
-            div(class="col-12 mb-2 fw-bold text-muted text-center")
-              h4(class="fw-bold text-center text-muted border-bottom p-2") Configuração de Autenticação
+            div(class="col-12 my-2 border-top text-muted")
+              div(class="bd-callout bd-callout-mave1 fw-bold")
+                p Utilize senhas com letras, numeros, caracteres especiais.
+              div(class="bd-callout bd-callout-mave1 fw-bold")
+                p As senhas devem ter no mínimo 6 caracteres e no máximo 256.
+              div(class="bd-callout bd-callout-mave1 fw-bold")
+                p Não utilize senhas conhecidas como: 123, abcd, a1b2b3...
+              div(class="bd-callout bd-callout-mave1 fw-bold")
+                p Nós não temos posse de sua senha, lembre-se de armazenada em um local seguro, para se lembrar depois.
+      div(class="tab-pane fade" id="nav-home2" role="tabpanel" aria-labelledby="nav-home2-tab")
+        div(class="col-12 mt-3 border-bottom")
+          div(class="row")
+            div(class="col-12 my-2")
+              h4(class="fw-bold text-center text-mave1 border-bottom p-2") Autenticação de dois fatores
             if (!twofactor_enabled)
-              div(class="col-12 mb-3")
-                label(for="sessions-auth-OATH-selected") Autenticação de dois fatores
-                select(class="form-select mb-2" id="sessions-auth-OATH-selected" onchange="$('#sessions-auth-OATH-selected').val() !== 'null' ? $('#button-generate-qr-code').attr('disabled', false) : $('#button-generate-qr-code').attr('disabled', true)")
+              div(class="col-12 my-3")
+                label(for="sessions-auth-OATH-selected" class="py-1 fw-bold text-mave1") Autenticação de dois fatores
+                select(class="form-select mb-3" id="sessions-auth-OATH-selected" onchange="$('#sessions-auth-OATH-selected').val() !== 'null' ? $('#button-generate-qr-code').attr('disabled', false) : $('#button-generate-qr-code').attr('disabled', true)")
                   option(value="true") Habilitado
                   option(selected value="null") Desabilitado
                 button(type="button" class="btn btn-mave1 col-12" id="button-generate-qr-code" onclick="window.app.signtwofactor()" disabled) Gerar QR CODE
             else
-              div(class="col-12 mb-3")
+              div(class="col-12 my-3")
                 label(for="sessions-auth-OATH-disabled") Autenticação de dois fatores
                 button(type="button" class="btn btn-mave1 col-12" id="sessions-auth-OATH-disabled" onclick="window.app.disabledtwofactor()") Desabilitar
   script(src="/javascripts/auth-security.min.js")

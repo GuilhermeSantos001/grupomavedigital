@@ -2,7 +2,7 @@ const jwt = require('../modules/jwt');
 const getReqProps = require('../modules/getReqProps');
 const mongoDB = require('../modules/mongodb');
 const LZString = require('lz-string');
-const getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+const getClientAddress = require('../modules/getClientAddress');
 
 module.exports = (req, res, next) => {
     const token = getReqProps(req, ['usr_token'])['usr_token'];
@@ -14,10 +14,11 @@ module.exports = (req, res, next) => {
         'logout',
     ]);
 
-    if (!token) return res.status(401).send({
-        success: false,
-        error: 'No token code provided!'
-    });
+    if (!token)
+        return res.status(401).send({
+            success: false,
+            error: 'No token code provided!'
+        });
 
     jwt.verify(token)
         .then(async result => {

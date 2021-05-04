@@ -36,6 +36,11 @@ server.on('listening', onListening);
 require('../modules/hls-server')(server);
 
 /**
+ * Web Socket Server
+ */
+require('../modules/socket-io')(server);
+
+/**
  * Normalize a port into a number, string, or false.
  */
 

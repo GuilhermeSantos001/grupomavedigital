@@ -1,16 +1,17 @@
-const { GraphQLServer } = require('graphql-yoga');
+const { GraphQLServer, PubSub } = require('graphql-yoga');
 const schemaDirectives = require('./schemaDirectives/index');
 const typeDefs = require('./typeDefs/index');
 const resolvers = require('./resolvers/index');
 const { default: costAnalysis } = require('graphql-cost-analysis');
 const device = require('express-device');
 const useragent = require('useragent');
+const pubsub = new PubSub();
 
 const server = new GraphQLServer({
     typeDefs,
     resolvers,
     schemaDirectives,
-    context: req => ({ ...req }),
+    context: req => ({ ...req, pubsub }),
 });
 
 server.express.use(device.capture({

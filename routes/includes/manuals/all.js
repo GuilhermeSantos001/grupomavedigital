@@ -1,5 +1,6 @@
 module.exports = (router, middlewareToken) => {
     const getReqProps = require('../../../modules/getReqProps');
+    const hasPrivilege = require('../../../modules/hasPrivilege');
 
     router.get(['/manuals/:id'], middlewareToken, async (req, res) => {
         let {
@@ -15,8 +16,8 @@ module.exports = (router, middlewareToken) => {
         let menus = [];
 
         switch (String(id).toLowerCase()) {
-            case 'glpi':
-                menus = require('./menus/glpi.json');
+            case 'helpdesk':
+                menus = require('./menus/helpdesk.json');
                 break;
             case 'monday':
                 menus = require('./menus/monday.json');
@@ -41,7 +42,7 @@ module.exports = (router, middlewareToken) => {
         return res.status(200).render('manual', {
             title: 'Grupo Mave Digital',
             router: `Sistema/Manuais/${id}.`,
-            privilege,
+            privilege: hasPrivilege.alias(privilege.reverse()[0]),
             id,
             menus
         })

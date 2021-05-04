@@ -4,6 +4,7 @@
 :root {
     --primary-color: #004a6e;
     --secondary-color: #f6d816;
+    --disabled-color: #cfcfcf;
     --body-color: #fcfcfc;
     --body-text-color: #2b2b2b;
     .btn-mave1 {
@@ -45,6 +46,7 @@
 .dark-theme:root {
     --primary-color: #212529;
     --secondary-color: #6c757d;
+    --disabled-color: #cfcfcf;
     --body-color: #3e3d3f;
     --body-text-color: #dadada;
 }
@@ -55,5 +57,6 @@
 $colors-custom: (
     "mave1": var(--primary-color),
     "mave2": var(--secondary-color),
+    "disabled": var(--disabled-color),
 );
 $theme-colors: map-merge($theme-colors, $colors-custom);

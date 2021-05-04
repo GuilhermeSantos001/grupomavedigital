@@ -26,9 +26,6 @@
             usr_internetadress = LZString.compressToEncodedURIComponent(String(internetadress));
 
         if (usr_auth.length <= 0 || usr_pwd.length <= 0) {
-            usr_auth = LZString.compressToEncodedURIComponent(String($('#input_authorization').val()));
-            usr_pwd = LZString.compressToEncodedURIComponent(String($('#input_password').val()));
-
             window.app.loading(false);
 
             if (!$('#input_authorization, #input_password').hasClass('is-invalid')) {
@@ -41,6 +38,9 @@
 
             return window.app.alerting('Preencha os campos obrigatórios. Tente novamente!')
         }
+
+        usr_auth = LZString.compressToEncodedURIComponent(String($('#input_authorization').val()));
+        usr_pwd = LZString.compressToEncodedURIComponent(String($('#input_password').val()));
 
         fetch(window.app.graphqlUrl, {
             "method": "POST",
@@ -77,6 +77,8 @@
                 return document.location = `${window.app.baseurl}/system?usr_token=${user['token']}&usr_internetadress=${internetadress}`;
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }

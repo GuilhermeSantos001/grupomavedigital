@@ -8,6 +8,8 @@ const smtp = {
         'pass': String(process.env.SMTP_PASSWORD)
     }
 };
+// const baseurl = process.env.NODE_ENV != "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
+const baseurl = 'https://grupomavedigital.com.br';
 
 module.exports = {
     getTestMessageUrl: nodemailer.getTestMessageUrl,
@@ -35,7 +37,7 @@ module.exports = {
             });
         })
     },
-    usr_econfirm: (email, username, token) => {
+    usr_econfirm: (email, username, temporarypass, token) => {
         return new Promise(async (resolve, reject) => {
             const transporter = nodemailer.createTransport(smtp);
             transporter.verify((err, success) => {
@@ -49,7 +51,13 @@ module.exports = {
                         text: `Prezado(a) ${username}, por gentileza clique no link a baixo para confirmar sua conta!`,
                         html: `
                         <b>Prezado(a) ${username}, por gentileza clique no link a baixo para confirmar sua conta!</b><br />
-                        <a href="http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}/user/email/confirm/${token}">Acesse sua conta</a><br />
+                        <a href="${baseurl}/user/email/confirm?token=${token}">Acesse sua conta</a><br /><br />
+                        <br>
+                        ${temporarypass ? `
+                            Senha temporaria: ${temporarypass}<br />
+                            - Recomendamos que você troque a senha assim que acessar o portal.
+                        `.trim() : ''}
+                        </br><br /><br />
                         Esse link está valido por 7 dias. Após esse periodo você deverá solicitar ao administrador outro email de confirmação.<br />
                         Caso você não tenha feito essa solicitação, ignore este e-mail.<br />
                         - Atenciosamente, Equipe de TI.
@@ -108,7 +116,7 @@ module.exports = {
                         text: `Prezado(a) ${username}, por gentileza clique no link a baixo para recuperar sua conta!`,
                         html: `
                         <b>Prezado(a) ${username}, por gentileza clique no link a baixo para recuperar sua conta!</b><br />
-                        <a href="http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}/user/auth/security/retrieve/twofactor/${token}">Recuperar a Conta!</a><br />
+                        <a href="${baseurl}/user/auth/security/retrieve/twofactor?token=${token}">Recuperar a Conta!</a><br />
                         Esse link está valido por 7 dias. Após esse periodo você deverá solicitar outro email de recuperação.<br />
                         Caso você não tenha feito essa solicitação, ignore este e-mail.<br />
                         - Atenciosamente, Equipe de TI.

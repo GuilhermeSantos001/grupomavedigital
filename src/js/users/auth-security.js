@@ -18,7 +18,11 @@
                 $('#password-new-confirm').val().length > 0 &&
                 $('#password-new').val() == $('#password-new-confirm').val()
             ) {
-                $('#button-define-new-password').attr('disabled', false);
+                window.app.check_password($('#password-new').val())
+                    .then(() => {
+                        $('#button-define-new-password').attr('disabled', false);
+                    })
+                    .catch(error => window.app.alerting(error));
             } else if (
                 $('#password-new').val().length > 0 &&
                 $('#password-new-confirm').val().length > 0 &&
@@ -34,12 +38,11 @@
 
             const { auth, token, internetadress } = await window.app.storage_get_userInfo();
 
-            const
-                usr_auth = LZString.compressToEncodedURIComponent(auth),
-                usr_pwd = LZString.compressToEncodedURIComponent($('#password-actual').val()),
-                usr_newPwd = LZString.compressToEncodedURIComponent($('#password-new').val());
+            let
+                usr_pwd = $('#password-actual').val(),
+                usr_newPwd = $('#password-new').val();
 
-            if (usr_auth.length <= 0 || usr_pwd.length <= 0 || usr_newPwd.length <= 0) {
+            if (usr_pwd.length <= 0 || usr_newPwd.length <= 0) {
                 window.app.loading(false);
 
                 if (!$('#password-actual, #password-new').hasClass('is-invalid')) {
@@ -52,6 +55,11 @@
 
                 return window.app.alerting('Preencha os campos obrigatórios. Tente novamente!')
             }
+
+            const usr_auth = LZString.compressToEncodedURIComponent(auth);
+
+            usr_pwd = LZString.compressToEncodedURIComponent($('#password-actual').val());
+            usr_newPwd = LZString.compressToEncodedURIComponent($('#password-new').val());
 
             fetch(window.app.graphqlUrl, {
                 "method": "POST",
@@ -75,6 +83,8 @@
                     return window.app.alerting(data['changePassword']);
                 })
                 .catch(err => {
+                    window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                     throw new Error(err);
                 });
         };
@@ -126,6 +136,8 @@
                 return showQRCode(data['authSignTwofactor']);
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -167,6 +179,8 @@
                 }
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -200,6 +214,8 @@
                 return window.app.alerting(`Sua autenticação de dois fatores, está ativada!`, 1000, function () { document.location.reload(); });
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -233,8 +249,49 @@
                 return window.app.alerting(`Sua autenticação de dois fatores, está desativada!`, 1000, function () { document.location.reload(); });
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
+    }
+
+    // ======================================================================
+    // Events
+    //
+    document.getElementById('visibility-password-1').onclick = e => {
+        let span = $(e.target).children().length > 0 ? $(e.target).children() : $(e.target);
+
+        if (span.text() === 'visibility_off') {
+            span.text('visibility');
+            $('#password-actual').attr('type', 'text');
+        } else {
+            span.text('visibility_off');
+            $('#password-actual').attr('type', 'password');
+        }
+    }
+
+    document.getElementById('visibility-password-2').onclick = e => {
+        let span = $(e.target).children().length > 0 ? $(e.target).children() : $(e.target);
+
+        if (span.text() === 'visibility_off') {
+            span.text('visibility');
+            $('#password-new').attr('type', 'text');
+        } else {
+            span.text('visibility_off');
+            $('#password-new').attr('type', 'password');
+        }
+    }
+
+    document.getElementById('visibility-password-3').onclick = e => {
+        let span = $(e.target).children().length > 0 ? $(e.target).children() : $(e.target);
+
+        if (span.text() === 'visibility_off') {
+            span.text('visibility');
+            $('#password-new-confirm').attr('type', 'text');
+        } else {
+            span.text('visibility_off');
+            $('#password-new-confirm').attr('type', 'password');
+        }
     }
 
     // ======================================================================

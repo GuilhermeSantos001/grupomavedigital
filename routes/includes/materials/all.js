@@ -1,6 +1,6 @@
 module.exports = (router, middlewareToken) => {
     const getReqProps = require('../../../modules/getReqProps'),
-        LZString = require('lz-string');
+        hasPrivilege = require('../../../modules/hasPrivilege');
 
     router.get(['/materials/:id'], middlewareToken, async (req, res) => {
         let {
@@ -52,7 +52,7 @@ module.exports = (router, middlewareToken) => {
         return res.status(200).render('material', {
             title: 'Grupo Mave Digital',
             router: `Sistema/Materiais/${id}`,
-            privilege,
+            privilege: hasPrivilege.alias(privilege.reverse()[0]),
             id,
             resources,
             menus: [{

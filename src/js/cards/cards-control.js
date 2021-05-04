@@ -161,7 +161,11 @@
                                 fetchCards = 'no more data...';
                             }
                         })
-                        .catch(error => { throw new Error(error) });
+                        .catch(error => {
+                            window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
+                            throw new Error(error);
+                        });
                 }, 1000);
             }
         }
@@ -748,7 +752,11 @@
                                 })
                                 .catch((err, details) => console.error(err, details))
                         };
-                    }).catch(e => { throw new Error(e) });
+                    }).catch(e => {
+                        window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
+                        throw new Error(e);
+                    });
                 };
 
             if (document.getElementById(`card-remove-${id}`))

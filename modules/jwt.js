@@ -19,7 +19,7 @@ module.exports = {
     verify: (token) => {
         return new Promise((resolve, reject) => {
             jwt.verify(token, secret, (err, decoded) => {
-                return err ? reject(err) : resolve(decoded);
+                return err === null ? resolve(decoded) : reject(err);
             });
         })
     }

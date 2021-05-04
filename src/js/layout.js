@@ -259,6 +259,8 @@
                 }
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -307,7 +309,6 @@
                     opacity: 0,
                     left: `-=${MAIN_MENU['width']}`
                 }, window.app.ONE_SECOND_DELAY / 2, function () {
-                    console.log('HIDE!!!');
                     $('#app-menu').hide();
                     $('#app-content').removeClass(MAIN_MENU['class']);
                     MAIN_MENU['freeze'] = false;
@@ -320,7 +321,6 @@
                     opacity: 1,
                     left: `+=${MAIN_MENU['width']}`
                 }, window.app.ONE_SECOND_DELAY / 2, function () {
-                    console.log('SHOW!!!');
                     $('#app-content').addClass(MAIN_MENU['class']);
                     MAIN_MENU['freeze'] = false;
                 });
@@ -356,6 +356,8 @@
                 internetadress: `${data['ip']}`
             }))
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -395,9 +397,11 @@
                     return document.location = `${baseurl}`;
                 }
                 else
-                    return window.app.alerting('Não foi possível desconectar. Tente Novamente mais tarde!');
+                    return window.app.alerting('Não foi possível desconectar. Tente novamente mais tarde!');
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -436,6 +440,8 @@
                     return window.app.alerting('Não foi possível desconectar. Tente Novamente mais tarde!');
             })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -496,6 +502,8 @@
                     process_notifications();
                 })
                 .catch(err => {
+                    window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                     throw new Error(err);
                 });
     }
@@ -521,6 +529,8 @@
         })
             .then(() => { })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -540,8 +550,10 @@
             }`
         })
             .then(response => response.json())
-            .then(({ data }) => { console.log(data); })
+            .then(({ data }) => { })
             .catch(err => {
+                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
                 throw new Error(err);
             });
     }
@@ -623,27 +635,34 @@
         return new Promise(async (resolve, reject) => {
             if (files.length <= 0) return;
 
-            const formData = new FormData();
+            const formData = new FormData(),
+                { token, internetadress } = await window.app.storage_get_userInfo();
 
             formData.append('attachment', files[0]);
 
-            const { token, internetadress } = await window.app.storage_get_userInfo();
-
-            fetch(`${baseurl}/system/upload/file`, {
+            const settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://grupomavedigital.com.br/system/upload/file",
                 "method": "POST",
                 "headers": {
                     "usr_token": token,
                     "usr_internetadress": internetadress,
                     "custompath": custompath
                 },
-                "body": formData
-            })
-                .then(response => {
-                    response.json().then(data => {
-                        return resolve(data);
-                    })
+                "processData": false,
+                "contentType": false,
+                "mimeType": "multipart/form-data",
+                "data": formData
+            };
+
+            $.ajax(settings)
+                .done(function (response) {
+                    return resolve(JSON.parse(response));
                 })
-                .catch(error => reject(error))
+                .catch(function (error) {
+                    return reject(error);
+                });
         })
     };
 
@@ -1166,7 +1185,47 @@
                 }
             })
         );
-    }
+    };
+
+    // ======================================================================
+    // Password
+    //
+    function check_password(password = '') {
+        return new Promise((resolve, reject) => {
+            var strength = 0;
+
+            if (password.match(/[a-z]+/)) {
+                strength += 1;
+            }
+
+            if (password.match(/[A-Z]+/)) {
+                strength += 1;
+            }
+
+            if (password.match(/[0-9]+/)) {
+                strength += 1;
+            }
+
+            if (password.match(/[$@#&!]+/)) {
+                strength += 1;
+
+            }
+
+            if (password.length < 6) {
+                return reject("A senha deve conter no mínimo 6 caracteres.");
+            }
+
+            if (password.length > 256) {
+                return reject("A senha deve conter no máximo 256 caracteres.");
+            }
+
+            if (strength < 4) {
+                return reject("A senha deve conter no mínimo uma letra minúscula e maiúscula, um número e um caractere especial: $@#&!");
+            }
+
+            return resolve();
+        });
+    };
 
     // ======================================================================
     // General Functions
@@ -1177,7 +1236,19 @@
         if (token) {
             let path = typeof window.app.pagedata('path') === 'string' ? window.app.pagedata('path') : '';
 
-            document.location = `${window.app.baseurl}/system${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
+            document.location = `${window.app.baseurl}/system/${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
+        } else {
+            document.location = `${window.app.baseurl}/user/auth`;
+        }
+    }
+
+    async function goto() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        if (token) {
+            let path = typeof window.app.pagedata('path') === 'string' ? window.app.pagedata('path') : '';
+
+            document.location = `${window.app.baseurl}/${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
         } else {
             document.location = `${window.app.baseurl}/user/auth`;
         }
@@ -1238,6 +1309,18 @@
         document.location = `${window.app.baseurl}/system/materials/${id}?usr_token=${token}&usr_internetadress=${internetadress}`;
     }
 
+    async function cpanel() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/system/cpanel?usr_token=${token}&usr_internetadress=${internetadress}`;
+    }
+
+    async function cpanel_users_register() {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        document.location = `${window.app.baseurl}/system/cpanel/users/register?usr_token=${token}&usr_internetadress=${internetadress}`;
+    }
+
     // ======================================================================
     // Globals (APP)
     //
@@ -1281,7 +1364,7 @@
         { 'alias': 'storage_get_userInfo', 'function': storage_get_userInfo },
         { 'alias': 'storage_set_userInfo', 'function': storage_set_userInfo },
         { 'alias': 'storage_clear_userInfo', 'function': storage_clear_userInfo },
-        { 'alias': 'graphqlUrl', 'function': baseurl.replace(':3000', ':4080') },
+        { 'alias': 'graphqlUrl', 'function': `${baseurl}/api` },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
         { 'alias': 'loading', 'function': loading },
         { 'alias': 'alerting', 'function': alerting },
@@ -1304,7 +1387,9 @@
         { 'alias': 'cardRemove', 'function': cardRemove },
         { 'alias': 'time_diference_hours', 'function': time_diference_hours },
         { 'alias': 'filter_input', 'function': filter_input },
+        { 'alias': 'check_password', 'function': check_password },
         { 'alias': 'gotoSystem', 'function': gotoSystem },
+        { 'alias': 'goto', 'function': goto },
         { 'alias': 'login', 'function': login },
         { 'alias': 'helpdesk', 'function': helpdesk },
         { 'alias': 'perfil', 'function': perfil },
@@ -1314,6 +1399,8 @@
         { 'alias': 'cards_register', 'function': cards_register },
         { 'alias': 'app_meu_rh', 'function': app_meu_rh },
         { 'alias': 'manuals', 'function': manuals },
-        { 'alias': 'materials', 'function': materials }
+        { 'alias': 'materials', 'function': materials },
+        { 'alias': 'cpanel', 'function': cpanel },
+        { 'alias': 'cpanel_users_register', 'function': cpanel_users_register },
     ].forEach(prop => window.app[prop['alias']] = prop['function']);
 })();

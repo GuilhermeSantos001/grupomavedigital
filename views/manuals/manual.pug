@@ -9,7 +9,7 @@ append content
         p(class="text-wrap")
             | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
     div
-        if (id === 'GLPI')
-            include ../includes/manuals/glpi.pug
+        if (id === 'HELPDESK')
+            include ../includes/manuals/helpdesk.pug
         else if(id === 'MONDAY')
             include ../includes/manuals/monday.pug

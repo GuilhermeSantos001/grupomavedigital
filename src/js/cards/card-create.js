@@ -406,7 +406,11 @@
                     ]
                 ).then(() => {
                     window.app.loading(false);
-                }).catch(e => { throw new Error(e) });
+                }).catch(e => {
+                    window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
+                    throw new Error(e) ;
+                });
             })
             .catch((err, details) => console.error(err, details))
     };

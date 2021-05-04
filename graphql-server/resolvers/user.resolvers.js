@@ -1,11 +1,14 @@
 const
-    getClientAddress = req => (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress,
+    getClientAddress = require('../../modules/getClientAddress'),
     getReqProps = require('../../modules/getReqProps'),
     mongoDB = require('../../modules/mongodb'),
     jwt = require('../../modules/jwt'),
     bcrypt = require('../../modules/bcrypt'),
     nodemailer = require('../../modules/nodemailer'),
-    LZString = require('lz-string');
+    debug = require('../../modules/log4'),
+    randomId = require('../../modules/randomId'),
+    generatePassword = require('../../modules/generatePassword'),
+    moment = require('../../modules/moment');
 
 module.exports = {
     Query: {
@@ -21,11 +24,20 @@ module.exports = {
 
                 if (user['authentication']['twofactor']['enabled'] && twofactortoken.length <= 0) {
                     userInfo['token'] = 'twofactorVerify';
-                    return userInfo;
+
+                    let error = `Verificação de duas etapas solicitadas para ${usr_auth}`;
+                    debug.info('user', error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogin`]);
+
+                    throw new Error(error);
                 } else if (user['authentication']['twofactor']['enabled'] && twofactortoken.length > 0) {
                     if (!await mongoDB.users.verifytwofactor(usr_auth, twofactortoken)) {
                         userInfo['token'] = 'twofactorDenied';
-                        return userInfo;
+
+                        let error = `Código de verificação de duas etapas invalido para ${usr_auth}`;
+
+                        debug.info('user', error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogin`]);
+
+                        throw new Error(error);
                     }
                 }
 
@@ -47,32 +59,40 @@ module.exports = {
                     }
                 });
 
+                await mongoDB.activities.register(randomId(undefined, 12), moment.format(), getClientAddress(request), user['authorization'], user['privilege'], 'Se conectou ao sistema');
+
+                debug.info('user', `Usuário(${usr_auth}) conectado`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogin`]);
+
                 return userInfo;
             } catch (error) {
+                debug.fatal('user', `Erro ocorrido na hora de conectar o usuário(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogin`]);
+
                 throw new Error(error);
             }
         },
         authLogout: async (source, { usr_auth, usr_token }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-                usr_token = LZString.decompressFromEncodedURIComponent(usr_token) || usr_token;
-
                 await mongoDB.users.disconnected(usr_auth, { ip: getClientAddress(request), token: usr_token });
+
+                debug.info('user', `Usuário(${usr_auth}) desconectado`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogout`]);
 
                 return true;
             } catch (error) {
+                debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${usr_auth}) desconectado`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authLogout`]);
+
                 throw new Error(error);
             }
         },
         authExpired: async (source, { usr_auth, usr_token }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-                usr_token = LZString.decompressFromEncodedURIComponent(usr_token) || usr_token;
-
                 await mongoDB.users.disconnected(usr_auth, { ip: getClientAddress(request), token: usr_token });
+
+                debug.info('user', `Sessão do usuário(${usr_auth}) expirada`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authExpired`]);
 
                 return true;
             } catch (error) {
+                debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão do usuário(${usr_auth}) está expirada`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: authExpired`]);
+
                 throw new Error(error);
             }
         },
@@ -82,25 +102,45 @@ module.exports = {
 
                 if (users.length >= 1) users = users[0];
 
+                let { temporarypass } = getReqProps(request, ['temporarypass']);
+
+                temporarypass = Boolean(temporarypass);
+
                 const email = users['email'],
-                    username = users['username'];
+                    username = users['username'],
+                    auth = users['auth'];
+
+                let password;
+
+                if (temporarypass) {
+                    password = generatePassword.unique();
+                    await mongoDB.users.changepassword(auth, password);
+                }
 
                 // Envia o email de confirmação da conta
-                return nodemailer.usr_econfirm(String(email).toLowerCase(), String(username), jwt.sign({
+                return nodemailer.usr_econfirm(String(email).toLowerCase(), String(username), temporarypass ? String(password) : false, jwt.sign({
                     'econfirm': true,
                     'email': String(email).toLowerCase(),
                     'authorization': String(usr_auth).toLowerCase()
                 }, '7d'))
-                    .then(info => { return true; })
-                    .catch(err => { return false; })
+                    .then(info => {
+                        debug.info('user', `Email de confirmação da conta enviado para o usuário(${usr_auth})`, info, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: emailResendConfirm`]);
+                        return true;
+                    })
+                    .catch(err => {
+                        debug.fatal('user', `Erro ocorrido na hora de enviar o email de confirmação da conta do usuário(${usr_auth})`, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: emailResendConfirm`]);
+                        return false;
+                    })
             } catch (error) {
+                debug.fatal('user', `Erro ocorrido na hora de enviar o email de confirmação da conta do usuário(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Query`, `Method: emailResendConfirm`]);
+
                 throw new Error(error);
             }
         }
     },
     Mutation: {
         registerUser: async (parent, {
-            usr_authorization,
+            authorization,
             privilege,
             fotoPerfil,
             username,
@@ -111,36 +151,18 @@ module.exports = {
             cpfcnpj,
             location
         }, { request }) => {
+            let { temporarypass } = getReqProps(request, ['temporarypass']);
+
+            temporarypass = Boolean(temporarypass);
+
+            if (temporarypass)
+                password = generatePassword.unique();
+
             try {
-                const { encodeuri } = getReqProps(request, ['encodeuri']);
-
-                if (eval(String(encodeuri))) {
-                    usr_authorization = LZString.decompressFromEncodedURIComponent(usr_authorization);
-                    privilege = LZString.decompressFromEncodedURIComponent(privilege);
-                    fotoPerfil = LZString.decompressFromEncodedURIComponent(fotoPerfil);
-                    username = LZString.decompressFromEncodedURIComponent(username);
-                    password = LZString.decompressFromEncodedURIComponent(password);
-                    name = LZString.decompressFromEncodedURIComponent(name);
-                    surname = LZString.decompressFromEncodedURIComponent(surname);
-                    email = LZString.decompressFromEncodedURIComponent(email);
-                    cpfcnpj = LZString.decompressFromEncodedURIComponent(cpfcnpj);
-                    location = JSON.parse(LZString.decompressFromEncodedURIComponent(location));
-                }
-
-                location = {
-                    street: String(location[0]),
-                    number: Number(location[1]),
-                    complement: String(location[2]),
-                    district: String(location[3]),
-                    state: String(location[4]),
-                    city: String(location[5]),
-                    zipcode: String(location[6])
-                }
-
                 return bcrypt.crypt(password)
                     .then(password_encode => {
                         return mongoDB.users.register(
-                            usr_authorization,
+                            authorization,
                             privilege,
                             fotoPerfil || 'avatar.png',
                             username,
@@ -150,83 +172,144 @@ module.exports = {
                             value: email
                         },
                             cpfcnpj,
-                            location
+                            {
+                                street: String(location[0]),
+                                number: Number(location[1]),
+                                complement: String(location[2]),
+                                district: String(location[3]),
+                                state: String(location[4]),
+                                city: String(location[5]),
+                                zipcode: String(location[6])
+                            }
                         )
                             .then(() => {
                                 // Envia o email de confirmação da conta
-                                return nodemailer.usr_econfirm(String(email).toLowerCase(), String(username), jwt.sign({
+                                return nodemailer.usr_econfirm(String(email).toLowerCase(), String(username), temporarypass ? String(password) : false, jwt.sign({
                                     'econfirm': true,
                                     'email': String(email).toLowerCase(),
-                                    'authorization': String(usr_authorization).toLowerCase()
+                                    'authorization': String(authorization).toLowerCase()
                                 }, '7d'))
-                                    .then(info => { return `Email de confirmação da conta ${usr_authorization} enviado para ${email}` })
-                                    .catch(err => { throw new Error(`Email de confirmação da conta ${usr_authorization} não pode ser enviado para ${email}`) })
+                                    .then(info => {
+                                        let msg = `Email de confirmação da conta ${authorization} enviado para ${email}`;
+
+                                        debug.info('user', msg, info, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: registerUser`]);
+
+                                        return msg;
+                                    })
+                                    .catch(err => {
+                                        let msg = `Email de confirmação da conta ${authorization} não pode ser enviado para ${email}`;
+
+                                        debug.fatal('user', msg, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: registerUser`]);
+
+                                        throw new Error(err);
+                                    })
                             })
-                            .catch(err => { throw new Error(err) })
+                            .catch(err => {
+                                debug.fatal('user', `Erro ocorrido na hora de enviar o email de confirmação da conta do usuário(${authorization})`, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: registerUser`]);
+
+                                throw new Error(err);
+                            })
                     })
-                    .catch(err => { throw new Error(err) })
+                    .catch(err => {
+                        debug.fatal('user', `Erro ocorrido na hora de encriptar a senha da conta do usuário(${authorization})`, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: registerUser`]);
+
+                        throw new Error(err);
+                    })
             } catch (error) {
+                debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${authorization})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: registerUser`]);
+
+                throw new Error(error);
+            }
+        },
+        updateData: async (parent, {
+            usr_auth,
+            usr_email,
+            usr_username,
+            usr_name,
+            usr_surname,
+            usr_cnpj,
+            usr_location
+        }, { request }) => {
+            try {
+                await mongoDB.users.updateData(usr_auth, {
+                    usr_email,
+                    usr_username,
+                    usr_name,
+                    usr_surname,
+                    usr_cnpj,
+                    usr_location: JSON.parse(usr_location)
+                });
+
+                debug.info('user', `As informações da conta(${usr_auth}) foram atualizadas`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: updateData`]);
+
+                return true;
+            } catch (error) {
+                debug.fatal('user', `Erro na hora de atualizar as informações da conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: updateData`]);
+
                 throw new Error(error);
             }
         },
         changePassword: async (parent, { usr_auth, pwd, new_pwd }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-                pwd = LZString.decompressFromEncodedURIComponent(pwd) || pwd;
-                new_pwd = LZString.decompressFromEncodedURIComponent(new_pwd) || new_pwd;
-
                 const password_encode = await bcrypt.crypt(new_pwd);
+
                 await mongoDB.users.cpassword(usr_auth, pwd);
+
                 await mongoDB.users.changepassword(usr_auth, password_encode);
 
-                return `Senha alterada com sucesso!`;
+                let msg = `Senha da conta(${usr_auth}) alterada com sucesso`;
+
+                debug.info('user', msg, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: changePassword`]);
+
+                return msg;
             } catch (error) {
+                debug.fatal('user', `Erro na hora de alterar a senha para a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: changePassword`]);
+
                 throw new Error(error);
             }
         },
         authSignTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-
                 const { qrcode } = await mongoDB.users.signtwofactor(usr_auth);
+
+                debug.info('user', `QRCode gerado para a conta(${usr_auth})`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authSignTwofactor`]);
 
                 return qrcode;
             } catch (error) {
+                debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authSignTwofactor`]);
+
                 throw new Error(error);
             }
         },
         authVerifyTwofactor: async (parent, { usr_auth, usr_qrcode }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-                usr_qrcode = LZString.decompressFromEncodedURIComponent(usr_qrcode) || usr_qrcode;
-
                 return await mongoDB.users.verifytwofactor(usr_auth, usr_qrcode);
             } catch (error) {
+                debug.fatal('user', `Erro na hora de verificar a autenticação de duas etapas para a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authVerifyTwofactor`]);
+
                 throw new Error(error);
             }
         },
         authEnabledTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-
                 return await mongoDB.users.enabledtwofactor(usr_auth);
             } catch (error) {
+                debug.fatal('user', `Erro na hora de ativar a autenticação de duas etapas para a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authEnabledTwofactor`]);
+
                 throw new Error(error);
             }
         },
         authDisableTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-
                 return await mongoDB.users.disabledtwofactor(usr_auth);
             } catch (error) {
+                debug.fatal('user', `Erro na hora de desativar a autenticação de duas etapas para a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authDisableTwofactor`]);
+
                 throw new Error(error);
             }
         },
         authRetrieveTwofactor: async (parent, { usr_auth }, { request }) => {
             try {
-                usr_auth = LZString.decompressFromEncodedURIComponent(usr_auth) || usr_auth;
-
                 return mongoDB.users.get('authorization', usr_auth)
                     .then(response => {
                         let users = response['users'] || [];
@@ -243,11 +326,22 @@ module.exports = {
                             'econfirm': true,
                             'authorization': usr_auth
                         }, '7d'))
-                            .then(info => { return true })
-                            .catch(err => { return false })
+                            .then(info => {
+                                debug.info('user', `Email de recuperação da conta(${usr_auth}) enviado`, info, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`]);
+                                return true;
+                            })
+                            .catch(err => {
+                                debug.fatal('user', `Erro na hora de enviar o email de recuperação da conta(${usr_auth})`, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`]);
+                                return false;
+                            })
                     })
-                    .catch(err => { return false })
+                    .catch(err => {
+                        debug.fatal('user', `Erro na hora de recuperar a conta(${usr_auth})`, err, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`]);
+                        return false;
+                    })
             } catch (error) {
+                debug.fatal('user', `Erro na hora de recuperar a conta(${usr_auth})`, error, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`]);
+
                 throw new Error(error);
             }
         }

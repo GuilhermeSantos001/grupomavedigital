@@ -1,8 +1,14 @@
-const ffmpeg = require('./ffmpeg');
+const getClientAddress = require('./getClientAddress'),
+    debug = require('./log4');
+
+/**
+ * @class HLS_SERVER
+ * @author GuilhermeSantos001
+ * @description Servidor de Streaming.
+ */
 class HLS_SERVER {
     constructor(server) {
         this.folderPath = 'public\\assets\\hls';
-        this.error = function (error) { throw new Error(error); };
         this.define(server);
     }
 
@@ -10,8 +16,7 @@ class HLS_SERVER {
         const hls = require('hls-server'),
             fs = require('fs'),
             path = require('../modules/localPath'),
-            folderPath = this.folderPath,
-            onError = this.error;
+            folderPath = this.folderPath;
 
         this.server =
             new hls(server, {
@@ -26,7 +31,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError(`HLS - File not exist ${filePath}`);
+                                debug.fatal('hls', `File not exist ${filePath}`, [`IP-Request: ${getClientAddress(req)}`, `Class -> HLS_SERVER`, 'Method -> exists']);
                                 return cb(null, false);
                             }
 
@@ -38,7 +43,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError(`HLS - File not exist ${filePath}`);
+                                debug.fatal('hls', `File not exist ${filePath}`, [`IP-Request: ${getClientAddress(req)}`, `Class -> HLS_SERVER`, 'Method -> getManifestStream']);
                                 return cb(null, false);
                             }
 
@@ -50,7 +55,7 @@ class HLS_SERVER {
 
                         fs.access(filePath, fs.constants.F_OK, function (err) {
                             if (err) {
-                                onError(`HLS - File not exist ${filePath}`);
+                                debug.fatal('hls', `File not exist ${filePath}`, [`IP-Request: ${getClientAddress(req)}`, `Class -> HLS_SERVER`, 'Method -> getSegmentStream']);
                                 return cb(null, false);
                             }
 

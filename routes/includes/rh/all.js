@@ -1,5 +1,6 @@
 module.exports = (router, middlewareToken) => {
-    const getReqProps = require('../../../modules/getReqProps');
+    const getReqProps = require('../../../modules/getReqProps'),
+        hasPrivilege = require('../../../modules/hasPrivilege');
 
     router.get(['/rh/appMeuRH'], middlewareToken, async (req, res) => {
         let {
@@ -13,7 +14,7 @@ module.exports = (router, middlewareToken) => {
         return res.status(200).render('app-meu-rh', {
             title: 'Grupo Mave Digital',
             router: 'Sistema/Recursos Humanos/APP Meu RH.',
-            privilege,
+            privilege: hasPrivilege.alias(privilege.reverse()[0]),
             menus: [{
                 type: 'normal',
                 icon: 'pocket',

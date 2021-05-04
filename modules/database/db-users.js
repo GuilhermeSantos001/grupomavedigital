@@ -1,5 +1,4 @@
-const __twofactor = require('../twofactor'),
-    __router_users_logger = require('../log4').log.router.users;
+const __twofactor = require('../twofactor');
 
 module.exports = (mongoose, uri, schema_users) => {
     return {
@@ -34,7 +33,7 @@ module.exports = (mongoose, uri, schema_users) => {
                 function mongooseConnected() {
                     var user = new schema_users({
                         authorization: String(authorization),
-                        privilege: String(privilege),
+                        privilege,
                         fotoPerfil: String(fotoPerfil),
                         username: String(username),
                         password: String(password),
@@ -96,7 +95,7 @@ module.exports = (mongoose, uri, schema_users) => {
                 }
             });
         },
-        updateDoc: (authorization, data = {}, filter = '') => {
+        updateData: (authorization, data = {}, filter = '') => {
             return new Promise((resolve, reject) => {
                 mongoose.connect(uri, {
                     useUnifiedTopology: true,
@@ -126,14 +125,58 @@ module.exports = (mongoose, uri, schema_users) => {
                         }
 
                         if (user) {
-                            let updateDocs = user['docs'] || {};
+                            if (data['usr_email'] != user['email']['value']) {
+                                data['usr_email_status'] = false;
+                            } else {
+                                data['usr_email'] = user['email']['value'];
+                                data['usr_email_status'] = user['email']['status'];
+                            }
 
-                            updateDocs[filter] = Object.assign(updateDocs[filter] || {}, data);
+                            if (!data['usr_username']) {
+                                data['usr_username'] = user['username'];
+                            }
+
+                            if (!data['usr_name']) {
+                                data['usr_name'] = user['name'];
+                            }
+
+                            if (!data['usr_surname']) {
+                                data['usr_surname'] = user['surname'];
+                            }
+
+                            if (!data['usr_cnpj']) {
+                                data['usr_cnpj'] = user['cnpj'];
+                            }
+
+                            if (!data['usr_location']) {
+                                data['usr_location'] = [
+                                    user['location']['street'],
+                                    user['location']['number'],
+                                    user['location']['complement'],
+                                    user['location']['district'],
+                                    user['location']['state'],
+                                    user['location']['city'],
+                                    user['location']['zipcode']
+                                ];
+                            }
 
                             schema_users.updateOne({
                                 authorization: String(authorization)
                             }, {
-                                docs: updateDocs
+                                email: { value: String(data['usr_email']), status: Boolean(data['usr_email_status']) },
+                                username: String(data['usr_username']),
+                                name: String(data['usr_name']),
+                                surname: String(data['usr_surname']),
+                                cnpj: String(data['usr_cnpj']),
+                                location: {
+                                    street: String(data['usr_location'][0]),
+                                    number: Number(data['usr_location'][1]),
+                                    complement: String(data['usr_location'][2]),
+                                    district: String(data['usr_location'][3]),
+                                    state: String(data['usr_location'][4]),
+                                    city: String(data['usr_location'][5]),
+                                    zipcode: String(data['usr_location'][6])
+                                }
                             }, (err) => {
                                 if (err) {
                                     reject([
@@ -173,25 +216,36 @@ module.exports = (mongoose, uri, schema_users) => {
                 });
 
                 function mongooseConnected() {
-                    schema_users.updateOne({
+                    schema_users.findOne({
                         authorization: String(authorization)
-                    }, {
-                        email: {
-                            value: email,
-                            status: true
-                        }
-                    }, (err) => {
+                    }, (err, user) => {
                         if (err) {
-                            reject([
-                                `Não é possível confirmar a conta com a autorização(${authorization}).`,
-                                err
-                            ]);
+                            reject(`Não foi possível verificar se o usuário com a autorização(${authorization}) já foi registrado.`);
                             return mongoose.connection.close();
                         }
-                        resolve(
-                            `A conta com a autorização(${authorization}) foi confirmada.`
-                        );
-                        return mongoose.connection.close();
+
+                        if (user) {
+                            user['email'] = {
+                                value: email,
+                                status: true
+                            };
+
+                            user.save(function (err) {
+                                if (err) {
+                                    reject([
+                                        `Erro na hora de registrar o usuário com a autorização(${authorization}).`,
+                                        err
+                                    ]);
+                                    return mongoose.connection.close();
+                                }
+
+                                resolve(`Usuário com a autorização(${authorization}) registrado no banco de dados.`);
+                                return mongoose.connection.close();
+                            });
+                        } else {
+                            reject(`Usuário com a autorização(${authorization}) não existe no banco de dados.`);
+                            return mongoose.connection.close();
+                        }
                     });
                 }
             });
@@ -1101,7 +1155,8 @@ module.exports = (mongoose, uri, schema_users) => {
                                         docs: user['docs'],
                                         notifications: user['notifications'],
                                         session: user['session'],
-                                        authentication: user['authentication']
+                                        authentication: user['authentication'],
+                                        status: user['status']
                                     }
                                 })
                             });

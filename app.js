@@ -1,7 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var fileupload = require('express-fileupload');
+var busboy = require('connect-busboy'); //middleware for form/file upload
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var device = require('express-device');
@@ -17,6 +17,7 @@ app.set('views', [
   path.join(__dirname, 'views/rh'),
   path.join(__dirname, 'views/manuals'),
   path.join(__dirname, 'views/materials'),
+  path.join(__dirname, 'views/cpanel'),
 ]);
 app.set('view engine', 'pug');
 app.set('view options', { layout: false });
@@ -26,8 +27,8 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: true
 }));
-app.use(fileupload());
 app.use(cookieParser());
+app.use(busboy());
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1d',
   setHeaders: function (res, path, stat) {
@@ -36,6 +37,10 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 app.use(express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use(express.static(path.join(__dirname, 'node_modules/feather-icons/dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/chart.js/dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/socket.io/client-dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/list.js/dist')));
+app.use(express.static(path.join(__dirname, 'node_modules/please-wait/build')));
 app.use(device.capture({
   parseUserAgent: true
 })), useragent(true);
@@ -47,9 +52,7 @@ const cors = require('cors');
 const corsOptions = {
   "origin": function (origin, callback) {
     if ([
-      `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
-      `https://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
-      'file://',
+      `https://grupomavedigital.com.br`,
       undefined
     ].indexOf(origin) !== -1) {
       callback(null, true);

@@ -3,10 +3,7 @@ extends layout
 append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Bem-Vindo(a)
-  video(
-    class="col-12 d-print-none"
-    playsinline controls crossorigin data-poster="/assets/grupomave-background.png"
-    style="--plyr-color-main: #f6d816; --plyr-captions-text-color: #f6d816; --plyr-captions-background: rgba(0, 0, 0, 0.8);"
-  )
-    source(ref="source" src="/grupo-mave-institucional.m3u8" type="application/x-mpegURL")
+  div(class="d-flex flex-column col-12 p-2")
+    img(src=`/images/tecnologia_e_inovacao.jpg` class="img-fluid col-12 mx-auto d-block shadow")
+    div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
   script(src="/javascripts/index.min.js")

@@ -20,7 +20,7 @@ module.exports = (SchemaDirectiveVisitor, defaultFieldResolver) =>
                                 await jwt.verify(token),
                                 { privilege } = data;
 
-                            return privilege === r;
+                            return privilege.indexOf(r) !== -1;
                         } catch (error) {
                             return false;
                         }

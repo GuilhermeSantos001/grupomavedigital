@@ -3,7 +3,20 @@ function decompress(method, value) {
 
     switch (method) {
         case "lz-string":
-            return LZString.decompressFromEncodedURIComponent(value) || value;
+            try {
+                let decode = LZString.decompressFromEncodedURIComponent(value);
+
+                if (
+                    decode.slice(0, 1).indexOf('[') !== -1 ||
+                    decode.slice(0, 1).indexOf('{') !== -1
+                ) {
+                    return JSON.parse(decode);
+                } else {
+                    return decode;
+                }
+            } catch {
+                return value;
+            }
     }
 }
 
@@ -23,9 +36,7 @@ module.exports = (SchemaDirectiveVisitor, defaultFieldResolver) =>
 
                     Object
                         .keys(props)
-                        .forEach(key => {
-                            newProps[key] = decompress(method, props[key])
-                        });
+                        .forEach(key => newProps[key] = decompress(method, props[key].toString()));
 
                     args[1] = newProps;
 

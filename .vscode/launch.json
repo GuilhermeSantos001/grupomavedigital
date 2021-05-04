@@ -6,7 +6,7 @@
 			"name": "App - JS",
 			"request": "attach",
 			"protocol": "inspector",
-			"port": 9229,
+			"port": 9329,
 			"restart": true,
 			"skipFiles": [
 				"<node_internals>/**"
