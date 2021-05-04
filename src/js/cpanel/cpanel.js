@@ -102,11 +102,25 @@
     //
     const
         socket = io(),
-        __GET_ACTIVITIES = function (limit = 100) {
-            return socket.emit("GET_ACTIVITIES", limit);
+        __GET_ACTIVITIES = async function (limit = 100) {
+            const
+                { token } = await window.app.storage_get_userInfo(),
+                key = {
+                    route: "GET_ACTIVITIES",
+                    value: "$n#ROZjvWYzMS0x4jP9gmPek$0fs^EE*5*xM4r6OBzdI1nTWna"
+                };
+
+            return socket.emit("GET_ACTIVITIES", { token, key }, limit);
         },
-        __GET_CHART_USER_TOTAL = function () {
-            return socket.emit("GET_CHART_USER_TOTAL");
+        __GET_CHART_USER_TOTAL = async function () {
+            const
+                { token } = await window.app.storage_get_userInfo(),
+                key = {
+                    route: "GET_CHART_USER_TOTAL",
+                    value: "*E2Y^oTqE%PEx2qRYVQe!aPcK^fR7VpYQ3hJSyC8PE5w3mSsZ$"
+                };
+
+            return socket.emit("GET_CHART_USER_TOTAL", { token, key });
         };
 
     socket.on("connect", () => {
@@ -118,6 +132,11 @@
         __GET_ACTIVITIES();
         __GET_CHART_USER_TOTAL();
     });
+
+    socket.on(
+        "ACCESS_DANIED",
+        () => console.log('Acesso Negado!!')
+    )
 
     socket.on(
         "POST_ACTIVITIES",
