@@ -780,6 +780,7 @@
     // Cartão Digital
     //
     function cardCreate(
+        id = "",
         version = '1.0',
         photo = {
             path: 'assets/perfil/',
@@ -880,6 +881,7 @@
                 },
                 "body": JSON.stringify({
                     query: `mutation { url: cardCreate(data: { \
+                        id: \"${id}\" \
                         version: \"${version}\" \
                         photo: { path: \"${photo['path']}\", name: \"${photo['name']}\" } \
                         name: \"${name}\" \

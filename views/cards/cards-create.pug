@@ -1,7 +1,7 @@
 extends ../layout
 
 append head
-    link(rel="stylesheet" href="/stylesheets/cards-create.min.css")
+  link(rel="stylesheet" href="/stylesheets/cards-create.min.css")
 append content
   div(class="app-container-page")
     h2 Definições do novo cartão digital.
@@ -107,6 +107,9 @@ append content
       input(class="form-control" type="file" id="input-file" accept="application/pdf")
   div(class="input-group flex-nowrap my-3")
     button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-file" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Arquivo de Apresentação
+  div(class="input-group flex-nowrap my-3")
+    span(class="input-group-text" id="span-cardID") #[i(class="fas fa-search")]
+    input(type="text" class="form-control col-12" id="input-cardID" placeholder="URL Personalizada..." aria-label="span-cardID" aria-describedby="span-cardID" value="")
   div(class="input-group flex-nowrap my-3")
     span(class="input-group-text" id="span-username") #[i(class="fas fa-user-circle")]
     input(type="text" class="form-control col-6" id="input-username" placeholder="Nome do Colaborador" aria-label="span-username" aria-describedby="span-username" value="Nome do Colaborador")
