@@ -269,6 +269,7 @@
             return window.app.alerting('Gere o vCard primeiro!');
 
         const
+            id = $('#input-cardID').val(),
             version = window.app.cardGetVersion(),
             photo = {
                 path: window.app.cardGetPhoto()['path'],
@@ -382,6 +383,7 @@
 
         window.app.loading(true);
         window.app.cardCreate(
+            id,
             version,
             photo,
             name,
