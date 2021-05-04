@@ -28,7 +28,7 @@ module.exports = {
         },
         cardCreate: async (parent, { data }, { request }) => {
             try {
-                const id = randomId(''),
+                const id = data['id'].length > 0 ? data['id'] : randomId(''),
                     { version, photo, name, jobtitle, phones, whatsapp, vcard, footer } = data;
 
                 await mongoDB.cards.register(id, version, photo, name, jobtitle, phones, whatsapp, vcard, footer);
