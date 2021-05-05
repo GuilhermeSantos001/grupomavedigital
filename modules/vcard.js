@@ -27,8 +27,8 @@ module.exports = (vcard) => {
                 fotoPerfil = vcard['photo'];
 
             //set properties
-            vCard.firstname = vcard['firstname'];
-            vCard.lastname = vcard['lastname'];
+            vCard.firstName = vcard['firstname'];
+            vCard.lastName = vcard['lastname'];
             vCard.organization = vcard['organization'];
             vCard.photo.embedFromString(Buffer.from(fs.readFileSync(path.localPath(`public/${fotoPerfil.path}${fotoPerfil.name}`))).toString('base64'), formatterIMG(fotoPerfil.name));
             vCard.logo.embedFromString(Buffer.from(fs.readFileSync(path.localPath(`public/${logotipo.path}${logotipo.name}`))).toString('base64'), formatterIMG(logotipo.name));
@@ -56,6 +56,7 @@ module.exports = (vcard) => {
             //save to file
             vCard.filename = randomId(undefined, undefined, 'hash', String(`${vcard['firstname']}_${vcard['lastname']}_${vcard['organization']}.vcf`).replace(/\s{1,}/g, '_'));
             vCard.filepath = path.localPath(`public/vcf/${vCard.filename}`);
+            vCard.version = '3.0'; //can also support 2.1 and 4.0, certain versions only support certain fields
             await vCard.saveToFile(vCard.filepath);
             return resolve(vCard.filename);
         } catch (error) {
