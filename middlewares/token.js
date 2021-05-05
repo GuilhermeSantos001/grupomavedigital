@@ -75,6 +75,19 @@ module.exports = (req, res, next) => {
                         }]
                     })
                 }
+
+                return res.status(500).render('tokenBlocked', {
+                    title: 'Grupo Mave Digital',
+                    message: 'O token da sua sessão não parece está seguro, faça o login novamente.',
+                    menus: [{
+                        type: 'normal',
+                        icon: 'power',
+                        first: false,
+                        enabled: true,
+                        title: 'Efetuar Login',
+                        onclick: "login()"
+                    }]
+                })
             }
         })
         .catch(err => {

@@ -103,8 +103,8 @@ let schema = new Schema({
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança'],
-        maxlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).']
+        minlength: [6, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
+        maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).']
     },
     name: { // Nome
         type: String,
