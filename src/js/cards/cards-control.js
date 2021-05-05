@@ -187,12 +187,18 @@
                     const { card, indexOf } = cards.filter(card => card != null)[0];
 
                     const birthday = (() => {
-                        let month = ((value) => {
-                            return String(value + 1 < 10 ? '0' + (value + 1) : value + 1)
-                        })(card['vcard']['birthday']['month']);
+                        let
+                            month = ((value) => {
+                                return String(value + 1 < 10 ? '0' + (value + 1) : value + 1)
+                            })(card['vcard']['birthday']['month']),
+                            day = ((value) => {
+                                return String(value).length < 2 ? `0${value}` : `${value}`;
+                            })(card['vcard']['birthday']['day']);
 
-                        return `${card['vcard']['birthday']['year']}-${month}-${card['vcard']['birthday']['day']}`;
+                        return `${card['vcard']['birthday']['year']}-${month}-${day}`;
                     })();
+
+                    console.log(birthday);
 
                     photoPerfil = { path: card['photo']['path'], name: card['photo']['name'] };
 
