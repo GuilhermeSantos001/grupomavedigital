@@ -1,7 +1,7 @@
 # Grupomave Digital
 Ambiente Digital Interativo do Grupo Mave.
 
-## Instalar
+## Requisitos
 - baixar & Instalar [NPM](https://www.npmjs.com/)
 
 - baixar & Instalar [Yarn](https://classic.yarnpkg.com/en/docs/install#windows-stable)
@@ -19,8 +19,3 @@ Ambiente Digital Interativo do Grupo Mave.
 - baixar & Instalar [python](https://www.python.org/downloads/)
 
 - baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
-
-## Executar
-### !Caso não seja a primeira vez, exclua a pasta node_modules e o arquivo package-lock.json!
-
-1°: npm install && npm run update && npm install && npm start
