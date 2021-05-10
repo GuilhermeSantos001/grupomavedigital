@@ -19,3 +19,5 @@ Ambiente Digital Interativo do Grupo Mave.
 - baixar & Instalar [python](https://www.python.org/downloads/)
 
 - baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
+
+- baixar & Instalar [FiraCode](https://github.com/tonsky/FiraCode)
