@@ -12,6 +12,10 @@ Ambiente Digital Interativo do Grupo Mave.
 
 - baixar & Instalar [node-gyp](https://github.com/nodejs/node-gyp)
 
+- baixar & Instalar [mongoDB](https://www.mongodb.com/)
+
+- baixar & Instalar [FFMPEG](https://www.ffmpeg.org/)
+
 - baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
 
 ## Executar
