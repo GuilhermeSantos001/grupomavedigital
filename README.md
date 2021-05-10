@@ -16,6 +16,8 @@ Ambiente Digital Interativo do Grupo Mave.
 
 - baixar & Instalar [FFMPEG](https://www.ffmpeg.org/)
 
+- baixar & Instalar [python](https://www.python.org/downloads/)
+
 - baixar & Instalar [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
 
 ## Executar
