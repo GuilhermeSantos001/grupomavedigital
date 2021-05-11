@@ -1,4 +1,4 @@
-(function () {
+(async function () {
     "use strict";
 
     // ======================================================================
@@ -101,26 +101,19 @@
     // Socket.io
     //
     const
-        socket = io(),
+        { token } = await window.app.storage_get_userInfo(),
+        socket = io({
+            "auth": {
+                "token": token
+            },
+            "secure": true,
+            "reconnectionAttempts": 4
+        }),
         __GET_ACTIVITIES = async function (limit = 100) {
-            const
-                { token } = await window.app.storage_get_userInfo(),
-                key = {
-                    route: "GET_ACTIVITIES",
-                    value: "$n#ROZjvWYzMS0x4jP9gmPek$0fs^EE*5*xM4r6OBzdI1nTWna"
-                };
-
-            return socket.emit("GET_ACTIVITIES", { token, key }, limit);
+            return socket.emit("GET_ACTIVITIES", limit);
         },
         __GET_CHART_USER_TOTAL = async function () {
-            const
-                { token } = await window.app.storage_get_userInfo(),
-                key = {
-                    route: "GET_CHART_USER_TOTAL",
-                    value: "*E2Y^oTqE%PEx2qRYVQe!aPcK^fR7VpYQ3hJSyC8PE5w3mSsZ$"
-                };
-
-            return socket.emit("GET_CHART_USER_TOTAL", { token, key });
+            return socket.emit("GET_CHART_USER_TOTAL");
         };
 
     socket.on("connect", () => {
@@ -133,10 +126,19 @@
         __GET_CHART_USER_TOTAL();
     });
 
-    socket.on(
-        "ACCESS_DANIED",
-        () => console.log('Acesso Negado!!')
-    )
+    socket.on("connect_error", (err) => {
+        window.app.openModalSelect("O TOKEN da sua sessão parece ter expirado ou não está valido.",
+            [
+                "<h4>Por gentileza, faça login novamente.</h4>",
+                "<small><b>Desculpe o transtorno, mas é para sua segurança.</b></small>"
+            ],
+            [
+                '<button type="button" class="btn btn-mave1" data-bs-dismiss="modal" onclick="window.app.logout()">Entendido</button>'
+            ]
+        );
+
+        return console.log(err);
+    });
 
     socket.on(
         "POST_ACTIVITIES",
