@@ -23,7 +23,13 @@ class IO {
     }
 
     static create(server) {
-        this.context = new Server(server);
+        this.context = new Server(server, {
+            cors: {
+                origin: "https://grupomavedigital.com.br",
+                methods: ["GET", "POST"]
+            }
+        });
+
         this.listening();
     }
 
