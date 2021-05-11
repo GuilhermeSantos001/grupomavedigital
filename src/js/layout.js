@@ -8,7 +8,8 @@
         DEFAULT_DELAY = 3600,
         ONE_SECOND_DELAY = 1000;
 
-    let MAIN_MENU = {};
+    let MAIN_MENU = {},
+        WINDOW_SELECTED = false;
 
     // ======================================================================
     // Default Functions
@@ -115,57 +116,68 @@
         '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rejeitar</button>',
         '<button type="button" class="btn btn-primary">Aceitar</button>'
     ], dismiss = false) {
-        return new Promise((resolve, reject) => {
-            try {
-                const addContent = function (str = '') {
-                    contentHTML.forEach(element => {
-                        str += element;
-                    });
-
-                    return str;
-                },
-                    addButtons = function (str = '') {
-                        buttons.forEach(element => {
+        if (!WINDOW_SELECTED)
+            return new Promise((resolve, reject) => {
+                try {
+                    const addContent = function (str = '') {
+                        contentHTML.forEach(element => {
                             str += element;
                         });
 
                         return str;
-                    }
+                    },
+                        addButtons = function (str = '') {
+                            buttons.forEach(element => {
+                                str += element;
+                            });
 
-                if (document.getElementById('modalSelect')) $('#modalSelect').remove();
+                            return str;
+                        }
 
-                $('body').append(`\
-                <div id="modalSelect" class="modal fade" tabindex="-1"> \
-                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> \
-                        <div class="modal-content shadow"> \
-                            <div class="modal-header bg-mave1 shadow"> \
-                                <h5 class="modal-title text-mave2 fw-bold">${title}</h5> \
-                                ${dismiss ? '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
-                            </div> \
-                            <div class="modal-body"> \
-                                ${addContent()} \
-                            </div> \
-                            <div class="modal-footer"> \
-                                ${addButtons()} \
+                    if (document.getElementById('modalSelect')) $('#modalSelect').remove();
+
+                    $('body').append(`\
+                    <div id="modalSelect" class="modal fade" tabindex="-1"> \
+                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> \
+                            <div class="modal-content shadow"> \
+                                <div class="modal-header bg-mave1 shadow"> \
+                                    <h5 class="modal-title text-mave2 fw-bold">${title}</h5> \
+                                    ${dismiss ? '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
+                                </div> \
+                                <div class="modal-body"> \
+                                    ${addContent()} \
+                                </div> \
+                                <div class="modal-footer"> \
+                                    ${addButtons()} \
+                                </div> \
                             </div> \
                         </div> \
                     </div> \
-                </div> \
-                `);
+                    `);
 
-                var modalSelect = new bootstrap.Modal(document.getElementById('modalSelect'), {
-                    backdrop: 'static',
-                    keyboard: false,
-                    focus: true
-                });
+                    var modalSelect = new bootstrap.Modal(document.getElementById('modalSelect'), {
+                        backdrop: 'static',
+                        keyboard: false,
+                        focus: true
+                    });
 
-                modalSelect.show();
+                    document.getElementById('modalSelect')
+                        .addEventListener('shown.bs.modal', function (event) {
+                            WINDOW_SELECTED = true;
+                        });
 
-                return resolve(modalSelect);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+                    document.getElementById('modalSelect')
+                        .addEventListener('hidden.bs.modal', function (event) {
+                            WINDOW_SELECTED = false;
+                        });
+
+                    modalSelect.show();
+
+                    return resolve(modalSelect);
+                } catch (error) {
+                    return reject(error);
+                }
+            });
     }
 
     // ======================================================================

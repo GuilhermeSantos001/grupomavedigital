@@ -4,12 +4,6 @@ const { Server } = require("socket.io"),
     jwt = require('./jwt');
 
 /**
- * @private
- * Strict Variables
- */
-let keys = [];
-
-/**
  * @class IO
  * @author GuilhermeSantos001
  * @description Servidor Socket.io
@@ -33,55 +27,46 @@ class IO {
         this.listening();
     }
 
-    static set keys(secret) {
-        if (keys.filter(key =>
-            key['route'] !== secret['route']
-        ).length <= 0)
-            keys.push(secret);
-    }
-
-    static get keys() {
-        return keys;
-    }
-
-    static checkKey(secret) {
-        return this.keys.filter(key =>
-            key['route'] === secret['route'] &&
-            key['value'] === secret['value']
-        ).length > 0;
-    }
-
-    static async credentials(secret) {
-        const { token, key } = secret;
-
-        return await jwt.verify(token)
-            .then(result => {
-                if (
-                    !result ||
-                    !this.checkKey(key)
-                ) return false;
-                return true;
-            })
-            .catch(err => {
-                return false;
-            });
-    }
-
     static listening() {
+        /**
+         * Middlewares
+         */
+        this.context.use((socket, next) => {
+            const token = socket.handshake.auth.token;
+
+            jwt.verify(token)
+                .then(result => {
+                    if (
+                        !result
+                    ) {
+                        const err = new Error("not authorized");
+
+                        err.data = { content: "Please retry later" };
+
+                        return next(err);
+                    }
+                    return next();
+                })
+                .catch(error => {
+                    const err = new Error("not authorized");
+
+                    err.data = { content: "Error with token ->", error };
+
+                    return next(err);
+                });
+        });
+
+        /**
+         * Routers
+         */
+
         this.context.on('connection', socket => {
             /** Retorna a lista de atividades */
-            socket.on('GET_ACTIVITIES', async (credentials, limit = 100) => {
-                if (!await this.credentials(credentials))
-                    return socket.emit('ACCESS_DANIED');
-
+            socket.on('GET_ACTIVITIES', async (limit = 100) => {
                 const { activities } = await mongoDB.activities.get('', '', limit);
 
                 socket.emit('POST_ACTIVITIES', LZString.compressToEncodedURIComponent(JSON.stringify(activities)));
             });
-            this.keys = {
-                route: "GET_ACTIVITIES",
-                value: "$n#ROZjvWYzMS0x4jP9gmPek$0fs^EE*5*xM4r6OBzdI1nTWna"
-            };
 
             /** Retorna dados para os gráficos */
             socket.on('GET_CHART_USER_TOTAL', async () => {
@@ -95,10 +80,6 @@ class IO {
 
                 socket.emit('POST_CHART_USER_TOTAL', LZString.compressToEncodedURIComponent(JSON.stringify(res)));
             });
-            this.keys = {
-                route: "POST_CHART_USER_TOTAL",
-                value: "*E2Y^oTqE%PEx2qRYVQe!aPcK^fR7VpYQ3hJSyC8PE5w3mSsZ$"
-            };
         });
     }
 }
