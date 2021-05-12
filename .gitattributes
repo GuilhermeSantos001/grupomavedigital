@@ -1,0 +1,98 @@
+# Folders
+*.log filter=lfs diff=lfs merge=lfs -text
+
+
+# Audio
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.wma filter=lfs diff=lfs merge=lfs -text
+
+# Video
+*.wmv filter=lfs diff=lfs merge=lfs -text
+*.mpg filter=lfs diff=lfs merge=lfs -text
+*.mpeg filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.flv filter=lfs diff=lfs merge=lfs -text
+*.avi filter=lfs diff=lfs merge=lfs -text
+*.ogv filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+
+# Editors of Image
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.xcf filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.cdr filter=lfs diff=lfs merge=lfs -text
+
+# Images
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.eps filter=lfs diff=lfs merge=lfs -text
+*.raw filter=lfs diff=lfs merge=lfs -text
+*.cr2 filter=lfs diff=lfs merge=lfs -text
+*.nef filter=lfs diff=lfs merge=lfs -text
+*.orf filter=lfs diff=lfs merge=lfs -text
+*.sr2 filter=lfs diff=lfs merge=lfs -text
+
+# Office
+*.doc filter=lfs diff=lfs merge=lfs -text
+*.docm filter=lfs diff=lfs merge=lfs -text
+*.docx filter=lfs diff=lfs merge=lfs -text
+*.dot filter=lfs diff=lfs merge=lfs -text
+*.dotm filter=lfs diff=lfs merge=lfs -text
+*.dotx filter=lfs diff=lfs merge=lfs -text
+*.csv filter=lfs diff=lfs merge=lfs -text
+*.ppt filter=lfs diff=lfs merge=lfs -text
+*.pot filter=lfs diff=lfs merge=lfs -text
+*.potm filter=lfs diff=lfs merge=lfs -text
+*.potx filter=lfs diff=lfs merge=lfs -text
+*.ppa filter=lfs diff=lfs merge=lfs -text
+*.ppam filter=lfs diff=lfs merge=lfs -text
+*.pps filter=lfs diff=lfs merge=lfs -text
+*.ppsm filter=lfs diff=lfs merge=lfs -text
+*.ppsx filter=lfs diff=lfs merge=lfs -text
+*.ppt filter=lfs diff=lfs merge=lfs -text
+*.pptm filter=lfs diff=lfs merge=lfs -text
+*.pptx filter=lfs diff=lfs merge=lfs -text
+
+# Web Page
+*.htm filter=lfs diff=lfs merge=lfs -text
+*.html filter=lfs diff=lfs merge=lfs -text
+*.mht filter=lfs diff=lfs merge=lfs -text
+*.mhtml filter=lfs diff=lfs merge=lfs -text
+
+# Others
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.ico filter=lfs diff=lfs merge=lfs -text
+*.rtf filter=lfs diff=lfs merge=lfs -text
+*.txt filter=lfs diff=lfs merge=lfs -text
+*.wps filter=lfs diff=lfs merge=lfs -text
+*.odt filter=lfs diff=lfs merge=lfs -text
+*.xml filter=lfs diff=lfs merge=lfs -text
+*.xps filter=lfs diff=lfs merge=lfs -text
+*.dbf filter=lfs diff=lfs merge=lfs -text
+*.dif filter=lfs diff=lfs merge=lfs -text
+*.ods filter=lfs diff=lfs merge=lfs -text
+*.pm filter=lfs diff=lfs merge=lfs -text
+*.slk filter=lfs diff=lfs merge=lfs -text
+*.xla filter=lfs diff=lfs merge=lfs -text
+*.xlam filter=lfs diff=lfs merge=lfs -text
+*.xls filter=lfs diff=lfs merge=lfs -text
+*.xlsb filter=lfs diff=lfs merge=lfs -text
+*.xlsm filter=lfs diff=lfs merge=lfs -text
+*.xlsx filter=lfs diff=lfs merge=lfs -text
+*.xlt filter=lfs diff=lfs merge=lfs -text
+*.xltm filter=lfs diff=lfs merge=lfs -text
+*.xltx filter=lfs diff=lfs merge=lfs -text
+*.xlw filter=lfs diff=lfs merge=lfs -text
+*.emf filter=lfs diff=lfs merge=lfs -text
+*.odp filter=lfs diff=lfs merge=lfs -text
+*.rtf filter=lfs diff=lfs merge=lfs -text
+*.thmx filter=lfs diff=lfs merge=lfs -text
+*.wmf filter=lfs diff=lfs merge=lfs -text
