@@ -107,7 +107,8 @@
                 "token": token
             },
             "secure": true,
-            "reconnectionAttempts": 4
+            "reconnectionAttempts": 4,
+            "transports": ['websocket', 'polling']
         }),
         __GET_ACTIVITIES = async function (limit = 100) {
             return socket.emit("GET_ACTIVITIES", limit);

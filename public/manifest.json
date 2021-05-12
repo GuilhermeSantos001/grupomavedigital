@@ -61,10 +61,5 @@
     "screenshots": [],
     "orientation": "any",
     "scope": "https://grupomavedigital.com.br/",
-    "start_url": "/",
-    "related_applications": [
-        {
-            "platform": "web"
-        }
-    ]
+    "start_url": "/"
 }
