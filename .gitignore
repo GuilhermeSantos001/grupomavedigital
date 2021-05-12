@@ -1,5 +1,6 @@
 # Folders
 **/node_modules/**
+**/public/stylesheets/**.min**
 **/public/javascripts/**.min**
 **/public/assets/hls/**
 **/log/**

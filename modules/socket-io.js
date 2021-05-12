@@ -1,4 +1,5 @@
 const { Server } = require("socket.io"),
+    redis = require('socket.io-redis'),
     mongoDB = require('./mongodb'),
     LZString = require('lz-string'),
     jwt = require('./jwt');
@@ -23,14 +24,22 @@ class IO {
     }
 
     static create(server) {
-        this.context = new Server(server);
+        this.context = new Server(server, {
+            cors: {
+                origin: "https://grupomavedigital.com.br",
+                methods: ["GET", "POST"]
+            },
+            transports: ['websocket', 'polling']
+        });
+
         this.listening();
     }
 
     static listening() {
         /**
-         * Middlewares
+         * Redis Adapter & Middlewares
          */
+        this.context.adapter(redis({ host: 'localhost', port: 6379 }));
         this.context.use((socket, next) => {
             const token = socket.handshake.auth.token;
 
@@ -45,6 +54,7 @@ class IO {
 
                         return next(err);
                     }
+
                     return next();
                 })
                 .catch(error => {
