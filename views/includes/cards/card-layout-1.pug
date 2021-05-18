@@ -11,9 +11,9 @@ div(class="col-12" style="background-repeat: no-repeat; background-size: cover; 
     h4(class="text-center" id="card-jobtitle") #{jobtitle || 'Cargo/Função'}
   div(class="d-flex justify-content-center col-12")
     div(class="col-sm-12 col-md-5 col-lg-4 mx-2 p-2")
-      button(type="button" class="btn btn-mave1 col-12 fs-sm-2 fs-md-5" id="card-phone-1" onclick="window.app.cardOpenPhone(0)") #[i(class="fas fa-phone")] #{phone_1 || '(11) 3683-3408'}
+      button(type="button" class="btn btn-mave1 col-12" style="font-size: 1rem;" id="card-phone-1" onclick="window.app.cardOpenPhone(0)") #[i(class="fas fa-phone")] #{phone_1 || '(11) 3683-3408'}
     div(class="col-sm-12 col-md-5 col-lg-4 mx-2 p-2")
-      button(type="button" class="btn btn-mave1 col-12 fs-sm-2 fs-md-5" id="card-phone-2" onclick="window.app.cardOpenPhone(1)") #[i(class="fas fa-mobile")] #{phone_2 || '(11) 99999-9999'}
+      button(type="button" class="btn btn-mave1 col-12" style="font-size: 1rem;" id="card-phone-2" onclick="window.app.cardOpenPhone(1)") #[i(class="fas fa-mobile")] #{phone_2 || '(11) 99999-9999'}
   div(class="d-flex justify-content-center col-12")
     div(class="col-sm-6 col-md-5 mx-2 p-2")
       button(type="button" class="btn btn-success col-12 fs-5" id="card-phone-3" onclick="window.app.cardOpenWhatsapp(2)") #[i(class="fab fa-whatsapp")] #{whatsapp_phone || '(11) 94784-1110'}
