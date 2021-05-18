@@ -56,8 +56,6 @@ class IO {
         this.context.use((socket, next) => {
             const token = socket.handshake.auth.token;
 
-            console.log('TESTE -> !!!!')
-
             jwt.verify(token)
                 .then(result => {
                     if (
