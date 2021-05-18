@@ -237,7 +237,7 @@ module.exports = {
                     usr_name,
                     usr_surname,
                     usr_cnpj,
-                    usr_location: JSON.parse(usr_location)
+                    usr_location
                 });
 
                 debug.info('user', `As informações da conta(${usr_auth}) foram atualizadas`, [`IP-Request: ${getClientAddress(request)}`, `GraphQL - Mutation`, `Method: updateData`]);
