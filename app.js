@@ -21,7 +21,6 @@ app.set('views', [
 ]);
 app.set('view engine', 'pug');
 app.set('view options', { layout: false });
-app.set('trust proxy', true);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({
@@ -51,10 +50,20 @@ app.use(device.capture({
 const cors = require('cors');
 const corsOptions = {
   "origin": function (origin, callback) {
-    if ([
-      `https://grupomavedigital.com.br`,
-      undefined
-    ].indexOf(origin) !== -1) {
+    let origins = [];
+    if (process.env.NODE_ENV === 'production') {
+      origins = [
+        `https://grupomavedigital.com.br`
+      ];
+    } else {
+      origins = [
+        `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`,
+        'file://',
+        undefined
+      ];
+    }
+
+    if (origins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

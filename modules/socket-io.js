@@ -24,13 +24,26 @@ class IO {
     }
 
     static create(server) {
-        this.context = new Server(server, {
-            cors: {
-                origin: "https://grupomavedigital.com.br",
-                methods: ["GET", "POST"]
-            },
-            transports: ['websocket', 'polling']
-        });
+        let options = {};
+        if (process.env.NODE_ENV === 'development') {
+            options = {
+                cors: {
+                    origin: "*:*",
+                    methods: ["GET", "POST"]
+                },
+                transports: ['websocket', 'polling']
+            };
+        } else {
+            options = {
+                cors: {
+                    origin: "https://grupomavedigital.com.br",
+                    methods: ["GET", "POST"]
+                },
+                transports: ['websocket', 'polling']
+            };
+        }
+
+        this.context = new Server(server, options);
 
         this.listening();
     }

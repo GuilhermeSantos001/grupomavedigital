@@ -1378,7 +1378,7 @@
         { 'alias': 'storage_get_userInfo', 'function': storage_get_userInfo },
         { 'alias': 'storage_set_userInfo', 'function': storage_set_userInfo },
         { 'alias': 'storage_clear_userInfo', 'function': storage_clear_userInfo },
-        { 'alias': 'graphqlUrl', 'function': `${baseurl}/api` },
+        { 'alias': 'graphqlUrl', 'function': "__GULP__VARIABLE__GRAPHQL_URL__" },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
         { 'alias': 'loading', 'function': loading },
         { 'alias': 'alerting', 'function': alerting },

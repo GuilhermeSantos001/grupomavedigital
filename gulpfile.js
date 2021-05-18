@@ -1,7 +1,9 @@
 "use strict";
 
 const gulp = require('gulp');
+const env = require('gulp-env');
 const rename = require("gulp-rename");
+const replace = require('gulp-replace');
 
 /**
  * Compile Sass
@@ -29,7 +31,6 @@ function compilaSass() {
  * Obfuscate Javascript
  */
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
-const env = require('gulp-env');
 
 gulp.task('obfuscate', obfuscateJavascript);
 
@@ -37,6 +38,7 @@ function obfuscateJavascript() {
     return gulp
         .src(['./src/js/**/*.js', '!**/plugins/**'])
         .pipe(env({ file: ".env", type: '.ini' }))
+        .pipe(replace('__GULP__VARIABLE__GRAPHQL_URL__', process.env.NODE_ENV === 'development' ? "http://localhost:4080" : "https://grupomavedigital.com.br/api"))
         .pipe(javascriptObfuscator({
             optionsPreset: process.env.NODE_ENV === 'development' ? 'low-obfuscation' : 'high-obfuscation',
             disableConsoleOutput: process.env.NODE_ENV === 'development' ? false : true,
