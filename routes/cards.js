@@ -8,8 +8,7 @@ const getReqProps = require('../modules/getReqProps');
 const mongodb = require('../modules/mongodb');
 const LZString = require('lz-string');
 const hasPrivilege = require('../modules/hasPrivilege');
-// const baseurl = process.env.NODE_ENV != "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
-const baseurl = 'https://grupomavedigital.com.br';
+const baseurl = process.env.NODE_ENV !== "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
 
 router.get(['/control'], middlewareToken, async (req, res) => {
   let {
