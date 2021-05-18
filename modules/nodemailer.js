@@ -8,8 +8,7 @@ const smtp = {
         'pass': String(process.env.SMTP_PASSWORD)
     }
 };
-// const baseurl = process.env.NODE_ENV != "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
-const baseurl = 'https://grupomavedigital.com.br';
+const baseurl = process.env.NODE_ENV !== "development" ? 'https://grupomavedigital.com.br' : `http://${process.env.APP_ADDRESS}:${process.env.APP_PORT}`;
 
 module.exports = {
     getTestMessageUrl: nodemailer.getTestMessageUrl,
