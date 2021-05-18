@@ -1378,7 +1378,9 @@
         { 'alias': 'storage_get_userInfo', 'function': storage_get_userInfo },
         { 'alias': 'storage_set_userInfo', 'function': storage_set_userInfo },
         { 'alias': 'storage_clear_userInfo', 'function': storage_clear_userInfo },
-        { 'alias': 'graphqlUrl', 'function': `${baseurl}/api` },
+        // Em Produção -> ${baseurl}/api
+        // Em Desenvolvimento -> ${String(baseurl).replace(':3000', ':4080')}
+        { 'alias': 'graphqlUrl', 'function': `${String(baseurl).replace(':3000', ':4080')}` },
         { 'alias': 'lockClosePage', 'function': lockClosePage },
         { 'alias': 'loading', 'function': loading },
         { 'alias': 'alerting', 'function': alerting },
