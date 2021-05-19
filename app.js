@@ -53,7 +53,8 @@ const corsOptions = {
     let origins = [];
     if (process.env.NODE_ENV === 'production') {
       origins = [
-        `https://grupomavedigital.com.br`
+        `https://grupomavedigital.com.br`,
+        undefined
       ];
     } else {
       origins = [
