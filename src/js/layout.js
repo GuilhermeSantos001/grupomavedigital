@@ -142,7 +142,7 @@
                             <div class="modal-content shadow"> \
                                 <div class="modal-header bg-mave1 shadow"> \
                                     <h5 class="modal-title text-mave2 fw-bold">${title}</h5> \
-                                    ${dismiss ? '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
+                                    ${dismiss ? '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
                                 </div> \
                                 <div class="modal-body"> \
                                     ${addContent()} \
@@ -156,8 +156,8 @@
                     `);
 
                     var modalSelect = new bootstrap.Modal(document.getElementById('modalSelect'), {
-                        backdrop: 'static',
-                        keyboard: false,
+                        backdrop: !dismiss ? 'static' : true,
+                        keyboard: !dismiss ? false : true,
                         focus: true
                     });
 
