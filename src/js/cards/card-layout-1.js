@@ -9,8 +9,29 @@
     // ======================================================================
     // Events
     //
-    document.getElementById('button-share-whatsapp').onclick = function () {
-        return window.app.cardShareWhatsapp();
+    document.getElementById('card-share-whatsapp').onclick = function () {
+        window.app.openModalSelect('Abra sua agenda ou Digite um numero com DDD', [
+            '<b class="fs-6">O whatsapp tem um limite de 5 contatos selecionados para compartilhamento por vez.</b>',
+            `
+            <div class="input-group my-2">
+                <span class="input-group-text" id="phone">+55</span>
+                <input id="custom-whatsapp-phone" type="text" class="form-control" placeholder="Numero de Telefone(com DDD)" aria-label="phone" aria-describedby="phone">
+            </div>
+            `
+        ], [
+            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="button-share-whatsapp">Abrir Agenda</button>',
+            '<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="button-share-whatsapp-with-phone">Enviar com numero</button>'
+        ], true)
+            .then(() => {
+                document.getElementById('button-share-whatsapp').onclick = function () {
+                    return window.app.cardShareWhatsapp();
+                };
+
+                document.getElementById('button-share-whatsapp-with-phone').onclick = function () {
+                    return window.app.cardOpenWhatsappCustom($('#custom-whatsapp-phone').val());
+                };
+            })
+            .catch(error => console.log(error));
     };
 
     // ======================================================================
@@ -58,6 +79,7 @@
         photoLogo = { path: 'images/', name: 'favicon.png' },
         whatsappAPI = {
             'base': `https://api.whatsapp.com/send?text=`,
+            'custom': phone => `https://api.whatsapp.com/send?phone=55${phone}&text=`,
             'text': window.app.cardGetProps['whatsapp_message'] || 'Olá, este é o cartão de visita digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!',
             'link': `${window.app.cardGetProps['baseurl']}/cards/card/${window.app.cardGetProps['id']}` || 'https://grupomavedigital.com.br/cartaodigital/index'
         };
@@ -211,6 +233,14 @@
         {
             'alias': 'cardShareWhatsapp', 'function': () => {
                 return window.open(`${whatsappAPI.base}${whatsappAPI.text} ${whatsappAPI.link}`, '_blank');
+            }
+        },
+        {
+            'alias': 'cardOpenWhatsappCustom', 'function': (phone) => {
+                if (phone.length <= 0)
+                    return window.app.alerting('Digite um numero de telefone com DDD');
+
+                return window.open(`${whatsappAPI.custom(phone)}${whatsappAPI.text} ${whatsappAPI.link}`, '_blank');
             }
         },
         {
