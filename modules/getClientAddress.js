@@ -1,1 +1,0 @@
-module.exports = req => req.connection.remoteAddress;

@@ -1,22 +1,413 @@
+// ------------------------------------------------------------------------------
+// Author: GuilhermeSantos001
+// Updated: 28/08/2021
+//
+
 @import "./plugins/fontawesome/fontawesome.scss";
 @import "./plugins/fontawesome/regular.scss";
 @import "./plugins/fontawesome/solid.scss";
 @import "./plugins/fontawesome/brands.scss";
 
-.user {
+.icon-check-circle {
   @extend %fa-icon;
   @extend .fas;
 
   &:before {
-    content: fa-content($fa-var-user);
+    content: fa-content($fa-var-check-circle);
   }
 }
 
-.twitter {
+.icon-chevron-circle-right {
   @extend %fa-icon;
-  @extend .fab;
+  @extend .fas;
 
   &:before {
-    content: fa-content($fa-var-twitter);
+    content: fa-content($fa-var-chevron-circle-right);
+  }
+}
+
+.icon-chevron-circle-left {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-chevron-circle-left);
+  }
+}
+
+.icon-file-upload {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-file-upload);
+  }
+}
+
+.icon-history {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-history);
+  }
+}
+
+.icon-file-download {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-file-download);
+  }
+}
+
+.icon-download {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-download);
+  }
+}
+
+.icon-file-archive {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-file-archive);
+  }
+}
+
+.icon-calendar-times {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-calendar-times);
+  }
+}
+
+.icon-users {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-users);
+  }
+}
+
+.icon-user-friends {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-user-friends);
+  }
+}
+
+.icon-envelope {
+  @extend %fa-icon;
+  @extend .far;
+
+  &:before {
+    content: fa-content($fa-var-envelope);
+  }
+}
+
+.icon-hands-helping {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-hands-helping);
+  }
+}
+
+.icon-folder {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-folder);
+  }
+}
+
+.icon-folder-minus {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-folder-minus);
+  }
+}
+
+.icon-folder-open {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-folder-open);
+  }
+}
+
+.icon-folder-plus {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-folder-plus);
+  }
+}
+
+.icon-file {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-file);
+  }
+}
+
+.icon-file-alt {
+  @extend %fa-icon;
+  @extend .far;
+
+  &:before {
+    content: fa-content($fa-var-file-alt);
+  }
+}
+
+.icon-file-download {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-file-download);
+  }
+}
+
+.icon-long-arrow-alt-right {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-long-arrow-alt-right);
+  }
+}
+
+.icon-external-link-alt {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-external-link-alt);
+  }
+}
+
+.icon-tag {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-tag);
+  }
+}
+
+.icon-code-branch {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-code-branch);
+  }
+}
+
+.icon-bullseye {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-bullseye);
+  }
+}
+
+.icon-plus-square {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-plus-square);
+  }
+}
+
+.icon-edit {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-edit);
+  }
+}
+
+.icon-trash-alt {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-trash-alt);
+  }
+}
+
+.icon-trash {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-trash);
+  }
+}
+
+.icon-shield-alt {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-shield-alt);
+  }
+}
+
+.icon-clock {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-clock);
+  }
+}
+
+.icon-history {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-history);
+  }
+}
+
+.icon-quote-right {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-quote-right);
+  }
+}
+
+.icon-info-circle {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-info-circle);
+  }
+}
+
+.icon-question-circle {
+  @extend %fa-icon;
+  @extend .far;
+
+  &:before {
+    content: fa-content($fa-var-question-circle);
+  }
+}
+
+.icon-key {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-key);
+  }
+}
+
+.icon-eye {
+  @extend %fa-icon;
+  @extend .far;
+
+  &:before {
+    content: fa-content($fa-var-eye);
+  }
+}
+
+.icon-eye-slash {
+  @extend %fa-icon;
+  @extend .far;
+
+  &:before {
+    content: fa-content($fa-var-eye-slash);
+  }
+}
+
+.icon-cogs {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-cogs);
+  }
+}
+
+.icon-lock {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-lock);
+  }
+}
+.icon-clipboard-list {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-clipboard-list);
+  }
+}
+
+.icon-lock-open {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-lock-open);
+  }
+}
+
+.icon-user-lock {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-user-lock);
+  }
+}
+
+.icon-share {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-share);
+  }
+}
+
+.icon-network-wired {
+  @extend %fa-icon;
+  @extend .fas;
+
+  &:before {
+    content: fa-content($fa-var-network-wired);
   }
 }

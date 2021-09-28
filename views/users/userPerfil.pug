@@ -5,12 +5,19 @@ append content
     h1(class="h2") Suas Informações Pessoais.
   div(class="col-12")
     p(class="text-wrap")
-      | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+      | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
   div(class="d-flex flex-column col-12 p-2")
-    img(src=`/assets/perfil/${fotoPerfil}` class="img-fluid mt-2 mx-auto d-block border border-5 shadow avatar")
+    img(id="user-photo" src=`/assets/perfil/${photoProfile}` class="img-fluid mx-auto mt-2 d-block border border-5 shadow avatar")
+    div(class="input-group flex-nowrap")
+      div(class="col-12")
+        label(for="input-photo" class="form-label fw-bold text-primary fs-5") Escolher Foto de Perfil
+        input(class="form-control" type="file" id="input-photo" accept="image/x-png,image/gif,image/jpeg")
+    div(class="input-group flex-nowrap my-3")
+      button(type="button" class="btn btn-outline-primary btn-sm col-12 fs-6" id="button-upload-photo" disabled)
+        | #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
     h1(class="text-center mt-2") #{name} #{surname}
-    h4(class="text-center text-mave1 text-capitalize fw-bold") (#{privilege})
-    button(type="button" class="btn btn-mave1 col-12 p-2 mt-2" id="btn_userInfoEdit" onclick="window.app.userInfoEdit()") #[i(class="fas fa-user-edit")] Editar Informações
+    h4(class="text-center text-primary text-capitalize fw-bold") (#{privileges})
+    button(type="button" class="btn btn-outline-primary col-12 p-2 mt-2" id="btn_userInfoEdit" onclick="window.app.userInfoEdit()") #[i(class="fas fa-user-edit")] Editar Informações
     label(for="input_email" disabled) Email
     input(type="text" class="form-control mx-auto" id="input_email" placeholder="Endereço de email" value=`${email}` disabled)
     label(for="input_username" class="mt-2") Nome de usuário

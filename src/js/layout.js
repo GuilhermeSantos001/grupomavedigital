@@ -1,4 +1,11 @@
-(function () {
+// ======================================================================
+// Imports
+//
+import indexedDB_users from './IndexedDB/indexedDB_users';
+import indexedDB_cache from './IndexedDB/indexedDB_cache';
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+
+(async function () {
     "use strict";
 
     // ======================================================================
@@ -6,7 +13,9 @@
     //
     const
         DEFAULT_DELAY = 3600,
-        ONE_SECOND_DELAY = 1000;
+        ONE_SECOND_DELAY = 1000,
+        usersDB = new indexedDB_users(),
+        cacheDB = new indexedDB_cache();
 
     let MAIN_MENU = {},
         WINDOW_SELECTED = false;
@@ -29,29 +38,185 @@
                 logo: '',
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 loadingHtml: ` \
-                    <div id="sk-flex" class="d-flex flex-column mx-3"> \
-                        <div class="sk-grid align-self-center"> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                            <div class="sk-grid-cube bg-light"></div> \
-                        </div> \
+                <div class="d-flex flex-column"> \
+                    <div class="sk-cube-grid align-self-center"> \
+                        <div class="sk-cube sk-cube1"></div> \
+                        <div class="sk-cube sk-cube2"></div> \
+                        <div class="sk-cube sk-cube3"></div> \
+                        <div class="sk-cube sk-cube4"></div> \
+                        <div class="sk-cube sk-cube5"></div> \
+                        <div class="sk-cube sk-cube6"></div> \
+                        <div class="sk-cube sk-cube7"></div> \
+                        <div class="sk-cube sk-cube8"></div> \
+                        <div class="sk-cube sk-cube9"></div> \
                     </div> \
-                    <p class='loading-message my-3 text-light'> \
-                      Carregando... \
-                    </p> \
-                    `
+                </div> \
+                `
             });
         } else {
             if (window.loading_screen)
                 window.loading_screen.finish();
         }
     }
+
+    loading(true);
+
+    // ======================================================================
+    // Cache
+    //
+    class Cache {
+        constructor(id = '0001') {
+            this._id = id;
+            this._clearTimeout = null;
+            this.initialize();
+        };
+
+        async initialize() {
+            await this.load();
+
+            this.update();
+        };
+
+        id() {
+            return this._id;
+        };
+
+        cache() {
+            return this._cache;
+        };
+
+        async save() {
+            return await cacheDB.set(this.id(), this.cache());
+        };
+
+        async load() {
+            const data = await cacheDB.get(this.id());
+
+            if (data instanceof Array === false) {
+                this._cache = [];
+            } else {
+                this._cache = data;
+            };
+        };
+
+        find(key) {
+            let __find = false;
+
+            for (const [index, cache] of this.cache().entries()) {
+                if (cache.key === key) {
+                    __find = index;
+                    break;
+                };
+            };
+
+            return __find;
+        };
+
+        async clear() {
+            const __cache = this.cache().slice(0);
+
+            for (const [index, cache] of __cache.entries()) {
+                const
+                    now = new Date(),
+                    expiry = new Date(cache.expiry);
+
+                if (now > expiry) {
+                    this._cache.splice(index, 1);
+                };
+            };
+
+            return await this.save();
+        };
+
+        parserExpiry(expiry) {
+            let
+                value = parseInt(expiry.replace(/[^0-9]/g, '').trim() || "0"),
+                type = expiry.replace(String(value), '').toLowerCase().trim(),
+                now = new Date();
+
+            if (
+                type === 'days'
+                || type === 'day'
+                || type === 'd'
+            ) {
+                now.setDate(now.getDate() + value);
+            };
+
+            if (
+                type === 'weeks'
+                || type === 'week'
+                || type === 'w'
+            ) {
+                now.setDate(now.getDate() + (7 * value));
+            };
+
+            if (
+                type === 'hours'
+                || type === 'hour'
+                || type === 'h'
+            ) {
+                now.setHours(now.getHours() + value);
+            };
+
+            if (
+                type === 'minutes'
+                || type === 'minute'
+                || type === 'm'
+            ) {
+                now.setMinutes(now.getMinutes() + value);
+            };
+
+            if (
+                type === 'seconds'
+                || type === 'second'
+                || type === 's'
+            ) {
+                now.setSeconds(now.getSeconds() + value);
+            };
+
+            return now;
+        };
+
+        set(key, value, expiry) {
+            if (typeof this.find(key) !== 'number') {
+                this._cache.push({ key, value, expiry: this.parserExpiry(expiry) });
+            };
+        };
+
+        get(key) {
+            let index = this.find(key);
+
+            return this.cache()[index] || false;
+        };
+
+        async update() {
+            await this.clear();
+
+            if (this._clearTimeout)
+                clearTimeout(this._clearTimeout);
+
+            this._clearTimeout = setTimeout(this.update.bind(this), ONE_SECOND_DELAY);
+        };
+    }
+
+    /**
+     * @description LocalStorage
+     */
+    function localStorage_save(key, value) {
+        return localStorage.setItem(key, value);
+    };
+
+    function localStorage_get(key) {
+        return localStorage.getItem(key);
+    };
+
+    function localStorage_clear(key) {
+        return localStorage.removeItem(key);
+    };
+
+    function localStorage_empty() {
+        return localStorage.clear();
+    };
 
     // ======================================================================
     // Alerts
@@ -66,7 +231,17 @@
     function alerting(message = '???', delay = DEFAULT_DELAY, callback = function () { }, saveCache = true) {
         if (alerts.clear) return;
 
-        if (saveCache) alerts.cache.push({ message, delay, callback });
+        let msgAlreadyExist = false;
+
+        for (const cache of alerts.cache) {
+            if (cache.message === message) {
+                msgAlreadyExist = true;
+                break;
+            }
+        };
+
+        if (saveCache && !msgAlreadyExist)
+            alerts.cache.push({ message, delay, callback });
 
         if (alerts.show) return;
 
@@ -76,15 +251,17 @@
 
                 if (alerts.cache.length > 0) {
                     alerts.cache.splice(0, 1);
-                    return alerting(alerts.cache[0]['message'], alerts.cache[0]['delay'], alerts.cache[0]['callback'], false);
+
+                    if (alerts.cache[0])
+                        return alerting(alerts.cache[0]['message'], alerts.cache[0]['delay'], alerts.cache[0]['callback'], false);
                 }
                 else
                     return clearInterval(alerts.interval), alerts.interval = null;
             }, ONE_SECOND_DELAY);
 
         $('body').append(`\
-        <div style="z-index: 9999; font-size: 18px;" class="alertDiv alert alert-mave alert-dismissible fade show shadow fixed-top m-2" role="alert">\
-          <strong>${message}</strong>\
+        <div style="z-index: 9999; font-size: 18px;" class="alertDiv alert alert-mave alert-dismissible fade show shadow fixed-top m-2 text-truncate" role="alert">\
+            <strong>${message}</strong>\
         </div>\
         `), alerts.show = true;
 
@@ -100,11 +277,12 @@
 
         $('.alertDiv').fadeOut("slow", function () {
             if (alerts.interval) clearInterval(alerts.interval), alerts.interval = null;
+
             alerts = { cache: [], show: null, interval: null, clear: null };
+
             $('.alertDiv').remove(), callback();
         });
     }
-
 
     // ======================================================================
     // Modal to Select
@@ -140,9 +318,9 @@
                     <div id="modalSelect" class="modal fade" tabindex="-1"> \
                         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> \
                             <div class="modal-content shadow"> \
-                                <div class="modal-header bg-mave1 shadow"> \
-                                    <h5 class="modal-title text-mave2 fw-bold">${title}</h5> \
-                                    ${dismiss ? '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
+                                <div class="modal-header bg-primary shadow"> \
+                                    <h5 class="modal-title text-secondary fw-bold">${title}</h5> \
+                                    ${dismiss ? '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' : ''} \
                                 </div> \
                                 <div class="modal-body"> \
                                     ${addContent()} \
@@ -156,8 +334,8 @@
                     `);
 
                     var modalSelect = new bootstrap.Modal(document.getElementById('modalSelect'), {
-                        backdrop: !dismiss ? 'static' : true,
-                        keyboard: !dismiss ? false : true,
+                        backdrop: 'static',
+                        keyboard: false,
                         focus: true
                     });
 
@@ -184,9 +362,9 @@
     // General Functions
     //
 
-    function sendemail(email) {
+    function externalMailOpen(email) {
         return window.open(`mailto:${email}`, '_blank');
-    }
+    };
 
     const animateCSS = (element, animation, prefix = 'animate__') =>
         new Promise((resolve, reject) => {
@@ -210,7 +388,7 @@
 
     function twofactor(callback = () => { }, usr_auth) {
         $('body').append(`\
-        <div style="z-index: 9999; height: 100vh; opacity: 0;" class="twofactorDiv bg-alert fixed-top col-12 overflow-auto"> \
+        <div style="z-index: 9999; height: 100vh; opacity: 0;" class="twofactorDiv fixed-top col-12 overflow-auto"> \
           <h1 class="text-white text-center fs-1 fw-bold m-5">Autenticação de dois fatores está ativada. Por gentileza, insira seu código de segurança.</h1><br />\
           <div class="col-10 mx-auto mb-5"> \
             <label for="twofactor-usertoken">Insira o código que aparece em seu visor</label> \
@@ -239,7 +417,7 @@
         $(".twofactorDiv").animate({
             'opacity': 1
         }, ONE_SECOND_DELAY);
-    }
+    };
 
     async function retrievetwofactor(callback = () => { }, usr_auth) {
         window.app.loading(true);
@@ -251,7 +429,7 @@
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "nlyachaglswisifrufrod0stEpec@UwlvizestAtr1xajanegaswa@remopheWip",
-                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                "internetadress": compressToEncodedURIComponent(internetadress),
                 "encodeuri": false
             },
             "body": `{\"query\":\"mutation { authRetrieveTwofactor(usr_auth: \\\"${usr_auth}\\\") }\"}`
@@ -275,16 +453,17 @@
 
                 throw new Error(err);
             });
-    }
+    };
 
     // ======================================================================
     // Default Events
     //
     $(() => {
+        loading(false);
+
         setTimeout(async () => {
             const { token } = await window.app.storage_get_userInfo();
             if (token) {
-                load_notifications();
                 console.log(token);
             }
         }, 180000);
@@ -341,8 +520,6 @@
 
         defaultSetters();
         getLocationIP();
-
-        window.app.loading(false);
     });
 
     async function defaultSetters() {
@@ -363,10 +540,15 @@
             "params": `{}`
         })
             .then(response => response.json())
-            .then(data => window.app.storage_set_userInfo({
-                locationIP: `${data['country']}(${data['city']}/${data['region']})`,
-                internetadress: `${data['ip']}`
-            }))
+            .then(async data => {
+                const oldInfo = await window.app.storage_get_userInfo();
+
+                window.app.storage_set_userInfo({
+                    ...oldInfo,
+                    locationIP: `${data['country']}(${data['city']}/${data['region']})`,
+                    internetadress: `${data['ip']}`
+                })
+            })
             .catch(err => {
                 window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
 
@@ -391,11 +573,11 @@
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4",
-                "token": LZString.compressToEncodedURIComponent(token),
-                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                "token": compressToEncodedURIComponent(token),
+                "internetadress": compressToEncodedURIComponent(internetadress),
                 "encodeuri": true
             },
-            "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${LZString.compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(token)}\\\") }\"}`
+            "body": `{\"query\":\"query { authLogout(usr_auth: \\\"${compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${compressToEncodedURIComponent(token)}\\\") }\"}`
         })
             .then(response => response.json())
             .then(async ({ data, errors }) => {
@@ -406,6 +588,9 @@
 
                 if (data['authLogout']) {
                     await window.app.storage_clear_userInfo();
+
+                    window.app.localStorage().empty();
+
                     return document.location = `${baseurl}`;
                 }
                 else
@@ -431,11 +616,11 @@
             "headers": {
                 "Content-Type": "application/json",
                 "authorization": "5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip",
-                "token": LZString.compressToEncodedURIComponent(token),
-                "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                "token": compressToEncodedURIComponent(token),
+                "internetadress": compressToEncodedURIComponent(internetadress),
                 "encodeuri": true
             },
-            "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${LZString.compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${LZString.compressToEncodedURIComponent(token)}\\\") }\"}`
+            "body": `{\"query\":\"query { authExpired(usr_auth: \\\"${compressToEncodedURIComponent(auth)}\\\", usr_token: \\\"${compressToEncodedURIComponent(token)}\\\") }\"}`
         })
             .then(response => response.json())
             .then(async ({ data, errors }) => {
@@ -446,6 +631,9 @@
 
                 if (data['authExpired']) {
                     await window.app.storage_clear_userInfo();
+
+                    window.app.localStorage().empty();
+
                     return document.location = `${baseurl}/user/auth`;
                 }
                 else
@@ -456,6 +644,82 @@
 
                 throw new Error(err);
             });
+    }
+
+    function getUserEmail(auth) {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
+            if (!token)
+                return document.location = `${baseurl}/user/auth`;
+
+            fetch(window.app.graphqlUrl, {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "authorization": "NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr",
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
+                    "encodeuri": true
+                },
+                "body": JSON.stringify({
+                    query: `query { getUserInfo( \
+                        usr_auth: \"${compressToEncodedURIComponent(auth)}\" \
+                    ) { email } }`
+                })
+            })
+                .then(response => response.json())
+                .then(async ({ data, errors }) => {
+                    if (errors) {
+                        return reject(errors);
+                    }
+
+                    return resolve(data['getUserInfo']['email']);
+                })
+                .catch(error => {
+                    return reject(error);
+                });
+        });
+    }
+
+    function getFolderInfo(cid) {
+        return new Promise(async (resolve, reject) => {
+            const { token, internetadress } = await window.app.storage_get_userInfo();
+
+            if (!token)
+                return document.location = `${baseurl}/user/auth`;
+
+            fetch(window.app.graphqlUrl, {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "authorization": "guI{rrKJGtc8{/4po.fd<rt48s]Lg_CXd$-?.3}g;_N<T(]Grw97.jczDR?>gy&]",
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
+                    "encodeuri": false
+                },
+                "body": JSON.stringify({
+                    query: `query { folderGet( \
+                        filter: { cid: \"${cid}\" }, \
+                        skip: ${0}, \
+                        limit: ${0} \
+                    ) { \
+                        cid authorId name description status type tag filesId foldersId \
+                    } }`
+                })
+            })
+                .then(response => response.json())
+                .then(async ({ data, errors }) => {
+                    if (errors) {
+                        return reject(errors);
+                    }
+
+                    return resolve(data['folderGet']);
+                })
+                .catch(error => {
+                    return reject(error);
+                });
+        });
     }
 
     function modalOpen(id) {
@@ -481,140 +745,244 @@
         }
     }
 
-    function StringPadZero(str, length) {
+    function stringPadZero(str, length) {
         var s = String(str);
         while (s.length < length) {
             s = '0' + s;
         }
         return s;
-    }
+    };
+
+    function fileContainValidExtensionAndSize(filename, filesize, extensions, maxSize) {
+        const extension = filename.slice(filename.lastIndexOf('.'));
+
+        if (extensions.indexOf(extension) === -1)
+            return window.app.alerting(`A extensão ${extension} do arquivo não poder ser usada.`);
+
+        if (maxSize < filesize)
+            return window.app.alerting(`O tamanho de ${byteSize(filesize)} do arquivo é maior que o máximo permitido de 20 MB.`);
+
+        return true;
+    };
+
+    function valueClearCustomsCharacters(text, characters) {
+        try {
+            const search = new RegExp(characters);
+
+            if (typeof text === 'string')
+                return text.replace(search, '');
+
+            return "";
+        } catch (error) {
+            if (typeof text === 'string')
+                return text.replace(characters, '');
+
+            return "";
+        }
+    };
 
     /**
-      Notification System
-    */
-    let notifications = [],
-        notification_timeout = null;
+     * @class Input
+     * @description Classe utilizada para interagir com inputs
+     */
 
-    async function load_notifications() {
-        const { token, internetadress } = await window.app.storage_get_userInfo();
+    class Input {
+        constructor(options = {}) {
+            this.minSuccess = Number(options['minSuccess']) || undefined;
+        };
 
-        if (token)
-            fetch(`${baseurl}/user/notifications`, {
-                "method": "GET",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "usr_token": token,
-                    "usr_internetadress": internetadress
-                },
-                "params": `{}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    notifications = data['notifications'] || [];
-                    process_notifications();
-                })
-                .catch(err => {
-                    window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+        handle(inputID, callback) {
+            if (inputID instanceof Array) {
+                const length = inputID.filter(id => callback(id)).length;
 
-                    throw new Error(err);
-                });
-    }
+                if (!this.minSuccess)
+                    return length >= inputID.length;
+                else
+                    return length >= this.minSuccess;
+            } else {
+                return callback(inputID);
+            };
+        };
 
-    async function create_notifications(title = '???', subtitle = '???', body = '???', background = 'secondary', expires = '1 min') {
-        const { auth, token, internetadress } = await window.app.storage_get_userInfo();
+        isValid(inputID) {
+            return this.handle(inputID, (id) => {
+                const input = $(`#${id}`) || id;
 
-        fetch(`${baseurl}/user/notifications/create`, {
-            "method": "POST",
-            "headers": {
-                "Content-Type": "application/json",
-                "usr_token": token,
-                "usr_internetadress": internetadress
-            },
-            "body": `{
-                authorization: "${auth}",
-                title: "${title}",
-                subtitle: "${subtitle}",
-                body: "${body}",
-                background: "${background}",
-                expires: "${expires}"
-            }`
-        })
-            .then(() => { })
-            .catch(err => {
-                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
-
-                throw new Error(err);
+                if (!input.hasClass('is-valid'))
+                    input
+                        .removeClass('is-invalid')
+                        .addClass('is-valid');
             });
-    }
+        };
 
-    async function remove_notifications(indexOf) {
-        const { token, internetadress } = await window.app.storage_get_userInfo();
+        isInvalid(inputID) {
+            return this.handle(inputID, (id) => {
+                const input = $(`#${id}`) || id;
 
-        fetch(`${baseurl}/user/notifications/remove`, {
-            "method": "POST",
-            "headers": {
-                "Content-Type": "application/json",
-                "usr_token": token,
-                "usr_internetadress": internetadress
-            },
-            "body": `{
-                id: ${Number(indexOf)}
-            }`
-        })
-            .then(response => response.json())
-            .then(({ data }) => { })
-            .catch(err => {
-                window.app.alerting('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
-
-                throw new Error(err);
+                if (!input.hasClass('is-invalid'))
+                    input
+                        .removeClass('is-valid')
+                        .addClass('is-invalid');
             });
-    }
+        };
 
-    function process_notifications() {
-        if (notifications.length > 0) {
-            let notification = notifications[0];
+        clearValidOrInvalid(inputID) {
+            return this.handle(inputID, (id) => {
+                const input = $(`#${id}`) || id;
 
-            $('body').append(`\
-          <div style="z-index: 9999; height: 100vh;" class="notificationDiv card bg-alert fixed-top col-12">\
-            <div id="notification-alert-box" class="alert alert-${notification['background']} alert-dismissible fade show m-auto mx-auto overflow-auto" role="alert" style="width: 90vw; height: 90vh;">\
-              <h5 class="alert-heading text-break"><span class="material-icons">notification_important</span> ${notification['title']}</h5>\
-              <hr>\
-              <h6>${notification['subtitle']}</h6>\
-              <hr>\
-              <div class="bg-dark text-white">\
-                <h5 class="text-white text-start p-3" style="white-space: pre-wrap;">${notification['body']}</h5>\
-              </div>\
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>\
-            </div>\
-          </div>\
-          `);
+                if (input.hasClass('is-valid') || input.hasClass('is-invalid'))
+                    input.removeClass('is-valid is-invalid')
+            });
+        };
 
-            $('#notification-alert-box').on('closed.bs.alert', function () {
-                notifications.splice(0, 1);
-                remove_notifications(0);
+        isMail(inputID) {
+            return this.handle(inputID, (id) => {
+                const
+                    input = $(`#${id}`) || id,
+                    search = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/g;
 
-                $('.notificationDiv').fadeOut("slow", function () {
-                    $('.notificationDiv').remove();
-                    notification_timeout = setTimeout(() => {
-                        process_notifications();
-                        clearTimeout(notification_timeout);
-                    }, ONE_SECOND_DELAY);
-                });
-            })
-        }
-    }
+                if (input.val().match(search))
+                    return input.val().match(search).filter(val => val !== '').length > 0;
+                else
+                    return false;
+            });
+        };
+
+        enable(inputID) {
+            return this.handle(inputID, (id) => {
+                const input = $(`#${id}`) || id;
+
+                input.attr('disabled', false);
+            });
+        };
+
+        disable(inputID) {
+            return this.handle(inputID, (id) => {
+                const input = $(`#${id}`) || id;
+
+                input.attr('disabled', true);
+            });
+        };
+
+        setValue(inputID, value) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    $(`#${id}`).val(value);
+                } else {
+                    $(input).val(value);
+                };
+            });
+        };
+
+        valueIsLarger(inputID, value) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    const input = $(`#${id}`).val();
+
+                    return input.length >= value;
+                } else {
+                    const input = id;
+
+                    return input.length >= value;
+                };
+            });
+        };
+
+        valueIsLess(inputID, value) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    const input = $(`#${id}`).val();
+
+                    return input.length <= value;
+                } else {
+                    const input = id;
+
+                    return input.length <= value;
+                };
+            });
+        };
+
+        valueIsMinAndMax(inputID, min, max) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    const input = $(`#${id}`).val();
+
+                    return input.length >= min && input.length <= max;
+                } else {
+                    const input = id;
+
+                    return input.length >= min && input.length <= max;
+                };
+            });
+        };
+
+        valueContainsCustomsCharacters(inputID, characters) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    const
+                        input = $(`#${id}`).val();
+
+                    if (input.search(characters) !== -1) {
+                        return true;
+                    };
+
+                    return false;
+                } else {
+                    const
+                        value = id;
+
+                    if (value.search(characters) !== -1) {
+                        return true;
+                    };
+
+                    return false;
+                };
+            });
+        };
+
+        valueClearCustomsCharacters(inputID, characters) {
+            return this.handle(inputID, (id) => {
+                if ($(`#${id}`)) {
+                    const
+                        input = $(`#${id}`).val();
+
+                    try {
+                        const search = new RegExp(characters);
+
+                        $(`#${id}`).val(input.replace(search, ''));
+                    } catch {
+                        $(`#${id}`).val(input.replace(characters, ''));
+                    };
+                } else {
+                    const input = id;
+
+                    try {
+                        const search = new RegExp(characters);
+
+                        input.innerText = input.replace(search, '');
+                    } catch {
+                        input.innerText = input.replace(characters, '');
+                    };
+                };
+            });
+        };
+    };
 
     // ======================================================================
     // Storage
     // Manager all application memory
+
+    //  - DB >> Users
     function storage_get_userInfo() {
-        if (window.app.indexedDB_users) {
-            return window.app.indexedDB_users.getUserInfo();
+        if (usersDB) {
+            return usersDB.getUserInfo();
         } else {
             return {
                 username: localStorage.getItem('usr-username'),
                 name: localStorage.getItem('usr-name'),
                 auth: localStorage.getItem('usr-auth'),
+                privileges: localStorage.getItem('usr-privileges'),
+                email: localStorage.getItem('usr-email'),
                 token: localStorage.getItem('usr-token'),
                 locationIP: localStorage.getItem('usr-locationIP'),
                 internetadress: localStorage.getItem('usr-internetadress')
@@ -623,22 +991,21 @@
     }
 
     function storage_set_userInfo(info) {
-        if (window.app.indexedDB_users) {
-            window.app.indexedDB_users.setUserInfo(info);
+        if (usersDB) {
+            return usersDB.setUserInfo(info);
         } else {
             Object
                 .keys(info)
                 .forEach(key => localStorage.setItem(`usr-${key}`, info[key]));
-        }
-    }
+        };
+    };
 
     function storage_clear_userInfo() {
-        if (window.app.indexedDB_users) {
-            window.app.indexedDB_users.clearUserInfo();
-        } else {
-            localStorage.clear();
-        }
-    }
+        if (usersDB)
+            return usersDB.clearUserInfo();
+
+        return window.app.localStorage().empty();
+    };
 
     // ======================================================================
     // File - Upload
@@ -647,32 +1014,36 @@
         return new Promise(async (resolve, reject) => {
             if (files.length <= 0) return;
 
-            const formData = new FormData(),
+            const form = new FormData(),
                 { token, internetadress } = await window.app.storage_get_userInfo();
 
-            formData.append('attachment', files[0]);
+            let i = 0, l = files.length;
+
+            for (i; i < l; i++) {
+                form.append(`attachment_${i}`, files.item(i));
+            }
 
             const settings = {
                 "async": true,
                 "crossDomain": true,
-                "url": "https://grupomavedigital.com.br/system/upload/file",
+                "url": `${window.app.baseurl}/system/upload/file`,
                 "method": "POST",
                 "headers": {
-                    "usr_token": token,
-                    "usr_internetadress": internetadress,
-                    "custompath": custompath
+                    'usr_token': token,
+                    'usr_internetadress': internetadress,
+                    'custompath': custompath
                 },
                 "processData": false,
                 "contentType": false,
                 "mimeType": "multipart/form-data",
-                "data": formData
+                "data": form
             };
 
             $.ajax(settings)
                 .done(function (response) {
                     return resolve(JSON.parse(response));
                 })
-                .catch(function (error) {
+                .fail(function (error) {
                     return reject(error);
                 });
         })
@@ -748,8 +1119,8 @@
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br",
-                    "token": LZString.compressToEncodedURIComponent(token),
-                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -887,8 +1258,8 @@
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC",
-                    "token": LZString.compressToEncodedURIComponent(token),
-                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -1040,8 +1411,8 @@
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT",
-                    "token": LZString.compressToEncodedURIComponent(token),
-                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -1106,8 +1477,8 @@
                 "headers": {
                     "Content-Type": "application/json",
                     "authorization": "fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv",
-                    "token": LZString.compressToEncodedURIComponent(token),
-                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                    "token": compressToEncodedURIComponent(token),
+                    "internetadress": compressToEncodedURIComponent(internetadress),
                     "encodeuri": false
                 },
                 "body": JSON.stringify({
@@ -1222,7 +1593,6 @@
 
             if (password.match(/[$@#&!]+/)) {
                 strength += 1;
-
             }
 
             if (password.length < 6) {
@@ -1242,6 +1612,14 @@
     };
 
     // ======================================================================
+    // Preferences
+    //
+    function openCanvasPreferences() {
+        const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvas_preferences'));
+        offcanvas.show();
+    };
+
+    // ======================================================================
     // General Functions
     //
     async function gotoSystem() {
@@ -1253,8 +1631,13 @@
             document.location = `${window.app.baseurl}/system/${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
         } else {
             document.location = `${window.app.baseurl}/user/auth`;
-        }
-    }
+        };
+    };
+
+    function windowClose() {
+        if (window)
+            return window.close();
+    };
 
     async function goto() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
@@ -1265,80 +1648,113 @@
             document.location = `${window.app.baseurl}/${path}?usr_token=${token}&usr_internetadress=${internetadress}`;
         } else {
             document.location = `${window.app.baseurl}/user/auth`;
-        }
-    }
+        };
+    };
 
     async function login() {
         await window.app.storage_clear_userInfo();
+
+        window.app.localStorage().empty();
+
         document.location = `${window.app.baseurl}/user/auth`;
-    }
+    };
+
+    function help() {
+        document.location = `${window.app.baseurl}/system/storage/hercules/help`;
+    };
 
     function helpdesk() {
         return window.open(`https://grupomavedigital.com.br/glpi`, '_blank');
-    }
+    };
 
     async function perfil() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/user/perfil?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function securityApp() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/user/auth/security?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     function cards() {
         return document.location = `${window.app.baseurl}/cards`;
-    }
+    };
 
     async function cards_control() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         return document.location = `${window.app.baseurl}/cards/control?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function cards_register() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         return document.location = `${window.app.baseurl}/cards/register?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function app_meu_rh() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/system/rh/appMeuRH?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function manuals(id) {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/system/manuals/${id}?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function materials(id) {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/system/materials/${id}?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function cpanel() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/system/cpanel?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
 
     async function cpanel_users_register() {
         const { token, internetadress } = await window.app.storage_get_userInfo();
 
         document.location = `${window.app.baseurl}/system/cpanel/users/register?usr_token=${token}&usr_internetadress=${internetadress}`;
-    }
+    };
+
+    async function hercules_openStorage(force) {
+        const
+            { token, internetadress } = await window.app.storage_get_userInfo(),
+            parent = window.app.localStorage().get('hercules_openFolder');
+
+        if (!force && parent) {
+            window.app.localStorage().clear('hercules_openFolder');
+
+            const { name, cid } = JSON.parse(decompressFromEncodedURIComponent(parent));
+
+            return document.location = `${window.app.baseurl}/system/storage/hercules/folder/${encodeURIComponent(name)}/${encodeURIComponent(cid)}?usr_token=${token}&usr_internetadress=${internetadress}`;
+        };
+
+        document.location = `${window.app.baseurl}/system/storage/hercules?usr_token=${token}&usr_internetadress=${internetadress}`;
+    };
+
+    async function hercules_openFolder(name, cid, parent) {
+        const { token, internetadress } = await window.app.storage_get_userInfo();
+
+        if (parent)
+            window.app.localStorage().save('hercules_openFolder', compressToEncodedURIComponent(JSON.stringify(parent)));
+
+        document.location = `${window.app.baseurl}/system/storage/hercules/folder/${encodeURIComponent(name)}/${encodeURIComponent(cid)}?usr_token=${token}&usr_internetadress=${internetadress}`;
+    };
 
     // ======================================================================
     // Globals (APP)
     //
     window.app = window.app || {};
+
     window.app.pagedata = function (prop) {
         let data = {}, values;
 
@@ -1375,6 +1791,8 @@
         { 'alias': 'ONE_SECOND_DELAY', 'function': ONE_SECOND_DELAY },
         { 'alias': 'MAIN_MENU', 'function': MAIN_MENU },
         { 'alias': 'baseurl', 'function': baseurl },
+        { 'alias': 'cache', 'function': Cache },
+        { 'alias': 'localStorage', 'function': () => { return { save: localStorage_save, get: localStorage_get, clear: localStorage_clear, empty: localStorage_empty } } },
         { 'alias': 'storage_get_userInfo', 'function': storage_get_userInfo },
         { 'alias': 'storage_set_userInfo', 'function': storage_set_userInfo },
         { 'alias': 'storage_clear_userInfo', 'function': storage_clear_userInfo },
@@ -1383,18 +1801,22 @@
         { 'alias': 'loading', 'function': loading },
         { 'alias': 'alerting', 'function': alerting },
         { 'alias': 'clearAlerting', 'function': clearAlerting },
-        { 'alias': 'sendemail', 'function': sendemail },
+        { 'alias': 'externalMailOpen', 'function': externalMailOpen },
         { 'alias': 'animateCSS', 'function': animateCSS },
         { 'alias': 'twofactor', 'function': twofactor },
         { 'alias': 'home', 'function': home },
         { 'alias': 'logout', 'function': logout },
         { 'alias': 'expired', 'function': expired },
+        { 'alias': 'getUserEmail', 'function': getUserEmail },
+        { 'alias': 'getFolderInfo', 'function': getFolderInfo },
         { 'alias': 'modalOpen', 'function': modalOpen },
         { 'alias': 'openModalSelect', 'function': openModalSelect },
+        { 'alias': 'input', 'function': (options) => new Input(options) },
         { 'alias': 'formatMoney', 'function': formatMoney },
-        { 'alias': 'StringPadZero', 'function': StringPadZero },
-        { 'alias': 'create_notifications', 'function': create_notifications },
+        { 'alias': 'stringPadZero', 'function': stringPadZero },
         { 'alias': 'fileUpload', 'function': fileUpload },
+        { 'alias': 'fileContainValidExtensionAndSize', 'function': fileContainValidExtensionAndSize },
+        { 'alias': 'valueClearCustomsCharacters', 'function': valueClearCustomsCharacters },
         { 'alias': 'vcardCreate', 'function': vcardCreate },
         { 'alias': 'cardCreate', 'function': cardCreate },
         { 'alias': 'cardUpdate', 'function': cardUpdate },
@@ -1403,8 +1825,10 @@
         { 'alias': 'filter_input', 'function': filter_input },
         { 'alias': 'check_password', 'function': check_password },
         { 'alias': 'gotoSystem', 'function': gotoSystem },
+        { 'alias': 'windowClose', 'function': windowClose },
         { 'alias': 'goto', 'function': goto },
         { 'alias': 'login', 'function': login },
+        { 'alias': 'help', 'function': help },
         { 'alias': 'helpdesk', 'function': helpdesk },
         { 'alias': 'perfil', 'function': perfil },
         { 'alias': 'securityApp', 'function': securityApp },
@@ -1416,5 +1840,8 @@
         { 'alias': 'materials', 'function': materials },
         { 'alias': 'cpanel', 'function': cpanel },
         { 'alias': 'cpanel_users_register', 'function': cpanel_users_register },
+        { 'alias': 'hercules_openStorage', 'function': hercules_openStorage },
+        { 'alias': 'hercules_openFolder', 'function': hercules_openFolder },
+        { 'alias': 'openCanvasPreferences', 'function': openCanvasPreferences },
     ].forEach(prop => window.app[prop['alias']] = prop['function']);
 })();

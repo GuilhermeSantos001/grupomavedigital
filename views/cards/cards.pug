@@ -13,14 +13,16 @@ append content
         div(class="app-content-group-2-card")
           h5 #{name || '???'}
           p #{jobtitle || '???'}
-          small Clique para visualizar.
-        small(class="text-sm-center") Layout: #{version || '???'}
+          div
+            small
+              | Layout: #{version || '???'} #[br]
+              | Clique para visualizar.
   div(class="app-container-search")
-    span(class="input-group-text" id="app-input-search") #[i(class="fas fa-search")]
-    input(type="text" id="app-input-search" placeholder="Procurar..." aria-label="app-input-search" aria-describedby="app-input-search" value="" disabled=cards.length <= 0 ? true: false)
+    span(class="input-group-text" id="app-span-search") #[i(class="fas fa-search")]
+    input(type="text" id="app-input-search" placeholder="Procurar..." aria-label="app-span-search" aria-describedby="app-span-search" value="" disabled=cards.length <= 0 ? true: false)
   div(id="list-cards")
     each card in cards
-      +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+      +card(card['cid'], card['photo'], card['name'], card['jobtitle'], card['version'])
     if (cards.length <= 0)
       p.text-muted Nenhum cartão digital encontrado.
   script(src="/javascripts/cards.min.js")

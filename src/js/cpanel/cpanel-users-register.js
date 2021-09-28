@@ -47,8 +47,8 @@
         __user_privileges = () => {
             let privileges = [];
 
-            if ($('#check-privilege-commum').prop("checked"))
-                privileges.push('commum');
+            if ($('#check-privilege-common').prop("checked"))
+                privileges.push('common');
 
             if ($('#check-privilege-admin').prop("checked"))
                 privileges.push('admin');
@@ -141,8 +141,8 @@
                 "body": JSON.stringify({
                     query: `mutation { registerUser( \
                         authorization: \"${LZString.compressToEncodedURIComponent(__user_auth())}\" \
-                        privilege: \"${LZString.compressToEncodedURIComponent(JSON.stringify(__user_privileges()))}\" \
-                        fotoPerfil: \"${LZString.compressToEncodedURIComponent(__user_photo)}\" \
+                        privileges: \"${LZString.compressToEncodedURIComponent(JSON.stringify(__user_privileges()))}\" \
+                        photoProfile: \"${LZString.compressToEncodedURIComponent(__user_photo)}\" \
                         username: \"${LZString.compressToEncodedURIComponent(__user_username())}\" \
                         password: \"${LZString.compressToEncodedURIComponent('__create_password__')}\" \
                         name: \"${LZString.compressToEncodedURIComponent(__user_name())}\" \
@@ -202,7 +202,7 @@
                     window.app.loading(false);
 
                     if (data['success']) {
-                        __user_photo = data['data'];
+                        __user_photo = data['files'][0];
 
                         document.getElementById('user-photo').src = `/assets/perfil/${__user_photo}`;
 

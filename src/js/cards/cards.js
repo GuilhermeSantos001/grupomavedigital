@@ -9,7 +9,7 @@
     // ======================================================================
     // Events
     //
-    window.app.filter_input("input-search", "list-cards", "a", ["h5", "p"]);
+    window.app.filter_input("app-input-search", "list-cards", "a", ["h5", "p"]);
 
     // ======================================================================
     // Export to Globals(APP)

@@ -21,7 +21,7 @@
     //
     let
         photoLogo = { path: 'images/', name: 'favicon.png' },
-        photoPerfil = { path: 'assets/perfil/', name: 'avatar.png' },
+        photoProfile = { path: 'assets/perfil/', name: 'avatar.png' },
         filePresentation = '/assets/Apresentação/APRESENTACAO_MAVE.pdf',
         limit = Number(sessionStorage.getItem('card-control-items-limit')) || 10;
 
@@ -59,7 +59,7 @@
                 lastIndex = items.get(items.length - 1);
 
             const cards = window.app.cardsCompressData.filter(card => {
-                if (String(lastIndex.id).replace('container-card-', '') === card['id'])
+                if (String(lastIndex.id).replace('container-card-', '') === card['cid'])
                     return true;
             });
 
@@ -84,7 +84,7 @@
                                 "authorization": "cnR{rrCHWtcB{/9tx^nG<sM6Km]Mc_RcE$-?.3}g;_N<T(]Grw97.jczDR?>gy&]"
                             },
                             "body": JSON.stringify({
-                                query: `query { cards: cardGet(lastIndex: \"${cards[0]['_index']}\", limit: ${Number(limit)}) }`
+                                query: `query { cards: cardGet(lastIndex: \"${cards[0]['index']}\", limit: ${Number(limit)}) }`
                             })
                         })
                             .then(response => response.json())
@@ -109,36 +109,36 @@
                             if (data.length > 0) {
                                 data.map(card => {
                                     let
-                                        id = card['id'],
+                                        id = card['cid'],
                                         photo = card['photo'],
                                         url = `${window.app.baseurl}/cards/card/${id}`,
                                         name = card['name'],
                                         jobtitle = card['jobtitle'],
                                         version = card['version'];
 
-                                    if (window.app.cardItems.filter(__card => __card['id'] === id && window.app.cardsCompressData.filter(__card => __card['id'] === id).length <= 0)) {
+                                    if (window.app.cardItems.filter(__card => __card['cid'] === id && window.app.cardsCompressData.filter(__card => __card['cid'] === id).length <= 0)) {
                                         $('#list-cards').append(`
-                                            <a class="list-group-item list-group-item-action col-12" aria-current="true" id='container-card-${id}'>
-                                                <div class="d-flex flex-lg-row flex-sm-column justify-content-between">
-                                                    <div class="col-sm-12 col-lg-1 border-end">
+                                            <a class="app-container-card" aria-current="true" id='container-card-${id}'>
+                                                <div class="app-content-card">
+                                                    <div class="app-content-group-1-card">
                                                         <img id='card-photo-${id}' src='/${photo['path']}${photo['name']}' class="rounded-circle mx-auto mt-2 d-block shadow" width="80" height="80">
-                                                        <button type="button" class="btn btn-mave2 col-12 mt-2 btn-sm" id='card-view-id-${id}'>
+                                                        <button type="button" id='card-view-id-${id}'>
                                                             Visualizar
                                                         </button>
                                                     </div>
-                                                    <div class="d-flex flex-column col-sm-12 col-lg p-2 text-lg-start text-sm-center">
-                                                        <h5 class="mb-1" id='card-name-${id}'>${name}</h5>
-                                                        <p class="mb-1" id='card-jobtitle-${id}'>${jobtitle}</p>
-                                                        <div class="d-flex flex-row col-12 justify-content-start">
-                                                            <button type="button" class="btn btn-mave1 col-sm-6 col-lg-4 me-2 btn-sm" id='card-edit-${id}'>
+                                                    <div class="app-content-group-2-card">
+                                                        <h5 id='card-name-${id}'>${name}</h5>
+                                                        <p id='card-jobtitle-${id}'>${jobtitle}</p>
+                                                        <div>
+                                                            <button type="button" class="first" id='card-edit-${id}'>
                                                                 Editar
                                                             </button>
-                                                            <button type="button" class="btn btn-mave1 col-sm-6 col-lg-4 btn-sm" id='card-remove-${id}'>
+                                                            <button type="button" class="second" id='card-remove-${id}'>
                                                                 Remover
                                                             </button>
+                                                            <small>Layout: ${version}</small>
                                                         </div>
                                                     </div>
-                                                    <small class="text-sm-center">Layout: ${version}</small>
                                                 </div>
                                             </a>
                                             `)
@@ -176,9 +176,10 @@
             if (document.getElementById(`card-edit-${id}`))
                 document.getElementById(`card-edit-${id}`).onclick = async function (e) {
                     const cards = await window.app.cardsCompressData.map((card, i) => {
-                        if (card['id'] === id) {
+                        if (card['cid'] === id) {
                             return { card, indexOf: i }
                         }
+
                         return null;
                     });
 
@@ -198,14 +199,12 @@
                         return `${card['vcard']['birthday']['year']}-${month}-${day}`;
                     })();
 
-                    console.log(birthday);
-
-                    photoPerfil = { path: card['photo']['path'], name: card['photo']['name'] };
+                    photoProfile = { path: card['photo']['path'], name: card['photo']['name'] };
 
                     window.app.openModalSelect(`Editar Cartão Digital - ${card['name']}(${card['jobtitle']})`, [
                         `\
                         <div class="d-flex justify-content-center my-2 col-12">
-                            <img src='/${photoPerfil['path']}${photoPerfil['name']}' class="rounded-circle align-self-center shadow" id="card-photo" width="140" height="140">
+                            <img src='/${photoProfile['path']}${photoProfile['name']}' class="rounded-circle align-self-center shadow" id="card-photo" width="140" height="140">
                         </div>
                         <div class="d-flex flex-column my-1 col-12 border-start border-end border-bottom">
                             <h4 class="text-center" id="card-username">${card['name']}</h4>
@@ -506,9 +505,9 @@
                                         window.app.loading(false);
 
                                         if (data['success']) {
-                                            photoPerfil = { path: 'assets/perfil/', name: data['data'] };
+                                            photoProfile = { path: 'assets/perfil/', name: data['files'][0] };
 
-                                            $('#card-photo').get(0).src = `/${photoPerfil['path']}${photoPerfil['name']}`;
+                                            $('#card-photo').get(0).src = `/${photoProfile['path']}${photoProfile['name']}`;
 
                                             return window.app.alerting('Foto de Perfil definida com sucesso!');
                                         }
@@ -549,7 +548,7 @@
                                         window.app.loading(false);
 
                                         if (data['success']) {
-                                            filePresentation = `/assets/Apresentação/${data['data']}`;
+                                            filePresentation = `/assets/Apresentação/${data['files'][0]}`;
 
                                             return window.app.alerting('Arquivo de Apresentação definido com sucesso!');
                                         }
@@ -565,7 +564,7 @@
                                 firstname = $('#input-vcard-prop-primeiro-nome').val(),
                                 lastname = $('#input-vcard-prop-último-nome').val(),
                                 organization = $('#input-vcard-prop-organização').val(),
-                                photo = photoPerfil,
+                                photo = photoProfile,
                                 logo = photoLogo,
                                 workPhone = [$('#input-vcard-prop-telefone-de-trabalho').val(), $('#input-vcard-prop-telefone-de-trabalho-2').val()],
                                 birthday = {
@@ -645,7 +644,7 @@
                                     const
                                         vcardFilename = filename,
                                         version = card['version'],
-                                        photo = photoPerfil,
+                                        photo = photoProfile,
                                         name = $('#input-username').val(),
                                         jobtitle = $('#input-jobtitle').val(),
                                         phones = [
@@ -661,7 +660,7 @@
                                             firstname,
                                             lastname,
                                             organization,
-                                            photo: photoPerfil,
+                                            photo: photoProfile,
                                             logo: photoLogo,
                                             workPhone,
                                             birthday,
@@ -741,7 +740,7 @@
                                             window.app.cardsChangeName(id, name);
                                             window.app.cardsChangeJobtitle(id, jobtitle);
                                             window.app.cardsCompressData[indexOf] = {
-                                                id,
+                                                cid: id,
                                                 version,
                                                 photo,
                                                 name,

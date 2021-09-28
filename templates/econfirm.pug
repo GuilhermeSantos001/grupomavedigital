@@ -1,0 +1,29 @@
+//- E-mail de confirmação da conta
+extends default.pug
+
+append content
+    tr
+        td(bgcolor="#ffffff" style="color: #004a6e; font-family: Arial, sans-serif; font-size: 24px; border: 1px solid #cccccc;")
+            table(border="1" cellpadding="0" cellspacing="0" width="100%" style="border-style: none;")
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 14px; border-style: none;")
+                        | Olá #{variables.username}, tudo bem? #[br]
+                        | Bem-vindo(a) ao Grupo Mave Digital, seu ambiente digital interativo. #[br]
+                        | Temos como objetivo em nossa plataforma oferecer mecanismos para nossos clientes !{"&"} colaboradores, facilitando o trabalho e a comunicação entre ambas as partes,
+                        | o que antes era feito de forma demorada e difusa, agora está concentrada e conexa, aumentando a produtividade, performance e escalabilidade de nossos serviços. #[br] #[br]
+                        | Parabéns pelo seu cadastro, pedimos que o guarde e proteja, pois ele é a prova de que você é parte da nossa historia, estamos iniciando um longo caminho de superação digital
+                        | e estamos ainda mais determinados, graças ao seu registro, pois a cada nova pessoa que entra em nossa plataforma, respiramos novos ares, adquirimos novos conhecimentos e crescemos
+                        | juntos, para mantermos nosso ambiente próspero. #[br] #[br]
+                        | Esperamos que você venha a contribuir com seu feedback ao utilizar nossos serviços, mais uma vez, muito obrigado por está fazendo parte da nossa historia, são mais de 25 anos de
+                        | experiência no mercado, mas há sempre algo inovador a ser aprendido. #[br] #[br]
+                        | Você deve primeiro ativar sua conta para liberar seu acesso: #[br]
+                        | #[a(href=`${variables.url}`) Acesse sua conta]
+                if(variables.temporarypass)
+                    tr
+                        td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 12px; border-style: none;")
+                            | Senha temporária: #{variables.temporarypassValue} #[br]
+                            | #[li Recomendamos que você troque a senha assim que acessar o portal]
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 12px; border-style: none;")
+                        | Esse link está valido por 7 dias. Após esse período você deverá solicitar ao administrador outro e-mail de confirmação. #[br]
+                        | - Caso você não tenha feito essa solicitação, ignore este e-mail.

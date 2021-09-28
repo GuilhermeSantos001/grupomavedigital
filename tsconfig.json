@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "strict": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/app/*": [
+        "ts/*"
+      ],
+      "@/config/*": [
+        "ts/config/*"
+      ],
+      "@/database/*": [
+        "ts/database/*"
+      ],
+      "@/src/*": [
+        "src/ts/*"
+      ],
+      "@/graphql/*": [
+        "ts/graphql/*"
+      ],
+      "@/bin/*": [
+        "ts/bin/*"
+      ],
+      "@/models/*": [
+        "ts/models/*"
+      ],
+      "@/controllers/*": [
+        "ts/controllers/*"
+      ],
+      "@/core/*": [
+        "ts/core/*"
+      ],
+      "@/db/*": [
+        "ts/db/*"
+      ],
+      "@/drivers/*": [
+        "ts/drivers/*"
+      ],
+      "@/middlewares/*": [
+        "ts/middlewares/*"
+      ],
+      "@/mongo/*": [
+        "ts/mongo/*"
+      ],
+      "@/routers/*": [
+        "ts/routers/*"
+      ],
+      "@/utils/*": [
+        "ts/utils/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "*.spec.ts"
+  ]
+}

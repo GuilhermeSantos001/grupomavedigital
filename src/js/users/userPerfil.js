@@ -40,6 +40,47 @@
         }
     });
 
+    document.getElementById('input-photo').addEventListener('change', e => {
+        if (e.target.files.length > 0)
+            $('#button-upload-photo').attr('disabled', false);
+        else
+            $('#button-upload-photo').attr('disabled', true);
+    });
+
+    document.getElementById('button-upload-photo').onclick = async function () {
+        let input = document.getElementById('input-photo');
+
+        if (input && input.files.length > 0) {
+            $('#input-photo, #button-upload-photo').attr('disabled', true);
+            window.app.loading(true);
+
+            const { internetadress } = await window.app.storage_get_userInfo();
+
+            window.app.fileUpload(input.files, 'assets/perfil', { type: 'temporary', index: `page-user-perfil-input-upload-photo-user`, origin: internetadress })
+                .then(async data => {
+                    $('#input-photo')
+                        .attr('disabled', false)
+                        .val('');
+                    $('#button-upload-photo').attr('disabled', true);
+
+                    window.app.loading(false);
+
+                    if (data['success']) {
+                        try {
+                            document.getElementById('user-photo').src = `/assets/perfil/${data['files'][0]}`;
+
+                            return window.app.alerting(await changeUserPhoto(data['files'][0]));
+                        } catch (error) {
+                            return window.app.alerting('Não foi possível confirmar a troca da sua foto, tente novamente mais tarde!');
+                        }
+                    } else {
+                        return window.app.alerting('Ocorreu um erro no envio do arquivo, tente novamente mais tarde!');
+                    }
+                })
+                .catch(e => console.error(e))
+        }
+    };
+
     // ======================================================================
     // Functions
     //
@@ -156,6 +197,56 @@
 
                 throw new Error(err);
             });
+    }
+
+    async function changeUserPhoto(photo) {
+        return new Promise(async (resolve, reject) => {
+            window.app.loading(true);
+
+            const { auth, token, internetadress } = await window.app.storage_get_userInfo();
+
+            if (!auth && !token)
+                return document.location = `${baseurl}/user/auth`;
+
+            let
+                usr_photo = LZString.compressToEncodedURIComponent(String(photo));
+
+            fetch(window.app.graphqlUrl, {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "authorization": "GHbqjX-RMmbKMbCfGZBV*xF48Lzqg74vq8G6eM3KTekCdaV3JZ+MYDz=RyGeWJ8N",
+                    "token": LZString.compressToEncodedURIComponent(token),
+                    "internetadress": LZString.compressToEncodedURIComponent(internetadress),
+                    "encodeuri": true
+                },
+                "body": `{\"query\":\"mutation { success: updatePhotoProfile(\
+                    usr_auth: \\\"${LZString.compressToEncodedURIComponent(auth)}\\\", \
+                    usr_photo: \\\"${usr_photo}\\\" \
+                    ) }\"}`
+            })
+                .then(response => response.json())
+                .then(({ data, errors }) => {
+                    window.app.loading(false);
+
+                    if (errors)
+                        return errors.forEach(error => window.app.alerting(error.message));
+
+                    const { success } = data || {};
+
+                    if (success) {
+                        return resolve(`Foto de Perfil definida com sucesso!`);
+                    } else {
+                        return reject(`Não foi possível atualizar suas informações!`);
+                    }
+
+                })
+                .catch(err => {
+                    reject('Ocorreu um erro com o servidor. Tente novamente mais tarde!');
+
+                    throw new Error(err);
+                });
+        });
     }
 
     // ======================================================================

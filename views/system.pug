@@ -1,18 +1,54 @@
 extends layout
 
+mixin accordionBody(title, update, status, notes)
+  div(class="d-flex flex-column border p-2")
+    div(class="m-2")
+      h5(class="fw-bold")=title
+      hr
+      p(class="fw-bold")
+        | Lançamento: #{update} #[br]
+        | Status: #{status} #[br]
+      - var random = Math.floor(Math.random() * (1000 + (100 * notes.length) + notes.length));
+      - var accordionID = `collapse-${title.replace(/\s+/g, '-')}-${random}`;
+      div(class="accordion" id=`${accordionID}_container`)
+        div(class="accordion-item")
+          h2(class="accordion-header" id=`${accordionID}_heading`)
+            button(class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target=`#${accordionID}` aria-expanded="false" aria-controls=`${accordionID}`)
+              | Patch Notes
+          div(id=`${accordionID}` class="accordion-collapse collapse" aria-labelledby=`${accordionID}_heading` data-bs-parent=`#${accordionID}_container`)
+            div(class="accordion-body")
+              each note in notes
+                div(class="bd-callout bd-callout-primary")
+                  p(class="text-primary fw-bold") #{note['strong']}
+                  hr
+                  p(class="text-primary") #{note['text']}
+
 append content
   div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
     h1(class="h2") Dashboard
   div(class="col-12")
     p(class="text-wrap")
-      | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+      | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
   div(class="accordion" id="accordion_main")
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_1")
-        button(class="accordion-button text-mave1 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
-          | Melhorias de Layout
-          span(class="badge bg-mave1 rounded-pill ms-2") Novidades
-      div(id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
+        button(class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1")
+          | Atualizações(♻)
+      div(id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
         div(class="accordion-body")
-          | #[li #[strong(class="text-mave1") Interface 2.0.] Toda a interface foi reformulada.]
-  script(src="/javascripts/system.min.js")
+          +accordionBody('Fenix', 'Julho/2021.', 'Em Desenvolvimento.', [
+            { strong: "Do Zero.", text: "O sistema foi totalmente reescrito em typescript."},
+            { strong: "Modernização.", text: "Reformulamos nosso design, inserimos novas mecânicas e agora é possível utilizar diferentes temas, mas por enquanto está disponível o tema escuro."}
+          ])
+    div(class="accordion-item")
+      h2(class="accordion-header" id="heading_2")
+        button(class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2")
+          | Módulos(✍)
+      div(id="collapse2" class="accordion-collapse collapse" aria-labelledby="heading_2" data-bs-parent="#accordion_main")
+        div(class="accordion-body")
+          +accordionBody('Painel de Controle', 'Março/2021.', 'Lançado.', [
+            { strong: "Gráfico de usuários ativos/inativos", text: "Um lindo gráfico foi adicionado para que de forma rapida seja possível identificar quantos usuários estão ativos/inativos na plataforma."}
+          ])
+          +accordionBody('Cartão Digital', 'Março/2021.', 'Lançado.', [
+            { strong: "Animações.", text: "Agora as paginas dos cartões são animadas."}
+          ])

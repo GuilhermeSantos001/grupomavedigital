@@ -134,7 +134,7 @@
                     window.app.loading(false);
 
                     if (data['success'])
-                        return window.app.cardChangePhoto(data['data']), window.app.alerting('Foto de Perfil definida com sucesso!');
+                        return window.app.cardChangePhoto(data['files'][0]), window.app.alerting('Foto de Perfil definida com sucesso!');
                     else
                         return window.app.alerting('Ocorreu um erro no envio do arquivo, tente novamente mais tarde!');
                 })
@@ -167,7 +167,7 @@
                     window.app.loading(false);
 
                     if (data['success'])
-                        return window.app.cardChangeFile(data['data']), window.app.alerting('Arquivo de Apresentação definido com sucesso!');
+                        return window.app.cardChangeFile(data['files'][0]), window.app.alerting('Arquivo de Apresentação definido com sucesso!');
                     else
                         return window.app.alerting('Ocorreu um erro no envio do arquivo, tente novamente mais tarde!');
                 })

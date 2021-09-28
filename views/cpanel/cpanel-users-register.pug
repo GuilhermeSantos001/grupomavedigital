@@ -5,79 +5,79 @@ append content
         h1(class="h2") Registrar usuário
     div(class="col-12")
         p(class="text-wrap")
-            | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+            | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
     div(class="d-flex flex-column flex-lg-row p-2 border-bottom")
         div(class="col-12 col-lg-6 p-2 border-end")
             img(src=`/assets/perfil/avatar.png` id="user-photo" class="img-fluid mt-2 mx-auto d-block border border-5 shadow avatar")
             div(class="input-group flex-nowrap my-3")
                 div(class="col-12")
-                    label(for="input-photo" class="form-label fw-bold text-mave1 fs-5") Escolher Foto de Perfil
+                    label(for="input-photo" class="form-label fw-bold text-primary fs-5") Escolher Foto de Perfil
                     input(class="form-control" type="file" id="input-photo" accept="image/x-png,image/gif,image/jpeg")
             div(class="input-group flex-nowrap my-2")
-                button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-photo" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
+                button(type="button" class="btn btn-primary btn-sm col-12 fs-6" id="button-upload-photo" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
             div(class="input-group flex-nowrap my-2")
-                button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-register-user" disabled onclick="window.app.registerUser();") #[i(class="fas fa-share")] Registrar Usuário
+                button(type="button" class="btn btn-primary btn-sm col-12 fs-6" id="button-register-user" disabled onclick="window.app.registerUser();") #[i(class="fas fa-share")] Registrar Usuário
         div(class="col-12 col-lg-6 p-2")
             div(class="col-12 flex-nowrap my-4 border-bottom")
                 h4(class="text-center") Informações do Portal
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-username") #[i(class="fas fa-user-circle")]
-                input(type="text" class="form-control col-12 col-12 text-mave1" id="input-username" placeholder="Nome de usuário" aria-label="span-username" aria-describedby="span-username")
+                span(class="input-group-text text-primary" id="span-username") #[i(class="fas fa-user-circle")]
+                input(type="text" class="form-control col-12 col-12 text-primary" id="input-username" placeholder="Nome de usuário" aria-label="span-username" aria-describedby="span-username")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-auth") #[i(class="fas fa-key")]
-                input(type="text" class="form-control col-12 col-12 text-mave1" id="input-auth" placeholder="Código exclusivo de acesso" aria-label="span-auth" aria-describedby="span-auth")
+                span(class="input-group-text text-primary" id="span-auth") #[i(class="fas fa-key")]
+                input(type="text" class="form-control col-12 col-12 text-primary" id="input-auth" placeholder="Código exclusivo de acesso" aria-label="span-auth" aria-describedby="span-auth")
             div(class="col-12 flex-nowrap my-4 border-bottom")
                 h4(class="text-center") Dados Pessoais
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-name") #[i(class="fab fa-angular")]
-                input(type="text" class="form-control col-12 col-12 text-mave1" id="input-name" placeholder="Nome" aria-label="span-name" aria-describedby="span-name")
+                span(class="input-group-text text-primary" id="span-name") #[i(class="fab fa-angular")]
+                input(type="text" class="form-control col-12 col-12 text-primary" id="input-name" placeholder="Nome" aria-label="span-name" aria-describedby="span-name")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-surname") #[i(class="fab fa-bootstrap")]
-                input(type="text" class="form-control col-12 col-12 text-mave1" id="input-surname" placeholder="Sobrenome" aria-label="span-surname" aria-describedby="span-surname")
+                span(class="input-group-text text-primary" id="span-surname") #[i(class="fab fa-bootstrap")]
+                input(type="text" class="form-control col-12 col-12 text-primary" id="input-surname" placeholder="Sobrenome" aria-label="span-surname" aria-describedby="span-surname")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-email") #[i(class="fas fa-at")]
-                input(type="text" class="form-control col-12 col-12 text-mave1" id="input-email" placeholder="Email" aria-label="span-email" aria-describedby="span-email")
+                span(class="input-group-text text-primary" id="span-email") #[i(class="fas fa-at")]
+                input(type="text" class="form-control col-12 col-12 text-primary" id="input-email" placeholder="Email" aria-label="span-email" aria-describedby="span-email")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-cnpj") #[i(class="fas fa-user-shield")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-cnpj" placeholder="CPF/CNPJ" aria-label="span-cnpj" aria-describedby="span-cnpj")
+                span(class="input-group-text text-primary" id="span-cnpj") #[i(class="fas fa-user-shield")]
+                input(type="text" class="form-control col-12 text-primary" id="input-cnpj" placeholder="CPF/CNPJ" aria-label="span-cnpj" aria-describedby="span-cnpj")
     div(class="d-flex flex-column flex-lg-row p-2")
         div(class="col-12 p-2")
             div(class="col-12 flex-nowrap mb-3 border-bottom")
                 h4(class="text-center") Endereço
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-street") #[i(class="fas fa-road")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-street" placeholder="Rua" aria-label="span-street" aria-describedby="span-street")
+                span(class="input-group-text text-primary" id="span-street") #[i(class="fas fa-road")]
+                input(type="text" class="form-control col-12 text-primary" id="input-street" placeholder="Rua" aria-label="span-street" aria-describedby="span-street")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-number") #[i(class="fas fa-sort-numeric-up-alt")]
-                input(type="number" class="form-control col-12 text-mave1" id="input-number" min="1" placeholder="Número" aria-label="span-number" aria-describedby="span-number")
+                span(class="input-group-text text-primary" id="span-number") #[i(class="fas fa-sort-numeric-up-alt")]
+                input(type="number" class="form-control col-12 text-primary" id="input-number" min="1" placeholder="Número" aria-label="span-number" aria-describedby="span-number")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-complement") #[i(class="fas fa-street-view")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-complement" placeholder="Complemento" aria-label="span-complement" aria-describedby="span-complement")
+                span(class="input-group-text text-primary" id="span-complement") #[i(class="fas fa-street-view")]
+                input(type="text" class="form-control col-12 text-primary" id="input-complement" placeholder="Complemento" aria-label="span-complement" aria-describedby="span-complement")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-district") #[i(class="fas fa-info-circle")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-district" placeholder="Bairro" aria-label="span-district" aria-describedby="span-district")
+                span(class="input-group-text text-primary" id="span-district") #[i(class="fas fa-info-circle")]
+                input(type="text" class="form-control col-12 text-primary" id="input-district" placeholder="Bairro" aria-label="span-district" aria-describedby="span-district")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-state") #[i(class="fas fa-flag-usa")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-state" placeholder="Estado" aria-label="span-state" aria-describedby="span-state")
+                span(class="input-group-text text-primary" id="span-state") #[i(class="fas fa-flag-usa")]
+                input(type="text" class="form-control col-12 text-primary" id="input-state" placeholder="Estado" aria-label="span-state" aria-describedby="span-state")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-city") #[i(class="fas fa-city")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-city" placeholder="Cidade" aria-label="span-city" aria-describedby="span-city")
+                span(class="input-group-text text-primary" id="span-city") #[i(class="fas fa-city")]
+                input(type="text" class="form-control col-12 text-primary" id="input-city" placeholder="Cidade" aria-label="span-city" aria-describedby="span-city")
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-zipcode") #[i(class="fas fa-info-circle")]
-                input(type="text" class="form-control col-12 text-mave1" id="input-zipcode" placeholder="CEP" aria-label="span-zipcode" aria-describedby="span-zipcode")
+                span(class="input-group-text text-primary" id="span-zipcode") #[i(class="fas fa-info-circle")]
+                input(type="text" class="form-control col-12 text-primary" id="input-zipcode" placeholder="CEP" aria-label="span-zipcode" aria-describedby="span-zipcode")
             div(class="col-12 flex-nowrap my-3 border-bottom")
                 h4(class="text-center") Privilégios
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-privilege-commum") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-commum" checked disabled)]
-                input(type="text" class="form-control col-12 text-mave1" aria-label="span-privilege-commum" aria-describedby="span-privilege-commum" value="Comum" disabled)
+                span(class="input-group-text text-primary" id="span-privilege-common") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-common" checked disabled)]
+                input(type="text" class="form-control col-12 text-primary" aria-label="span-privilege-common" aria-describedby="span-privilege-common" value="Comum" disabled)
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-privilege-admin") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-admin")]
-                input(type="text" class="form-control col-12 text-mave1" aria-label="span-privilege-admin" aria-describedby="span-privilege-admin" value="Administrador" disabled)
+                span(class="input-group-text text-primary" id="span-privilege-admin") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-admin")]
+                input(type="text" class="form-control col-12 text-primary" aria-label="span-privilege-admin" aria-describedby="span-privilege-admin" value="Administrador" disabled)
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-privilege-supervisor") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-supervisor")]
-                input(type="text" class="form-control col-12 text-mave1" aria-label="span-privilege-supervisor" aria-describedby="span-privilege-supervisor" value="Supervisor" disabled)
+                span(class="input-group-text text-primary" id="span-privilege-supervisor") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-supervisor")]
+                input(type="text" class="form-control col-12 text-primary" aria-label="span-privilege-supervisor" aria-describedby="span-privilege-supervisor" value="Supervisor" disabled)
             div(class="input-group flex-nowrap my-2")
-                span(class="input-group-text text-mave1" id="span-privilege-moderator") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-moderator")]
-                input(type="text" class="form-control col-12 text-mave1" aria-label="span-privilege-moderator" aria-describedby="span-privilege-moderator" value="Moderador" disabled)
+                span(class="input-group-text text-primary" id="span-privilege-moderator") #[input(class="form-check-input" type="checkbox" value="" id="check-privilege-moderator")]
+                input(type="text" class="form-control col-12 text-primary" aria-label="span-privilege-moderator" aria-describedby="span-privilege-moderator" value="Moderador" disabled)
     p(id="app-data-page" class=`path stringPath ${path}` style="display: none;")
     script(src="/javascripts/cpanel-users-register.min.js")

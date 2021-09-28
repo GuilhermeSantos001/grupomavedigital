@@ -1,0 +1,18 @@
+//- E-mail de recuperação da conta
+extends default.pug
+
+append content
+    tr
+        td(bgcolor="#ffffff" style="color: #004a6e; font-family: Arial, sans-serif; font-size: 24px; border: 1px solid #cccccc;")
+            table(border="1" cellpadding="0" cellspacing="0" width="100%" style="border-style: none;")
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 14px; border-style: none;")
+                        | Olá #{variables.username}, tudo bem? #[br]
+                        | Notamos que você solicitou a recuperação da sua conta, em nossa plataforma só é possível realizar tal pedido caso sua autenticação de dois fatores esteja ativa,
+                        | nesse caso você perdeu seu autenticador? Caso não tenha solicitado a recuperação, basta ignorar esse e-mail. #[br]
+                        | - Basta clicar no link a baixo para recuperar sua conta!: #[br]
+                        | #[a(href=`${variables.url}`) Recuperar a conta]
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 12px; border-style: none;")
+                        | Esse link está valido por 7 dias. Após esse periodo você deverá solicitar outro e-mail para recuperar sua conta. #[br]
+                        | - Caso você não tenha feito essa solicitação, ignore este e-mail.

@@ -1,7 +1,11 @@
-div(class="offcanvas offcanvas-start bg-mave1" tabindex="-1" id="offcanvas_preferences" aria-labelledby="offcanvas_preferencesLabel")
-    div(class="offcanvas-header")
-        h5(class="offcanvas-title text-mave2 fw-bold" id="offcanvas_preferencesLabel")
+div(class="offcanvas offcanvas-start text-primary" tabindex="-1" id="offcanvas_preferences" aria-labelledby="offcanvas_label")
+    div(class="offcanvas-header bg-primary text-secondary fw-bold")
+        h5(class="offcanvas-title fw-bold" id="offcanvas_label")
             | Preferências
         button(type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close")
-    div(class="offcanvas-body bg-light bg-gradient")
-        h5.border-bottom Testando
+    div(class="offcanvas-body bg-offcanvas bg-gradient")
+        h5.fw-bold Escolha um tema
+        hr
+        select(id="app-theme-switch" class="form-select" aria-label="Theme Select")
+            option(value="light-theme" selected) Claro
+            option(value="dark-theme") Escuro

@@ -3,12 +3,12 @@
 **/public/stylesheets/**.min**
 **/public/javascripts/**.min**
 **/public/assets/hls/**
+**/dist/**
 **/log/**
-**/db/**
+**/coverage/**
+**/ts/teste/data/**
 
 # Developer
-**/test/**
-*.test*
 *.env
 *ecosystem.config.js
 

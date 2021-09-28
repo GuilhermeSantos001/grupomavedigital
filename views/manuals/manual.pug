@@ -7,7 +7,7 @@ append content
         h1(class="h2") #{id}
     div(class="col-12")
         p(class="text-wrap")
-            | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+            | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
     div
         if (id === 'HELPDESK')
             include ../includes/manuals/helpdesk.pug

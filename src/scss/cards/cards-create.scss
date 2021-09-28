@@ -16,8 +16,9 @@
     @extend .col-12;
     p {
         @extend .text-wrap;
+
         b {
-            @extend .text-mave1;
+            @extend .text-primary;
             @extend .text-capitalize;
         }
     }
@@ -42,6 +43,6 @@
 
 .app-content-preview-card {
     @extend .border;
-    @extend .border-mave1;
+    @extend .border-primary;
     @extend .shadow;
 }

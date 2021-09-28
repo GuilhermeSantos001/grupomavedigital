@@ -6,14 +6,14 @@ append content
   div(class="app-container-page")
     h2 Definições do novo cartão digital.
   div(class="app-content-tittle-page")
-    p Olá #[b(id="usr-username")]/#[b #{privilege} #{">"}] Seu caminho de navegação atual é #[b #{router}]
+    p Olá #[b(id="usr-username")]/#[b #{privileges} #{">"}] Seu caminho de navegação atual é #[b #{router}]
   div(class="app-header-preview-card")
     p(class="highlight") A página a baixo é uma prévia do cartão digital.
     p (Durante o modo de prévia não será possível visualizar como o layout se comporta em vários dispositivos)
   div(class="app-content-preview-card")
     include ../includes/cards/card-layout-1.pug
-  div(class="list-group mt-3")
-    a(href="#" class="list-group-item list-group-item-action disabled" aria-current="true")
+  div(class="list-group")
+    a(href="#" class="list-group-item list-group-item-action bg-primary bg-gradient fw-bold text-secondary shadow my-2 disabled" aria-current="true")
       div(class="d-flex w-100 justify-content-between")
         h5(class="mb-1") Layout
         small Atualizado em 22/02/2021
@@ -21,9 +21,8 @@ append content
   div(class="accordion mt-1" id="accordion_main")
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_1")
-        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne")
+        button(class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne")
           | Redes Sociais
-          span(class="badge bg-mave1 rounded-pill ms-2") Habilitar/Desabilitar
       div(id="collapseOne" class="accordion-collapse collapse" aria-labelledby="heading_1" data-bs-parent="#accordion_main")
         div(class="accordion-body")
           mixin socialmedia(media, enabled)
@@ -38,9 +37,8 @@ append content
             +socialmedia('Facebook', true)
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_2")
-        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_2" aria-expanded="false" aria-controls="collapse_2")
+        button(class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_2" aria-expanded="false" aria-controls="collapse_2")
           | Redes Sociais
-          span(class="badge bg-mave1 rounded-pill ms-2") Domínios
       div(id="collapse_2" class="accordion-collapse collapse" aria-labelledby="heading_2" data-bs-parent="#accordion_main")
         div(class="accordion-body")
           mixin socialmedia(media, address)
@@ -54,9 +52,8 @@ append content
             +socialmedia('Facebook', 'https://www.facebook.com/grupomaveoficial/')
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_3")
-        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_3" aria-expanded="false" aria-controls="collapse_3")
+        button(class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_3" aria-expanded="false" aria-controls="collapse_3")
           | Dados para importar contato
-          span(class="badge bg-mave1 rounded-pill ms-2") vCard
       div(id="collapse_3" class="accordion-collapse collapse" aria-labelledby="heading_3" data-bs-parent="#accordion_main")
         div(class="accordion-body")
           mixin vcardprop(prop, value, type)
@@ -82,12 +79,11 @@ append content
             +vcardprop('Cidade', 'São Paulo')
             +vcardprop('Estado', 'São Paulo')
             +vcardprop('CEP', '05078-080')
-            button(type="button" class="btn btn-mave2 col-12 fs-5" id="vcard-generate") #[i(class="fas fa-id-card")] Gerar vCard
+            button(type="button" class="btn btn-primary col-12 fs-5" id="vcard-generate") #[i(class="fas fa-id-card")] Gerar vCard
     div(class="accordion-item")
       h2(class="accordion-header" id="heading_4")
-        button(class="accordion-button text-mave1 fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_4" aria-expanded="false" aria-controls="collapse_4")
+        button(class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_4" aria-expanded="false" aria-controls="collapse_4")
           | Compartilhar no Whatsapp
-          span(class="badge bg-mave1 rounded-pill ms-2") Texto
       div(id="collapse_4" class="accordion-collapse collapse" aria-labelledby="heading_4" data-bs-parent="#accordion_main")
         div(class="accordion-body")
           div(class="d-flex flex-wrap p-lg-2 p-xl-2 p-xxl-2 col-12")
@@ -97,16 +93,16 @@ append content
                 | Olá, este é o cartão de visita digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!
   div(class="input-group flex-nowrap my-3")
     div(class="col-12")
-      label(for="input-photo" class="form-label fw-bold text-mave1 fs-5") Escolher Foto de Perfil
+      label(for="input-photo" class="form-label fw-bold text-primary fs-5") Escolher Foto de Perfil
       input(class="form-control" type="file" id="input-photo" accept="image/x-png,image/gif,image/jpeg")
   div(class="input-group flex-nowrap my-3")
-    button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-photo" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
+    button(type="button" class="btn btn-primary btn-sm col-12 fs-6" id="button-upload-photo" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Foto de Perfil
   div(class="input-group flex-nowrap my-3")
     div(class="col-12")
-      label(for="input-file" class="form-label fw-bold text-mave1 fs-5") Escolher Arquivo de Apresentação
+      label(for="input-file" class="form-label fw-bold text-primary fs-5") Escolher Arquivo de Apresentação
       input(class="form-control" type="file" id="input-file" accept="application/pdf")
   div(class="input-group flex-nowrap my-3")
-    button(type="button" class="btn btn-mave1 btn-sm col-12 fs-6" id="button-upload-file" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Arquivo de Apresentação
+    button(type="button" class="btn btn-primary btn-sm col-12 fs-6" id="button-upload-file" disabled) #[i(class="fas fa-cloud-upload-alt")] Enviar Arquivo de Apresentação
   div(class="input-group flex-nowrap my-3")
     span(class="input-group-text" id="span-cardID") #[i(class="fas fa-search")]
     input(type="text" class="form-control col-12" id="input-cardID" placeholder="URL Personalizada..." aria-label="span-cardID" aria-describedby="span-cardID" value="")
@@ -135,6 +131,6 @@ append content
     span(class="input-group-text" id="span-website") #[i(class="fab fa-chrome")]
     input(type="text" class="form-control" id="input-website" placeholder="https://grupomave.com.br" aria-label="span-website" aria-describedby="span-website" value="https://grupomave.com.br")
   div(class="input-group flex-nowrap my-3")
-    button(type="button" class="btn btn-mave2 col-12 fs-5" id="card-register")
+    button(type="button" class="btn btn-primary col-12 fs-5" id="card-register")
       | #[i(class="fas fa-cloud-upload-alt")] Registrar o Cartão Digital
   script(src="/javascripts/card-create.min.js")
