@@ -1,14 +1,11 @@
 {
-    "execMap": {
-        "js": "node --inspect=9329 -r dotenv/config bin/www"
-    },
-    "ext": "js",
-    "ignore": [
-        "public/*",
-        "src/*",
-        "graphql-server/*"
-    ],
-    "env": {
-        "NODE_ENV": "development"
-    }
+  "events": {
+    "restart": "kill-port 3000 4000",
+    "crash": "kill-port 3000 4000"
+  },
+  "verbose": true,
+  "delay": "1500",
+  "watch": ["ts"],
+  "ext": "ts,gql",
+  "ignore": ["node_modules", "ts/test", "**/*.spec.ts"]
 }

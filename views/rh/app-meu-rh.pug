@@ -5,14 +5,14 @@ append content
         h1(class="h2") TOTVS - Meu RH
     div(class="col-12")
         p(class="text-wrap")
-            | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+            | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
     img(src=`/images/meurh_logo.png` class="img-fluid mt-2 mx-auto d-block shadow d-print-none" style="height: 15%; border-radius: 30%;")
     div(class="d-flex justify-content-center col-12 my-3")
-        button(type="button" class="btn btn-mave2 m-2 col-4 shadow d-print-none" onclick="window.open('https://play.google.com/store/apps/details?id=com.totvs.hr.mobile&hl=pt&gl=US', '_blank');")
+        button(type="button" class="btn btn-outline-primary m-2 col-4 shadow d-print-none" onclick="window.open('https://play.google.com/store/apps/details?id=com.totvs.hr.mobile&hl=pt&gl=US', '_blank');")
             | #[i(class="bi bi-download")] Google Play
-        button(type="button" class="btn btn-mave2 m-2 col-4 shadow d-print-none" onclick="window.open('https://apps.apple.com/br/app/totvs-meu-rh/id1263940937', '_blank');")
+        button(type="button" class="btn btn-outline-primary m-2 col-4 shadow d-print-none" onclick="window.open('https://apps.apple.com/br/app/totvs-meu-rh/id1263940937', '_blank');")
             | #[i(class="bi bi-download")] Apple Store
-    button(id="web-link" type="button" class="btn btn-mave2 col-12 shadow d-print-none" onclick="window.open('http://smave103587.protheus.cloudtotvs.com.br:4020/#/login', '_blank');")
+    button(id="web-link" type="button" class="btn btn-outline-primary col-12 shadow d-print-none" onclick="window.open('http://smave103587.protheus.cloudtotvs.com.br:4020/#/login', '_blank');")
         | Acesse pelo navegador
     h4(class="fw-bold text-center my-3 border-bottom d-print-none") Apos instalar siga os passos para configurar seu aplicativo
     h6(class="fw-bold text-danger text-center my-3") Atenção - Em seu aplicativo clique no botão: ler QR Code
@@ -24,9 +24,9 @@ append content
     )
     div(class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true")
         div(class="modal-dialog")
-            div(class="modal-content bg-mave1 shadow")
-                div(class="modal-header bg-mave2 border-mave1")
-                    h5(class="modal-title" id="exampleModalLabel") Escaneie o nosso QR CODE
+            div(class="modal-content bg-primary shadow")
+                div(class="modal-header bg-secondary border-primary")
+                    h5(class="modal-title fw-bold" id="exampleModalLabel") Escaneie o nosso QR CODE
                     button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
                 div(class="modal-body")
                     img(src=`/images/qr_code_app_meu_rh.png` class="img-fluid mt-2 mx-auto d-block shadow" style="height: 15%; border-radius: 30%;")

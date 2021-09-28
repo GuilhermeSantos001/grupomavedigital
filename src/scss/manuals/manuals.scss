@@ -11,28 +11,28 @@
     iframe {
         @extend .border;
         @extend .border-3;
-        @extend .border-mave1;
+        @extend .border-primary;
         @extend .shadow;
     }
 }
 
 .app-page-manual h4 {
     @extend .fw-bold;
-    @extend .text-mave1;
+    @extend .text-primary;
     @extend .text-center;
     @extend .py-3;
 }
 
 .app-page-manual p {
-    @extend .text-mave1;
+    @extend .text-primary;
     @extend .bd-callout;
-    @extend .bd-callout-mave1;
+    @extend .bd-callout-primary;
 }
 
 .app-page-manual p {
     b {
         @extend .fw-bold;
-        @extend .text-mave1;
+        @extend .text-primary;
     }
     img {
         @extend .col-12;
@@ -42,7 +42,7 @@
         @extend .d-block;
         @extend .border;
         @extend .border-3;
-        @extend .border-mave1;
+        @extend .border-primary;
         @extend .p-1;
         @extend .shadow;
     }

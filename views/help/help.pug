@@ -1,0 +1,22 @@
+extends ../layout
+
+append content
+    div(class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom")
+        h1(class="h2") #{router}
+    div(class="col-12")
+        div(class="accordion" id="accordion-questions")
+            - var questionId = 0;
+            mixin drawQuestion(question, answers)
+                div(class="accordion-item")
+                    h2(class="accordion-header" id=`question-${++questionId}`)
+                        button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target=`#collapse-${questionId}` aria-expanded="false" aria-controls=`collapse-${questionId}`)
+                            | #[i(class="icon-question-circle me-2")] #{questionId}. #{question}
+                    div(id=`collapse-${questionId}` class="accordion-collapse collapse" aria-labelledby=`question-${questionId}` data-bs-parent="#accordion-questions")
+                        div(class="accordion-body")
+                            each answer, index in answers
+                                div(class="d-flex flex-row border p-2 my-1")
+                                    p(class="m-2 col-11") #{answer}
+                                    div(class="col text-end fs-5 align-self-center")
+                                        span(class="badge bg-primary fw-bold") #{index + 1}
+            each question in questions
+                +drawQuestion(question.title, question.answer)

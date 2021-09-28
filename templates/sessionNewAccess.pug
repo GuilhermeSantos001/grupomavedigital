@@ -1,0 +1,20 @@
+//- E-mail de novo acesso por um endereço de IP fora do historico
+extends default.pug
+
+append content
+    tr
+        td(bgcolor="#ffffff" style="color: #004a6e; font-family: Arial, sans-serif; font-size: 24px; border: 1px solid #cccccc;")
+            table(border="1" cellpadding="0" cellspacing="0" width="100%" style="border-style: none;")
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 14px; border-style: none;")
+                        | Olá #{variables.username}, tudo bem? #[br]
+                        | Recebemos um novo acesso de um endereço diferente do que você costuma a usar, você confirma as informações a baixo? #[br] #[br]
+                        | #[li Navegador: #{variables.browser}] #[br]
+                        | #[li Dispositivo: #{variables.os}] #[br]
+                        | #[li Localização: #{variables.locationIP}] #[br]
+                        | #[li Endereço de IP: #{variables.internetAdress}] #[br] #[br]
+                        | Desconhece esse acesso? Recomendamos que altere sua senha agora mesmo, e ative a autenticação de duas etapas em sua conta.
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 12px; border-style: none;")
+                        | - Caso você ainda esteja inseguro sobre o que pode ter sido causado aos seus dados, peça ao administrador do sistema um relatorio das atividades realizadas na sua conta nos últimos dias. #[br]
+                        | - Caso você não tenha feito essa solicitação, ignore este e-mail.

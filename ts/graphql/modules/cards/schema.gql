@@ -1,0 +1,165 @@
+# Schema de input para os vCards
+input file {
+  path: String!
+  name: String!
+}
+
+input birthday {
+  year: Int!
+  month: Int!
+  day: Int!
+}
+
+input socialURL {
+  media: String!
+  url: String!
+}
+
+input socialmedia {
+  name: String!
+  value: String!
+  enabled: Boolean!
+}
+
+input whatsapp {
+  phone: String!
+  text: String!
+  message: String!
+}
+
+input cardFooter {
+  email: String!
+  location: String!
+  website: String!
+  attachment: String!
+  socialmedia: [socialmedia!]!
+}
+
+input vcard {
+  firstname: String!
+  lastname: String!
+  organization: String!
+  photo: file!
+  logo: file!
+  workPhone: [String!]!
+  birthday: birthday!
+  title: String!
+  url: String!
+  workUrl: String!
+  email: String!
+  label: String!
+  countryRegion: String!
+  street: String!
+  city: String!
+  stateProvince: String!
+  postalCode: String!
+  socialUrls: [socialURL!]!
+  file: file
+}
+
+input card {
+  id: String
+  version: String!
+  photo: file!
+  name: String!
+  jobtitle: String!
+  phones: [String!]!
+  whatsapp: whatsapp!
+  vcard: vcard!
+  footer: cardFooter!
+}
+
+type Query {
+  """
+  Efetua o login do usuário
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-query?id=cardget
+  """
+  cardGet(
+    """
+    ID usado como base para que a lista retorne cartões com ID's mais recentes
+    """
+    lastIndex: String
+    """
+    Limite de cartões a serem retornados na lista
+    """
+    limit: Int!
+  ): String!
+    @auth(
+      keys: ["cnR{rrCHWtcB{/9tx^nG<sM6Km]Mc_RcE$-?.3}g;_N<T(]Grw97.jczDR?>gy&]"]
+    )
+}
+
+type Mutation {
+  """
+  Cria um novo vcard
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-mutations?id=vcardcreate
+  """
+  vcardCreate(
+    """
+    Propriedades do vcard
+    """
+    data: vcard!
+  ): String!
+    @auth(
+      keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"]
+    )
+    @privilege(keys: ["administrador", "moderador"])
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Cria um novo cartão digital
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-mutations?id=cardcreate
+  """
+  cardCreate(
+    """
+    Propriedades do cartão digital
+    """
+    data: card!
+  ): String!
+    @auth(
+      keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC"]
+    )
+    @privilege(keys: ["administrador", "moderador"])
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Atualiza um cartão digital
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-mutations?id=cardupdate
+  """
+  cardUpdate(
+    """
+    Propriedades do cartão digital
+    """
+    data: card!
+  ): String!
+    @auth(
+      keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"]
+    )
+    @privilege(keys: ["administrador", "moderador"])
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Remove um cartão digital
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-mutations?id=cardremove
+  """
+  cardRemove(
+    """
+    ID do cartão digital
+    """
+    id: String!
+  ): Boolean!
+    @auth(
+      keys: ["fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv"]
+    )
+    @privilege(keys: ["administrador", "moderador"])
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+}
+
+directive @auth(keys: [String!]!) on FIELD_DEFINITION
+
+directive @token(ignore: Boolean!) on FIELD_DEFINITION
+
+directive @privilege(keys: [String!]!) on FIELD_DEFINITION
+
+directive @encodeuri(method: String!) on FIELD_DEFINITION

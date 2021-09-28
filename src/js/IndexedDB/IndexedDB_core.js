@@ -1,20 +1,12 @@
-(function () {
-    'use strict';
+/**
+ * @description Class for Storange Web
+ * @author @GuilhermeSantos001
+ * @update 26/07/2021
+ * @version 2.0.0
+ */
 
-    // ======================================================================
-    // Import of Globals(APP)
-    //
-    window.app = window.app || {};
-
-    // ======================================================================
-    // indexedDB
-    //  Class for Storange Web
-    //
-    function indexedDB() {
-        this.initialize.apply(this, arguments);
-    }
-
-    indexedDB.prototype.initialize = function (db_name = 'default', version = 1) {
+export default class indexedDB {
+    constructor(db_name = 'default', version = 1) {
         if (!this.supportBrowser())
             throw new Error('Browser not support for indexedDB!');
 
@@ -22,17 +14,11 @@
         this.version = version;
     };
 
-    indexedDB.prototype.supportBrowser = function () {
-        const indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-
-        if (Modernizr) {
-            return Modernizr.localstorage;
-        }
-
-        return indexedDB;
+    supportBrowser() {
+        return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     };
 
-    indexedDB.prototype.storeGet = function (storeName = 'main', keyPath = 'id', key = '0001') {
+    storeGet(storeName = 'main', keyPath = 'id', key = '0001') {
         return new Promise((resolve, reject) => {
             let request_DB = window.indexedDB.open(this.db, this.version);
 
@@ -74,7 +60,7 @@
         });
     };
 
-    indexedDB.prototype.storeAdd = function (storeName = 'main', keyPath = 'id', data = { id: '0001' }) {
+    storeAdd(storeName = 'main', keyPath = 'id', data = { id: '0001' }) {
         return new Promise((resolve, reject) => {
             let request_DB = window.indexedDB.open(this.db, this.version);
 
@@ -110,7 +96,7 @@
         });
     };
 
-    indexedDB.prototype.storeRemove = function (storeName = 'main', keyPath = 'id', key = '0001') {
+    storeRemove(storeName = 'main', keyPath = 'id', key = '0001') {
         return new Promise((resolve, reject) => {
             let request_DB = window.indexedDB.open(this.db, this.version);
 
@@ -146,7 +132,7 @@
         });
     };
 
-    indexedDB.prototype.storeUpdate = function (storeName = 'main', keyPath = 'id', key = '0001', newData = {}) {
+    storeUpdate(storeName = 'main', keyPath = 'id', key = '0001', newData = {}) {
         return new Promise((resolve, reject) => {
             let request_DB = window.indexedDB.open(this.db, this.version);
 
@@ -193,7 +179,7 @@
         });
     };
 
-    indexedDB.prototype.storeClear = function (storeName = 'main', keyPath = 'id') {
+    storeClear(storeName = 'main', keyPath = 'id') {
         return new Promise((resolve, reject) => {
             let request_DB = window.indexedDB.open(this.db, this.version);
 
@@ -228,9 +214,4 @@
             };
         });
     };
-
-    // ======================================================================
-    // Export to Globals(APP)
-    //
-    window.app['indexedDB'] = indexedDB;
-})();
+};

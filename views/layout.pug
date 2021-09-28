@@ -5,7 +5,6 @@ html
     meta(charset="utf-8")
     meta(http-equiv="X-UA-Compatible" content="IE=edge")
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
-    meta(http-equiv="X-UA-Compatible" content="ie=edge")
     meta(name="description" content="Olá, venha conhecer o ambiente digital interativo do Grupo Mave. Tenha todas as informações a um clique. Acesse o link e saiba mais!")
     meta(property="og:title" content="Cartão Digital do Grupo Mave")
     meta(property="og:site_name" content="Grupo Mave Digital")
@@ -28,15 +27,15 @@ html
     link(rel="icon" type="image/png" sizes="32x30" href="/favicon/favicon256.png")
     link(rel="apple-touch-icon" sizes="128x128" href="/favicon/favicon256.png")
     link(rel="apple-touch-startup-image" href="/favicon/favicon256.png")
-    link(rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons')
-    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css")
-    link(rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css")
-    link(rel="stylesheet" href="/stylesheets/plugins/Chart.min.css")
-    link(rel="stylesheet" href="/stylesheets/plugins/jquery-ui.min.css")
-    link(rel="stylesheet" href="/stylesheets/plugins/jquery-ui.structure.min.css")
-    link(rel="stylesheet" href="/stylesheets/plugins/jquery-ui.theme.min.css")
-    link(rel="stylesheet" href="/stylesheets/plugins/spinkit.min.css")
-    link(rel="stylesheet" href="/stylesheets/layout.min.css")
+    link(rel='stylesheet' type="text/css" href='https://fonts.googleapis.com/icon?family=Material+Icons')
+    link(rel="stylesheet" type="text/css" href="https://cdn.plyr.io/3.6.8/plyr.css")
+    link(rel="stylesheet" type="text/css" href="/stylesheets/plugins/jquery-ui.min.css")
+    link(rel="stylesheet" type="text/css" href="/stylesheets/plugins/jquery-ui.structure.min.css")
+    link(rel="stylesheet" type="text/css" href="/stylesheets/plugins/jquery-ui.theme.min.css")
+    link(rel="stylesheet" type="text/css" href="/animate.min.css")
+    link(rel="stylesheet" type="text/css" href="/Chart.css")
+    link(rel="stylesheet" type="text/css" href="/spinkit.min.css")
+    link(rel="stylesheet" type="text/css" href="/stylesheets/layout.min.css")
     block head
       script.
         if ('serviceWorker' in navigator) {
@@ -45,44 +44,18 @@ html
           });
         }
   body(onbeforeunload="window.app.loading(true);")
-    script(type="text/javascript" src="/please-wait.min.js")
-    script.
-      window.loading_screen = window.pleaseWait({
-        logo: ''
-        , backgroundColor: 'rgba(0, 0, 0, 0.5);'
-        , loadingHtml: `\
-          <div id="sk-flex" class="d-flex flex-column mx-3"> \
-            <div class="sk-grid align-self-center"> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-              <div class="sk-grid-cube bg-light"></div> \
-            </div> \
-          </div> \
-          <p class='loading-message my-3 text-light'> \
-            Carregando... \
-          </p> \
-          `
-      });
     div
       header(
-        class="navbar navbar-dark d-print-none bg-mave1 bg-gradient sticky-top flex-md-nowrap p-0 shadow"
+        class="navbar navbar-dark bg-primary bg-gradient sticky-top flex-md-nowrap p-2 shadow"
       )
         a(class="navbar-brand d-md-flex flex-row col-12 me-0 px-3 disabled")
           div(class="col-1 d-none d-lg-flex justify-content-center")
             p(class="my-auto") #[span(id="buttonMenu" class="material-icons fs-1") menu_open]
-          img(src="/assets/logo.png" class="img-fluid mt-4 mt-md-0" width="340")
+          img(src="/assets/logo.png" class="img-fluid mt-4 mt-md-0" width="340" onclick="window.location=\"\/\"" style="cursor: pointer;")
           div(class="col-2 ms-5 my-auto flex-fill")
             div(class="d-flex flex-column justify-content-center")
-              p(class="text-center fs-3")
+              p(class="text-center fs-3 fw-bold")
                 | Ambiente Digital Interativo
-              //- button(class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_preferences" aria-controls="offcanvas_preferences")
-              //-   | Offcanvas
         button(
           class="navbar-toggler position-absolute d-md-none collapsed my-4" type="button"
           data-bs-toggle="collapse" data-bs-target="#app-menu" aria-controls="app-menu" aria-expanded="false"
@@ -91,9 +64,9 @@ html
           span(class="navbar-toggler-icon")
       div(class="container-fluid")
         div(class="row")
-          nav(id="app-menu" class="d-print-none col-md-3 col-lg-2 d-md-block bg-light bg-gradient sidebar collapse" style="overflow-x: hidden; overflow-y: auto;")
+          nav(id="app-menu" class="col-md-3 col-lg-2 d-md-block bg-light-gray bg-gradient sidebar collapse" style="overflow-x: hidden; overflow-y: auto;")
             div(style="height: 88vh;")
-              ul(class="nav flex-column col-12 bg-light bg-gradient")
+              ul(class="nav flex-column col-12 bg-light-gray bg-gradient")
                 each menu in menus
                   li(class="nav-item col-12" role="presentation")
                     if (menu['first'])
@@ -106,16 +79,16 @@ html
                             role="presentation"
                             aria-expanded="false"
                           )
-                            | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-                          ul(class="dropdown-menu col-12 bg-light bg-gradient border-secondary shadow overflow-auto" style="max-height: 30vh;")
+                            | #[span(class="me-2" data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
+                          ul(class="dropdown-menu col-12 bg-light-gray bg-gradient border-primary shadow overflow-auto" style="max-height: 30vh;")
                             each item in menu['items']
                               li(class="nav-item col-12")
                                 a(
                                   title=`${item['title']}`
-                                  class=`dropdown-item text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
+                                  class=`dropdown-item bg-light-gray text-primary text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
                                   onclick=`${item['onclick'] ? `window.app.${item['onclick']}` : ''}`
                                 )
-                                  | #[span(data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
+                                  | #[span(class="me-2" data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
                       else
                         li(class="nav-item dropdown col-12")
                           a(
@@ -125,7 +98,7 @@ html
                             role="presentation"
                             onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
                           )
-                            | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
+                            | #[span(class="me-2" data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
                     else
                       if (menu['type'] === 'collapse')
                         li(class="nav-item dropdown col-12")
@@ -136,16 +109,16 @@ html
                             role="presentation"
                             aria-expanded="false"
                           )
-                            | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
-                          ul(class="dropdown-menu col-12 bg-light bg-gradient border-secondary shadow overflow-auto" style="max-height: 30vh;")
+                            | #[span(class="me-2" data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
+                          ul(class="dropdown-menu col-12 bg-light-gray bg-gradient border-primary shadow overflow-auto" style="max-height: 30vh;")
                             each item in menu['items']
                               li(class="nav-item col-12")
                                 a(
                                   title=`${item['title']}`
-                                  class=`dropdown-item text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
+                                  class=`dropdown-item bg-light-gray text-primary text-truncate ${item['enabled'] ? '' : 'text-muted disabled'}`
                                   onclick=`${item['onclick'] ? `window.app.${item['onclick']}` : ''}`
                                 )
-                                  | #[span(data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
+                                  | #[span(class="me-2" data-feather=`${item['icon'] && item['enabled'] ? item['icon'] : 'x-circle'}`)] !{item['title']}
                       else
                         li(class="nav-item col-12")
                           a(
@@ -154,24 +127,26 @@ html
                             role="presentation"
                             onclick=`${menu['onclick'] ? `window.app.${menu['onclick']}` : ''}`
                           )
-                            | #[span(data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
+                            | #[span(class="me-2" data-feather=`${menu['icon'] && menu['enabled'] ? menu['icon'] : 'x-circle'}`)] !{menu['title']}
           main(id="app-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4")
             div(class="container-fluid")
               a(id="buttonToTop") #[span(class="material-icons" style="font-size: 2rem;") keyboard_arrow_up]
-              script(type="text/javascript" src="/javascripts/plugins/modernizr-custom.js")
-              script(src="/javascripts/plugins/jquery-3.5.1.min.js")
+              script(src="https://cdn.plyr.io/3.6.8/plyr.js")
+              script(src="/jquery.min.js")
+              script(src="/jquery.ui.position.min.js")
+              script(src="/jquery.contextMenu.min.js")
               script(src="/javascripts/plugins/jquery-ui.min.js")
-              script(src="/javascripts/plugins/jquery.inputmask.min.js")
-              script(src="/chart.js")
+              script(src="/jquery.inputmask.min.js")
+              script(src="/javascripts/plugins/hls.min.js")
+              script(src="/javascripts/plugins/file_explore.js")
+              script(src="/chart.min.js")
               script(src="/socket.io.js")
-              script(src="/javascripts/plugins/lz-string.min.js")
-              script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js" integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi" crossorigin="anonymous")
-              script(src="/js/bootstrap.min.js")
+              script(src="/lz-string.min.js")
+              script(src="/popper.min.js")
+              script(src="/bootstrap.min.js")
               script(src="/feather.min.js")
-              script(src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.0.0/hls.min.js" integrity="sha512-uM0ewIqsiljk+lbRkzsxcx3eriM5HBN6JKMIcM9wX2L1qa1/+JlzR1qubm4YqnC6Zpn6ElVmNr1+VxUFrCRICQ==" crossorigin="anonymous")
-              script(src="https://cdn.plyr.io/3.6.4/plyr.js")
-              script(src="/javascripts/IndexedDB_core.min.js")
-              script(src="/javascripts/IndexedDB_users.min.js")
+              script(src="/please-wait.min.js")
+              script(src="/javascripts/definitions.min.js")
               script(src="/javascripts/layout.min.js")
               block content
                 include ./includes/offcanvas/preferences.pug

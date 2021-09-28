@@ -1,0 +1,15 @@
+//- E-mail dos pedidos aos procuradores dos arquivos/pastas
+extends default.pug
+
+append content
+    tr
+        td(bgcolor="#ffffff" style="color: #004a6e; font-family: Arial, sans-serif; font-size: 24px; border: 1px solid #cccccc;")
+            table(border="1" cellpadding="0" cellspacing="0" width="100%" style="border-style: none;")
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 14px; border-style: none;")
+                        | Olá #{variables.username}, tudo bem? #[br]
+                        | #{variables.description} #[br]
+                        | - #[a(href=`${variables.link}`) Acesse a pagina] para responder a solicitação.
+                tr
+                    td(width="520" valign="top" style="padding: 20px; color: #004a6e; text-align: justify; text-justify: inter-word; font-family: Arial, sans-serif; font-size: 12px; border-style: none;")
+                        | - #[a(href=`${variables.linkHelp}`) Saiba mais] sobre o #[b Hercules Storage] e suas funcionalidades. #[br]

@@ -11,8 +11,8 @@
 
         if (token) {
             return document.location = `${window.app.baseurl}/system?usr_token=${token}&usr_internetadress=${internetadress}`;
-        }
-    })
+        };
+    });
 
     async function loginAuth(usr_twofactortoken) {
         window.app.loading(true);
@@ -34,10 +34,10 @@
                     $('#input_authorization, #input_password').removeClass('is-invalid');
                     clearTimeout(clear);
                 }, window.app.DEFAULT_DELAY);
-            }
+            };
 
             return window.app.alerting('Preencha os campos obrigatórios. Tente novamente!')
-        }
+        };
 
         usr_auth = LZString.compressToEncodedURIComponent(String($('#input_authorization').val()));
         usr_pwd = LZString.compressToEncodedURIComponent(String($('#input_password').val()));
@@ -50,10 +50,10 @@
                 "internetadress": LZString.compressToEncodedURIComponent(internetadress),
                 "encodeuri": true
             },
-            "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", twofactortoken: \\\"${LZString.compressToEncodedURIComponent(usr_twofactortoken)}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization username name token } }\"}`
+            "body": `{\"query\":\"{ user: authLogin(usr_auth: \\\"${usr_auth}\\\", pwd: \\\"${usr_pwd}\\\", twofactortoken: \\\"${LZString.compressToEncodedURIComponent(usr_twofactortoken)}\\\", locationIP: \\\"${usr_locationIP}\\\", internetAdress: \\\"${usr_internetadress}\\\") { authorization privileges email username name token } }\"}`
         })
             .then(response => response.json())
-            .then(({ data, errors }) => {
+            .then(async ({ data, errors }) => {
                 window.app.loading(false);
 
                 if (errors)
@@ -61,18 +61,25 @@
 
                 const { user } = data || {};
 
-
                 if (user['token'] === 'twofactorVerify')
                     return window.app.twofactor(loginAuth, usr_auth);
                 else if (user['token'] === 'twofactorDenied')
                     return window.app.alerting('O código informado está inválido. Tente Novamente!')
 
-                window.app.storage_set_userInfo({
-                    auth: user['authorization'],
-                    username: user['username'],
-                    token: user['token'],
-                    name: user['name']
-                });
+                try {
+                    await window.app.storage_set_userInfo({
+                        auth: user['authorization'],
+                        privileges: user['privileges'],
+                        email: user['email'],
+                        username: user['username'],
+                        token: user['token'],
+                        name: user['name']
+                    });
+                } catch (error) {
+                    console.error(error);
+
+                    return window.app.alerting('Ocorreu um erro na hora de salvar suas informações. Tente Novamente!');
+                };
 
                 return document.location = `${window.app.baseurl}/system?usr_token=${user['token']}&usr_internetadress=${internetadress}`;
             })
@@ -81,12 +88,12 @@
 
                 throw new Error(err);
             });
-    }
+    };
 
     // ======================================================================
     // Events
     //
-    document.getElementsByClassName('visibility-password')[0].onclick = e => {
+    document.getElementsByClassName('visibility-eye')[0].onclick = e => {
         let span = $(e.target).children().length > 0 ? $(e.target).children() : $(e.target);
 
         if (span.text() === 'visibility_off') {
@@ -96,7 +103,7 @@
             span.text('visibility_off');
             $('#input_password').attr('type', 'password');
         }
-    }
+    };
 
     // ======================================================================
     // Export to Globals(APP)

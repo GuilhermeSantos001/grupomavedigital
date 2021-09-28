@@ -26,7 +26,7 @@
                 'created',
                 'ipremote',
                 'auth',
-                'privilege',
+                'privileges',
                 'roadmap'
             ],
             item: 'activities-item'
@@ -39,16 +39,14 @@
         __activities_append = function (items) {
             if (items.length > 0)
                 items
-                    .reverse()
-                    .slice(0, 100)
                     .filter(item => _activities.indexOf(item['id']) === -1)
                     .forEach(item => {
                         _activitiesList.add({
                             index: `:${++_acIndex}`,
-                            created: `Criado em: ${formatter_date(item['created'])}`,
+                            created: `Criado em: ${formatter_date(item['createdAt'])}`,
                             ipremote: `Endereço de IP: ${item['ipremote']}`,
                             auth: `Usuário: ${item['auth']}`,
-                            privilege: `Cargo: ${item['privilege']}`,
+                            privileges: `Cargo: ${item['privileges']}`,
                             roadmap: `Rotina: ${item['roadmap']}`
                         });
 
@@ -127,18 +125,12 @@
         __GET_CHART_USER_TOTAL();
     });
 
-    socket.on("connect_error", (err) => {
-        window.app.openModalSelect("O TOKEN da sua sessão parece ter expirado ou não está valido.",
-            [
-                "<h4>Por gentileza, faça login novamente.</h4>",
-                "<small><b>Desculpe o transtorno, mas é para sua segurança.</b></small>"
-            ],
-            [
-                '<button type="button" class="btn btn-mave1" data-bs-dismiss="modal" onclick="window.app.logout()">Entendido</button>'
-            ]
-        );
+    socket.on("connect_error", (e) => setTimeout(() => window.location.reload(), window.app.ONE_SECOND_DELAY));
 
-        return console.log(err);
+    socket.on("connect_close", () => {
+        socket.emit('DISCONNECT');
+
+        return setTimeout(() => window.app.gotoSystem(), window.app.ONE_SECOND_DELAY);
     });
 
     socket.on(

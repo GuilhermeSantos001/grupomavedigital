@@ -6,7 +6,7 @@ append content
   div(class="app-container-page")
     h2 Gerenciamento dos Cartões Digitais Interativos.
   div(class="app-content-title-page")
-    p Olá #[b(id="usr-username")]/#[b #{privilege} #{">"}] Seu caminho de navegação atual é #[b #{router}]
+    p Olá #[b(id="usr-username")]/#[b #{privileges} #{">"}] Seu caminho de navegação atual é #[b #{router}]
   mixin card(id, photo, name, jobtitle, version)
     a(class="app-container-card" aria-current="true" id=`container-card-${id}`)
       div(class="app-content-card")
@@ -19,7 +19,7 @@ append content
           div
             button(type="button" class="first" id=`card-edit-${id}`) Editar
             button(type="button" class="second" id=`card-remove-${id}`) Remover
-        small Layout: #{version || '???'}
+            small Layout: #{version || '???'}
   div(class="app-content-page")
     span(id="span-search") #[i(class="fas fa-search")]
     input(type="text" id="input-search" placeholder="Procurar..." aria-label="span-search" aria-describedby="span-search" value="" disabled=cards.length <= 0 ? true: false)
@@ -31,7 +31,7 @@ append content
       p.text-muted Nenhum cartão digital encontrado.
     else
       each card in cards
-        +card(card['id'], card['photo'], card['name'], card['jobtitle'], card['version'])
+        +card(card['cid'], card['photo'], card['name'], card['jobtitle'], card['version'])
   p(id="app-data-page" class=`path stringPath ${path}` style="display: none;")
   script.
     (function () {

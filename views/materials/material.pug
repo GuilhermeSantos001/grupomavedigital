@@ -7,7 +7,7 @@ append content
         h1(class="h2") #{id}
     div(class="col-12")
         p(class="text-wrap")
-            | Olá #[b(class="text-mave1 text-capitalize" id="usr-username")]/#[b(class="text-mave1 text-capitalize") #{privilege} #{">"}] Seu caminho de navegação atual é #[b(class="text-mave1") #{router}]
+            | Olá #[b(class="text-capitalize" id="usr-username")]/#[b(class="text-capitalize") #{privileges} #{">"}] Seu caminho de navegação atual é #[b(class="text-primary") #{router}]
     div(class="app-page-materials")
         mixin joinResource(resource)
             div(class="container-contents")
@@ -134,7 +134,7 @@ append content
                 div(class="container-content")
                     button(
                         type="button"
-                        class="btn btn-mave1 d-none d-lg-block col-12 mb-2"
+                        class="btn btn-primary d-none d-lg-block col-12 mb-2"
                         onclick=`window.app.pageMaterials('${resource["paper"]["pdf"][0]}-modal')`
                     ) Prévia
                     div(class="modal fade" id=`${resource["paper"]["pdf"][0]}-modal` tabindex="-1" aria-labelledby=`${resource["paper"]["pdf"][0]}-label` aria-hidden="true")
@@ -144,7 +144,7 @@ append content
                                     h5(class="modal-title" id=`${resource["paper"]["pdf"][0]}-label`) !{resource["paper"]["pdf"][0]}
                                     button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
                                 div(class="modal-body")
-                                    object(data=`${resource["paper"]["pdf"][1]}` class="col-12 shadow border border-3 border-mave1" height="350" type="application/pdf")
+                                    object(data=`${resource["paper"]["pdf"][1]}` class="col-12 shadow border border-3 border-primary" height="350" type="application/pdf")
                                         embed(src=`${resource["paper"]["pdf"][1]}` type="application/pdf")
         each resource in resources
             +joinResource(resource)
