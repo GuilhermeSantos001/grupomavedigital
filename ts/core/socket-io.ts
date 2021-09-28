@@ -11,9 +11,9 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { RedisClient } from 'redis';
 
 import JsonWebToken from "@/core/JsonWebToken";
-import WebSocketRouterMiddlewares from '@/app/routers/wss/middlewares-socket';
-import WebSocketRouterCards from '@/app/routers/wss/cards-socket';
-import WebSocketRouterHerculesStorage from '@/app/routers/wss/storageHercules-socket';
+import WebSocketRouterMiddlewares from '@/web/webSocketRouterMiddlewares';
+import WebSocketRouterCards from '@/web/webSocketRouterCards';
+import WebSocketRouterHerculesStorage from '@/web/webSocketRouterHerculesStorage';
 
 class IO {
     static readonly db: number = 3;
