@@ -19,8 +19,8 @@
       "@/database/*": [
         "ts/database/*"
       ],
-      "@/src/*": [
-        "src/ts/*"
+      "@/controllers/*": [
+        "ts/controllers/*"
       ],
       "@/graphql/*": [
         "ts/graphql/*"
@@ -31,9 +31,6 @@
       "@/models/*": [
         "ts/models/*"
       ],
-      "@/controllers/*": [
-        "ts/controllers/*"
-      ],
       "@/core/*": [
         "ts/core/*"
       ],
@@ -43,9 +40,6 @@
       "@/drivers/*": [
         "ts/drivers/*"
       ],
-      "@/middlewares/*": [
-        "ts/middlewares/*"
-      ],
       "@/mongo/*": [
         "ts/mongo/*"
       ],
@@ -54,6 +48,9 @@
       ],
       "@/utils/*": [
         "ts/utils/*"
+      ],
+      "@/web/*": [
+        "ts/web/*"
       ]
     }
   },
