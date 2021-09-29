@@ -68,12 +68,19 @@ type Query {
     """
     Token exclusivo de segurança da solicitação
     """
+    privileges: [String!]!
+    """
+    Token exclusivo de segurança da solicitação
+    """
     token: String!
+    """
+    Token exclusivo de segurança da solicitação
+    """
+    signature: String!
   ): Boolean!
     @auth(
       keys: ["vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4"]
     )
-    @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
   Verifica se o token de segurança do usuário está expirado

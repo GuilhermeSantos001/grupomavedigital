@@ -102,19 +102,20 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authLogout: async (parent: unknown, args: { auth: string, token: string }, context: { express: ExpressContext }) => {
+        authLogout: async (parent: unknown, args: { auth: string, privileges: PrivilegesSystem[], token: string, signature: string }, context: { express: ExpressContext }) => {
             try {
+                const
+                    { ip } = geoIP(context.express.req),
+                    internetadress = ip;
+
+                await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
                 await userManagerDB.disconnected(args.auth, args.token);
 
-                const
-                    userToken = await JsonWebToken.verify(args.token),
-                    req: any = context.express.req,
-                    clientIP = geoIP(req);
-
+                await JsonWebToken.cancel(args.token);
                 await activityManagerDB.register({
-                    ipremote: clientIP.ip,
-                    auth: userToken['auth'],
-                    privileges: userToken['privileges'],
+                    ipremote: ip,
+                    auth: args.auth,
+                    privileges: args.privileges,
                     roadmap: 'Se desconectou do sistema'
                 });
 

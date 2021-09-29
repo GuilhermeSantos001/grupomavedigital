@@ -19,11 +19,12 @@ export default function AuthDirective(directiveName: string) {
 
                     if (resolve)
                         fieldConfig.resolve = async function (source, args, context, info) {
+                            const headers = String(context.express.req.headers['authorization']).split(',');
+
                             if (
                                 AuthDirective.args?.keys.length === 0 ||
                                 AuthDirective.args?.keys.some((r: string) => {
-                                    let result = false,
-                                        headers = String(context.express.req.headers['authorization']).split(',');
+                                    let result = false;
 
                                     for (const header of headers) {
                                         if (header === r)

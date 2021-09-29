@@ -55,8 +55,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             'Accept',
             'X-Access-Token',
             'authorization',
-            'encodeuri',
             'token',
+            'auth',
+            'signature',
+            'encodeuri',
             'temporarypass'
         ];
 
@@ -90,8 +92,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
                 'Accept',
                 'X-Access-Token',
                 'authorization',
-                'encodeuri',
                 'token',
+                'auth',
+                'signature',
+                'encodeuri',
                 'temporarypass'
             ],
             credentials: true,
