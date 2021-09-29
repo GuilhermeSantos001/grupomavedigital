@@ -1,10 +1,10 @@
-
 /**
  * @description Usado para converter os videos em formato de streamer.
  * @author @GuilhermeSantos001
  * @update 17/07/2021
  * @version 1.0.3
  */
+
 
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
@@ -30,49 +30,49 @@ export interface Resolution {
     bandwidth: string;
     size: string;
     file?: string;
-};
+}
 
 export interface Language {
     input: string;
     language: LanguageKey;
     name: string;
-};
+}
 
 export interface Caption {
     portuguese: Language;
     english: Language;
     spanish: Language;
-};
+}
 
 export interface EncodeOptions {
     title: string;
     resolutions: Resolution[];
     caption: Caption;
-};
+}
 
 export interface MasterFileLegend {
-    files_m3u8: object;
-    files_vtt: object;
-    files_master: object;
+    files_m3u8: unknown;
+    files_vtt: unknown;
+    files_master: unknown;
     total_languages: number
-};
+}
 
 export interface MasterFileThumbs {
     folder: string;
     file_master: string;
-};
+}
 
 export interface MasterFile {
     path: string;
     legend: MasterFileLegend;
-    video: object;
+    video: unknown;
     thumbs: MasterFileThumbs;
-};
+}
 
 export interface FilePath {
     src: string;
     output: string;
-};
+}
 
 export interface VMaster {
     "8k": Resolution;
@@ -83,21 +83,21 @@ export interface VMaster {
     "360p": Resolution;
     "240p": Resolution;
     "144p": Resolution;
-};
+}
 
 export interface CFileKey {
     language: LanguageKey;
     name: string;
     file: string;
-};
+}
 
 export interface CFile {
     "portuguese": CFileKey;
     "english": CFileKey;
     "spanish": CFileKey;
-};
+}
 
-export const Bandwidth: Object = {
+export const Bandwidth: unknown = {
     "8k": String(Math.floor(7680 * 4320 * 30 * 4 * 0.07)),
     "4k": String(Math.floor(3840 * 2160 * 30 * 4 * 0.07)),
     "1080p": String(Math.floor(1920 * 1080 * 30 * 4 * 0.07)),
@@ -108,7 +108,7 @@ export const Bandwidth: Object = {
     "144p": String(Math.floor(256 * 144 * 30 * 4 * 0.07))
 };
 
-export const Size: Object = {
+export const Size: unknown = {
     "8k": "7680X4320",
     "4k": "3840X2160",
     "1080p": "1920X1080",
@@ -123,7 +123,7 @@ class FFMPEG {
 
     constructor(
         private pathbase: string
-    ) { };
+    ) { }
 
     private _normalizePath(...paths: string[]): string {
         let __path = "";
@@ -131,7 +131,7 @@ class FFMPEG {
         paths.forEach(_path => __path += '/' + _path);
 
         return this.pathbase + __path;
-    };
+    }
 
     public encode(filePath: string, options: EncodeOptions = {
         title: `Video-Now-${Moment.format()}`,
@@ -179,7 +179,7 @@ class FFMPEG {
                     let memory: any = {},
                         _resolution: any = {},
                         maxResolutions: number = options.resolutions.length,
-                        _indexResolution: number = 0;
+                        _indexResolution = 0;
 
                     options
                         .resolutions
@@ -209,7 +209,7 @@ class FFMPEG {
                                                 newVttFile += String(line) + '\r\n';
                                         } else {
                                             newVttFile += '\r\n';
-                                        };
+                                        }
                                     });
 
                                     rl.on('error', (error) => reject({ origin: `FFMPEG: Encode Video(${options.title}) Failed`, details: error }));
@@ -237,13 +237,13 @@ class FFMPEG {
                                                         let legendFileM3U8: any = {},
                                                             legendFileVTT: any = {},
                                                             masterLegendFile: any = {},
-                                                            indexProcess: number = 0,
+                                                            indexProcess = 0,
                                                             lengthProcess: number = Object.keys(options.caption).length,
                                                             _languages: any = {};
 
                                                         Object.keys(options.caption)
                                                             .forEach(language => {
-                                                                let _options: any = options.caption;
+                                                                const _options: any = options.caption;
 
                                                                 legendFileM3U8[language] = `_legend-${options.title}-m3u8-${Random.HASH(10, 'hex')}`;
                                                                 legendFileVTT[language] = `_legend-${options.title}-vtt-${Random.HASH(10, 'hex')}`;
@@ -283,13 +283,13 @@ class FFMPEG {
                                                                                     }
                                                                                 }))
                                                                                 .catch(error => reject({ origin: `FFMPEG: Get File Master(${resolution.key}) Failed`, details: error }))
-                                                                        };
+                                                                        }
                                                                     })
                                                                     .catch(error => reject({ origin: `FFMPEG: Write Captions(${resolution.key}) Failed`, details: error }))
                                                             });
                                                     })
                                                     .catch(error => reject({ origin: `FFMPEG: Generate Thumbs(${resolution.key}) Failed`, details: error }))
-                                            };
+                                            }
                                         });
                                     });
                                 })
@@ -298,12 +298,12 @@ class FFMPEG {
                         });
                 } catch (error) {
                     return reject({ origin: `FFMPEG: Video Encode(${filePath}) Failed`, details: error });
-                };
+                }
             } else {
                 return reject(`File ${filePath} no exist!`);
-            };
+            }
         });
-    };
+    }
 
     private _getResolution(resolution: ResolutionKey): string[] {
         switch (String(resolution).toLowerCase()) {
@@ -388,11 +388,11 @@ class FFMPEG {
                     '-hls_list_size 0',
                     '-f hls'
                 ];
-        };
-    };
+        }
+    }
 
     private _getMasterFile(
-        title: string = "",
+        title = "",
         vMaster: VMaster = {
             "8k": {
                 enabled: false,
@@ -450,12 +450,12 @@ class FFMPEG {
         }) {
         return new Promise<string>((resolve, reject) => {
             try {
-                let fileMaster: string = '#EXTM3U';
+                let fileMaster = '#EXTM3U';
 
                 Object
                     .keys(vMaster)
                     .forEach((resolution: string) => {
-                        let _vMaster: any = vMaster;
+                        const _vMaster: any = vMaster;
 
                         if (_vMaster[resolution]['enabled'])
                             fileMaster += `\n#EXT-X-STREAM-INF:BANDWIDTH=${_vMaster[resolution]['bandwidth']},RESOLUTION=${_vMaster[resolution]['size']},RESOLUTION_NAME=${resolution.replace('p', '')},SUBTITLES="text"`;
@@ -466,7 +466,7 @@ class FFMPEG {
                 Object
                     .keys(cFile)
                     .forEach((key: string, index: number) => {
-                        let _cFile: any = cFile;
+                        const _cFile: any = cFile;
 
                         if (_cFile[key]['file'].length > 0)
                             fileMaster += `\n#EXT-X-MEDIA:TYPE=SUBTITLES,URI="${_cFile[key]['file']}",GROUP-ID="text",LANGUAGE="${_cFile[key]['language']}",NAME="${_cFile[key]['name']}",AUTOSELECT=${index <= 0 ? 'YES' : 'NO'}`;
@@ -482,9 +482,9 @@ class FFMPEG {
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     private _writeCaption(input: string, masterFile: string, captionFile: string) {
         return new Promise<string>((resolve, reject) => {
@@ -493,7 +493,7 @@ class FFMPEG {
                 playlist = playlist.replace("0.vtt", `/captions/${masterFile}/${captionFile}.vtt`);
                 localPathCreate(this._normalizePath('captions', masterFile));
 
-                let captionFileM3U8 = localPath(this._normalizePath('captions', masterFile, `${masterFile}.m3u8`)),
+                const captionFileM3U8 = localPath(this._normalizePath('captions', masterFile, `${masterFile}.m3u8`)),
                     captionFileVTT = localPath(this._normalizePath('captions', masterFile, `${captionFile}.vtt`));
 
                 writeFileSync(captionFileM3U8, Buffer.from(playlist));
@@ -502,9 +502,9 @@ class FFMPEG {
                 return resolve(captionFileM3U8);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     private _generateThumbs(filePath: FilePath = { src: "", output: "" }) {
         return new Promise<string>((resolve, reject) => {
@@ -556,14 +556,14 @@ class FFMPEG {
                             });
                         } catch (error) {
                             return reject(error);
-                        };
+                        }
                     }
                 )
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 module.exports = new FFMPEG('public/assets/hls');

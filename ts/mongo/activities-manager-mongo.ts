@@ -15,11 +15,11 @@ export interface activityInterface {
     privileges: PrivilegesSystem[];
     roadmap: string;
     createdAt?: string;
-};
+}
 
 export interface activityModelInterface extends activityInterface, Document {
     authAndPrivilege: string;
-};
+}
 
 export const activitySchema: Schema = new Schema({
     ipremote: { // Endereço de IP

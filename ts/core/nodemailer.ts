@@ -8,7 +8,8 @@
 import * as nodemailer from "nodemailer";
 import { pugEngine } from "nodemailer-pug-engine";
 
-import { localPath } from '@/utils/localpath';
+import path from 'path';
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export type Priority = 'high' | 'normal' | 'low';
 
@@ -32,13 +33,13 @@ export enum Templates {
     ACCOUNT_RETRIEVE = "accountRetrieve",
     SESSION_NEW_ACCESS = "sessionNewAccess",
     HERCULES_ORDERS = "herculesOrders",
-};
+}
 
 export default class Mail {
 
     constructor() {
         throw new Error('this is static class');
-    };
+    }
 
     static test(recipient: Recipient) {
         return Mail.send(recipient,
@@ -47,10 +48,10 @@ export default class Mail {
                 title: 'Testando o envio de mensagens',
                 variables: {}
             });
-    };
+    }
 
-    static send(recipient: Recipient, template: Templates, variables: CTX) {
-        return new Promise<any>(async (resolve, reject) => {
+    static send(recipient: Recipient, template: Templates, variables: CTX): Promise<SMTPTransport.SentMessageInfo> {
+        return new Promise(async (resolve, reject) => {
             const mailOptions = {
                 from: '"Grupo Mave Digital(✉)" <grupomavedigital@grupomave.com.br>',
                 to: String(recipient.to),
@@ -79,7 +80,7 @@ export default class Mail {
                     if (success) {
                         transporter
                             .use('compile', pugEngine({
-                                templateDir: localPath('templates'),
+                                templateDir: path.resolve(__dirname, '../templates'),
                                 pretty: true
                             }));
 
@@ -92,8 +93,8 @@ export default class Mail {
                             });
                     } else {
                         return reject(success);
-                    };
+                    }
                 });
         });
-    };
-};
+    }
+}

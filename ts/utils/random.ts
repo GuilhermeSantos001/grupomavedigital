@@ -1,8 +1,7 @@
 /**
  * @description Geração aleatória de utilidades variadas
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.0
+ * @update 29/09/2021
  */
 
 import { createHash } from 'crypto';
@@ -10,22 +9,22 @@ import { createHash } from 'crypto';
 export default class Random {
     constructor() {
         throw new Error('this is static class');
-    };
+    }
 
     static INT(max: number): number {
         return Math.floor(max * Math.random());
-    };
+    }
 
     static HASH(length: number, digest: 'base64' | 'hex'): string {
         const hash = createHash('sha256');
 
         hash.update(this.STRING(length));
 
-        return hash.digest(digest).substr(0, length);
-    };
+        return hash.digest(digest).substring(0, length);
+    }
 
     static STRING(length: number): string {
-        let
+        const
             abc = [
                 "a", "b", "c",
                 "d", "e", "f",
@@ -50,12 +49,13 @@ export default class Random {
             ],
             abc_length = abc.length - 1,
             nums_length = nums.length - 1,
-            specials_length = specials.length - 1,
-            iv = "";
+            specials_length = specials.length - 1;
+
+        let iv = "";
 
         while (iv.length < length) {
-            let cif = Random.INT(3);
-            let uppercase = Random.INT(2);
+            const cif = Random.INT(3);
+            const uppercase = Random.INT(2);
 
             if (cif == 0) {
                 if (uppercase)
@@ -66,9 +66,9 @@ export default class Random {
                 iv += nums[Random.INT(nums_length)];
             } else if (cif == 2) {
                 iv += specials[Random.INT(specials_length)];
-            };
-        };
+            }
+        }
 
         return iv;
-    };
-};
+    }
+}

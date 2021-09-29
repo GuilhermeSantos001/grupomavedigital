@@ -20,7 +20,7 @@ const sequelize = connection;
 interface AddressAttributes {
     userId: number;
     address: string;
-};
+}
 
 /**
  * @description Classe dos endereços
@@ -31,7 +31,7 @@ class Address extends Model<AddressAttributes> implements AddressAttributes {
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
-};
+}
 
 /**
  * @description Inicialização do modelo representado na tabela, com atributos e opções.

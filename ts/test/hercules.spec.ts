@@ -98,7 +98,7 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let streams = [
+        const streams = [
             createReadStream(localPath('ts/test/data/relatorio_de_gastos.xlsx')),
             createReadStream(localPath('ts/test/data/hello_world.txt'))
         ];
@@ -128,7 +128,7 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let streams = [
+        const streams = [
             createReadStream(localPath('ts/test/data/relatorio_de_gastos.xlsx')),
             createReadStream(localPath('ts/test/data/hello_world.txt'))
         ];
@@ -142,7 +142,7 @@ describe("Hercules Storage", () => {
         expect(write2.versions).toBe(2);
         expect(write2.version).toBe(2);
 
-        let streams2 = [
+        const streams2 = [
             createWriteStream(localPath(`ts/test/data/teste_file_1_v1.xlsx.gz`)),
             createWriteStream(localPath(`ts/test/data/teste_file_2_v2.txt.gz`)),
         ];
@@ -169,7 +169,7 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let streams = [
+        const streams = [
             createReadStream(localPath('ts/test/data/relatorio_de_gastos.xlsx')),
             createReadStream(localPath('ts/test/data/hello_world.txt'))
         ];
@@ -205,7 +205,7 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let streams = [
+        const streams = [
             createReadStream(localPath('ts/test/data/relatorio_de_gastos.xlsx')),
             createReadStream(localPath('ts/test/data/hello_world.txt'))
         ];
@@ -957,10 +957,10 @@ describe("Hercules Storage", () => {
         const length = 10;
 
         for (let i = 0; i < length; i++) {
-            let added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `user_${i}@exemple.com`, name: `Assignee ${i}` });
+            const added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `user_${i}@exemple.com`, name: `Assignee ${i}` });
 
             expect(added).toBe(true);
-        };
+        }
 
         const find_1 = await FileController.get({ cid }, 0, 1);
 
@@ -1126,13 +1126,13 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let length = 1;
+        const length = 1;
 
         for (let i = 0; i < length; i++) {
-            let added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `assignee_${i}@exemple.com`, name: `Assignee ${i}` });
+            const added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `assignee_${i}@exemple.com`, name: `Assignee ${i}` });
 
             expect(added).toBe(true);
-        };
+        }
 
         const find_1 = await FileController.get({ cid }, 0, 1);
 
@@ -1177,13 +1177,13 @@ describe("Hercules Storage", () => {
 
         expect(typeof cid).toBe("string");
 
-        let length = 2;
+        const length = 2;
 
         for (let i = 0; i < length; i++) {
-            let added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `assignee_${i}@exemple.com`, name: `Assignee ${i}` });
+            const added = await FileController.insertAssignee(cid, { group: { name: 'administrador', permission: "Security" } }, { email: `assignee_${i}@exemple.com`, name: `Assignee ${i}` });
 
             expect(added).toBe(true);
-        };
+        }
 
         const find_1 = await FileController.get({ cid }, 0, 1);
 
@@ -2064,8 +2064,8 @@ afterAll(async () => {
             const deleted = await FileController.delete(file.cid || "", { group: { name: "administrador", permission: "Delete" } }, { group: { name: "administrador", permission: "Delete" } });
 
             expect(deleted).toBe(true);
-        };
-    };
+        }
+    }
 
     const folders = await FolderController.get({ }, 0, 9e9);
 
@@ -2074,8 +2074,8 @@ afterAll(async () => {
             const deleted = await FolderController.delete(folder.cid || "", { group: { name: "administrador", permission: "Delete" } }, { group: { name: "administrador", permission: "Delete" } });
 
             expect(deleted).toBe(true);
-        };
-    };
+        }
+    }
 
     const jobsClear = await Jobs.clear();
 

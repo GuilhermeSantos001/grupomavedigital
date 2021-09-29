@@ -16,7 +16,7 @@ export type Priority = 'High' | 'Medium' | 'Low';
 export interface DateAt {
     type: 'hours' | 'minutes' | 'seconds' | 'Days';
     add: number;
-};
+}
 
 interface MailsendEconfirm {
     email: string;
@@ -25,7 +25,7 @@ interface MailsendEconfirm {
     token: string;
     temporarypass: string | null; // Identificador
     clientAddress: string;
-};
+}
 
 interface MailsendSessionNewAccess {
     email: string;
@@ -37,7 +37,7 @@ interface MailsendSessionNewAccess {
         internetAdress: string;
     },
     clientAddress: string;
-};
+}
 
 interface MailsendAccountRetrieveTwofactor {
     email: string;
@@ -45,7 +45,7 @@ interface MailsendAccountRetrieveTwofactor {
     token: string;
     twofactor: boolean; // Identificador
     clientAddress: string;
-};
+}
 
 interface MailsendHerculesOrders {
     email: string;
@@ -55,7 +55,7 @@ interface MailsendHerculesOrders {
     link: string;
     order: boolean; // Identificador
     clientAddress: string;
-};
+}
 
 export interface jobInterface {
     cid?: string;
@@ -64,17 +64,17 @@ export interface jobInterface {
     type: Types;
     args: MailsendEconfirm | MailsendSessionNewAccess | MailsendAccountRetrieveTwofactor | MailsendHerculesOrders;
     status: Status;
-    error?: any;
+    error?: string;
     runAt?: DateAt;
     date?: string;
     createdAt?: string;
-};
+}
 
 export interface jobModelInterface extends jobInterface, Document {
     isAvailable: boolean;
     isFinish: boolean;
     isError: boolean;
-};
+}
 
 export const runAtSchema: Schema = new Schema({
     type: {
@@ -154,7 +154,8 @@ export const jobSchema: Schema = new Schema({
         required: [true, '{PATH} este campo é obrigatório']
     },
     error: {
-        type: Schema.Types.Mixed,
+        type: String,
+        trim: true,
         required: [false, '{PATH} este campo é obrigatório']
     },
     runAt: {

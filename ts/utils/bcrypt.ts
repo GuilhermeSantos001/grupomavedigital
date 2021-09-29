@@ -1,35 +1,34 @@
 /**
- * Bcrypt
  * @description https://www.npmjs.com/package/bcrypt
  * @author GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.0
+ * @update 29/09/2021
  */
 
 import { genSalt, hash, compare } from 'bcrypt';
 
-export function Encrypt(password: string, saltRounds?: number) {
-    return new Promise<string>((resolve, reject) => {
-        genSalt(saltRounds || 10, function (err: any, salt: string) {
-            if (err)
-                return reject(err);
+export function Encrypt(password: string, saltRounds?: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+        genSalt(saltRounds || 10, function (error: Error | undefined, salt: string) {
+            if (error)
+                return reject(error);
 
-            hash(password, salt, function (err: any, encrypted: string) {
-                if (err)
-                    return reject(err);
+            hash(password, salt, function (error: Error | undefined, encrypted: string) {
+                if (error)
+                    return reject(error);
 
                 return resolve(encrypted);
             });
         });
     });
-};
+}
 
-export function Decrypt(password: string, encrypted: string) {
-    return new Promise<boolean>((resolve, reject) => {
-        compare(password, encrypted, function (err, same) {
-            if (err) return reject(err);
+export function Decrypt(password: string, encrypted: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        compare(password, encrypted, function (error: Error | undefined, same: boolean) {
+            if (error)
+                return reject(error);
 
             return resolve(same);
         });
     });
-};
+}

@@ -23,12 +23,12 @@ export default function AuthDirective(directiveName: string) {
                                 AuthDirective.args?.keys.length === 0 ||
                                 AuthDirective.args?.keys.some((r: string) => {
                                     let result = false,
-                                        headers = String(context.req.headers['authorization']).split(',');
+                                        headers = String(context.express.req.headers['authorization']).split(',');
 
                                     for (const header of headers) {
                                         if (header === r)
                                             return result = true;
-                                    };
+                                    }
 
                                     return result;
                                 })
@@ -45,4 +45,4 @@ export default function AuthDirective(directiveName: string) {
             }
         }),
     };
-};
+}

@@ -30,10 +30,12 @@ export default function TokenDirective(directiveName: string) {
                             if (ignore)
                                 return await resolve(source, args, context, info);
 
-                            const { ip } = geoIP(context.req);
+                            const { ip } = geoIP(context.express.req);
 
                             const
-                                token = decompressFromEncodedURIComponent(String(context.req.headers['token'])) || String(context.req.headers['token']),
+                                auth = decompressFromEncodedURIComponent(String(context.express.req.headers['auth'])) || String(context.express.req.headers['auth']),
+                                token = decompressFromEncodedURIComponent(String(context.express.req.headers['signature'])) || String(context.express.req.headers['signature']),
+                                signature = decompressFromEncodedURIComponent(String(context.express.req.headers['token'])) || String(context.express.req.headers['token']),
                                 internetadress = ip;
 
                             const decoded = await JsonWebToken.verify(token);
@@ -42,7 +44,7 @@ export default function TokenDirective(directiveName: string) {
                                 throw new Error('Token informado está invalido!');
 
                             try {
-                                await userManagerDB.verifytoken(decoded['auth'], token, internetadress);
+                                await userManagerDB.verifytoken(auth, token, signature, internetadress);
 
                                 return await resolve(source, args, context, info);
                             } catch (err: any) {
@@ -52,10 +54,10 @@ export default function TokenDirective(directiveName: string) {
                                     throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de internet.');
                                 } else if (err['code'] === 3) {
                                     throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de IP.');
-                                };
+                                }
 
                                 throw new Error(err);
-                            };
+                            }
                         };
 
                     return fieldConfig;
@@ -63,4 +65,4 @@ export default function TokenDirective(directiveName: string) {
             }
         }),
     };
-};
+}

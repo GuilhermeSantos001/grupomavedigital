@@ -7,6 +7,8 @@
 
 import { Document, Schema, model } from "mongoose";
 
+import Random from '@/utils/random';
+
 /**
  * Types
  */
@@ -26,7 +28,7 @@ export type PrivilegesSystem = 'administrador'
 export interface Email {
     value: string;
     status: boolean;
-};
+}
 
 export interface Location {
     street: string;
@@ -36,48 +38,49 @@ export interface Location {
     state: string;
     city: string;
     zipcode: string;
-};
+}
 
 export interface Twofactor {
     secret: string;
     enabled: boolean;
-};
+}
 
 export interface Authentication {
     twofactor: Twofactor;
-};
+}
 
 export interface Token {
+    signature: string,
     value: string;
     status: boolean;
-};
+}
 
 export interface History {
     token: string;
     device: Devices;
     tmp: string;
     internetAdress: string;
-};
+}
 
 export interface Cache {
     tmp: number;
     unit: Unit;
     tokens: Token[];
     history: History[];
-};
+}
 
 export interface Device {
     allowed: Devices[];
     connected: Devices[];
-};
+}
 
 export interface Session {
     connected: number;
-    limit: Number;
+    limit: number;
     alerts: string[],
     cache: Cache;
     device: Device;
-};
+}
 
 export interface UserInterface {
     authorization: string;
@@ -93,12 +96,13 @@ export interface UserInterface {
     authentication?: Authentication;
     session?: Session;
     status?: boolean;
-};
+}
 
 export interface UserModelInterface extends UserInterface, Document {
     clearEmail: string;
     isEnabled: boolean;
-};
+    signature: string;
+}
 
 export const authenticationDefault: Authentication = {
     twofactor: {
@@ -134,7 +138,7 @@ export const emailSchema: Schema = new Schema({
         lowercase: true,
         trim: true,
         unique: true,
-        match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
+        match: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/
     },
     status: { // Se o email está confirmado
         type: Boolean,
@@ -290,7 +294,7 @@ export const userSchema: Schema = new Schema({
     },
     email: { // Email
         type: emailSchema,
-        default: { },
+        default: {},
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     cnpj: { // CNPJ
@@ -300,7 +304,7 @@ export const userSchema: Schema = new Schema({
     },
     location: { // Endereço
         type: locationSchema,
-        default: { },
+        default: {},
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     session: {
@@ -328,6 +332,10 @@ userSchema.virtual("clearEmail").get(function (this: UserModelInterface) {
 
 userSchema.virtual("isEnabled").get(function (this: UserModelInterface) {
     return this.status === true;
+});
+
+userSchema.virtual("signature").get(function (this: UserModelInterface) {
+    return Random.HASH(32, "hex");
 });
 
 export default model<UserModelInterface>("users", userSchema);

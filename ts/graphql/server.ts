@@ -99,7 +99,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             origin,
             preflightContinue: false,
         };
-    };
+    }
 
     //use cors middleware
     app.use(cors(corsOptions));
@@ -127,7 +127,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             if (error.syscall !== 'listen') {
                 mongoDB.shutdown();
                 throw error;
-            };
+            }
 
             // handle specific listen errors with friendly messages
             switch (error.code) {
@@ -143,15 +143,15 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
                     Debug.fatal('default', `Fatal error: ${error}`);
                     mongoDB.shutdown();
                     throw error;
-            };
-        };
+            }
+        }
 
         /**
          * @description Event listener for HTTP server "listening" event.
          */
         function onListening() {
             Debug.console('default', `Server is now running on http://localhost:${PORT}/graphql`);
-        };
+        }
 
         schema = AuthDirectiveTransformer(schema);
         schema = TokenDirectiveTransformer(schema);
@@ -160,7 +160,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
         const server = new ApolloServer({
             schema,
-            context: req => ({ ...req, ...options.context })
+            context: req => ({ express: req, ...options.context })
         });
 
         await server.start();
@@ -197,7 +197,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             // Fork workers.
             for (let i = 0; i < numCPUs; i++) {
                 cluster.fork();
-            };
+            }
 
             cluster.on('exit', (worker, code, signal) => {
                 Debug.console('default', `worker ${worker.process.pid} died`);

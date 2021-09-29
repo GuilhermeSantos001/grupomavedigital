@@ -1,11 +1,8 @@
 /**
  * @description Armazena os dados do arquivo
  * @author @GuilhermeSantos001
- * @update 01/09/2021
- * @version 1.1.3
+ * @update 28/09/2021
  */
-
-// @ts-nocheck
 
 import { createGzip, constants } from 'zlib';
 import { promisify } from 'util';
@@ -26,11 +23,11 @@ export type MetadataFile = {
 
 class FileGridFS {
 
-    constructor() { };
+    constructor() { }
 
-    private dbName() {
-        return process.env.DB_HERCULES_STORAGE;
-    };
+    private dbName(): any {
+        return mongoDB.getDB(process.env.DB_HERCULES_STORAGE || "");
+    }
 
     /**
      * @description Abre uma Stream(GridFSBucketWriteStream) para escrever o arquivo no banco de dados.
@@ -41,7 +38,7 @@ class FileGridFS {
         return new Promise<HistoryFile>(async (resolve, reject) => {
             try {
                 const
-                    bucket = new GridFSBucket(mongoDB.getDB(this.dbName())),
+                    bucket = new GridFSBucket(this.dbName()),
                     streamBucket = bucket.openUploadStream(`${metadata.filename}${metadata.fileType}`, {
                         metadata: {
                             authorId: metadata.authorId,
@@ -59,9 +56,9 @@ class FileGridFS {
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Abre uma Stream(GridFSBucketReadStream) para ler os dados do arquivo no banco de dados.
@@ -72,7 +69,7 @@ class FileGridFS {
         return new Promise<void>(async (resolve, reject) => {
             try {
                 const
-                    bucket = new GridFSBucket(mongoDB.getDB(this.dbName())),
+                    bucket = new GridFSBucket(this.dbName()),
                     streamBucket = bucket.openDownloadStream(fileId);
 
                 streamBucket
@@ -85,9 +82,9 @@ class FileGridFS {
                     });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna uma Stream(GridFSBucketReadStream) para ler os dados do arquivo no banco de dados.
@@ -97,15 +94,15 @@ class FileGridFS {
         return new Promise<GridFSBucketReadStream>(async (resolve, reject) => {
             try {
                 const
-                    bucket = new GridFSBucket(mongoDB.getDB(this.dbName())),
+                    bucket = new GridFSBucket(this.dbName()),
                     streamBucket = bucket.openDownloadStream(fileId);
 
                 return resolve(streamBucket);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Renomeia o arquivo no banco de dados.
@@ -116,20 +113,20 @@ class FileGridFS {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const
-                    bucket = new GridFSBucket(mongoDB.getDB(this.dbName()));
+                    bucket = new GridFSBucket(this.dbName());
 
                 bucket.rename(fileId, name, async (error: any) => {
                     if (error) {
                         return reject(error);
-                    };
+                    }
 
                     return resolve(true);
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Deleta o arquivo no banco de dados.
@@ -139,20 +136,20 @@ class FileGridFS {
         return new Promise<void>(async (resolve, reject) => {
             try {
                 const
-                    bucket = new GridFSBucket(mongoDB.getDB(this.dbName()));
+                    bucket = new GridFSBucket(this.dbName());
 
                 bucket.delete(fileId, async (error: any) => {
                     if (error) {
                         return reject(error);
-                    };
+                    }
 
                     return resolve();
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new FileGridFS();

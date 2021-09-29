@@ -18,12 +18,12 @@ export type FolderPermission = 'Append' | 'Delete' | 'Protect' | 'Share' | 'Secu
 export interface GroupId {
     name: PrivilegesSystem;
     permissions: FolderPermission[];
-};
+}
 
 export interface UserId {
     email: string;
     permissions: FolderPermission[];
-};
+}
 
 export interface folderInterface {
     cid?: string;
@@ -49,7 +49,7 @@ export interface folderInterface {
     updated?: string;
     lastAccess?: string;
     createdAt?: string;
-};
+}
 
 export interface folderModelInterface extends folderInterface, Model<folderInterface> {
     available: boolean;
@@ -72,7 +72,7 @@ export interface folderModelInterface extends folderInterface, Model<folderInter
     orderTypeIs: (type: OrderType) => boolean;
     orderAllAssigneesApproved: () => boolean;
     orderAnswerIndex: (answer: OrderAnswer) => number;
-};
+}
 
 export const groupIdSchema: Schema = new Schema({
     name: {
@@ -193,7 +193,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -207,7 +207,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [25, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -221,7 +221,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -235,7 +235,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -412,7 +412,7 @@ folderSchema.method('orderTimelapseExpired', function (this: folderModelInterfac
         const now = new Date();
 
         return now >= this.order.timelapse;
-    };
+    }
 
     return false;
 });
@@ -423,7 +423,7 @@ folderSchema.method('orderTimelapseExpired', function (this: folderModelInterfac
 folderSchema.method('orderTypeIs', function (this: folderModelInterface, type: OrderType) {
     if (this.order) {
         return type === this.order.type;
-    };
+    }
 
     return false;
 });
@@ -436,7 +436,7 @@ folderSchema.method('orderAllAssigneesApproved', function (this: folderModelInte
         const approved = this.order.answers.filter((answer: OrderAnswer) => answer.decision === 'Approved');
 
         return approved.length >= this.assignees.length;
-    };
+    }
 
     return false;
 });
@@ -452,11 +452,11 @@ folderSchema.method('orderAnswerIndex', function (this: folderModelInterface, an
             if (_answer.assignee.email === answer.assignee.email) {
                 indexOf = i;
                 break;
-            };
-        };
+            }
+        }
 
         return indexOf;
-    };
+    }
 
     return 0;
 });

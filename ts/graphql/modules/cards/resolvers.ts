@@ -1,8 +1,7 @@
 /**
  * @description Rotas dos cartões
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 2.0.0
+ * @update 28/09/2021
  */
 
 import vcard from '@/core/vcard';
@@ -87,29 +86,27 @@ type Card = {
 
 module.exports = {
     Query: {
-        cardGet: async (parent: any, args: { lastIndex: string, limit: number }, context: { req: any }) => {
+        cardGet: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
             try {
-                let field: any = {};
-
-                field['_id'] = { $gt: args.lastIndex };
-
-                const cards = await cardsDB.get(0, 1, args.limit, field);
+                const cards = await cardsDB.get(0, 1, args.limit, {
+                    _id: { $gt: args.lastIndex }
+                });
 
                 return compressToEncodedURIComponent(JSON.stringify(cards));
-            } catch (error: any) {
-                throw new Error(error);
+            } catch (error) {
+                throw new Error(String(error));
             }
         }
     },
     Mutation: {
-        vcardCreate: async (parent: any, args: { data: Vcard }, context: { req: any }) => {
+        vcardCreate: async (parent: unknown, args: { data: Vcard }) => {
             try {
                 return await vcard(args.data);
-            } catch (error: any) {
-                throw new Error(error);
+            } catch (error) {
+                throw new Error(String(error));
             }
         },
-        cardCreate: async (parent: any, args: { data: Card }, context: { req: any }) => {
+        cardCreate: async (parent: unknown, args: { data: Card }) => {
             try {
                 const
                     id = args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
@@ -137,11 +134,11 @@ module.exports = {
                 });
 
                 return id;
-            } catch (error: any) {
-                throw new Error(error);
+            } catch (error) {
+                throw new Error(String(error));
             }
         },
-        cardUpdate: async (parent: any, args: { data: Card }, context: { req: any }) => {
+        cardUpdate: async (parent: unknown, args: { data: Card }) => {
             try {
                 const {
                     id,
@@ -168,17 +165,17 @@ module.exports = {
                 });
 
                 return id;
-            } catch (error: any) {
-                throw new Error(error);
+            } catch (error) {
+                throw new Error(String(error));
             }
         },
-        cardRemove: async (parent: any, args: { id: string }, context: { req: any }) => {
+        cardRemove: async (parent: unknown, args: { id: string }) => {
             try {
                 await cardsDB.remove(args.id);
 
                 return true
-            } catch (error: any) {
-                throw new Error(error);
+            } catch (error) {
+                throw new Error(String(error));
             }
         },
     }

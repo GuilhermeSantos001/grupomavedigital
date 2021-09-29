@@ -1,16 +1,16 @@
 /**
  * @description Websocket Router -> Cards
  * @author @GuilhermeSantos001
- * @update 27/07/2021
- * @version 1.0.0
+ * @update 29/09/2021
  */
 
+import { Server, Socket } from "socket.io";
 import LZString from "lz-string";
 
 import userDb from '@/db/user-db';
 import activityDB from '@/db/activities-db';
 
-export default function WebSocketRouterCards(io: any, socket: any) {
+export default function WebSocketRouterCards(io: Server, socket: Socket): void {
   /** Retorna a lista de atividades */
   socket.on('GET_ACTIVITIES', async (limit = 100) => {
     const activities = await activityDB.get(limit);
@@ -26,4 +26,4 @@ export default function WebSocketRouterCards(io: any, socket: any) {
 
     socket.emit('POST_CHART_USER_TOTAL', LZString.compressToEncodedURIComponent(JSON.stringify(res)));
   });
-};
+}

@@ -5,7 +5,7 @@
  * @version 1.0.4
  */
 
-import { configure, getLogger } from 'log4js';
+import { configure, getLogger, Logger } from 'log4js';
 
 import { localPath, localPathExists, localPathCreate } from '@/utils/localpath';
 import Moment from '@/utils/moment';
@@ -70,11 +70,9 @@ configure({
 declare type Category = 'default' | 'hls' | 'user' | 'mongoDB' | 'files_upload' | 'redis' | 'jobs';
 
 export default class Debug {
-    constructor() { };
-
     static isHomolog(): boolean {
         return process.env.NODE_ENV == "development";
-    };
+    }
 
     static parseCategory(category: Category): string {
         switch (String(category).toLowerCase()) {
@@ -93,35 +91,35 @@ export default class Debug {
             case 'default':
             default:
                 return 'router_general';
-        };
-    };
+        }
+    }
 
-    static exe(category: string) {
+    static exe(category: string): Logger {
         return getLogger(category);
-    };
+    }
 
     static console(type: string, message: string, ...args: string[]): void {
         if (this.isHomolog())
             console.log(`[${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] [${String(type).toUpperCase()}] -`, message, ...args);
-    };
+    }
 
     static log(category: Category, message: string, ...args: string[]): void {
         this.exe(this.parseCategory(category)).debug(message, args.length > 0 ? args : "");
         this.console(`[${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] [LOG] [${String(category).toUpperCase()}] -`, message, ...args);
-    };
+    }
 
     static info(category: Category, message: string, ...args: string[]): void {
         this.exe(this.parseCategory(category)).info(message, args.length > 0 ? args : "");
         this.console(`[${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] [INFO] [${String(category).toUpperCase()}] -`, message, ...args);
-    };
+    }
 
     static warn(category: Category, message: string, ...args: string[]): void {
         this.exe(this.parseCategory(category)).warn(message, args.length > 0 ? args : "");
         this.console(`[${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] [WARN] [${String(category).toUpperCase()}] -`, message, ...args);
-    };
+    }
 
     static fatal(category: Category, message: string, ...args: string[]): void {
         this.exe(this.parseCategory(category)).fatal(message, args.length > 0 ? args : "");
         this.console(`[${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] [FATAL] [${String(category).toUpperCase()}] -`, message, ...args);
-    };
-};
+    }
+}

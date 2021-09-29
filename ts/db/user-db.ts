@@ -14,7 +14,7 @@ import Moment from '@/utils/moment';
 
 declare interface FindUserByAuth {
     authorization: string;
-};
+}
 
 export interface UserInfo {
     authorization: string;
@@ -27,8 +27,9 @@ export interface UserInfo {
     cnpj: string;
     location: Location;
     session: Session;
+    signature: string;
     authentication: Authentication;
-};
+}
 
 export interface UpdateUserInfo {
     email: string;
@@ -37,26 +38,24 @@ export interface UpdateUserInfo {
     surname: string;
     cnpj: string;
     location: Location;
-};
+}
 
 declare interface RequestLocation {
     locationIP: string;
     internetAdress: string;
     browser: string;
     os: string;
-};
+}
 
 declare interface ConnectedOptions {
     ip: string;
     token: string;
     device: Devices;
     location: RequestLocation;
-};
+    signature: string;
+}
 
 class userManagerDB {
-
-    constructor() { };
-
     /**
      * @description Registra o usuário
      */
@@ -69,7 +68,7 @@ class userManagerDB {
 
                 if (_user) {
                     return reject(`Usuário(${user.authorization}) já está registrado`);
-                };
+                }
 
                 user.password = await Encrypt(user.password);
 
@@ -84,9 +83,9 @@ class userManagerDB {
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna o total de usuários ativos e inativos
@@ -94,7 +93,7 @@ class userManagerDB {
     public getUsersEnabledAndDisabled() {
         return new Promise<number[]>(async (resolve, reject) => {
             try {
-                let totals: number[] = [];
+                const totals: number[] = [];
 
                 const _user = await userDB.find({}).exec();
 
@@ -103,14 +102,14 @@ class userManagerDB {
                     totals.push(_user.filter((user: UserModelInterface) => !user.isEnabled).length);
                 } else {
                     return reject(`Nenhum usuário está registrado.`);
-                };
+                }
 
                 return resolve(totals);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Recupera a conta de usuário
@@ -131,14 +130,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Confirma a conta de usuário
@@ -156,14 +155,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica a senha de usuário
@@ -179,13 +178,13 @@ class userManagerDB {
                     try {
                         if (!await Decrypt(pwd, _user.password)) {
                             return reject(`Senha está invalida, tente novamente!`);
-                        };
+                        }
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 if (!_user.session)
                     _user.session = sessionDefault;
@@ -210,13 +209,14 @@ class userManagerDB {
                         alerts: _user.session.alerts,
                         cache: _user.session.cache
                     },
+                    signature: _user.signature,
                     authentication: _user.authentication
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Troca a senha do usuário
@@ -234,14 +234,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza as informações para UX/UI.
@@ -264,7 +264,7 @@ class userManagerDB {
                             authorization = _user.authorization,
                             email = _user.clearEmail,
                             username = _user.username,
-                            jwt: any = await JsonWebToken.sign({
+                            jwt: string = await JsonWebToken.sign({
                                 payload: {
                                     'econfirm': true,
                                     'email': String(email).toLowerCase(),
@@ -290,7 +290,7 @@ class userManagerDB {
                             },
                             status: 'Available'
                         });
-                    };
+                    }
 
                     _user.username = updateData.username;
                     _user.name = updateData.name;
@@ -301,14 +301,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza a foto de perfil para UX/UI.
@@ -326,14 +326,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Recupera as informações para UX/UI.
@@ -347,7 +347,7 @@ class userManagerDB {
 
                 if (!_user) {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 if (!_user.session)
                     _user.session = sessionDefault;
@@ -372,13 +372,14 @@ class userManagerDB {
                         alerts: _user.session.alerts,
                         cache: _user.session.cache
                     },
+                    signature: _user.signature,
                     authentication: _user.authentication
                 });
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Conecta o usuário
@@ -395,17 +396,17 @@ class userManagerDB {
                         _user.session = sessionDefault;
 
                     try {
-                        let clearIds: Array<number> = [];
+                        const clearIds: Array<number> = [];
 
                         // - Verifica se o email do usuário foi confirmado
                         if (!_user.email.status) {
                             return reject(`Usuário com a autorização(${auth}), não confirmou o email.`);
-                        };
+                        }
 
                         // - Verifica se o dispositivo está liberado para acesso
                         if (_user.session.device.allowed.filter(_device => _device === options.device).length <= 0) {
                             return reject(`Usuário com a autorização(${auth}), está utilizando um dispositivo não permitido há estabelecer sessões.`);
-                        };
+                        }
 
                         // - Verifica se existe alguma sessão expirada
                         _user.session.cache.history = _user.session.cache.history.filter((_history: History, i): History => {
@@ -427,7 +428,7 @@ class userManagerDB {
 
                                         return _token;
                                     });
-                            };
+                            }
 
                             return _history;
                         });
@@ -444,9 +445,9 @@ class userManagerDB {
 
                             _user.session.device.connected.push(options.device);
 
-                            _user.session.cache.tokens.push({ value: options.token, status: true });
+                            _user.session.cache.tokens.push({ signature: options.signature, value: options.token, status: true });
 
-                            let time = new Date();
+                            const time = new Date();
 
                             if (_user.session.cache.unit === 'm') {
                                 time.setMinutes(time.getMinutes() + _user.session.cache.tmp);
@@ -454,7 +455,7 @@ class userManagerDB {
                                 time.setHours(time.getHours() + _user.session.cache.tmp);
                             } else if (_user.session.cache.unit === 'd') {
                                 time.setDate(time.getDate() + _user.session.cache.tmp);
-                            };
+                            }
 
                             _user.session.cache.history.push({
                                 device: options.device,
@@ -486,23 +487,23 @@ class userManagerDB {
                                     },
                                     status: 'Available'
                                 });
-                            };
+                            }
 
                             await _user.save();
-                        };
+                        }
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desconecta o usuário
@@ -515,7 +516,7 @@ class userManagerDB {
                 const _user = await userDB.findOne(filter).exec();
 
                 if (_user) {
-                    let clearIds: Array<number> = [];
+                    const clearIds: Array<number> = [];
 
                     if (!_user.session)
                         _user.session = sessionDefault;
@@ -538,8 +539,8 @@ class userManagerDB {
 
                                 return _token;
                             });
-                        };
-                    };
+                        }
+                    }
 
                     if (clearIds.length > 0)
                         clearIds.forEach(i => {
@@ -551,14 +552,14 @@ class userManagerDB {
                     await _user.save();
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Registra a autenticação de duas etapas
@@ -593,16 +594,16 @@ class userManagerDB {
                         });
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
 
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Habilita a verificação de duas etapas
@@ -624,18 +625,18 @@ class userManagerDB {
                         await _user.save();
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
 
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desabilita a verificação de duas etapas
@@ -657,17 +658,17 @@ class userManagerDB {
                         await _user.save();
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica o código da verificação de duas etapas
@@ -689,22 +690,22 @@ class userManagerDB {
                         await twoFactorVerify(twofactor.secret, userToken);
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica o token de sessão
      */
-    public verifytoken(auth: string, token: string, internetAdress: string) {
+    public verifytoken(auth: string, token: string, signature: string, internetAdress: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const filter: FindUserByAuth = { authorization: auth };
@@ -716,7 +717,12 @@ class userManagerDB {
                         if (!_user.session)
                             _user.session = sessionDefault;
 
-                        const _usrToken = _user.session.cache.tokens.filter(_token => _token.value === token)[0];
+                        const _usrToken = _user.session.cache.tokens.filter(_token => {
+                            if (_token.signature === signature && _token.value === token)
+                                return true;
+
+                            return false;
+                        })[0];
 
                         // - Verifica se existem alguma conexão usando o token
                         if (
@@ -732,24 +738,24 @@ class userManagerDB {
                                     process.env.NODE_ENV === 'production'
                                 ) {
                                     return reject(`Token de sessão está registrado em outro endereço de internet.`);
-                                };
-                            };
+                                }
+                            }
                         } else {
                             return reject(`Token de sessão não está registrado.`);
-                        };
+                        }
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new userManagerDB();

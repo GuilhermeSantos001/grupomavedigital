@@ -15,12 +15,9 @@ export interface ActivityInfo {
     privileges: PrivilegesSystem[];
     roadmap: string;
     createdAt?: string;
-};
+}
 
 class activityManagerDB {
-
-    constructor() { };
-
     /**
      * @description Registra a atividade
      */
@@ -37,14 +34,14 @@ class activityManagerDB {
                     await model.save();
                 } catch (error) {
                     return reject(error);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna as ultimas atividades com limite de itens a serem retornados
@@ -55,7 +52,7 @@ class activityManagerDB {
                 let activities: ActivityInfo[];
 
                 try {
-                    let _activities = await activityDB.find({ }).sort({ $natural: -1 }).limit(limit);
+                    const _activities = await activityDB.find({ }).sort({ $natural: -1 }).limit(limit);
 
                     activities = _activities.map((activity: activityModelInterface) => {
                         return {
@@ -69,14 +66,14 @@ class activityManagerDB {
                     })
                 } catch (error) {
                     return reject(error);
-                };
+                }
 
                 return resolve(activities);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new activityManagerDB();

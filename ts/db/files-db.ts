@@ -1,11 +1,12 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 09/09/2021
- * @version 1.31.14
+ * @update 28/09/2021
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { FilterQuery } from 'mongoose';
+import { ObjectId } from 'bson';
 
 import fileDB, { GroupId, UserId, Assignee, Order, OrderAnswer, FilePermission, fileInterface, fileModelInterface, FileShare, FileProtected, FileBlocked } from '@/mongo/files-manager-mongo';
 import folderDB from '@/mongo/folders-manager-mongo';
@@ -26,123 +27,120 @@ export interface Access {
         email: string;
         permission: FilePermission;
     };
-};
+}
 
 export interface FileRead {
-    fileId: string,
+    fileId: ObjectId,
     filename: string
-};
+}
 
 export interface BlockVerify {
     block: boolean,
     message: string
-};
+}
 
-export const trashDays: number = 30; // - Total de dias que os arquivos/pastas ficam na lixeira
+export const trashDays = 30; // - Total de dias que os arquivos/pastas ficam na lixeira
 
-export const orderDays: number = 7; // - Total de dias de validade dos pedidos
+export const orderDays = 7; // - Total de dias de validade dos pedidos
 
 class fileManagerDB {
-
-    constructor() { };
-
     /**
      * @description Verifica se o arquivo está protegido/bloqueado.
      */
     private _isProtectedOrBlocked(file: fileModelInterface): boolean {
         return file.protected || file.blocked;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para há escrita.
      */
     private _isAvailableAndAllowsWrite(file: fileModelInterface): boolean {
         return file.available && file.allowsWrite;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para há leitura.
      */
     private _isAvailableAndAllowsRead(file: fileModelInterface): boolean {
         return file.available && file.allowsRead;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para há remoção.
      */
     private _isAvailableAndAllowsDelete(file: fileModelInterface): boolean {
         return file.available && file.allowsDelete;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para a proteção.
      */
     private _isAvailableAndAllowsProtect(file: fileModelInterface): boolean {
         return file.available && file.allowsProtect;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para o compartilhamento.
      */
     private _isAvailableAndAllowsShare(file: fileModelInterface): boolean {
         return file.available && file.allowsShare;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para as alterações de segurança.
      */
     private _isAvailableAndAllowsSecurity(file: fileModelInterface): boolean {
         return file.available && file.allowsSecurity;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível para o bloqueio.
      */
     private _isAvailableAndAllowsBlock(file: fileModelInterface): boolean {
         return file.available && file.allowsBlock;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está em modo escrita/leitura/remoção/atualização.
      */
     private _isWritingOrReadingOrRemovingOrUpdating(file: fileModelInterface): boolean {
         return file.writing || file.reading || file.removing || file.updating;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está disponível.
      */
     private _isAvailable(file: fileModelInterface): boolean {
         return file.available;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está em modo escrita.
      */
     private _isWriting(file: fileModelInterface): boolean {
         return file.writing;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está protegido.
      */
     private _isProtected(file: fileModelInterface): boolean {
         return file.protected;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está protegido.
      */
     private _isBlocked(file: fileModelInterface): boolean {
         return file.blocked;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está compartilhado.
      */
     private _isShared(file: fileModelInterface): boolean {
         return file.shared;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está na lixeira.
@@ -152,14 +150,14 @@ class fileManagerDB {
             return false;
 
         return file.garbage;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está na lista de reciclagem
      */
     private _isRecycle(file: fileModelInterface): boolean {
         return file.status === 'Recycle';
-    };
+    }
 
     /**
      * @description Verifica se o arquivo está associado a uma pasta.
@@ -169,7 +167,7 @@ class fileManagerDB {
             return file.isAssociatedFolder;
 
         return file.folderId === folderId;
-    };
+    }
 
     /**
      * @description Verifica se o arquivo tem procuradores associados
@@ -179,7 +177,7 @@ class fileManagerDB {
             return false;
 
         return true;
-    };
+    }
 
     /**
      * @description Verifica a "Chave" e o "Texto Secreto" da proteção.
@@ -189,8 +187,8 @@ class fileManagerDB {
             return true;
         } else {
             return false;
-        };
-    };
+        }
+    }
 
     /**
      * @description Verifica o "Link" e o "Texto Secreto" do compartilhamento.
@@ -200,8 +198,8 @@ class fileManagerDB {
             return true;
         } else {
             return false;
-        };
-    };
+        }
+    }
 
     /**
      * @description Verifica se o grupo/usuário está na whitelist do arquivo.
@@ -214,7 +212,7 @@ class fileManagerDB {
          */
         if (!file.isAssociatedGroup && !file.isAssociatedUser) {
             return true;
-        };
+        }
 
         if (!file.accessGroupId)
             file.accessGroupId = [];
@@ -222,7 +220,7 @@ class fileManagerDB {
         if (!file.accessUsersId)
             file.accessUsersId = [];
 
-        let
+        const
             accessByGroup: boolean = file.accessGroupId.filter((groupId: GroupId) => {
                 if (
                     groupId.name === access.group?.name &&
@@ -231,7 +229,7 @@ class fileManagerDB {
                     return true;
                 } else {
                     return false;
-                };
+                }
             }).length > 0,
             accessByEmail: boolean = file.accessUsersId.filter((usersId: UserId) => {
                 if (
@@ -241,11 +239,11 @@ class fileManagerDB {
                     return true;
                 } else {
                     return false;
-                };
+                }
             }).length > 0;
 
         return accessByGroup || accessByEmail;
-    };
+    }
 
     /**
      * @description Reciclagem dos arquivos na lixeira
@@ -253,7 +251,7 @@ class fileManagerDB {
     public recycleGarbage() {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                let
+                const
                     files = await fileDB.find({ trash: { $ne: undefined } }),
                     itens: string[] = [];
 
@@ -283,7 +281,7 @@ class fileManagerDB {
                             else if (file.status === 'Recycle') {
                                 if (typeof file.cid === 'string')
                                     itens.push(file.cid);
-                            };
+                            }
 
                             /**
                              * @description Verifica se o arquivo é o último da lista
@@ -293,16 +291,16 @@ class fileManagerDB {
                             }
                         } else {
                             return resolve(itens);
-                        };
-                    };
+                        }
+                    }
                 } else {
                     return resolve(itens);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica o bloqueio
@@ -316,21 +314,21 @@ class fileManagerDB {
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está bloqueado
@@ -355,7 +353,7 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado até ${file.block.value.toLocaleDateString('pt-br')} às ${file.block.value.toLocaleTimeString('pt-br')}`
                             });
-                        };
+                        }
                     } else if (file.block.type === 'Month') {
                         if (
                             now.getMonth() === file.block.value.getMonth()
@@ -364,7 +362,7 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado durante esse mês.`
                             });
-                        };
+                        }
                     } else if (file.block.type === 'Day Month') {
                         if (
                             now.getDate() === file.block.value.getDate()
@@ -373,7 +371,7 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado durante esse dia do mês.`
                             });
-                        };
+                        }
                     } else if (file.block.type === 'Day Week') {
                         if (
                             now.getDay() === file.block.value.getDay()
@@ -382,7 +380,7 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado durante esse dia da semana.`
                             });
-                        };
+                        }
                     } else if (file.block.type === 'Hour') {
                         if (
                             now.getHours() <= file.block.value.getHours()
@@ -391,7 +389,7 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado até às ${file.block.value.toLocaleTimeString('pt-br')}.`
                             });
-                        };
+                        }
                     } else if (file.block.type === 'Minute') {
                         if (
                             now.getMinutes() <= file.block.value.getMinutes()
@@ -400,8 +398,8 @@ class fileManagerDB {
                                 block: true,
                                 message: `O arquivo com cid(${cid}) está bloqueado até às ${file.block.value.toLocaleTimeString('pt-br')}.`
                             });
-                        };
-                    };
+                        }
+                    }
 
                     /**
                      * @description Verifica se o bloqueio deve ser repetido
@@ -423,12 +421,12 @@ class fileManagerDB {
                             file.block.type === 'Minute'
                         ) {
                             file.block.value.setDate(file.block.value.getDate() + 1);
-                        };
+                        }
                     } else {
                         file.status = 'Available';
 
                         file.block = undefined;
-                    };
+                    }
 
                     await file.updateOne({ $set: { status: file.status, block: file.block, updated: Moment.format() } });
 
@@ -439,12 +437,12 @@ class fileManagerDB {
                 } else {
                     return reject(`Arquivo com cid(${cid}) não está bloqueado.`);
 
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna uma lista de arquivos
@@ -452,8 +450,8 @@ class fileManagerDB {
      * @param skip {Number} - Pular x itens iniciais no banco de dados
      * @param limit {Number} - Limite de itens a serem retornados
      */
-    public get(filter: object, skip: number, limit: number) {
-        return new Promise<fileModelInterface[]>(async (resolve, reject) => {
+    public get(filter: FilterQuery<fileModelInterface>, skip: number, limit: number): Promise<fileModelInterface[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 if (skip > 9e3)
                     skip = 9e3;
@@ -465,14 +463,14 @@ class fileManagerDB {
 
                 if (_files.length < 0) {
                     return reject(`Nenhum arquivo foi encontrado.`);
-                };
+                }
 
                 return resolve(_files);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Armazena o arquivo
@@ -487,7 +485,7 @@ class fileManagerDB {
 
                 if (_file) {
                     return reject(`Arquivo(${file.name}.${file.type}) já está registrado.`);
-                };
+                }
 
                 const
                     now = Moment.format(),
@@ -505,9 +503,9 @@ class fileManagerDB {
                 return resolve(model);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza as informações do arquivo
@@ -518,43 +516,43 @@ class fileManagerDB {
     public update(cid: string, access: Access, data: Pick<fileInterface, "name" | "description" | "tag">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _update = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _update = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se existe outro arquivo com o novo nome
                  */
-                let _exist = await fileDB.findOne({ name: data.name, type: file.type });
+                const _exist = await fileDB.findOne({ name: data.name, type: file.type });
 
                 if (_exist && _exist.cid !== cid) {
                     return reject(`Já existe um arquivo com o mesmo nome: ${data.name}${file.type}`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -567,7 +565,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _update = true;
-                };
+                }
 
                 if (_update) {
                     file.status = 'Updating';
@@ -583,12 +581,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`O arquivo com cid(${cid}) não está disponível no momento, para há atualização.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o arquivo
@@ -599,27 +597,27 @@ class fileManagerDB {
     public delete(cid: string, access: Access, accessFolder: AccessFolder) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _delete = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _delete = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -638,7 +636,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailableAndAllowsDelete(file)) {
                     _delete = true;
-                };
+                }
 
                 if (_delete) {
                     file.status = 'Removing';
@@ -653,7 +651,7 @@ class fileManagerDB {
                         } catch (error) {
                             return reject(`A pasta(${file.folderId}) está protegida/bloqueada ou na lixeira, não é possível remover o arquivo no momento.`);
                         }
-                    };
+                    }
 
                     await file.save();
 
@@ -662,12 +660,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) não pode ser deletado no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o arquivo na pasta.
@@ -678,39 +676,40 @@ class fileManagerDB {
     public joinFolder(cid: string, access: Access, folderId: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
+                const
                     file = await fileDB.findOne({ cid }),
-                    folder = await folderDB.findOne({ cid: folderId }),
-                    _join = false;
+                    folder = await folderDB.findOne({ cid: folderId });
+
+                let _join = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 if (!folder) {
                     return reject(`Pasta com cid(${folderId}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o arquivo com cid(${cid}) na pasta.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -723,7 +722,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _join = true;
-                };
+                }
 
                 if (_join) {
                     /**
@@ -734,7 +733,7 @@ class fileManagerDB {
                         !file.folderId && this._isAssociatedFolder(file)
                     ) {
                         return reject(`Arquivo com cid(${cid}) já está associado a uma pasta com o cid(${file.folderId}).`);
-                    };
+                    }
 
                     file.status = 'Updating';
 
@@ -747,12 +746,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível associá-lo a pasta com o cid(${folderId}) no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retira o arquivo da pasta.
@@ -763,39 +762,40 @@ class fileManagerDB {
     public exitFolder(cid: string, access: Access, folderId: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
+                const
                     file = await fileDB.findOne({ cid }),
-                    folder = await folderDB.findOne({ cid: folderId }),
-                    _exit = false;
+                    folder = await folderDB.findOne({ cid: folderId });
+
+                let _exit = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 if (!folder) {
                     return reject(`Pasta com cid(${folderId}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da pasta.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -808,7 +808,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _exit = true;
-                };
+                }
 
                 if (_exit) {
                     /**
@@ -829,12 +829,12 @@ class fileManagerDB {
                     }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remove-lo da pasta com o cid(${folderId}) no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um grupo na whitelist
@@ -845,34 +845,34 @@ class fileManagerDB {
     public addGroupId(cid: string, access: Access, group: GroupId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _addGroupId = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _addGroupId = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o grupo na whitelist do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -885,7 +885,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _addGroupId = true;
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível.
@@ -904,7 +904,7 @@ class fileManagerDB {
 
                         if (index) {
                             return reject(`Grupo(${group.name}) já está adicionado na whitelist do arquivo com cid(${cid})`);
-                        };
+                        }
 
                         file.accessGroupId.push(group);
 
@@ -915,15 +915,15 @@ class fileManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o grupo(${group.name}) na whitelist.`);
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove um grupo de acesso da whitelist
@@ -934,34 +934,34 @@ class fileManagerDB {
     public removeGroupId(cid: string, access: Access, group: Pick<GroupId, "name">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _removeGroupId = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _removeGroupId = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o grupo na whitelist do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -974,7 +974,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _removeGroupId = true;
-                };
+                }
 
                 if (_removeGroupId) {
                     /**
@@ -990,7 +990,7 @@ class fileManagerDB {
 
                         if (!index) {
                             return reject(`Grupo(${group.name}) não está na whitelist do arquivo com cid(${cid})`);
-                        };
+                        }
 
                         file.accessGroupId = file.accessGroupId.filter((groupId: GroupId) => groupId.name !== group.name);
 
@@ -1001,15 +1001,15 @@ class fileManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover o grupo(${group.name}) da whitelist.`);
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um usuário na whitelist
@@ -1020,34 +1020,34 @@ class fileManagerDB {
     public addUserId(cid: string, access: Access, user: UserId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _addUserId = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _addUserId = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o usuário na whitelist do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1060,7 +1060,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _addUserId = true;
-                };
+                }
 
                 if (_addUserId) {
                     /**
@@ -1087,15 +1087,15 @@ class fileManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o usuário da whitelist
@@ -1106,34 +1106,34 @@ class fileManagerDB {
     public removeUserId(cid: string, access: Access, user: Pick<UserId, "email">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _removeUserId = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _removeUserId = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o usuário na whitelist do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1146,7 +1146,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _removeUserId = true;
-                };
+                }
 
                 if (_removeUserId) {
                     /**
@@ -1174,15 +1174,15 @@ class fileManagerDB {
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
 
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um novo procurador
@@ -1193,34 +1193,35 @@ class fileManagerDB {
     public addAssignee(cid: string, access: Access, assignee: Assignee) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _addAssignee = false;
+                const
+                    file = await fileDB.findOne({ cid });
+
+                let _addAssignee = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar um procurador ao arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1233,7 +1234,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _addAssignee = true;
-                };
+                }
 
                 if (_addAssignee) {
                     /**
@@ -1260,15 +1261,15 @@ class fileManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o procurador(${assignee.email}).`);
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o procurador(${assignee.email}) no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o procurador
@@ -1279,34 +1280,35 @@ class fileManagerDB {
     public removeAssignee(cid: string, access: Access, assignee: Pick<Assignee, "email">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _removeAssignee = false;
+                const
+                    file = await fileDB.findOne({ cid });
+
+                let _removeAssignee = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                   * @description Verifica o acesso ao arquivo
                   */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover um procurador do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1319,7 +1321,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _removeAssignee = true;
-                };
+                }
 
                 if (_removeAssignee) {
                     /**
@@ -1335,7 +1337,7 @@ class fileManagerDB {
 
                         if (!index) {
                             return reject(`Procurador(${assignee.email}) não está associado ao arquivo com cid(${cid})`);
-                        };
+                        }
 
                         file.assignees = file.assignees.filter((_assignee: Assignee) => _assignee.email !== assignee.email);
 
@@ -1347,15 +1349,15 @@ class fileManagerDB {
                     } else {
                         return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
 
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o histórico da versão.
@@ -1365,18 +1367,18 @@ class fileManagerDB {
     public addHistory(cid: string, history: HistoryFile) {
         return new Promise<number>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está em modo escrita.
@@ -1397,12 +1399,12 @@ class fileManagerDB {
                     return resolve(file.history.length);
                 } else {
                     return reject(`O arquivo com cid(${cid}) não está em modo de escrita, o historico da versão não pode ser armazenado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o historico da versão.
@@ -1410,21 +1412,21 @@ class fileManagerDB {
      * @param access {Access} - Propriedades do acesso para arquivos
      * @param versions {Array<Number> | Undefined} - Versões a serem removidas. Se undefined remove todas as versões.
      */
-    public removeHistory(cid: string, access: Access, versions: number[] | undefined) {
-        return new Promise<string[]>(async (resolve, reject) => {
+    public removeHistory(cid: string, access: Access, versions: number[] | undefined): Promise<ObjectId[]> {
+        return new Promise(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível para há remoção.
@@ -1442,8 +1444,8 @@ class fileManagerDB {
                     if (!file.version || file.version < 0)
                         file.version = 1;
 
-                    let
-                        fileIds: string[] = [];
+                    const
+                        fileIds: ObjectId[] = [];
 
                     if (versions instanceof Array) {
                         for (const version of versions) {
@@ -1463,16 +1465,16 @@ class fileManagerDB {
                                     file.version = previousVersion.version;
                                 } else {
                                     file.version = 0;
-                                };
+                                }
                             } else {
                                 return reject(`Versão(${version}) do arquivo com o cid(${cid}) não está registrada.`);
-                            };
-                        };
+                            }
+                        }
                     } else {
                         file.history.map(history => fileIds.push(history.fileId));
                         file.history = [];
                         file.version = 0;
-                    };
+                    }
 
                     file.updated = Moment.format();
 
@@ -1481,12 +1483,12 @@ class fileManagerDB {
                     return resolve(fileIds);
                 } else {
                     return reject(`O arquivo com cid(${cid}) não pode ter versões removidas.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Prepara o arquivo para há escrita
@@ -1496,34 +1498,35 @@ class fileManagerDB {
     public write(cid: string, access: Access) {
         return new Promise<MetadataFile>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _write = false;
+                const
+                    file = await fileDB.findOne({ cid });
+
+                let _write = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1536,7 +1539,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailableAndAllowsWrite(file)) {
                     _write = true;
-                };
+                }
 
                 if (_write) {
                     file.status = 'Writing';
@@ -1553,12 +1556,12 @@ class fileManagerDB {
                     });
                 } else {
                     return reject(`O arquivo com cid(${cid}) não está disponível no momento, para há escrita.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Prepara o arquivo para há leitura
@@ -1570,34 +1573,35 @@ class fileManagerDB {
     public read(cid: string, access: Access, version: number | undefined, force?: boolean) {
         return new Promise<FileRead>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _read = false;
+                const
+                    file = await fileDB.findOne({ cid });
+
+                let _read = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para ler o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1616,27 +1620,27 @@ class fileManagerDB {
                  */
                 else if (force) {
                     _read = true;
-                };
+                }
 
                 if (_read) {
-                    let fileId = "";
+                    let fileId!: ObjectId;
 
                     if (typeof version === 'number') {
                         if (!file.history)
                             file.history = [];
 
-                        let _history = file.history.filter(history => history.version === version);
+                        const _history = file.history.filter(history => history.version === version);
 
                         if (_history.length > 0) {
                             fileId = _history[0].fileId;
-                        };
+                        }
                     } else {
                         fileId = file.getActualFileId;
-                    };
+                    }
 
-                    if (fileId.length <= 0) {
+                    if (!fileId) {
                         return reject(`A versão(${version}) para o arquivo com cid(${cid}) não está registrada.`);
-                    };
+                    }
 
                     file.status = 'Reading';
 
@@ -1647,12 +1651,12 @@ class fileManagerDB {
                     return resolve({ fileId, filename: `${file.name}${file.type}.gz` });
                 } else {
                     return reject(`O arquivo com cid(${cid}) não está disponível no momento, para há leitura.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Renomea o arquivo.
@@ -1661,38 +1665,38 @@ class fileManagerDB {
      * @param name {String} - Novo nome do arquivo
      */
     public rename(cid: string, access: Access, name: string) {
-        return new Promise<{ filesID: string[], type: string } | boolean>(async (resolve, reject) => {
+        return new Promise<{ filesID: ObjectId[], type: string } | boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _rename = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _rename = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se existe outro arquivo com o novo nome
                  */
-                let _exist = await fileDB.findOne({ name, type: file.type });
+                const _exist = await fileDB.findOne({ name, type: file.type });
 
                 if (_exist && _exist.cid !== cid) {
                     return reject(`Já existe um arquivo com o mesmo nome: ${name}${file.type}`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1705,7 +1709,7 @@ class fileManagerDB {
                  */
                 else if (this._isAvailable(file)) {
                     _rename = true;
-                };
+                }
 
                 if (_rename) {
                     file.status = 'Updating';
@@ -1720,15 +1724,15 @@ class fileManagerDB {
                         return resolve(false);
                     } else {
                         return resolve({ filesID: file.getHistoryFilesId, type: file.type });
-                    };
+                    }
                 } else {
                     return reject(`O arquivo com cid(${cid}) não está disponível no momento, para há renomeação.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Volta o estado do arquivo para disponível
@@ -1738,27 +1742,27 @@ class fileManagerDB {
     public close(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    file = await fileDB.findOne({ cid }),
-                    _close = false;
+                const file = await fileDB.findOne({ cid });
+
+                let _close = false;
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file) && !this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso o arquivo esteja protegido/bloqueado.
@@ -1771,7 +1775,7 @@ class fileManagerDB {
                  */
                 else if (this._isWritingOrReadingOrRemovingOrUpdating(file)) {
                     _close = true;
-                };
+                }
 
                 if (_close) {
                     if (file.protected) {
@@ -1782,19 +1786,19 @@ class fileManagerDB {
                         file.status = 'Recycle'
                     } else {
                         file.status = 'Available';
-                    };
+                    }
 
                     await file.save();
 
                     return resolve(true);
                 } else {
                     return resolve(true);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Cria uma proteção para o arquivo.
@@ -1805,32 +1809,32 @@ class fileManagerDB {
     public protect(cid: string, access: Access, passphrase: string) {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está em modo escrita/leitura/remoção/atualização.
@@ -1858,13 +1862,13 @@ class fileManagerDB {
                         return resolve(uuid);
                     } else {
                         return reject(`Arquivo com cid(${cid}) está em uso e/ou não será possível protege-lo.`);
-                    };
-                };
+                    }
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove a proteção do arquivo.
@@ -1875,25 +1879,25 @@ class fileManagerDB {
     public unProtect(cid: string, access: Access, protect: FileProtected) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido.
@@ -1913,16 +1917,16 @@ class fileManagerDB {
 
                         return resolve(true);
                     } else {
-                        return reject(`\"Chave\" e/ou \"Texto Secreto\" está invalido(a).`);
-                    };
+                        return reject(`Chave e/ou Texto Secreto está invalido(a).`);
+                    }
                 } else {
                     return reject(`Arquivo com cid(${cid}) está não está protegido.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Cria o compartilhamento do arquivo.
@@ -1933,39 +1937,39 @@ class fileManagerDB {
     public share(cid: string, access: Access, title: string) {
         return new Promise<{ link: string, secret: string }>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está compartilhado.
                  */
                 if (this._isShared(file)) {
                     return reject(`Arquivo com cid(${cid}) já está compartilhado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível para o compartilhamento.
@@ -1992,15 +1996,15 @@ class fileManagerDB {
                         await file.save();
 
                         return resolve({ link, secret: uuid });
-                    };
+                    }
                 } else {
                     return reject(`Arquivo com cid(${cid}) não pode ser compartilhado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o compartilhamento do arquivo.
@@ -2011,32 +2015,32 @@ class fileManagerDB {
     public unShare(cid: string, access: Access, share: Omit<FileShare, "title">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está compartilhado.
@@ -2057,17 +2061,17 @@ class fileManagerDB {
 
                             return resolve(true);
                         } else {
-                            return reject(`\"Link\" e/ou \"Texto Secreto\" está invalido.`);
+                            return reject(`Link e/ou Texto Secreto está invalido.`);
                         }
-                    };
+                    }
                 } else {
                     return reject(`Arquivo com cid(${cid}) não está compartilhado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia o arquivo.
@@ -2078,32 +2082,32 @@ class fileManagerDB {
     public blocked(cid: string, access: Access, block: FileBlocked) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível para o bloqueio.
@@ -2120,12 +2124,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) está em uso e/ou não será possível bloqueá-lo.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desbloqueia o arquivo.
@@ -2135,32 +2139,32 @@ class fileManagerDB {
     public unBlocked(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido.
                  */
                 if (this._isProtected(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear o arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está bloqueado.
@@ -2177,12 +2181,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) não está bloqueado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Coloca o arquivo na lixeira
@@ -2192,38 +2196,38 @@ class fileManagerDB {
     public moveToGarbage(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para colocar o arquivo com cid(${cid}) na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível.
                  */
                 if (this._isAvailable(file)) {
-                    let now = new Date();
+                    const now = new Date();
 
                     now.setDate(now.getDate() + trashDays);
 
@@ -2232,12 +2236,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) está em uso no momento, não será possível coloca-lo na lixeira agora.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retira o arquivo da lixeira
@@ -2247,25 +2251,25 @@ class fileManagerDB {
     public removeOfGarbage(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
@@ -2284,12 +2288,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) não está na lixeira.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Gera um pedido aos procuradores para mover o arquivo para a lixeira
@@ -2300,45 +2304,45 @@ class fileManagerDB {
     public orderMoveToGarbage(cid: string, access: Access, order: Order) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está na lixeira.
                  */
                 if (this._isGarbage(file)) {
                     return reject(`Arquivo com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para gerar um pedido para mover o arquivo com cid(${cid}) para a lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo tem procuradores associados
                  */
                 if (!this._isContainsAssignees(file)) {
                     return reject(`Arquivo com cid(${cid}) não possui procuradores.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está disponível.
                  */
                 if (this._isAvailable(file)) {
-                    let now = new Date();
+                    const now = new Date();
 
                     now.setDate(now.getDate() + orderDays);
 
@@ -2370,19 +2374,19 @@ class fileManagerDB {
                             },
                             status: 'Available'
                         });
-                    };
+                    }
 
                     await file.updateOne({ $set: { order, updated: Moment.format() } });
 
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) está em uso no momento, não será possível criar um pedido para coloca-lo na lixeira agora.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o pedido enviado aos procuradores
@@ -2392,25 +2396,25 @@ class fileManagerDB {
     public orderRemove(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo tem um pedido definido
@@ -2427,12 +2431,12 @@ class fileManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Arquivo com cid(${cid}) não tem um pedido definido.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Responde o pedido enviado ao procurador
@@ -2443,25 +2447,25 @@ class fileManagerDB {
     public orderAssigneeSetDecision(cid: string, access: Access, answer: OrderAnswer) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo tem um pedido definido
@@ -2479,22 +2483,22 @@ class fileManagerDB {
                             const index = file.orderAnswerIndex(answer);
 
                             file.order.answers[index] = answer;
-                        };
+                        }
 
                         file.updated = Moment.format();
 
                         await file.save();
 
                         return resolve(true);
-                    };
+                    }
                 } else {
                     return reject(`Arquivo com cid(${cid}) não tem um pedido definido.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Processa o pedido enviado aos procuradores
@@ -2504,25 +2508,25 @@ class fileManagerDB {
     public orderProcess(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let file = await fileDB.findOne({ cid });
+                const file = await fileDB.findOne({ cid });
 
                 if (!file) {
                     return reject(`Arquivo com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(file)) {
                     return reject(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso ao arquivo
                  */
                 if (!this.verifyAccessByGroupAndUser(file, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se o arquivo tem um pedido definido
@@ -2552,9 +2556,9 @@ class fileManagerDB {
                                     await this.moveToGarbage(cid, { group: { name: 'administrador', permission: 'Delete' } });
                                 } catch {
                                     return resolve(false);
-                                };
-                            };
-                        };
+                                }
+                            }
+                        }
 
                         file.order = undefined;
 
@@ -2563,15 +2567,15 @@ class fileManagerDB {
                         await file.save();
 
                         return resolve(orderAllAssigneesApproved);
-                    };
+                    }
                 } else {
                     return reject(`Arquivo com cid(${cid}) não tem um pedido definido.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new fileManagerDB();

@@ -1,13 +1,13 @@
 /**
  * @description Websocket Router -> Middlewares
  * @author @GuilhermeSantos001
- * @update 25/08/2021
- * @version 1.0.0
+ * @update 29/09/2021
  */
 
+import { Server } from "socket.io";
 import JsonWebToken from "@/core/JsonWebToken";
 
-export default function WebSocketRouterMiddlewares(io: any, socket: any) {
+export default function WebSocketRouterMiddlewares(io: Server, socket: any): void {
     /**
      * @description Escuta todos os eventos recebidos
      */
@@ -20,10 +20,10 @@ export default function WebSocketRouterMiddlewares(io: any, socket: any) {
                 return onevent.call(this, packet);
             } catch {
                 return socket.emit('connect_close');
-            };
+            }
         } else {
             return onevent.call(this, packet);
-        };
+        }
     };
 
     /**
@@ -34,8 +34,8 @@ export default function WebSocketRouterMiddlewares(io: any, socket: any) {
     /**
      * @description Verifica se o token do usuário está valido
      */
-    function verifyToken() {
-        return new Promise<void>((resolve, reject) => {
+    function verifyToken(): Promise<void> {
+        return new Promise((resolve, reject) => {
             const token = socket.handshake.auth.token;
 
             JsonWebToken.verify(token)
@@ -44,11 +44,11 @@ export default function WebSocketRouterMiddlewares(io: any, socket: any) {
                         !result
                     ) {
                         return reject();
-                    };
+                    }
 
                     return resolve();
                 })
-                .catch(error => reject());
+                .catch(error => reject(error));
         });
-    };
-};
+    }
+}

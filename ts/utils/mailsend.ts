@@ -1,32 +1,63 @@
 /**
  * @description Envio de emails padronizados
  * @author @GuilhermeSantos001
- * @update 17/07/2020
- * @version 1.1.1
+ * @update 29/09/2020
  */
 
 import Mail, { Templates, Priority } from "@/core/nodemailer";
 import BASE_URL from "@/utils/getBaseURL";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
+
+interface IVariablesEconfirm {
+    username: string
+    url: string
+    temporarypass: boolean
+    temporarypassValue: string | null
+}
+
+interface IVariablesAccountRetrieveTwofactor {
+    username: string
+    url: string
+}
+
+interface IVariablesSessionNewAccess {
+    username: string
+    browser: string
+    os: string
+    locationIP: string
+    internetAdress: string
+}
+
+interface IVariablesHerculesOrders {
+    username: string
+    description: string
+    link: string
+    linkHelp: string
+}
 
 declare type Options = {
     email: string;
     subject: string;
     title: string;
     priority: Priority;
-    variables: object;
+    variables:
+    IVariablesEconfirm |
+    IVariablesAccountRetrieveTwofactor |
+    IVariablesSessionNewAccess |
+    IVariablesHerculesOrders;
 }
 
 export default class MailSend {
     constructor() {
         throw new Error('this is static class');
-    };
+    }
 
     static baseurl = BASE_URL;
 
     /**
      * @description Envia o email de confirmação da conta
      */
-    static async econfirm(email: string, username: string, token: string, temporarypass: string | null) {
+    static async econfirm(email: string, username: string, token: string, temporarypass: string | null): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -49,15 +80,15 @@ export default class MailSend {
                 title: options.title,
                 variables: options.variables
             });
-        } catch (error: any) {
-            throw new Error(error);
-        };
-    };
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
 
     /**
      * @description Envia o email de recuperação da conta
      */
-    static async accountRetrieveTwofactor(email: string, username: string, token: string) {
+    static async accountRetrieveTwofactor(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -78,15 +109,15 @@ export default class MailSend {
                 title: options.title,
                 variables: options.variables
             });
-        } catch (error: any) {
-            throw new Error(error);
-        };
-    };
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
 
     /**
      * @description Envia o email de novo acesso por um endereço de IP fora do historico
      */
-    static async sessionNewAccess(email: string, username: string, navigator: { browser: string, os: string, locationIP: string, internetAdress: string }) {
+    static async sessionNewAccess(email: string, username: string, navigator: { browser: string, os: string, locationIP: string, internetAdress: string }): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -110,15 +141,15 @@ export default class MailSend {
                 title: options.title,
                 variables: options.variables
             });
-        } catch (error: any) {
-            throw new Error(error);
-        };
-    };
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
 
     /**
      * @description Envia o email com o pedido aos procuradores do arquivo/pasta
      */
-    static async herculesOrders(email: string, username: string, title: string, description: string, link: string) {
+    static async herculesOrders(email: string, username: string, title: string, description: string, link: string): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -141,8 +172,8 @@ export default class MailSend {
                 title: options.title,
                 variables: options.variables
             });
-        } catch (error: any) {
-            throw new Error(error);
-        };
-    };
-};
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
+}

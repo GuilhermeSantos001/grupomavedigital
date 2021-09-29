@@ -1,11 +1,11 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 09/09/2021
- * @version 1.26.12
+ * @update 28/09/2021
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { FilterQuery } from 'mongoose';
 
 import folderDB, { GroupId, UserId, FolderPermission, folderInterface, folderModelInterface } from '@/mongo/folders-manager-mongo';
 import fileDB, { FileShare, FileProtected, FileBlocked } from '@/mongo/files-manager-mongo';
@@ -23,95 +23,92 @@ export interface Access {
         email: string;
         permission: FolderPermission;
     };
-};
+}
 
 class folderManagerDB {
-
-    constructor() { };
-
     /**
      * @description Verifica se a pasta está protegida/bloqueada.
      */
     private _isProtectedOrBlocked(folder: folderModelInterface): boolean {
         return folder.protected || folder.blocked;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para há remoção.
      */
     private _isAvailableAndAllowsDelete(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsDelete;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para há adição.
      */
     private _isAvailableAndAllowsAppending(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsAppending;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para a proteção.
      */
     private _isAvailableAndAllowsProtect(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsProtect;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para o compartilhamento.
      */
     private _isAvailableAndAllowsShare(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsShare;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para as alterações de segurança.
      */
     private _isAvailableAndAllowsSecurity(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsSecurity;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível para o bloqueio.
      */
     private _isAvailableAndAllowsBlock(folder: folderModelInterface): boolean {
         return folder.available && folder.allowsBlock;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está em modo appending/removing.
      */
     private _isAppendingOrRemoving(folder: folderModelInterface): boolean {
         return folder.appending || folder.removing;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está disponível.
      */
     private _isAvailable(folder: folderModelInterface): boolean {
         return folder.available;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está protegida.
      */
     private _isProtected(folder: folderModelInterface): boolean {
         return folder.protected;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está protegida.
      */
     private _isBlocked(folder: folderModelInterface): boolean {
         return folder.blocked;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está compartilhada.
      */
     private _isShared(folder: folderModelInterface): boolean {
         return folder.shared;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está na lixeira.
@@ -121,14 +118,14 @@ class folderManagerDB {
             return false;
 
         return folder.garbage;
-    };
+    }
 
     /**
      * @description Verifica se a pasta está na lista de reciclagem
      */
     private _isRecycle(folder: folderModelInterface): boolean {
         return folder.status === 'Recycle';
-    };
+    }
 
     /**
      * @description Verifica se a pasta está associado a uma pasta.
@@ -138,7 +135,7 @@ class folderManagerDB {
             return folder.isAssociatedFolder;
 
         return folder.folderId === folderId;
-    };
+    }
 
     /**
      * @description Verifica a "Chave" e o "Texto Secreto" da proteção.
@@ -148,8 +145,8 @@ class folderManagerDB {
             return true;
         } else {
             return false;
-        };
-    };
+        }
+    }
 
     /**
      * @description Verifica o "Link" e o "Texto Secreto" do compartilhamento.
@@ -159,8 +156,8 @@ class folderManagerDB {
             return true;
         } else {
             return false;
-        };
-    };
+        }
+    }
 
     /**
      * @description Reciclagem das pastas na lixeira
@@ -168,7 +165,7 @@ class folderManagerDB {
     public recycleGarbage() {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                let
+                const
                     folders = await folderDB.find({ trash: { $ne: undefined } }),
                     itens: string[] = [];
 
@@ -198,7 +195,7 @@ class folderManagerDB {
                             else if (folder.status === 'Recycle') {
                                 if (typeof folder.cid === 'string')
                                     itens.push(folder.cid);
-                            };
+                            }
 
                             /**
                              * @description Verifica se a pasta é a última da lista
@@ -208,16 +205,16 @@ class folderManagerDB {
                             }
                         } else {
                             return resolve(itens);
-                        };
-                    };
+                        }
+                    }
                 } else {
                     return resolve(itens);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
     /**
          * @description Verifica se o grupo/usuário está na whitelist da pasta.
          * @param group { name: string; permission: FolderPermission} - Grupo do usuário e permissão
@@ -229,7 +226,7 @@ class folderManagerDB {
          */
         if (!folder.isAssociatedGroup && !folder.isAssociatedUser) {
             return true;
-        };
+        }
 
         if (!folder.accessGroupId)
             folder.accessGroupId = [];
@@ -237,7 +234,7 @@ class folderManagerDB {
         if (!folder.accessUsersId)
             folder.accessUsersId = [];
 
-        let
+        const
             accessByGroup: boolean = folder.accessGroupId.filter((groupId: GroupId) => {
                 if (
                     groupId.name === access.group?.name &&
@@ -246,7 +243,7 @@ class folderManagerDB {
                     return true;
                 } else {
                     return false;
-                };
+                }
             }).length > 0,
             accessByEmail: boolean = folder.accessUsersId.filter((usersId: UserId) => {
                 if (
@@ -256,11 +253,11 @@ class folderManagerDB {
                     return true;
                 } else {
                     return false;
-                };
+                }
             }).length > 0;
 
         return accessByGroup || accessByEmail;
-    };
+    }
 
     /**
      * @description Verifica o bloqueio
@@ -274,21 +271,21 @@ class folderManagerDB {
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio da pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está bloqueada
@@ -313,7 +310,7 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada até ${folder.block.value.toLocaleDateString('pt-br')} às ${folder.block.value.toLocaleTimeString('pt-br')}`
                             });
-                        };
+                        }
                     } else if (folder.block.type === 'Month') {
                         if (
                             now.getMonth() === folder.block.value.getMonth()
@@ -322,7 +319,7 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada durante esse mês.`
                             });
-                        };
+                        }
                     } else if (folder.block.type === 'Day Month') {
                         if (
                             now.getDate() === folder.block.value.getDate()
@@ -331,7 +328,7 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada durante esse dia do mês.`
                             });
-                        };
+                        }
                     } else if (folder.block.type === 'Day Week') {
                         if (
                             now.getDay() === folder.block.value.getDay()
@@ -340,7 +337,7 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada durante esse dia da semana.`
                             });
-                        };
+                        }
                     } else if (folder.block.type === 'Hour') {
                         if (
                             now.getHours() <= folder.block.value.getHours()
@@ -349,7 +346,7 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada até às ${folder.block.value.toLocaleTimeString('pt-br')}.`
                             });
-                        };
+                        }
                     } else if (folder.block.type === 'Minute') {
                         if (
                             now.getMinutes() <= folder.block.value.getMinutes()
@@ -358,8 +355,8 @@ class folderManagerDB {
                                 block: true,
                                 message: `A pasta com cid(${cid}) está bloqueada até às ${folder.block.value.toLocaleTimeString('pt-br')}.`
                             });
-                        };
-                    };
+                        }
+                    }
 
                     /**
                      * @description Verifica se o bloqueio deve ser repetido
@@ -381,12 +378,12 @@ class folderManagerDB {
                             folder.block.type === 'Minute'
                         ) {
                             folder.block.value.setDate(folder.block.value.getDate() + 1);
-                        };
+                        }
                     } else {
                         folder.status = 'Available';
 
                         folder.block = undefined;
-                    };
+                    }
 
                     folder.updated = Moment.format();
 
@@ -399,12 +396,12 @@ class folderManagerDB {
                 } else {
                     return reject(`Pasta com cid(${cid}) não está bloqueada.`);
 
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna uma lista de pastas
@@ -412,8 +409,8 @@ class folderManagerDB {
      * @param skip {Number} - Pular x itens iniciais no banco de dados
      * @param limit {Number} - Limite de itens a serem retornados
      */
-    public get(filter: object, skip: number, limit: number) {
-        return new Promise<folderModelInterface[]>(async (resolve, reject) => {
+    public get(filter: FilterQuery<folderModelInterface>, skip: number, limit: number): Promise<folderModelInterface[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 if (skip > 9e3)
                     skip = 9e3;
@@ -425,14 +422,14 @@ class folderManagerDB {
 
                 if (_folders.length < 0) {
                     return reject(`Nenhuma pastas foi encontrada.`);
-                };
+                }
 
                 return resolve(_folders);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna o nome da pasta
@@ -445,14 +442,14 @@ class folderManagerDB {
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não foi encontrada.`);
-                };
+                }
 
                 return resolve(folder.name);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Armazena a pasta
@@ -467,7 +464,7 @@ class folderManagerDB {
 
                 if (_folder) {
                     return reject(`Pasta(${folder.name}) com o tipo (${folder.type}) já está registrada.`);
-                };
+                }
 
                 const
                     now = Moment.format(),
@@ -485,9 +482,9 @@ class folderManagerDB {
                 return resolve(model);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove a pasta
@@ -498,27 +495,28 @@ class folderManagerDB {
     public delete(cid: string, access: Access, accessFile: AccessFile) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _delete = false;
+                const
+                    folder = await folderDB.findOne({ cid });
+
+                let _delete = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -537,7 +535,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailableAndAllowsDelete(folder)) {
                     _delete = true;
-                };
+                }
 
                 if (_delete) {
                     folder.status = 'Removing';
@@ -546,36 +544,36 @@ class folderManagerDB {
                      * @description Verifica se existe arquivos associados
                      */
                     if (folder.filesId instanceof Array && folder.filesId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const fileId of folder.filesId) {
                             try {
                                 await fileManagerDB.exitFolder(fileId, accessFile, cid);
                                 await fileManagerDB.close(fileId, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível remover a pasta no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     /**
                      * @description Verifica se existe pastas associadas
                      */
                     if (folder.foldersId instanceof Array && folder.foldersId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const folderId of folder.foldersId) {
                             try {
                                 await this.delete(folderId, access, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível remover a pasta no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     await folder.save();
 
@@ -584,12 +582,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ser deletada no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um grupo na whitelist
@@ -600,27 +598,28 @@ class folderManagerDB {
     public addGroupId(cid: string, access: Access, group: GroupId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _addGroupId = false;
+                const
+                    folder = await folderDB.findOne({ cid });
+
+                let _addGroupId = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -633,7 +632,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailable(folder)) {
                     _addGroupId = true;
-                };
+                }
 
                 if (_addGroupId) {
                     /**
@@ -649,7 +648,7 @@ class folderManagerDB {
 
                         if (index) {
                             return reject(`Grupo(${group.name}) já está adicionado a whitelist da pasta com cid(${cid})`);
-                        };
+                        }
 
                         folder.accessGroupId.push(group);
 
@@ -660,15 +659,15 @@ class folderManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`A pasta com cid(${cid}) está em uso e/ou não é possível adicionar o grupo(${group.name}) na whitelist.`);
-                    };
+                    }
                 } else {
                     return reject(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove um grupo de acesso da whitelist
@@ -679,27 +678,28 @@ class folderManagerDB {
     public removeGroupId(cid: string, access: Access, group: GroupId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _removeGroupId = false;
+                const
+                    folder = await folderDB.findOne({ cid });
+
+                let _removeGroupId = false;
 
                 if (!folder) {
                     return reject(`Pata com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -712,7 +712,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailable(folder)) {
                     _removeGroupId = true;
-                };
+                }
 
                 if (_removeGroupId) {
                     /**
@@ -728,7 +728,7 @@ class folderManagerDB {
 
                         if (!index) {
                             return reject(`Grupo(${group.name}) não está na whitelist da pasta com cid(${cid})`);
-                        };
+                        }
 
                         folder.accessGroupId = folder.accessGroupId.filter((groupId: GroupId) => groupId.name !== group.name);
 
@@ -739,15 +739,15 @@ class folderManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
-                    };
+                    }
                 } else {
                     return reject(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um usuário na whitelist
@@ -758,27 +758,28 @@ class folderManagerDB {
     public addUserId(cid: string, access: Access, user: UserId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _addUserId = false;
+                const
+                    folder = await folderDB.findOne({ cid });
+
+                let _addUserId = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -791,7 +792,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailable(folder)) {
                     _addUserId = true;
-                };
+                }
 
                 if (_addUserId) {
                     /**
@@ -819,15 +820,15 @@ class folderManagerDB {
                     } else {
                         return reject(`A pasta com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
 
-                    };
+                    }
                 } else {
                     return reject(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o usuário da whitelist
@@ -838,27 +839,27 @@ class folderManagerDB {
     public removeUserId(cid: string, access: Access, user: UserId) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _removeUserId = false;
+                const folder = await folderDB.findOne({ cid });
+
+                let _removeUserId = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -871,7 +872,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailable(folder)) {
                     _removeUserId = true;
-                };
+                }
 
                 if (_removeUserId) {
                     /**
@@ -898,15 +899,15 @@ class folderManagerDB {
                         return resolve(true);
                     } else {
                         return reject(`A pasta com cid(${cid}) está em uso e/ou não será possível remover o email(${user.email}) da whitelist.`);
-                    };
+                    }
                 } else {
                     return reject(`A pasta com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o arquivo na pasta
@@ -918,39 +919,40 @@ class folderManagerDB {
     public append(cid: string, access: Access, fileId: string, accessFile: AccessFile) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
+                const
                     folder = await folderDB.findOne({ cid }),
-                    file = await fileDB.findOne({ cid: fileId }),
-                    _append = false;
+                    file = await fileDB.findOne({ cid: fileId });
+
+                let _append = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 if (!file) {
                     return reject(`Arquivo com cid(${fileId}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar arquivos na pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -963,7 +965,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailableAndAllowsAppending(folder)) {
                     _append = true;
-                };
+                }
 
                 if (_append) {
                     folder.status = 'Appending';
@@ -975,14 +977,14 @@ class folderManagerDB {
 
                     if (index) {
                         return reject(`Arquivo com cid(${fileId}) já está na pasta.`);
-                    };
+                    }
 
                     try {
                         await fileManagerDB.joinFolder(fileId, accessFile, cid);
                         await fileManagerDB.close(fileId, accessFile);
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
 
                     folder.filesId.push(fileId);
 
@@ -993,12 +995,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ter arquivos adicionados no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o arquivo na pasta
@@ -1010,34 +1012,34 @@ class folderManagerDB {
     public remove(cid: string, access: Access, fileId: string, accessFile: AccessFile) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
-                    folder = await folderDB.findOne({ cid }),
-                    _remove = false;
+                const folder = await folderDB.findOne({ cid });
+
+                let _remove = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover os arquivos da pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1050,7 +1052,7 @@ class folderManagerDB {
                  */
                 else if (this._isAvailableAndAllowsDelete(folder)) {
                     _remove = true;
-                };
+                }
 
                 if (_remove) {
                     folder.status = 'Removing';
@@ -1062,7 +1064,7 @@ class folderManagerDB {
 
                     if (!index) {
                         return reject(`Arquivo com cid(${fileId}) não está na pasta.`);
-                    };
+                    }
 
                     folder.filesId = folder.filesId.filter(_fileId => _fileId !== fileId);
 
@@ -1071,7 +1073,7 @@ class folderManagerDB {
                         await fileManagerDB.close(fileId, accessFile);
                     } catch (error) {
                         return reject(error);
-                    };
+                    }
 
                     folder.updated = Moment.format();
 
@@ -1080,12 +1082,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ter os arquivos removidos no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona uma pasta a pasta
@@ -1096,18 +1098,19 @@ class folderManagerDB {
     public push(cid: string, access: Access, folderId: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
+                const
                     folder = await folderDB.findOne({ cid }),
-                    folder2 = await folderDB.findOne({ cid: folderId }),
-                    _push = false;
+                    folder2 = await folderDB.findOne({ cid: folderId });
+
+                let _push = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 if (!folder2) {
                     return reject(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixera
@@ -1115,7 +1118,7 @@ class folderManagerDB {
                  */
                 if (this._isGarbage(folder) || this._isGarbage(folder2)) {
                     return reject(`Uma das pastas está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada
@@ -1126,7 +1129,7 @@ class folderManagerDB {
                     this._isProtectedOrBlocked(folder2) && !this.verifyAccessByGroupAndUser(folder2, access)
                 ) {
                     return reject(`Uma das pastas está protegida/bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está associada a uma pasta.
@@ -1136,18 +1139,18 @@ class folderManagerDB {
                     !folder.folderId && this._isAssociatedFolder(folder2)
                 ) {
                     return reject(`Pasta com cid(${folderId}) já está associada a uma pasta.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta e a pasta a ser associada
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover pastas para essa pasta com cid(${cid}).`);
-                };
+                }
 
                 if (!this.verifyAccessByGroupAndUser(folder2, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover a pasta com cid(${folderId}) para essa pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1168,7 +1171,7 @@ class folderManagerDB {
                     this._isAvailableAndAllowsAppending(folder2)
                 ) {
                     _push = true;
-                };
+                }
 
                 if (_push) {
                     folder.status = 'Appending';
@@ -1180,7 +1183,7 @@ class folderManagerDB {
 
                     if (index) {
                         return reject(`Pasta com cid(${folderId}) já está na pasta.`);
-                    };
+                    }
 
                     /**
                      * @description Retira a pasta da matriz
@@ -1196,8 +1199,8 @@ class folderManagerDB {
                             });
                         } catch (error) {
                             return reject(error);
-                        };
-                    };
+                        }
+                    }
 
                     folder.foldersId.push(folderId);
                     folder2.folderId = cid;
@@ -1211,12 +1214,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ter pastas adicionadas no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove uma pasta da pasta
@@ -1227,18 +1230,19 @@ class folderManagerDB {
     public splice(cid: string, access: Access, folderId: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let
+                const
                     folder = await folderDB.findOne({ cid }),
-                    folder2 = await folderDB.findOne({ cid: folderId }),
-                    _splice = false;
+                    folder2 = await folderDB.findOne({ cid: folderId });
+
+                let _splice = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 if (!folder2) {
                     return reject(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixera
@@ -1246,7 +1250,7 @@ class folderManagerDB {
                  */
                 if (this._isGarbage(folder) || this._isGarbage(folder2)) {
                     return reject(`Uma das pastas está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada
@@ -1257,25 +1261,25 @@ class folderManagerDB {
                     this._isProtectedOrBlocked(folder2) && !this.verifyAccessByGroupAndUser(folder2, access)
                 ) {
                     return reject(`Uma das pastas está protegida/bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está associada há a pasta.
                  */
                 if (!this._isAssociatedFolder(folder2, cid)) {
                     return reject(`Pasta com cid(${folderId}) não está associada há pasta.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta e a pasta a ser associada
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover pastas dessa pasta com cid(${cid}).`);
-                };
+                }
 
                 if (!this.verifyAccessByGroupAndUser(folder2, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover a pasta com cid(${folderId}) dessa pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1296,7 +1300,7 @@ class folderManagerDB {
                     this._isAvailableAndAllowsDelete(folder2)
                 ) {
                     _splice = true;
-                };
+                }
 
                 if (_splice) {
                     folder.status = 'Removing';
@@ -1308,7 +1312,7 @@ class folderManagerDB {
 
                     if (!index) {
                         return reject(`Pasta com cid(${folderId}) não está na pasta.`);
-                    };
+                    }
 
                     folder.foldersId = folder.foldersId.filter(_folderId => _folderId !== folderId);
                     folder2.folderId = undefined;
@@ -1322,12 +1326,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ter pastas removidas no momento.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Abre a pasta e retorna os IDs dos arquivos
@@ -1337,26 +1341,26 @@ class folderManagerDB {
     public open(cid: string, access: Access) {
         return new Promise<string[]>(async (resolve, reject) => {
             try {
-                let
+                const
                     folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está em modo appending/removing.
@@ -1364,7 +1368,7 @@ class folderManagerDB {
                 if (this._isAppendingOrRemoving(folder)) {
 
                     return reject(`Pasta com cid(${cid}) está em uso no momento, não será possível acessar seu conteúdo agora.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1378,19 +1382,19 @@ class folderManagerDB {
 
                     if (folder.filesId.length <= 0) {
                         return reject(`Pasta com cid(${cid}) está vazia.`);
-                    };
+                    }
 
                     folder.lastAccess = Moment.format();
 
                     await folder.save();
 
                     return resolve(folder.filesId);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Volta o estado da pasta para disponível
@@ -1400,26 +1404,27 @@ class folderManagerDB {
     public close(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid }),
-                    _close = false;
+                const folder = await folderDB.findOne({ cid });
+
+                let _close = false;
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder) && !this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1432,7 +1437,7 @@ class folderManagerDB {
                  */
                 else if (this._isAppendingOrRemoving(folder)) {
                     _close = true;
-                };
+                }
 
                 if (_close) {
                     if (folder.protected) {
@@ -1443,19 +1448,19 @@ class folderManagerDB {
                         folder.status = 'Recycle';
                     } else {
                         folder.status = 'Available';
-                    };
+                    }
 
                     await folder.save();
 
                     return resolve(true);
                 } else {
                     return resolve(true);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Cria uma proteção para a pasta.
@@ -1466,32 +1471,32 @@ class folderManagerDB {
     public protect(cid: string, access: Access, passphrase: string) {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger a pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está em modo appending/removing.
@@ -1519,13 +1524,13 @@ class folderManagerDB {
                         return resolve(uuid);
                     } else {
                         return reject(`Pasta com cid(${cid}) está em uso e/ou não será possível protegê-la.`);
-                    };
-                };
+                    }
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove a proteção da pasta.
@@ -1536,25 +1541,25 @@ class folderManagerDB {
     public unProtect(cid: string, access: Access, protect: FileProtected) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger a pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida.
@@ -1574,16 +1579,16 @@ class folderManagerDB {
 
                         return resolve(true);
                     } else {
-                        return reject(`\"Chave\" e/ou \"Texto Secreto\" está invalido(a).`);
-                    };
+                        return reject(`Chave e/ou Texto Secreto está invalido(a).`);
+                    }
                 } else {
                     return reject(`Pasta com cid(${cid}) está não está protegida.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Cria o compartilhamento da pasta.
@@ -1594,39 +1599,39 @@ class folderManagerDB {
     public share(cid: string, access: Access, title: string) {
         return new Promise<{ link: string, secret: string }>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está compartilhada.
                  */
                 if (this._isShared(folder)) {
                     return reject(`Pasta com cid(${cid}) já está compartilhada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar a pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está disponível para o compartilhamento.
@@ -1653,15 +1658,15 @@ class folderManagerDB {
                         await folder.save();
 
                         return resolve({ link, secret: uuid });
-                    };
+                    }
                 } else {
                     return reject(`Pasta com cid(${cid}) não pode ser compartilhada.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o compartilhamento da pasta.
@@ -1672,32 +1677,32 @@ class folderManagerDB {
     public unShare(cid: string, access: Access, share: Omit<FileShare, "title">) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegida/bloqueada.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento da pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está compartilhada.
@@ -1718,17 +1723,17 @@ class folderManagerDB {
 
                             return resolve(true);
                         } else {
-                            return reject(`\"Link\" e/ou \"Texto Secreto\" está invalido.`);
+                            return reject(`Link e/ou Texto Secreto está invalido.`);
                         }
-                    };
+                    }
                 } else {
                     return reject(`Pasta com cid(${cid}) não está compartilhada.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta.
@@ -1739,32 +1744,32 @@ class folderManagerDB {
     public blocked(cid: string, access: Access, block: FileBlocked) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear a pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está disponível para o bloqueio.
@@ -1781,12 +1786,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) está em uso e/ou não será possível bloqueá-la.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desbloqueia a pasta.
@@ -1796,32 +1801,32 @@ class folderManagerDB {
     public unBlocked(cid: string, access: Access) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegido.
                  */
                 if (this._isProtected(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida.`);
-                };
+                }
 
                 /**
                  * @description Verifica o acesso a pasta
                  */
                 if (!this.verifyAccessByGroupAndUser(folder, access)) {
                     return reject(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear a pasta com cid(${cid}).`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está bloqueada.
@@ -1838,12 +1843,12 @@ class folderManagerDB {
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não está bloqueada.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Coloca a pasta na lixeira
@@ -1854,31 +1859,31 @@ class folderManagerDB {
     public moveToGarbage(cid: string, access: Access, accessFile: AccessFile) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
                  */
                 if (this._isGarbage(folder)) {
                     return reject(`Pasta com cid(${cid}) está na lixeira.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está disponível.
                  */
                 if (this._isAvailable(folder)) {
-                    let now = new Date();
+                    const now = new Date();
 
                     now.setDate(now.getDate() + trashDays);
 
@@ -1888,45 +1893,45 @@ class folderManagerDB {
                      * @description Verifica se existe arquivos associados
                      */
                     if (folder.filesId instanceof Array && folder.filesId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const fileId of folder.filesId) {
                             try {
                                 await fileManagerDB.moveToGarbage(fileId, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível colocar a pasta na lixeira no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     /**
                      * @description Verifica se existe pastas associadas
                      */
                     if (folder.foldersId instanceof Array && folder.foldersId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const folderId of folder.foldersId) {
                             try {
                                 await this.moveToGarbage(folderId, access, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível colocar a pasta na lixeira no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) está em uso no momento, não será possível coloca-la na lixeira agora.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retira a pasta da lixeira
@@ -1937,18 +1942,18 @@ class folderManagerDB {
     public removeOfGarbage(cid: string, access: Access, accessFile: AccessFile) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let folder = await folderDB.findOne({ cid });
+                const folder = await folderDB.findOne({ cid });
 
                 if (!folder) {
                     return reject(`Pasta com cid(${cid}) não existe no banco de dados.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está protegido/bloqueado.
                  */
                 if (this._isProtectedOrBlocked(folder)) {
                     return reject(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
-                };
+                }
 
                 /**
                  * @description Verifica se a pasta está na lixeira.
@@ -1966,47 +1971,47 @@ class folderManagerDB {
                      * @description Verifica se existe arquivos associados
                      */
                     if (folder.filesId instanceof Array && folder.filesId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const fileId of folder.filesId) {
                             try {
                                 await fileManagerDB.removeOfGarbage(fileId, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Um ou mais arquivos protegidos/bloqueados, não é possível remover a pasta da lixeira no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     /**
                      * @description Verifica se existe pastas associadas
                      */
                     if (folder.foldersId instanceof Array && folder.foldersId.length > 0) {
-                        let errors: number = 0;
+                        let errors = 0;
 
                         for (const folderId of folder.foldersId) {
                             try {
                                 await this.removeOfGarbage(folderId, access, accessFile);
-                            } catch (error) { errors++; };
-                        };
+                            } catch (error) { errors++; }
+                        }
 
                         if (errors > 0) {
                             return reject(`Uma ou mais pastas estão protegidas/bloqueadas, não é possível remover a pasta da lixeira no momento.`);
-                        };
-                    };
+                        }
+                    }
 
                     await folder.save();
 
                     return resolve(true);
                 } else {
                     return reject(`Pasta com cid(${cid}) não está na lixeira.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new folderManagerDB();

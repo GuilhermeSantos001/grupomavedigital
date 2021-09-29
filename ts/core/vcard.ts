@@ -14,23 +14,23 @@ import Random from '@/utils/random';
 export interface Photo {
     name: string;
     path: string;
-};
+}
 
 export interface Birthday {
     year: number;
     month: number;
     day: number;
-};
+}
 
 export interface SocialUrls {
     media: string;
     url: string;
-};
+}
 
 export interface File {
     name: string;
     path: string;
-};
+}
 
 export type Label = 'Work Address' | 'Home Address';
 
@@ -58,10 +58,10 @@ export interface VCard {
     postalCode: string;
     socialUrls: SocialUrls[];
     file?: File;
-};
+}
 
-export default function vcard(vcard: VCard) {
-    return new Promise<String>(async (resolve, reject) => {
+export default function vcard(vcard: VCard): Promise<string> {
+    return new Promise(async (resolve, reject) => {
         try {
             const
                 vCard = vCardsJS(),
@@ -125,6 +125,6 @@ export default function vcard(vcard: VCard) {
             return resolve(filename);
         } catch (error) {
             return reject(error);
-        };
+        }
     });
-};
+}

@@ -12,13 +12,13 @@ import Debug from '@/core/log4';
 interface User {
     username: string;
     password: string;
-};
+}
 
 interface Config extends User {
     host: string;
     port: string;
     database: string;
-};
+}
 
 /**
  * @description Configuração de acesso do mongodb
@@ -66,16 +66,16 @@ connection.on('open', function () {
 function ConnectionClose(): void {
     connection.close(function (error) {
         if (error) {
-            return Debug.info('mongoDB', `MongoDB got an error while trying to close the connection`, JSON.stringify(error));
-        };
+            return Debug.info('mongoDB', `MongoDB got an error while trying to close the connection`, String(error));
+        }
 
         if (connection.readyState == 0) {
             Debug.info('mongoDB', `Connection to mongoDB was closed, due to server shutdown`);
-        };
+        }
 
         process.exit(0);
     });
-};
+}
 
 process.on('SIGINT', ConnectionClose.bind(this));
 process.on('SIGTERM', ConnectionClose.bind(this));
@@ -83,11 +83,11 @@ process.on('SIGTERM', ConnectionClose.bind(this));
 class MongoDB {
     constructor() {
         this.open();
-    };
+    }
 
     private uri() {
         return `mongodb://${mongoConfig.username}:${encodeURIComponent(mongoConfig.password)}@${mongoConfig.host}:${mongoConfig.port}/${mongoConfig.database}?authSource=admin&readPreference=primary&appname=GMD&directConnection=true&ssl=false`;
-    };
+    }
 
     private open() {
         connect(this.uri(), {
@@ -98,27 +98,27 @@ class MongoDB {
                 connection.close();
 
                 Debug.info('mongoDB', `Error in try open connection for operations in database`);
-            };
+            }
 
             Debug.info('mongoDB', `New Connection for operations in database`);
         });
-    };
+    }
 
     public shutdown() {
         connection.close(function (error) {
             if (error) {
-                return Debug.info('mongoDB', `MongoDB got an error while trying to close the connection`, JSON.stringify(error));
-            };
+                return Debug.info('mongoDB', `MongoDB got an error while trying to close the connection`, String(error));
+            }
 
             if (connection.readyState == 0) {
                 Debug.info('mongoDB', `Connection to mongoDB was closed, due to server shutdown`);
-            };
+            }
         });
-    };
+    }
 
     public getDB(dbName: string) {
         return connection.getClient().db(dbName);
-    };
-};
+    }
+}
 
 export default new MongoDB();
