@@ -5,7 +5,7 @@
  * @version 1.1.9
  */
 
-import userDB, { UserInterface, UserModelInterface, PrivilegesSystem, Location, Authentication, Session, Devices, History, Token, authenticationDefault, sessionDefault } from '@/mongo/user-manager-mongo';
+import userDB, { UserInterface, UserModelInterface, PrivilegesSystem, Location, Authentication, Session, Devices, History, Token, RefreshToken, authenticationDefault, sessionDefault } from '@/mongo/user-manager-mongo';
 import { Encrypt, Decrypt } from '@/utils/bcrypt';
 import { verify as twoFactorVerify, generateQRCode, QRCode } from '@/utils/twoFactor';
 import Jobs from '@/app/core/jobs';
@@ -28,6 +28,7 @@ export interface UserInfo {
     location: Location;
     session: Session;
     signature: string;
+    token: string;
     authentication: Authentication;
 }
 
@@ -210,6 +211,7 @@ class userManagerDB {
                         cache: _user.session.cache
                     },
                     signature: _user.signature,
+                    token: await _user.token,
                     authentication: _user.authentication
                 });
             } catch (error) {
@@ -338,8 +340,8 @@ class userManagerDB {
     /**
      * @description Recupera as informações para UX/UI.
      */
-    public getInfo(auth: string) {
-        return new Promise<UserInfo>(async (resolve, reject) => {
+    public getInfo(auth: string): Promise<Omit<UserInfo, "token">> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const filter: FindUserByAuth = { authorization: auth };
 
@@ -703,6 +705,55 @@ class userManagerDB {
     }
 
     /**
+     * @description Atualiza o token de segurança da sessão armazenada
+     */
+    public updateTokenHistory(auth: string, token: string): Promise<string[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const
+                    _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    try {
+                        if (!_user.session)
+                            _user.session = sessionDefault;
+
+                        const
+                            newSignature = _user.signature,
+                            newToken = await _user.token;
+
+                        if (_user.session.cache.history.length > 0)
+                            for (const _history of _user.session.cache.history) {
+                                if (_history.token === token)
+                                    _history.token = newToken;
+                            }
+
+                        if (_user.session.cache.tokens.length > 0)
+                            for (const _token of _user.session.cache.tokens) {
+                                if (_token.value === token) {
+                                    _token.signature = newSignature;
+                                    _token.value = newToken;
+                                }
+                            }
+
+                        await _user.save();
+
+                        return resolve([newSignature, newToken]);
+                    } catch (error) {
+                        return reject(error);
+                    }
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
      * @description Verifica o token de sessão
      */
     public verifytoken(auth: string, token: string, signature: string, internetAdress: string) {
@@ -717,12 +768,7 @@ class userManagerDB {
                         if (!_user.session)
                             _user.session = sessionDefault;
 
-                        const _usrToken = _user.session.cache.tokens.filter(_token => {
-                            if (_token.signature === signature && _token.value === token)
-                                return true;
-
-                            return false;
-                        })[0];
+                        const _usrToken = _user.session.cache.tokens.filter(_token => _token.signature === signature && _token.value === token)[0];
 
                         // - Verifica se existem alguma conexão usando o token
                         if (
@@ -734,8 +780,7 @@ class userManagerDB {
                             } else {
                                 // - Verifica se o token está vinculado ao endereço de IP
                                 if (
-                                    _user.session.cache.history.filter(_history => _history.internetAdress === internetAdress).length <= 0 &&
-                                    process.env.NODE_ENV === 'production'
+                                    _user.session.cache.history.filter(_history => _history.internetAdress === internetAdress).length <= 0
                                 ) {
                                     return reject(`Token de sessão está registrado em outro endereço de internet.`);
                                 }
@@ -751,6 +796,170 @@ class userManagerDB {
                 }
 
                 return resolve(true);
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
+     * @description Registra um novo refresh token
+     */
+    public addRefreshToken(auth: string): Promise<RefreshToken> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    let now = new Date();
+
+                    now.setDate(now.getDate() + 7);
+
+                    const token: RefreshToken = {
+                        signature: _user.signature,
+                        value: _user.refreshToken,
+                        expiry: now
+                    };
+
+                    if (
+                        _user.session &&
+                        _user.session.cache &&
+                        !_user.session.cache.refreshToken
+                    )
+                        _user.session.cache.refreshToken = [];
+
+                    if (
+                        _user.session &&
+                        _user.session.cache &&
+                        _user.session.cache.refreshToken
+                    ) {
+                        if (_user.session.cache.refreshToken.length <= 0) {
+                            _user.session.cache.refreshToken.push(token);
+
+                            await _user.save();
+
+                            return resolve(token);
+                        } else {
+                            return resolve(_user.session.cache.refreshToken[0] || token);
+                        }
+                    }
+
+                    return reject(`Não é possivel adicionar um novo refresh token para o usuário(${auth}).`);
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
+     * @description Verifica um refresh token
+     */
+    public verifyRefreshToken(auth: string, signature: string, refreshToken: string): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    let now = new Date();
+
+                    const tokens = _user.session?.cache.refreshToken.filter(token => {
+                        if (token.expiry >= now && token.signature === signature && token.value === refreshToken)
+                            return true;
+
+                        return false;
+                    }) || [];
+
+                    if (tokens.length > 0) {
+                        return resolve();
+                    } else {
+                        return reject(`Refresh Token(${refreshToken}) não está registrado.`);
+                    }
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
+     * @description Remove o refresh token
+     */
+    public removeRefreshToken(auth: string, signature: string, refreshToken: string): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    const tokens = _user.session?.cache.refreshToken.filter(token => {
+                        if (token.signature === signature && token.value !== refreshToken)
+                            return true;
+
+                        return false;
+                    }) || [];
+
+                    if (tokens.length > 0) {
+                        if (_user.session && _user.session.cache) {
+                            _user.session.cache.refreshToken = tokens;
+                            await _user.save();
+                        }
+
+                        return resolve();
+                    } else {
+                        return reject(`Usuário(${auth}) não possui refresh tokens.`);
+                    }
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
+     * @description Remove os refresh tokens expirados
+     */
+    public clearExpiredRefreshToken(auth: string): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    let now = new Date();
+
+                    if (
+                        _user.session &&
+                        _user.session.cache &&
+                        _user.session.cache.refreshToken instanceof Array &&
+                        _user.session.cache.refreshToken.length > 0
+                    ) {
+                        _user.session.cache.refreshToken = _user.session.cache.refreshToken.filter(token => {
+                            if (token.expiry >= now)
+                                return true;
+
+                            return false;
+                        });
+
+                        await _user.save();
+                    }
+
+                    return resolve();
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
             } catch (error) {
                 return reject(error);
             }

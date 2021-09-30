@@ -5,8 +5,22 @@ type AuthInfo {
   email: String!
   username: String!
   token: String!
+  refreshToken: RefreshToken!
   name: String!
   signature: String!
+}
+
+scalar Date
+
+type RefreshToken {
+  signature: String!
+  value: String!
+  expiry: Date!
+}
+
+input InputRefreshToken {
+  signature: String!
+  value: String!
 }
 
 # Schema de informações dos usuários
@@ -31,6 +45,12 @@ type UserInfo {
   surname: String!
   cnpj: String!
   location: Location!
+}
+
+type AuthValidate {
+  success: Boolean!
+  signature: String
+  token: String
 }
 
 type Query {
@@ -117,7 +137,11 @@ type Query {
     Assinatura do token
     """
     signature: String!
-  ): Boolean!
+    """
+    Refresh token para renovação de segurança da solicitação
+    """
+    refreshToken: InputRefreshToken
+  ): AuthValidate!
     @auth(
       keys: ["4VMYcqF77yRfA9dmzVcD9JPZFycmN5dZdtDZww49ENHW4H97nY7RuzWa6jTkAMY3"]
     )

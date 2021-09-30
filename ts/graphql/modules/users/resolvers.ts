@@ -30,6 +30,7 @@ export default {
                     surname,
                     session,
                     signature,
+                    token,
                     authentication
                 } = await userManagerDB.cpassword(args.auth, args.pwd);
 
@@ -44,7 +45,8 @@ export default {
                         session,
                         authentication,
                         signature,
-                        token: ""
+                        token,
+                        refreshToken: {},
                     };
 
                 const
@@ -64,12 +66,7 @@ export default {
                     }
                 }
 
-                userInfo['token'] = await JsonWebToken.sign({
-                    payload: {},
-                    options: {
-                        expiresIn: `${userInfo['session']['cache']['tmp']}${userInfo['session']['cache']['unit']}`
-                    }
-                });
+                userInfo['refreshToken'] = await userManagerDB.addRefreshToken(args.auth);
 
                 await userManagerDB.connected(args.auth, {
                     ip: clientIP.ip,
@@ -110,6 +107,7 @@ export default {
 
                 await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
                 await userManagerDB.disconnected(args.auth, args.token);
+                await userManagerDB.clearExpiredRefreshToken(args.auth);
 
                 await JsonWebToken.cancel(args.token);
                 await activityManagerDB.register({
@@ -145,16 +143,36 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authValidate: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext }) => {
+        authValidate: async (parent: unknown, args: {
+            auth: string,
+            token: string,
+            signature: string,
+            refreshToken: {
+                signature: string,
+                value: string
+            }
+        }, context: { express: ExpressContext }) => {
             try {
                 const
                     { ip } = geoIP(context.express.req),
                     internetadress = ip;
 
-                await JsonWebToken.verify(args.token);
-                await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
+                try {
+                    await JsonWebToken.verify(args.token);
+                    await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
 
-                return true;
+                    return { success: true };
+                } catch {
+                    if (args.refreshToken) {
+                        await userManagerDB.verifyRefreshToken(args.auth, args.refreshToken.signature, args.refreshToken.value);
+
+                        const updateHistory = await userManagerDB.updateTokenHistory(args.auth, args.token);
+
+                        return { success: true, signature: updateHistory[0], token: updateHistory[1] };
+                    }
+
+                    return { success: false };
+                }
             } catch (error) {
                 const
                     req: any = context.express.req,
