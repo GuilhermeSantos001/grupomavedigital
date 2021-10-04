@@ -1,8 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 01/09/2021
- * @version 1.4.1
+ * @update 01/10/2021
  */
 
 import jobDB, { jobInterface, jobModelInterface } from '@/mongo/jobs-manager-mongo';

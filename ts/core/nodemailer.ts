@@ -32,6 +32,7 @@ export enum Templates {
     ECONFIRM = "econfirm",
     ACCOUNT_RETRIEVE = "accountRetrieve",
     SESSION_NEW_ACCESS = "sessionNewAccess",
+    FORGOT_PASSWORD = "forgotPassword",
     HERCULES_ORDERS = "herculesOrders",
 }
 

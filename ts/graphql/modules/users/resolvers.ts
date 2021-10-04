@@ -16,6 +16,7 @@ import generatePassword from '@/utils/generatePassword';
 import { PrivilegesSystem } from '@/mongo/user-manager-mongo';
 import geoIP from '@/utils/geoIP';
 import { ExpressContext } from 'apollo-server-express';
+import { compressToBase64, decompressFromBase64 } from 'lz-string';
 
 export default {
     Query: {
@@ -183,6 +184,59 @@ export default {
                 throw new Error(String(error));
             }
         },
+        authForgotPassword: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
+            try {
+                const {
+                    username,
+                    email,
+                    signature,
+                } = await userManagerDB.getInfo(args.auth),
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                await userManagerDB.forgotPasswordSignatureRegister(args.auth, signature);
+
+                const jwt = await JsonWebToken.sign({
+                    payload: {
+                        'auth': compressToBase64(String(args.auth).toLowerCase()),
+                        'signature': compressToBase64(String(signature))
+                    },
+                    options: {
+                        expiresIn: '1h'
+                    }
+                });
+
+                if (typeof jwt === 'string') {
+                    // Cria um job para o envio de e-mail para alteração de senha da conta
+                    await Jobs.append({
+                        name: 'Send mail to change account password',
+                        type: 'mailsend',
+                        priority: 'High',
+                        args: {
+                            email,
+                            username,
+                            signature,
+                            token: jwt,
+                            forgotPassword: true,
+                            clientAddress: clientIP.ip
+                        },
+                        status: 'Available'
+                    });
+
+                    return true;
+                }
+
+                return false;
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de alteração de senha da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authForgotPassword`);
+
+                throw new Error(String(error));
+            }
+        },
         emailResendConfirm: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const
@@ -202,14 +256,12 @@ export default {
 
                 if (temporarypass) {
                     newpassword = generatePassword.unique();
-                    await userManagerDB.changepassword(args.auth, newpassword);
+                    await userManagerDB.changePassword(args.auth, newpassword);
                 }
 
                 const jwt = await JsonWebToken.sign({
                     payload: {
-                        'econfirm': true,
-                        'email': String(email).toLowerCase(),
-                        'auth': String(args.auth).toLowerCase()
+                        'auth': compressToBase64(String(args.auth).toLowerCase()),
                     },
                     options: {
                         expiresIn: '7d'
@@ -217,7 +269,7 @@ export default {
                 });
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de email para confirmação da conta
+                    // Cria um job para o envio de e-mail para confirmação da conta
                     await Jobs.append({
                         name: 'Send the account confirmation mail again',
                         type: 'mailsend',
@@ -243,6 +295,59 @@ export default {
                     clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: emailResendConfirm`);
+
+                throw new Error(String(error));
+            }
+        },
+        mailConfirm: async (parent: unknown, args: { token: string }, context: { express: ExpressContext }) => {
+            try {
+                const { auth } = await JsonWebToken.verify(args.token)
+
+                if (await userManagerDB.confirmEmail(decompressFromBase64(auth) || "")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de confirmar a conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: mailConfirm`);
+
+                throw new Error(String(error));
+            }
+        },
+        processOrderForgotPassword: async (parent: unknown, args: { signature: string, token: string, pwd: string }, context: { express: ExpressContext }) => {
+            try {
+                const decoded = await JsonWebToken.verify(args.token)
+
+                if (
+                    !decoded ||
+                    decompressFromBase64(decoded['signature']) !== args.signature
+                )
+                    return false;
+
+                const auth = decompressFromBase64(decoded['auth']) || "";
+
+                const {
+                    authentication,
+                } = await userManagerDB.getInfo(auth);
+
+                if (authentication.forgotPassword !== args.signature)
+                    return false;
+
+                if (await userManagerDB.changePassword(auth, args.pwd)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de alterar a senha da conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: processOrderForgotPassword`);
 
                 throw new Error(String(error));
             }
@@ -334,9 +439,7 @@ export default {
                     const
                         jwt = await JsonWebToken.sign({
                             payload: {
-                                'econfirm': true,
-                                'email': String(args.email).toLowerCase(),
-                                'auth': String(args.authorization).toLowerCase()
+                                'auth': compressToBase64(String(args.authorization).toLowerCase()),
                             },
                             options: {
                                 expiresIn: '7d'
@@ -346,7 +449,7 @@ export default {
 
                     // Envia o email de confirmação da conta
                     if (typeof jwt === 'string') {
-                        // Cria um job para o envio de email para confirmação da conta
+                        // Cria um job para o envio de e-mail para confirmação da conta
                         await Jobs.append({
                             name: 'Sends the account confirmation mail after user registration',
                             type: 'mailsend',
@@ -448,12 +551,9 @@ export default {
                 const password_encode = await Encrypt(args.new_pwd);
 
                 await userManagerDB.cpassword(args.auth, args.pwd);
+                await userManagerDB.changePassword(args.auth, password_encode);
 
-                await userManagerDB.changepassword(args.auth, password_encode);
-
-                const msg = `${args.auth}, sua senha foi alterada com sucesso`;
-
-                return msg;
+                return true;
             } catch (error) {
                 const
                     req: any = context.express.req,
@@ -470,6 +570,19 @@ export default {
                     { qrcode } = await userManagerDB.signtwofactor(args.auth);
 
                 return qrcode;
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
+
+                throw new Error(String(error));
+            }
+        },
+        hasConfiguredTwoFactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
+            try {
+                return await userManagerDB.hasConfiguredTwoFactor(args.auth);
             } catch (error) {
                 const
                     req: any = context.express.req,
@@ -529,8 +642,7 @@ export default {
                     } = userInfo,
                     jwt = await JsonWebToken.sign({
                         payload: {
-                            'econfirm': true,
-                            'authorization': args.auth
+                            'auth': compressToBase64(String(args.auth).toLowerCase()),
                         },
                         options: {
                             expiresIn: '7d'
@@ -540,7 +652,7 @@ export default {
                     clientIP = geoIP(req);
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de email para recuperação da conta
+                    // Cria um job para o envio de e-mail para recuperação da conta
                     await Jobs.append({
                         name: 'Send the account recovery mail',
                         type: 'mailsend',

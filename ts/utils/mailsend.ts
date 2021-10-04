@@ -15,6 +15,12 @@ interface IVariablesEconfirm {
     temporarypassValue: string | null
 }
 
+interface IVariablesForgotPassword {
+    username: string
+    signature: string
+    url: string
+}
+
 interface IVariablesAccountRetrieveTwofactor {
     username: string
     url: string
@@ -42,6 +48,7 @@ declare type Options = {
     priority: Priority;
     variables:
     IVariablesEconfirm |
+    IVariablesForgotPassword |
     IVariablesAccountRetrieveTwofactor |
     IVariablesSessionNewAccess |
     IVariablesHerculesOrders;
@@ -55,7 +62,7 @@ export default class MailSend {
     static baseurl = BASE_URL;
 
     /**
-     * @description Envia o email de confirmação da conta
+     * @description Envia o e-mail de confirmação da conta
      */
     static async econfirm(email: string, username: string, token: string, temporarypass: string | null): Promise<SMTPTransport.SentMessageInfo> {
         try {
@@ -66,7 +73,7 @@ export default class MailSend {
                 priority: 'high',
                 variables: {
                     username,
-                    url: `${MailSend.baseurl}/user/email/confirm?token=${token}`,
+                    url: `${MailSend.baseurl}/user/mail/confirm?token=${token}`,
                     temporarypass: typeof temporarypass === 'string' ? true : false,
                     temporarypassValue: temporarypass
                 }
@@ -86,7 +93,37 @@ export default class MailSend {
     }
 
     /**
-     * @description Envia o email de recuperação da conta
+     * @description Envia o e-mail para confirmar a troca da senha
+     */
+    static async accountForgotPassword(email: string, username: string, signature: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
+        try {
+            const options: Options = {
+                email: email,
+                subject: 'Perdeu sua senha?',
+                title: `Prezado(a) ${username}, perdeu sua senha?`,
+                priority: 'high',
+                variables: {
+                    username,
+                    signature,
+                    url: `${MailSend.baseurl}/auth/password/restore?token=${token}`
+                }
+            };
+
+            return await Mail.send({
+                to: [options.email],
+                subject: options.subject,
+                priority: options.priority
+            }, Templates.FORGOT_PASSWORD, {
+                title: options.title,
+                variables: options.variables
+            });
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
+
+    /**
+     * @description Envia o e-mail de recuperação da conta
      */
     static async accountRetrieveTwofactor(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
         try {
@@ -115,7 +152,7 @@ export default class MailSend {
     }
 
     /**
-     * @description Envia o email de novo acesso por um endereço de IP fora do historico
+     * @description Envia o e-mail de novo acesso por um endereço de IP fora do historico
      */
     static async sessionNewAccess(email: string, username: string, navigator: { browser: string, os: string, locationIP: string, internetAdress: string }): Promise<SMTPTransport.SentMessageInfo> {
         try {
@@ -147,7 +184,7 @@ export default class MailSend {
     }
 
     /**
-     * @description Envia o email com o pedido aos procuradores do arquivo/pasta
+     * @description Envia o e-mail com o pedido aos procuradores do arquivo/pasta
      */
     static async herculesOrders(email: string, username: string, title: string, description: string, link: string): Promise<SMTPTransport.SentMessageInfo> {
         try {

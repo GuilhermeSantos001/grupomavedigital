@@ -223,7 +223,7 @@ class userManagerDB {
     /**
      * @description Troca a senha do usuário
      */
-    public changepassword(auth: string, newpass: string) {
+    public changePassword(auth: string, newpass: string) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 const filter: FindUserByAuth = { authorization: auth };
@@ -232,6 +232,35 @@ class userManagerDB {
 
                 if (_user) {
                     _user.password = await Encrypt(newpass);
+
+                    await _user.save();
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+
+                return resolve(true);
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
+
+    /**
+     * @description Registra a assinatura para que o usuario possa
+     * trocar a senha
+     */
+    public forgotPasswordSignatureRegister(auth: string, signature: string) {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    if (!_user.authentication)
+                        _user.authentication = authenticationDefault;
+
+                    _user.authentication.forgotPassword = signature;
 
                     await _user.save();
                 } else {
@@ -597,7 +626,39 @@ class userManagerDB {
                     } catch (error) {
                         return reject(error);
                     }
+                } else {
+                    return reject(`Usuário(${auth}) não está registrado.`);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
 
+    /**
+     * @description Verifica se a autenticação de duas etapas está configurada
+     */
+    public hasConfiguredTwoFactor(auth: string) {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                const filter: FindUserByAuth = { authorization: auth };
+
+                const _user = await userDB.findOne(filter).exec();
+
+                if (_user) {
+                    try {
+                        if (
+                            _user.authentication &&
+                            _user.authentication.twofactor.secret.length > 0 &&
+                            _user.authentication.twofactor.enabled
+                        ) {
+                            return resolve(true);
+                        } else {
+                            return resolve(false);
+                        }
+                    } catch (error) {
+                        return reject(error);
+                    }
                 } else {
                     return reject(`Usuário(${auth}) não está registrado.`);
                 }

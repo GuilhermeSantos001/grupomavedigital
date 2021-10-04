@@ -51,6 +51,7 @@ export interface Twofactor {
 
 export interface Authentication {
     twofactor: Twofactor;
+    forgotPassword: string;
 }
 
 export interface Token {
@@ -121,7 +122,8 @@ export const authenticationDefault: Authentication = {
     twofactor: {
         secret: '',
         enabled: false
-    }
+    },
+    forgotPassword: ""
 };
 
 export const sessionDefault: Session = {
@@ -250,6 +252,11 @@ export const authenticationSchema: Schema = new Schema({
             secret: '',
             enabled: false
         }
+    },
+    forgotPassword: {
+        type: String,
+        trim: true,
+        default: ""
     }
 });
 

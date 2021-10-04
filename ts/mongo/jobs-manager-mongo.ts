@@ -1,8 +1,7 @@
 /**
  * @description Schema dos Jobs
  * @author @GuilhermeSantos001
- * @update 24/07/2021
- * @version 1.0.0
+ * @update 01/10/2021
  */
 
 import { Document, Schema, model } from "mongoose";
@@ -18,15 +17,17 @@ export interface DateAt {
     add: number;
 }
 
+// E-mail de confirmação da conta
 interface MailsendEconfirm {
     email: string;
     username: string;
     auth: string;
     token: string;
-    temporarypass: string | null; // Identificador
+    temporarypass: string | null; // Identificador usado para diferenciar das de mais interfaces
     clientAddress: string;
 }
 
+// E-mail de novo acesso há conta
 interface MailsendSessionNewAccess {
     email: string;
     username: string;
@@ -39,6 +40,17 @@ interface MailsendSessionNewAccess {
     clientAddress: string;
 }
 
+// E-mail de recuperação da conta caso perca a senha
+interface MailsendForgotPassword {
+    email: string;
+    username: string;
+    signature: string;
+    token: string;
+    forgotPassword: boolean; // Identificador
+    clientAddress: string;
+}
+
+// E-mail de recuperação da conta caso perca o autenticador
 interface MailsendAccountRetrieveTwofactor {
     email: string;
     username: string;
@@ -47,6 +59,7 @@ interface MailsendAccountRetrieveTwofactor {
     clientAddress: string;
 }
 
+// E-mail de pedidos do hercules storage
 interface MailsendHerculesOrders {
     email: string;
     username: string;
@@ -57,12 +70,20 @@ interface MailsendHerculesOrders {
     clientAddress: string;
 }
 
+export type Jobs =
+    | MailsendEconfirm
+    | MailsendSessionNewAccess
+    | MailsendForgotPassword
+    | MailsendAccountRetrieveTwofactor
+    | MailsendHerculesOrders
+    ;
+
 export interface jobInterface {
     cid?: string;
     name: string;
     priority: Priority;
     type: Types;
-    args: MailsendEconfirm | MailsendSessionNewAccess | MailsendAccountRetrieveTwofactor | MailsendHerculesOrders;
+    args: Jobs;
     status: Status;
     error?: string;
     runAt?: DateAt;

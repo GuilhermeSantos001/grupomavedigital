@@ -1,8 +1,7 @@
 /**
  * @description Gerenciador de Processamentos Paralelos
  * @author @GuilhermeSantos001
- * @update 01/08/2021
- * @version 1.3.6
+ * @update 01/10/2021
  */
 
 import { v4 } from 'uuid';
@@ -18,7 +17,7 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport';
 export default class Jobs {
 
     static readonly db: number = 5;
-    static readonly delay: number = 60000; // 1 Minute
+    static readonly delay: number = 30000; // 5 Segundos
 
     constructor() {
         throw new Error('this is static class');
@@ -312,7 +311,7 @@ export default class Jobs {
                     mailsend.econfirm(args.email, args.username, args.token, args.temporarypass)
                         .then(async (info: SMTPTransport.SentMessageInfo) => {
                             try {
-                                Debug.info('user', `Email de confirmação da conta enviado para o usuário(${args.auth})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+                                Debug.info('user', `E-mail de confirmação da conta enviado para o usuário(${args.auth})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Finish';
 
@@ -325,7 +324,7 @@ export default class Jobs {
                         })
                         .catch(async error => {
                             try {
-                                Debug.fatal('user', `Erro ocorrido na hora de enviar o email de confirmação da conta do usuário(${args.auth})`, error, `IP-Request: ${args.clientAddress}`);
+                                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, error, `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Error';
                                 job.error = error;
@@ -342,7 +341,7 @@ export default class Jobs {
                     mailsend.sessionNewAccess(args.email, args.username, args.navigator)
                         .then(async (info: SMTPTransport.SentMessageInfo) => {
                             try {
-                                Debug.info('user', `Email de novo acesso da conta enviado para o usuário(${args.email})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+                                Debug.info('user', `E-mail de novo acesso da conta enviado para o usuário(${args.email})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Finish';
 
@@ -355,7 +354,37 @@ export default class Jobs {
                         })
                         .catch(async error => {
                             try {
-                                Debug.fatal('user', `Erro ocorrido na hora de enviar o email de novo acesso da conta do usuário(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+                                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de novo acesso da conta do usuário(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+
+                                job.status = 'Error';
+                                job.error = error;
+
+                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+
+                                return resolve();
+                            } catch (error) {
+                                return reject(error);
+                            }
+                        });
+                }
+                else if ('forgotPassword' in args) {
+                    mailsend.accountForgotPassword(args.email, args.username, args.signature, args.token)
+                        .then(async (info: SMTPTransport.SentMessageInfo) => {
+                            try {
+                                Debug.info('user', `E-mail de alteração de senha da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                                job.status = 'Finish';
+
+                                await this.updateJob(job.cid || '', { status: job.status });
+
+                                return resolve();
+                            } catch (error) {
+                                return reject(error);
+                            }
+                        })
+                        .catch(async error => {
+                            try {
+                                Debug.fatal('user', `Erro na hora de enviar o e-mail de alteração da senha da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Error';
                                 job.error = error;
@@ -372,7 +401,7 @@ export default class Jobs {
                     mailsend.accountRetrieveTwofactor(args.email, args.username, args.token)
                         .then(async (info: SMTPTransport.SentMessageInfo) => {
                             try {
-                                Debug.info('user', `Email de recuperação da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+                                Debug.info('user', `E-mail de recuperação da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Finish';
 
@@ -385,7 +414,7 @@ export default class Jobs {
                         })
                         .catch(async error => {
                             try {
-                                Debug.fatal('user', `Erro na hora de enviar o email de recuperação da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+                                Debug.fatal('user', `Erro na hora de enviar o e-mail de recuperação da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Error';
                                 job.error = error;
@@ -397,11 +426,12 @@ export default class Jobs {
                                 return reject(error);
                             }
                         });
-                } else if ('order' in args) {
+                }
+                else if ('order' in args) {
                     mailsend.herculesOrders(args.email, args.username, args.title, args.description, args.link)
                         .then(async (info: SMTPTransport.SentMessageInfo) => {
                             try {
-                                Debug.info('user', `Email com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+                                Debug.info('user', `E-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Finish';
 
@@ -414,7 +444,7 @@ export default class Jobs {
                         })
                         .catch(async error => {
                             try {
-                                Debug.fatal('user', `Erro na hora de enviar o email com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, error, `IP-Request: ${args.clientAddress}`);
+                                Debug.fatal('user', `Erro na hora de enviar o e-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, error, `IP-Request: ${args.clientAddress}`);
 
                                 job.status = 'Error';
                                 job.error = error;

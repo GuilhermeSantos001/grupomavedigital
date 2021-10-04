@@ -197,6 +197,12 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     if (!cluster.isWorker) {
         Debug.console('default', `Master ${process.pid} is running`);
 
+        /**
+         * @description Jobs started
+         */
+        Jobs.reset();
+        Jobs.start();
+
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.
             for (let i = 0; i < numCPUs; i++) {
@@ -206,12 +212,6 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             cluster.on('exit', (worker, code, signal) => {
                 Debug.console('default', `worker ${worker.process.pid} died`);
             });
-
-            /**
-             * @description Jobs started
-             */
-            Jobs.reset();
-            Jobs.start();
         } else {
             return startServer();
         }
