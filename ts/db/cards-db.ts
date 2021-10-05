@@ -5,19 +5,18 @@
  * @version 1.1.3
  */
 
+import { FilterQuery } from 'mongoose';
+
 import cardsDB, { cardsInterface, cardsModelInterface } from '@/mongo/cards-manager-mongo';
 import Moment from '@/utils/moment';
 
 export interface cardsInfo extends cardsInterface {
     index: string;
-};
+}
 
 export type Sort = 1 | -1;
 
 class cardsManagerDB {
-
-    constructor() {};
-
     /**
      * @description Registra o cartão digital
      */
@@ -36,14 +35,14 @@ class cardsManagerDB {
                     await model.save();
                 } else {
                     return reject(`Cartão Digital com o ID(${card.cid}) já está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza o cartão digital
@@ -66,14 +65,14 @@ class cardsManagerDB {
                     await _card.save();
                 } else {
                     return reject(`Cartão Digital com o ID(${cid}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o cartão digital
@@ -87,28 +86,28 @@ class cardsManagerDB {
                     await _card.remove();
                 } else {
                     return reject(`Cartão Digital com o ID(${cid}) não está registrado.`);
-                };
+                }
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna os cartões digitais com limite de itens a serem retornados
      * @param skip Pula a leitura de uma quantidade X de itens iniciais
      * @param sort Define a ordem de leitura, crescente ou decrescente
      * @param limit Limite de itens a serem retornados
-     * @param field Filtro de pesquisa
+     * @param filter Filtro de pesquisa
      */
-    public get(skip: number, sort: Sort, limit: number, field: object = {}) {
-        return new Promise<cardsInfo[]>(async (resolve, reject) => {
+    public get(skip: number, sort: Sort, limit: number, filter: FilterQuery<cardsModelInterface>): Promise<cardsInfo[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 let cards: cardsInfo[];
 
-                let _cards = await cardsDB.find(field).skip(skip).sort({ $natural: sort }).limit(limit);
+                const _cards = await cardsDB.find(filter, null).skip(skip).sort({ $natural: sort }).limit(limit);
 
                 if (_cards.length > 0) {
                     cards = _cards.map((card: cardsModelInterface) => {
@@ -127,14 +126,14 @@ class cardsManagerDB {
                     })
                 } else {
                     cards = [];
-                };
+                }
 
                 return resolve(cards);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new cardsManagerDB();

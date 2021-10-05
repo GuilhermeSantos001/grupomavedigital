@@ -7,6 +7,12 @@
 
 import { Document, Schema, model } from "mongoose";
 
+import { v4 } from 'uuid';
+
+import JsonWebToken from '@/core/jsonWebToken';
+
+import Random from '@/utils/random';
+
 /**
  * Types
  */
@@ -26,7 +32,7 @@ export type PrivilegesSystem = 'administrador'
 export interface Email {
     value: string;
     status: boolean;
-};
+}
 
 export interface Location {
     street: string;
@@ -36,48 +42,57 @@ export interface Location {
     state: string;
     city: string;
     zipcode: string;
-};
+}
 
 export interface Twofactor {
     secret: string;
     enabled: boolean;
-};
+}
 
 export interface Authentication {
     twofactor: Twofactor;
-};
+    forgotPassword: string;
+}
 
 export interface Token {
+    signature: string;
     value: string;
     status: boolean;
-};
+}
+
+export interface RefreshToken {
+    signature: string;
+    value: string;
+    expiry: Date;
+}
 
 export interface History {
     token: string;
     device: Devices;
     tmp: string;
     internetAdress: string;
-};
+}
 
 export interface Cache {
     tmp: number;
     unit: Unit;
     tokens: Token[];
+    refreshToken: RefreshToken[];
     history: History[];
-};
+}
 
 export interface Device {
     allowed: Devices[];
     connected: Devices[];
-};
+}
 
 export interface Session {
     connected: number;
-    limit: Number;
-    alerts: string[],
+    limit: number;
+    alerts: string[];
     cache: Cache;
     device: Device;
-};
+}
 
 export interface UserInterface {
     authorization: string;
@@ -93,18 +108,22 @@ export interface UserInterface {
     authentication?: Authentication;
     session?: Session;
     status?: boolean;
-};
+}
 
 export interface UserModelInterface extends UserInterface, Document {
     clearEmail: string;
     isEnabled: boolean;
-};
+    signature: string;
+    token: string;
+    refreshToken: string;
+}
 
 export const authenticationDefault: Authentication = {
     twofactor: {
         secret: '',
         enabled: false
-    }
+    },
+    forgotPassword: ""
 };
 
 export const sessionDefault: Session = {
@@ -112,9 +131,10 @@ export const sessionDefault: Session = {
     limit: 4,
     alerts: ["::ffff:127.0.0.1"],
     cache: {
-        tmp: 60,
+        tmp: 15,
         unit: "m",
         tokens: [],
+        refreshToken: [],
         history: []
     },
     device: {
@@ -134,7 +154,7 @@ export const emailSchema: Schema = new Schema({
         lowercase: true,
         trim: true,
         unique: true,
-        match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
+        match: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/
     },
     status: { // Se o email está confirmado
         type: Boolean,
@@ -192,9 +212,10 @@ export const sessionSchema: Schema = new Schema({
     cache: {
         type: Object,
         default: {
-            tmp: 60,
+            tmp: 15,
             unit: "m",
             tokens: [],
+            refreshToken: [],
             history: []
         }
     },
@@ -231,6 +252,11 @@ export const authenticationSchema: Schema = new Schema({
             secret: '',
             enabled: false
         }
+    },
+    forgotPassword: {
+        type: String,
+        trim: true,
+        default: ""
     }
 });
 
@@ -290,7 +316,7 @@ export const userSchema: Schema = new Schema({
     },
     email: { // Email
         type: emailSchema,
-        default: { },
+        default: {},
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     cnpj: { // CNPJ
@@ -300,7 +326,7 @@ export const userSchema: Schema = new Schema({
     },
     location: { // Endereço
         type: locationSchema,
-        default: { },
+        default: {},
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     session: {
@@ -328,6 +354,26 @@ userSchema.virtual("clearEmail").get(function (this: UserModelInterface) {
 
 userSchema.virtual("isEnabled").get(function (this: UserModelInterface) {
     return this.status === true;
+});
+
+userSchema.virtual("signature").get(function (this: UserModelInterface) {
+    return Random.HASH(32, "hex");
+});
+
+userSchema.virtual("token").get(async function (this: UserModelInterface) {
+    if (!this.session)
+        this.session = sessionDefault;
+
+    return await JsonWebToken.sign({
+        payload: {},
+        options: {
+            expiresIn: `${this.session.cache.tmp}${this.session.cache.unit}`
+        }
+    });
+});
+
+userSchema.virtual("refreshToken").get(function (this: UserModelInterface) {
+    return v4();
 });
 
 export default model<UserModelInterface>("users", userSchema);

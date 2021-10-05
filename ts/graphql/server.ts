@@ -55,8 +55,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             'Accept',
             'X-Access-Token',
             'authorization',
-            'encodeuri',
             'token',
+            'auth',
+            'signature',
+            'encodeuri',
             'temporarypass'
         ];
 
@@ -90,8 +92,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
                 'Accept',
                 'X-Access-Token',
                 'authorization',
-                'encodeuri',
                 'token',
+                'auth',
+                'signature',
+                'encodeuri',
                 'temporarypass'
             ],
             credentials: true,
@@ -99,7 +103,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             origin,
             preflightContinue: false,
         };
-    };
+    }
 
     //use cors middleware
     app.use(cors(corsOptions));
@@ -127,7 +131,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             if (error.syscall !== 'listen') {
                 mongoDB.shutdown();
                 throw error;
-            };
+            }
 
             // handle specific listen errors with friendly messages
             switch (error.code) {
@@ -143,15 +147,15 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
                     Debug.fatal('default', `Fatal error: ${error}`);
                     mongoDB.shutdown();
                     throw error;
-            };
-        };
+            }
+        }
 
         /**
          * @description Event listener for HTTP server "listening" event.
          */
         function onListening() {
             Debug.console('default', `Server is now running on http://localhost:${PORT}/graphql`);
-        };
+        }
 
         schema = AuthDirectiveTransformer(schema);
         schema = TokenDirectiveTransformer(schema);
@@ -160,7 +164,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
         const server = new ApolloServer({
             schema,
-            context: req => ({ ...req, ...options.context })
+            context: req => ({ express: req, ...options.context })
         });
 
         await server.start();
@@ -193,21 +197,21 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     if (!cluster.isWorker) {
         Debug.console('default', `Master ${process.pid} is running`);
 
+        /**
+         * @description Jobs started
+         */
+        Jobs.reset();
+        Jobs.start();
+
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.
             for (let i = 0; i < numCPUs; i++) {
                 cluster.fork();
-            };
+            }
 
             cluster.on('exit', (worker, code, signal) => {
                 Debug.console('default', `worker ${worker.process.pid} died`);
             });
-
-            /**
-             * @description Jobs started
-             */
-            Jobs.reset();
-            Jobs.start();
         } else {
             return startServer();
         }

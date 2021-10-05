@@ -6,6 +6,7 @@
  */
 
 import { Model, Schema, model } from "mongoose";
+import { ObjectId } from 'bson';
 
 import { PrivilegesSystem } from "@/mongo/user-manager-mongo";
 
@@ -28,44 +29,44 @@ export type OrderAnswerDecision = 'Approved' | 'Rejected';
 export interface Matches {
     specialCharacters: RegExp;
     mail: RegExp;
-};
+}
 
 export interface FileShare {
     title: string;
     link: string;
     secret: string;
-};
+}
 
 export interface FileProtected {
     key: string;
     passphrase: string;
-};
+}
 
 export interface FileBlocked {
     type: FileBlock;
     value: Date;
     repeat: boolean;
-};
+}
 
 export interface HistoryFile {
-    fileId: any;
+    fileId: ObjectId;
     version: number;
-};
+}
 
 export interface GroupId {
     name: PrivilegesSystem;
     permissions: FilePermission[];
-};
+}
 
 export interface UserId {
     email: string;
     permissions: FilePermission[];
-};
+}
 
 export interface Assignee {
     name: string;
     email: string;
-};
+}
 
 export interface Order {
     assignee: Assignee;
@@ -76,12 +77,12 @@ export interface Order {
     answers?: OrderAnswer[];
     timelapse?: Date;
     link?: string;
-};
+}
 
 export interface OrderAnswer {
     assignee: Assignee;
     decision: OrderAnswerDecision;
-};
+}
 
 export interface fileInterface {
     cid?: string;
@@ -107,7 +108,7 @@ export interface fileInterface {
     updated?: string;
     lastAccess?: string;
     createdAt?: string;
-};
+}
 
 export interface fileModelInterface extends fileInterface, Model<fileInterface> {
     available: boolean;
@@ -129,17 +130,17 @@ export interface fileModelInterface extends fileInterface, Model<fileInterface> 
     allowsShare: boolean;
     allowsSecurity: boolean;
     allowsBlock: boolean;
-    getActualFileId: string;
-    getHistoryFilesId: string[];
+    getActualFileId: ObjectId;
+    getHistoryFilesId: ObjectId[];
     orderTimelapseExpired: () => boolean;
     orderTypeIs: (type: OrderType) => boolean;
     orderAllAssigneesApproved: () => boolean;
     orderAnswerIndex: (answer: OrderAnswer) => number;
-};
+}
 
 export const matches: Matches = {
-    specialCharacters: /[\!\@\#\$\%\¨\`\´\&\*\(\)\-\_\+\=\§\}\º\{\}\[\]\'\"\/\.\,\;\<\>\^\~\?\|\\]/g,
-    mail: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/g
+    specialCharacters: /[!@#$%¨`´&*()-_+=§}º{}[]'".,;<>^~?|\\]/g,
+    mail: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/g
 };
 
 export const groupIdSchema: Schema = new Schema({
@@ -423,7 +424,7 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -437,7 +438,7 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [25, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -470,9 +471,9 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
                     return true;
                 } else {
                     return false;
-                };
+                }
             },
-            message: (props: any) => `${props.value} não é uma extensão de arquivo valida.`
+            message: (props: { value: string }) => `${props.value} não é uma extensão de arquivo valida.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         required: [true, '{PATH} este campo é obrigatório']
@@ -485,7 +486,7 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
                 const filter = value.match(matches.specialCharacters)?.filter((result: string) => result.toLowerCase().trim() !== '') || [];
                 return filter.length <= 0;
             },
-            message: (props: any) => `${props.value} contém caracteres especiais e não é permitido.`
+            message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
         minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
@@ -663,7 +664,7 @@ fileSchema.virtual("getActualFileId").get(function (this: fileModelInterface) {
     if (!this.history)
         this.history = [];
 
-    let fileId = this.history.filter(history => history.version === this.version);
+    const fileId = this.history.filter(history => history.version === this.version);
 
     if (fileId.length > 0)
         return fileId[0].fileId;
@@ -675,7 +676,7 @@ fileSchema.virtual("getHistoryFilesId").get(function (this: fileModelInterface) 
     if (!this.history)
         this.history = [];
 
-    let fileId = this.history.map(history => history.fileId);
+    const fileId = this.history.map(history => history.fileId);
 
     if (fileId.length > 0)
         return fileId;
@@ -691,7 +692,7 @@ fileSchema.method('orderTimelapseExpired', function (this: fileModelInterface) {
         const now = new Date();
 
         return now >= this.order.timelapse;
-    };
+    }
 
     return false;
 });
@@ -702,7 +703,7 @@ fileSchema.method('orderTimelapseExpired', function (this: fileModelInterface) {
 fileSchema.method('orderTypeIs', function (this: fileModelInterface, type: OrderType) {
     if (this.order) {
         return type === this.order.type;
-    };
+    }
 
     return false;
 });
@@ -715,7 +716,7 @@ fileSchema.method('orderAllAssigneesApproved', function (this: fileModelInterfac
         const approved = this.order.answers.filter((answer: OrderAnswer) => answer.decision === 'Approved');
 
         return approved.length >= this.assignees.length;
-    };
+    }
 
     return false;
 });
@@ -731,11 +732,11 @@ fileSchema.method('orderAnswerIndex', function (this: fileModelInterface, answer
             if (_answer.assignee.email === answer.assignee.email) {
                 indexOf = i;
                 break;
-            };
-        };
+            }
+        }
 
         return indexOf;
-    };
+    }
 
     return 0;
 });

@@ -12,19 +12,19 @@ import { VCard } from '@/core/vcard';
 export interface Photo {
     path: string;
     name: string;
-};
+}
 
 export interface Whatsapp {
     phone: string;
     text: string;
     message: string;
-};
+}
 
 export interface Socialmedia {
     name: SocialmediaName;
     value: string;
     enabled: boolean;
-};
+}
 
 export type SocialmediaName = 'Facebook' | 'Youtube' | 'Linkedin' | 'Instagram' | 'Twitter';
 
@@ -34,7 +34,7 @@ export interface Footer {
     website: string;
     attachment: string;
     socialmedia: Socialmedia[];
-};
+}
 
 export interface cardsInterface {
     cid: string;
@@ -47,12 +47,12 @@ export interface cardsInterface {
     vcard: VCard;
     footer: Footer;
     createdAt?: string;
-};
+}
 
 export interface cardsModelInterface extends cardsInterface, Document {
     phone1: string;
     phone2: string;
-};
+}
 
 export const photoSchema: Schema = new Schema({
     path: {

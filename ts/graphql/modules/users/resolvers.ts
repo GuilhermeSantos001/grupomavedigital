@@ -1,8 +1,7 @@
 /**
  * @description Rotas dos usuários
  * @author @GuilhermeSantos001
- * @update 21/09/2021
- * @version 3.0.0
+ * @update 30/10/2021
  */
 
 import getReqProps from '@/utils/getReqProps';
@@ -15,12 +14,14 @@ import Debug from '@/core/log4';
 import generatePassword from '@/utils/generatePassword';
 import { PrivilegesSystem } from '@/mongo/user-manager-mongo';
 import geoIP from '@/utils/geoIP';
+import { ExpressContext } from 'apollo-server-express';
+import { compressToBase64, decompressFromBase64 } from 'lz-string';
 
 export default {
     Query: {
-        authLogin: async (source: any, args: { auth: string, pwd: string, twofactortoken: string }, context: { req: any }) => {
+        authLogin: async (parent: unknown, args: { auth: string, pwd: string, twofactortoken: string }, context: { express: ExpressContext }) => {
             try {
-                let {
+                const {
                     authorization,
                     privileges,
                     username,
@@ -28,8 +29,12 @@ export default {
                     name,
                     surname,
                     session,
+                    signature,
+                    token,
                     authentication
-                } = await userManagerDB.cpassword(args.auth, args.pwd),
+                } = await userManagerDB.cpassword(args.auth, args.pwd);
+
+                let
                     userInfo = {
                         authorization,
                         privileges,
@@ -39,48 +44,41 @@ export default {
                         surname,
                         session,
                         authentication,
-                        token: ""
+                        signature,
+                        token,
+                        refreshToken: {},
                     };
 
-                const clientIP = geoIP(context.req);
+                const
+                    req: any = context.express.req,
+                    device: any = req.device,
+                    clientIP = geoIP(req);
 
                 if (userInfo['authentication']['twofactor']['enabled'] && args.twofactortoken.length <= 0) {
                     userInfo['token'] = 'twofactorVerify';
-
-                    Debug.info('user', `Verificação de duas etapas solicitadas para ${args.auth}`, `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogin`);
 
                     return userInfo;
                 } else if (userInfo['authentication']['twofactor']['enabled'] && args.twofactortoken.length > 0) {
                     if (!await userManagerDB.verifytwofactor(args.auth, args.twofactortoken)) {
                         userInfo['token'] = 'twofactorDenied';
 
-                        Debug.info('user', `Código de verificação de duas etapas invalido para ${args.auth}`, `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogin`);
-
                         return userInfo;
                     }
                 }
 
-                userInfo['token'] = await JsonWebToken.sign({
-                    payload: {
-                        "privileges": userInfo['privileges'],
-                        "auth": args.auth,
-                        "email": userInfo['email']
-                    },
-                    options: {
-                        expiresIn: `${userInfo['session']['cache']['tmp']}${userInfo['session']['cache']['unit']}`
-                    }
-                });
+                userInfo['refreshToken'] = await userManagerDB.addRefreshToken(args.auth);
 
                 await userManagerDB.connected(args.auth, {
                     ip: clientIP.ip,
                     token: userInfo['token'],
-                    device: context.req.device['type'],
+                    device: device['type'],
                     location: {
                         locationIP: clientIP.location,
                         internetAdress: clientIP.ip,
-                        browser: context.req.device.parser.useragent['family'],
-                        os: context.req.device.parser.useragent['os']['family']
-                    }
+                        browser: device.parser.useragent['family'],
+                        os: device.parser.useragent['os']['family']
+                    },
+                    signature: userInfo['signature']
                 });
 
                 await activityManagerDB.register({
@@ -90,69 +88,167 @@ export default {
                     roadmap: 'Se conectou ao sistema'
                 });
 
-                Debug.info('user', `Usuário(${args.auth}) conectado`, `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogin`);
-
                 return userInfo;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de conectar o usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogin`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authLogout: async (source: any, args: { auth: string, token: string }, context: { req: any }) => {
+        authLogout: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext }) => {
             try {
-                await userManagerDB.disconnected(args.auth, args.token);
-
                 const
-                    userToken = await JsonWebToken.verify(args.token),
-                    clientIP = geoIP(context.req);
+                    { ip } = geoIP(context.express.req),
+                    internetadress = ip,
+                    { privileges } = await userManagerDB.getInfo(args.auth);
 
+                await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
+                await userManagerDB.disconnected(args.auth, args.token);
+                await userManagerDB.clearExpiredRefreshToken(args.auth);
+
+                await JsonWebToken.cancel(args.token);
                 await activityManagerDB.register({
-                    ipremote: clientIP.ip,
-                    auth: userToken['auth'],
-                    privileges: userToken['privileges'],
+                    ipremote: ip,
+                    auth: args.auth,
+                    privileges,
                     roadmap: 'Se desconectou do sistema'
                 });
 
-                Debug.info('user', `Usuário(${args.auth}) desconectado`, `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogout`);
-
                 return true;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${args.auth}) desconectado`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogout`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authExpired: async (source: any, args: { auth: string, token: string }, context: { req: any }) => {
+        authExpired: async (parent: unknown, args: { auth: string, token: string }, context: { express: ExpressContext }) => {
             try {
                 await userManagerDB.disconnected(args.auth, args.token);
 
-                const clientIP = geoIP(context.req);
-
-                Debug.info('user', `Sessão do usuário(${args.auth}) expirada`, `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authExpired`);
-
                 return true;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão do usuário(${args.auth}) está expirada`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authExpired`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        emailResendConfirm: async (source: any, args: { auth: string }, context: { req: any }) => {
+        authValidate: async (parent: unknown, args: {
+            auth: string,
+            token: string,
+            signature: string,
+            refreshToken: {
+                signature: string,
+                value: string
+            }
+        }, context: { express: ExpressContext }) => {
             try {
-                let { temporarypass } = getReqProps(context.req, ['temporarypass']);
+                const
+                    { ip } = geoIP(context.express.req),
+                    internetadress = ip;
+
+                try {
+                    await JsonWebToken.verify(args.token);
+                    await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
+
+                    return { success: true };
+                } catch {
+                    if (args.refreshToken) {
+                        await userManagerDB.verifyRefreshToken(args.auth, args.refreshToken.signature, args.refreshToken.value);
+
+                        const updateHistory = await userManagerDB.updateTokenHistory(args.auth, args.token);
+
+                        return { success: true, signature: updateHistory[0], token: updateHistory[1] };
+                    }
+
+                    return { success: false };
+                }
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão(${args.token}) está autorizada`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authValidate`);
+
+                throw new Error(String(error));
+            }
+        },
+        authForgotPassword: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
+            try {
+                const {
+                    username,
+                    email,
+                    signature,
+                } = await userManagerDB.getInfo(args.auth),
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                await userManagerDB.forgotPasswordSignatureRegister(args.auth, signature);
+
+                const jwt = await JsonWebToken.sign({
+                    payload: {
+                        'auth': compressToBase64(String(args.auth).toLowerCase()),
+                        'signature': compressToBase64(String(signature))
+                    },
+                    options: {
+                        expiresIn: '1h'
+                    }
+                });
+
+                if (typeof jwt === 'string') {
+                    // Cria um job para o envio de e-mail para alteração de senha da conta
+                    await Jobs.append({
+                        name: 'Send mail to change account password',
+                        type: 'mailsend',
+                        priority: 'High',
+                        args: {
+                            email,
+                            username,
+                            signature,
+                            token: jwt,
+                            forgotPassword: true,
+                            clientAddress: clientIP.ip
+                        },
+                        status: 'Available'
+                    });
+
+                    return true;
+                }
+
+                return false;
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de alteração de senha da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authForgotPassword`);
+
+                throw new Error(String(error));
+            }
+        },
+        emailResendConfirm: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
+            try {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                let { temporarypass } = getReqProps(req, ['temporarypass']);
 
                 temporarypass = String(temporarypass).toLowerCase() === 'true' ? true : false;
 
                 const
                     userInfo = await userManagerDB.getInfo(args.auth),
-                    clientIP = geoIP(context.req),
                     email = userInfo['email'],
                     username = userInfo['username'];
 
@@ -160,14 +256,12 @@ export default {
 
                 if (temporarypass) {
                     newpassword = generatePassword.unique();
-                    await userManagerDB.changepassword(args.auth, newpassword);
-                };
+                    await userManagerDB.changePassword(args.auth, newpassword);
+                }
 
                 const jwt = await JsonWebToken.sign({
                     payload: {
-                        'econfirm': true,
-                        'email': String(email).toLowerCase(),
-                        'auth': String(args.auth).toLowerCase()
+                        'auth': compressToBase64(String(args.auth).toLowerCase()),
                     },
                     options: {
                         expiresIn: '7d'
@@ -175,7 +269,7 @@ export default {
                 });
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de email para confirmação da conta
+                    // Cria um job para o envio de e-mail para confirmação da conta
                     await Jobs.append({
                         name: 'Send the account confirmation mail again',
                         type: 'mailsend',
@@ -192,21 +286,75 @@ export default {
                     });
 
                     return true;
-                };
+                }
 
                 return false;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: emailResendConfirm`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        getUserInfo: async (source: any, args: { auth: string }, context: { req: any }) => {
+        mailConfirm: async (parent: unknown, args: { token: string }, context: { express: ExpressContext }) => {
+            try {
+                const { auth } = await JsonWebToken.verify(args.token)
+
+                if (await userManagerDB.confirmEmail(decompressFromBase64(auth) || "")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de confirmar a conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: mailConfirm`);
+
+                throw new Error(String(error));
+            }
+        },
+        processOrderForgotPassword: async (parent: unknown, args: { signature: string, token: string, pwd: string }, context: { express: ExpressContext }) => {
+            try {
+                const decoded = await JsonWebToken.verify(args.token)
+
+                if (
+                    !decoded ||
+                    decompressFromBase64(decoded['signature']) !== args.signature
+                )
+                    return false;
+
+                const auth = decompressFromBase64(decoded['auth']) || "";
+
+                const {
+                    authentication,
+                } = await userManagerDB.getInfo(auth);
+
+                if (authentication.forgotPassword !== args.signature)
+                    return false;
+
+                if (await userManagerDB.changePassword(auth, args.pwd)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro ocorrido na hora de alterar a senha da conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: processOrderForgotPassword`);
+
+                throw new Error(String(error));
+            }
+        },
+        getUserInfo: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const {
-                    authorization,
                     privileges,
                     photoProfile,
                     username,
@@ -218,7 +366,6 @@ export default {
                 } = await userManagerDB.getInfo(args.auth);
 
                 return {
-                    authorization,
                     privileges,
                     photoProfile,
                     username,
@@ -228,17 +375,19 @@ export default {
                     cnpj,
                     location
                 };
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de retornar as informações do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: getUserInfo`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         }
     },
     Mutation: {
-        registerUser: async (parent: any, args: {
+        registerUser: async (parent: unknown, args: {
             authorization: string,
             privileges: PrivilegesSystem[],
             photoProfile?: string,
@@ -249,8 +398,10 @@ export default {
             email: string,
             cnpj: string,
             location: string[]
-        }, context: { req: any }) => {
-            let { temporarypass } = getReqProps(context.req, ['temporarypass']);
+        }, context: { express: ExpressContext }) => {
+            const req: any = context.express.req;
+
+            let { temporarypass } = getReqProps(req, ['temporarypass']);
 
             temporarypass = String(temporarypass).toLowerCase() === 'true' ? true : false;
 
@@ -286,19 +437,17 @@ export default {
                     const
                         jwt = await JsonWebToken.sign({
                             payload: {
-                                'econfirm': true,
-                                'email': String(args.email).toLowerCase(),
-                                'auth': String(args.authorization).toLowerCase()
+                                'auth': compressToBase64(String(args.authorization).toLowerCase()),
                             },
                             options: {
                                 expiresIn: '7d'
                             }
                         }),
-                        clientIP = geoIP(context.req);
+                        clientIP = geoIP(req);
 
                     // Envia o email de confirmação da conta
                     if (typeof jwt === 'string') {
-                        // Cria um job para o envio de email para confirmação da conta
+                        // Cria um job para o envio de e-mail para confirmação da conta
                         await Jobs.append({
                             name: 'Sends the account confirmation mail after user registration',
                             type: 'mailsend',
@@ -318,22 +467,26 @@ export default {
                     } else {
                         return `Não foi possível enviar o e-mail de confirmação da conta ${args.authorization}`;
                     }
-                } catch (err: any) {
-                    const clientIP = geoIP(context.req);
+                } catch (error) {
+                    const
+                        req: any = context.express.req,
+                        clientIP = geoIP(req);
 
-                    Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.authorization})`, String(err), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
+                    Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
 
-                    throw new Error(err);
+                    throw new Error(String(error));
                 }
-            } catch (err: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${args.authorization})`, String(err), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
+                Debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
 
-                throw new Error(err);
+                throw new Error(String(error));
             }
         },
-        updateData: async (parent: any, args: {
+        updateData: async (parent: unknown, args: {
             auth: string,
             email: string,
             username: string,
@@ -341,7 +494,7 @@ export default {
             surname: string,
             cnpj: string,
             location: string[]
-        }, context: { req: any }) => {
+        }, context: { express: ExpressContext }) => {
             try {
                 await userManagerDB.updateData(args.auth, {
                     email: args.email,
@@ -360,113 +513,124 @@ export default {
                     }
                 });
 
-                const clientIP = geoIP(context.req);
-
-                Debug.info('user', `As informações da conta(${args.auth}) foram atualizadas`, `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updateData`);
+                const req: any = context.express.req;
 
                 return true;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de atualizar as informações da conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updateData`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        updatePhotoProfile: async (parent: any, args: {
+        updatePhotoProfile: async (parent: unknown, args: {
             auth: string,
             photo: string
-        }, context: { req: any }) => {
+        }, context: { express: ExpressContext }) => {
             try {
                 await userManagerDB.updatePhotoProfile(args.auth, args.photo);
 
-                const clientIP = geoIP(context.req);
-
-                Debug.info('user', `A foto de perfil da conta(${args.auth}) foi atualizada!`, `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updatephotoProfile`);
-
                 return true;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de atualizar a foto de perfil da conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updatephotoProfile`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        changePassword: async (parent: any, args: { auth: string, pwd: string, new_pwd: string }, context: { req: any }) => {
+        changePassword: async (parent: unknown, args: { auth: string, pwd: string, new_pwd: string }, context: { express: ExpressContext }) => {
             try {
                 const password_encode = await Encrypt(args.new_pwd);
 
                 await userManagerDB.cpassword(args.auth, args.pwd);
+                await userManagerDB.changePassword(args.auth, password_encode);
 
-                await userManagerDB.changepassword(args.auth, password_encode);
-
-                let msg = `${args.auth}, sua senha foi alterada com sucesso`;
-
-                const clientIP = geoIP(context.req);
-
-                Debug.info('user', msg, `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: changePassword`);
-
-                return msg;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+                return true;
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de alterar a senha para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: changePassword`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authSignTwofactor: async (parent: any, args: { auth: string }, context: { req: any }) => {
+        authSignTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const
-                    { qrcode } = await userManagerDB.signtwofactor(args.auth),
-                    clientIP = geoIP(context.req);
-
-                Debug.info('user', `QRCode gerado para a conta(${args.auth})`, `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
+                    { qrcode } = await userManagerDB.signtwofactor(args.auth);
 
                 return qrcode;
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authVerifyTwofactor: async (parent: any, args: { auth: string, qrcode: string }, context: { req: any }) => {
+        hasConfiguredTwoFactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
+            try {
+                return await userManagerDB.hasConfiguredTwoFactor(args.auth);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
+
+                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
+
+                throw new Error(String(error));
+            }
+        },
+        authVerifyTwofactor: async (parent: unknown, args: { auth: string, qrcode: string }, context: { express: ExpressContext }) => {
             try {
                 return await userManagerDB.verifytwofactor(args.auth, args.qrcode);
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de verificar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authVerifyTwofactor`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authEnabledTwofactor: async (parent: any, args: { auth: string }, context: { req: any }) => {
+        authEnabledTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 return await userManagerDB.enabledtwofactor(args.auth);
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de ativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authEnabledTwofactor`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authDisableTwofactor: async (parent: any, args: { auth: string }, context: { req: any }) => {
+        authDisableTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 return await userManagerDB.disabledtwofactor(args.auth);
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de desativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authDisableTwofactor`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         },
-        authRetrieveTwofactor: async (parent: any, args: { auth: string }, context: { req: any }) => {
+        authRetrieveTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const
                     userInfo = await userManagerDB.getInfo(args.auth),
@@ -476,17 +640,17 @@ export default {
                     } = userInfo,
                     jwt = await JsonWebToken.sign({
                         payload: {
-                            'econfirm': true,
-                            'authorization': args.auth
+                            'auth': compressToBase64(String(args.auth).toLowerCase()),
                         },
                         options: {
                             expiresIn: '7d'
                         }
                     }),
-                    clientIP = geoIP(context.req);
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de email para recuperação da conta
+                    // Cria um job para o envio de e-mail para recuperação da conta
                     await Jobs.append({
                         name: 'Send the account recovery mail',
                         type: 'mailsend',
@@ -505,12 +669,14 @@ export default {
                 } else {
                     return `${args.auth}, não foi possível enviar um e-mail de recuperação para sua conta. Desculpe, tente mais tarde!`;
                 }
-            } catch (error: any) {
-                const clientIP = geoIP(context.req);
+            } catch (error) {
+                const
+                    req: any = context.express.req,
+                    clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro na hora de recuperar a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`);
 
-                throw new Error(error);
+                throw new Error(String(error));
             }
         }
     }

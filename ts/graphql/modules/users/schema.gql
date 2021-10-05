@@ -5,7 +5,22 @@ type AuthInfo {
   email: String!
   username: String!
   token: String!
+  refreshToken: RefreshToken!
   name: String!
+  signature: String!
+}
+
+scalar Date
+
+type RefreshToken {
+  signature: String!
+  value: String!
+  expiry: Date!
+}
+
+input InputRefreshToken {
+  signature: String!
+  value: String!
 }
 
 # Schema de informações dos usuários
@@ -21,7 +36,6 @@ type Location {
 }
 
 type UserInfo {
-  authorization: String!
   privileges: [String!]!
   photoProfile: String!
   username: String!
@@ -30,6 +44,12 @@ type UserInfo {
   surname: String!
   cnpj: String!
   location: Location!
+}
+
+type AuthValidate {
+  success: Boolean!
+  signature: String
+  token: String
 }
 
 type Query {
@@ -68,11 +88,14 @@ type Query {
     Token exclusivo de segurança da solicitação
     """
     token: String!
+    """
+    Assinatura do token
+    """
+    signature: String!
   ): Boolean!
     @auth(
       keys: ["vlta#eke08uf=48uCuFustLr3ChL9a1*wrE_ayi0L*oFl-UHidlST8moj9f8C5L4"]
     )
-    @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
   Verifica se o token de segurança do usuário está expirado
@@ -93,6 +116,46 @@ type Query {
     )
     @encodeuri(method: "lz-string")
   """
+  Verifica se o token de segurança do usuário está valido
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authvalidate
+  """
+  authValidate(
+    """
+    Autorização exclusiva do usuário
+    """
+    auth: String!
+    """
+    Token exclusivo de segurança da solicitação
+    """
+    token: String!
+    """
+    Assinatura do token
+    """
+    signature: String!
+    """
+    Refresh token para renovação de segurança da solicitação
+    """
+    refreshToken: InputRefreshToken
+  ): AuthValidate!
+    @auth(
+      keys: ["4VMYcqF77yRfA9dmzVcD9JPZFycmN5dZdtDZww49ENHW4H97nY7RuzWa6jTkAMY3"]
+    )
+    @encodeuri(method: "lz-string")
+  """
+  Envia o e-mail para recuperar a conta do usuário caso ele esqueca a senha
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authforgotpassword
+  """
+  authForgotPassword(
+    """
+    Autorização exclusiva do usuário
+    """
+    auth: String!
+  ): Boolean!
+    @auth(
+      keys: ["8VV8srQhf2HcHujsqK2V2p9CDNeENa5RUzNaXFJeTCLnBtNPERgUxAM5bYLjFups"]
+    )
+    @encodeuri(method: "lz-string")
+  """
   Envia o e-mail de confirmação da conta do usuário
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=emailresendconfirm
   """
@@ -104,6 +167,57 @@ type Query {
   ): Boolean!
     @auth(
       keys: ["p4YIfr$zoG9buqUD0Ochodu1enex2ZOCh8Y1C8beMlDIbrIqU4OThLsTe6LMEB@+"]
+    )
+    @encodeuri(method: "lz-string")
+  """
+  Retorna as informações do usuário
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=getuserinfo
+  """
+  getUserInfo(
+    """
+    Autorização exclusiva do usuário
+    """
+    auth: String!
+  ): UserInfo!
+    @auth(
+      keys: ["NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
+    )
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Processa o pedido de confirmação da conta do usuario
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=mailconfirm
+  """
+  mailConfirm(
+    """
+    Token da solicitação
+    """
+    token: String!
+  ): Boolean!
+    @auth(
+      keys: ["Pygj6FpZq2RpANJVRjgzJN6fR9FW5pDb7UX7BPJBgZrnXdNPgF7u4VAh2hgUyx9k"]
+    )
+    @encodeuri(method: "lz-string")
+  """
+  Processa o pedido de alteração de senha da conta do usuario
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=processorderforgotpassword
+  """
+  processOrderForgotPassword(
+    """
+    Assinatura da solicitação
+    """
+    signature: String!
+    """
+    Token da solicitação
+    """
+    token: String!
+    """
+    Nova senha do usuario
+    """
+    pwd: String!
+  ): Boolean!
+    @auth(
+      keys: ["BkbcHMWNDyBqHn7GT8dzxB5KbAmhMSuKQFpPqtJmC6s94hrqqzRVdcSHf2uexRvm"]
     )
     @encodeuri(method: "lz-string")
   """
@@ -256,7 +370,7 @@ type Mutation {
     Nova senha do usuário
     """
     new_pwd: String!
-  ): String!
+  ): Boolean!
     @auth(
       keys: ["Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic"]
     )
@@ -275,6 +389,19 @@ type Mutation {
     @auth(
       keys: ["bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo"]
     )
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Verifica se a autenticação de duas etapas está configurada
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-mutations?id=hasconfiguredtwofactor
+  """
+  hasConfiguredTwoFactor(
+    """
+    Autorização exclusiva do usuário
+    """
+    auth: String!
+  ): Boolean!
+    @auth(keys: ["0bvNnE1JZN0d9hFVWgVpCrWa8ZhvgE8w"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -305,7 +432,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): String!
+  ): Boolean!
     @auth(
       keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
     )
@@ -320,7 +447,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): String!
+  ): Boolean!
     @auth(
       keys: ["ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr"]
     )

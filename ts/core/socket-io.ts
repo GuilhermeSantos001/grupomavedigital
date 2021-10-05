@@ -6,8 +6,9 @@
  */
 
 import { Server as HTTPServer } from 'http';
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { createAdapter } from '@socket.io/redis-adapter';
+import { ExtendedError } from 'socket.io/dist/namespace';
 import { RedisClient } from 'redis';
 
 import JsonWebToken from "@/core/JsonWebToken";
@@ -17,19 +18,19 @@ import WebSocketRouterHerculesStorage from '@/web/webSocketRouterHerculesStorage
 
 class IO {
     static readonly db: number = 3;
-    static _context: any = null;
+    static _context: Server;
 
     constructor() {
         throw new Error('this is static class');
-    };
+    }
 
-    static get context() {
+    static get context(): Server {
         return this._context;
-    };
+    }
 
-    static set context(value) {
+    static set context(value: Server) {
         this._context = value;
-    };
+    }
 
     static create(server: HTTPServer) {
         let options = {};
@@ -49,12 +50,12 @@ class IO {
                 },
                 transports: ['websocket', 'polling']
             };
-        };
+        }
 
         this.context = new Server(server, options);
 
         this.listening();
-    };
+    }
 
     static listening() {
         /**
@@ -65,7 +66,7 @@ class IO {
 
         this.context.adapter(createAdapter(pubClient, subClient));
 
-        this.context.use((socket: any, next: any) => {
+        this.context.use((socket: Socket, next: (err?: ExtendedError | undefined) => void) => {
             const token = socket.handshake.auth.token;
 
             JsonWebToken.verify(token)
@@ -97,14 +98,14 @@ class IO {
          * Routers
          */
 
-        this.context.on('connection', (socket: any) => {
+        this.context.on('connection', (socket: Socket) => {
             WebSocketRouterMiddlewares(this.context, socket);
             WebSocketRouterCards(this.context, socket);
             WebSocketRouterHerculesStorage(this.context, socket);
         });
-    };
-};
+    }
+}
 
 export default function SocketIO(server: HTTPServer): void {
     IO.create(server);
-};
+}

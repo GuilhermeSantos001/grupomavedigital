@@ -35,14 +35,14 @@ interface UserAttributes {
     name: string;
     preferredName: string | null;
     email: string;
-};
+}
 
 /**
  * @description Atributos opcionais dos usuários
  * Alguns atributos são opcionais para chamadas como por exemplo:
  * 'User.build' e 'User.create'
  */
-interface UserCreationAttributes extends Optional<UserAttributes, "id"> { }
+type UserCreationAttributes = Optional<UserAttributes, "id">
 
 /**
  * @description Classe dos usuários
@@ -73,7 +73,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     public static associations: {
         projects: Association<User, Project>;
     };
-};
+}
 
 /**
  * @description Inicialização do modelo representado na tabela, com atributos e opções.

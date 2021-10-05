@@ -5,9 +5,9 @@
  * @version 1.0.0
  */
 
-import {
-    Op
-} from 'sequelize';
+// import {
+//     Op
+// } from 'sequelize';
 
 /**
  * @description Importação dos modelos
@@ -17,16 +17,16 @@ import Project from '@/models/project';
 /**
  * @description Cria um novo projeto
  */
-export async function createProject(ownerId: number, name: string) {
+export async function createProject(ownerId: number, name: string): Promise<Project> {
     const newProject = await Project.create({
         name,
         ownerId
     });
 
-    console.log(newProject.id, newProject.name);
+    // console.log(newProject.id, newProject.name);
 
     return newProject;
-};
+}
 
 // /**
 //  * @description Busca pelo usuário

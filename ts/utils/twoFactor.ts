@@ -1,48 +1,46 @@
 /**
  * @description Gerenciador de QRCode para autenticação de duas etapas.
  * @author GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.0
+ * @update 29/09/2021
  */
 
-import { generateSecret, totp } from 'speakeasy';
+import { generateSecret, verifyToken } from 'node-2fa';
 import { toDataURL } from 'qrcode';
 
 export interface QRCode {
     secret: string;
     qrcode: string;
-};
+}
 
-export function generateQRCode(username: string) {
-    return new Promise<QRCode>(async (resolve, reject) => {
-        const secret = await generateSecret();
+export function generateQRCode(username: string): Promise<QRCode> {
+    return new Promise(async (resolve, reject) => {
+        const newSecret = await generateSecret({
+            name: "Grupo Mave Digital",
+            account: username
+        });
 
-        toDataURL(String(secret.otpauth_url).replace('SecretKey', `Grupo Mave Digital (${username})`), function (err, data_url) {
+        toDataURL(String(newSecret.uri), function (err, data_url) {
             if (err)
                 return reject(`QRCode Error: ${err}`);
 
             return resolve({
-                secret: secret.base32,
+                secret: newSecret.secret,
                 qrcode: data_url
             });
         });
     });
-};
+}
 
-export function verify(tempBase32Secret: string, userToken: string) {
-    return new Promise<boolean>(async (resolve, reject) => {
+export function verify(tempBase32Secret: string, userToken: string): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
         try {
-            if (!await totp.verify({
-                secret: tempBase32Secret,
-                encoding: 'base32',
-                token: userToken
-            })) {
+            if (!verifyToken(tempBase32Secret, userToken)) {
                 reject(`Código de autenticação de duas etapas está inválido.`);
             } else {
                 resolve(true);
-            };
+            }
         } catch (err) {
             reject(`Two Factor Validation Failed, error: ${err}`);
-        };
+        }
     });
-};
+}

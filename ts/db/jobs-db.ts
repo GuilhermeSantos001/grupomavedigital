@@ -1,17 +1,13 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 01/09/2021
- * @version 1.4.1
+ * @update 01/10/2021
  */
 
 import jobDB, { jobInterface, jobModelInterface } from '@/mongo/jobs-manager-mongo';
 import Moment from '@/utils/moment';
 
 class jobManagerDB {
-
-    constructor() { };
-
     /**
      * @description Registra o serviço
      */
@@ -29,24 +25,24 @@ class jobManagerDB {
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza o serviço
      */
-    public update(cid: string, data: Object) {
-        return new Promise<boolean>(async (resolve, reject) => {
+    public update(cid: string, data: { status: string, error?: string }): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
             try {
                 await jobDB.updateMany({ cid }, { $set: data });
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o serviço
@@ -59,9 +55,9 @@ class jobManagerDB {
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o serviço
@@ -74,9 +70,9 @@ class jobManagerDB {
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Restaura o status dos serviços
@@ -89,9 +85,9 @@ class jobManagerDB {
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Deleta todos os serviços
@@ -99,14 +95,14 @@ class jobManagerDB {
     public clear() {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                await jobDB.deleteMany({ });
+                await jobDB.deleteMany({});
 
                 return resolve(true);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna os serviços
@@ -116,14 +112,14 @@ class jobManagerDB {
             try {
                 let jobs: jobModelInterface[] = [];
 
-                jobs = await jobDB.find({ });
+                jobs = await jobDB.find({});
 
                 return resolve(jobs);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new jobManagerDB();

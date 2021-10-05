@@ -11,9 +11,9 @@ import { createClient, RedisClient } from 'redis';
 
 import Debug from '@/core/log4';
 
-declare function events(error?: any): string;
-declare function _callback(response: boolean, values: any[]): void;
-declare function finish(key: string, operation: string, error?: any, callback?: typeof _callback, ...args: any[]): void;
+declare function events(error?: string): string;
+declare function _callback(response: boolean, values: string[]): void;
+declare function finish(key: string, operation: string, error: string, callback: typeof _callback, ...args: string[]): void;
 
 declare type Config = {
     host: string;
@@ -33,8 +33,8 @@ export default class REDIS {
     private client?: RedisClient;
     private lzstring: LZString.LZStringStatic;
 
-    constructor(db: number = 1) {
-        this.onError = function (error: any) {
+    constructor(db = 1) {
+        this.onError = function (error?: string) {
             return `Redis(Client | DB: ${this.getDB()}) -> Error ${error}`;
         };
 
@@ -54,8 +54,8 @@ export default class REDIS {
             return `Redis(Client | DB: ${this.getDB()}) -> Disconnected`;
         };
 
-        this.onFinish = function (key, operation, error, callback: any, ...args: any[]) {
-            if (error) {
+        this.onFinish = function (key, operation, error, callback: typeof _callback, ...args: string[]) {
+            if (error !== 'null') {
                 const msg = `Redis(Client | DB: ${this.getDB()}) -> Error occurred in the database operation: ${operation} \n Key: ${key} \n ${error}`;
 
                 Debug.fatal('redis', msg);
@@ -77,21 +77,21 @@ export default class REDIS {
         };
         this.db = db;
         this.lzstring = LZString;
-    };
+    }
 
     getDB(): number {
         return this.db;
     }
 
-    connect() {
-        return new Promise<String>((resolve, reject) => {
+    connect(): Promise<string> {
+        return new Promise((resolve, reject) => {
             if (typeof this.client === "undefined" || this.client && !this.client?.connected) {
                 this.client = createClient(this.config);
             } else {
                 return resolve(this.onContinue());
             }
 
-            this.client?.on('error', (error: any) => {
+            this.client?.on('error', (error) => {
                 const msg = this.onError(error);
 
                 Debug.fatal('redis', msg);
@@ -119,21 +119,21 @@ export default class REDIS {
                 return Debug.info('redis', msg);
             });
         });
-    };
+    }
 
-    disconnect() {
+    disconnect(): boolean | undefined {
         if (this.client && this.client?.connected)
             return this.client?.quit();
-    };
+    }
 
-    flush() {
+    flush(): Promise<string> {
         return new Promise(async (resolve, reject) => {
             if (this.client && this.client?.connected) {
-                this.client?.select(this.db, async (error: any) => {
+                this.client?.select(this.db, async (error) => {
                     if (error)
-                        return Debug.fatal('redis', this.onError(error));
+                        return Debug.fatal('redis', this.onError(String(error)));
 
-                    let status = await this.client?.flushdb();
+                    const status = await this.client?.flushdb();
 
                     if (status) {
                         const msg = `Redis(Client | DB: ${this.getDB()}) -> Success occurred in the database operation: ${'CLEAR DATABASE'} \n db: ${this.db}`;
@@ -157,39 +157,35 @@ export default class REDIS {
                 return reject(msg);
             }
         });
-    };
+    }
 
-    async set(key: string, value: string, callback?: typeof _callback) {
+    async set(key: string, value: string, callback: typeof _callback): Promise<void> {
         try {
             await this.connect();
 
-            if (typeof callback !== "function") callback = () => { };
-
-            this.client?.select(this.db, (error: any) => {
+            this.client?.select(this.db, (error) => {
                 if (error)
-                    return Debug.fatal('redis', this.onError(error));
+                    return Debug.fatal('redis', this.onError(String(error)));
 
-                this.client?.set(key, this.lzstring.compressToBase64(value), (error: any, reply: string) => this.onFinish(key, 'SET VALUE', error, callback, reply));
+                this.client?.set(key, this.lzstring.compressToBase64(value), (error, reply: string) => this.onFinish(key, 'SET VALUE', String(error), callback, reply));
             });
         } catch (error) {
-            return Debug.fatal('redis', this.onError(error));
+            return Debug.fatal('redis', this.onError(String(error)));
         }
-    };
+    }
 
-    async get(key: string, callback?: typeof _callback) {
+    async get(key: string, callback: typeof _callback): Promise<void> {
         try {
             await this.connect();
 
-            if (typeof callback !== "function") callback = () => { };
-
-            this.client?.select(this.db, async (error: any) => {
+            this.client?.select(this.db, async (error) => {
                 if (error)
-                    return Debug.fatal('redis', this.onError(error));
+                    return Debug.fatal('redis', this.onError(String(error)));
 
-                this.client?.get(key, async (error: any, value: any) => this.onFinish(key, 'GET VALUE', error, callback, this.lzstring.decompressFromBase64(value)));
+                this.client?.get(key, async (error, value: string | null) => this.onFinish(key, 'GET VALUE', String(error), callback, this.lzstring.decompressFromBase64(value || "") || ""));
             });
         } catch (error) {
-            return Debug.fatal('redis', this.onError(error));
+            return Debug.fatal('redis', this.onError(String(error)));
         }
-    };
-};
+    }
+}

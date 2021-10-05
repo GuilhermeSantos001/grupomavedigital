@@ -8,27 +8,25 @@
 import { GroupId, UserId, folderInterface, folderModelInterface } from '@/mongo/folders-manager-mongo';
 import FolderManagerDB, { Access } from '@/db/folders-db';
 import { Access as AccessFile, BlockVerify } from '@/db/files-db';
+import { FilterQuery } from 'mongoose';
+
 class FolderController {
-
-    constructor(
-    ) { };
-
     /**
      * @description Fecha a pasta após interação
      * @param cid {String} - CustomId da pasta
      * @param access {Access} - Propriedades do acesso
      */
     private closeAfterInteraction(cid: string, access: Access) {
-        return new Promise<void>(async (resolve, reject) => {
+        return new Promise<void>(async (resolve) => {
             try {
                 await FolderManagerDB.close(cid, access);
 
                 return resolve();
             } catch (error) {
                 return resolve();
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna uma lista de pastas
@@ -36,8 +34,8 @@ class FolderController {
      * @param skip {Number} - Pular x itens iniciais no banco de dados
      * @param limit {Number} - Limite de itens a serem retornados
      */
-    public get(filter: object, skip: number, limit: number) {
-        return new Promise<folderInterface[]>(async (resolve, reject) => {
+    public get(filter: FilterQuery<folderModelInterface>, skip: number, limit: number): Promise<folderInterface[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const folders = await FolderManagerDB.get(filter, skip, limit);
 
@@ -70,9 +68,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Armazena a pasta
@@ -84,9 +82,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.save(folder));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna o nome da pasta
@@ -100,9 +98,9 @@ class FolderController {
                 return resolve(name);
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove a pasta.
@@ -120,9 +118,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o grupo na whitelist da pasta.
@@ -141,9 +139,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o grupo da whitelist da pasta.
@@ -162,9 +160,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um usuário na whitelist
@@ -183,9 +181,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o usuário da whitelist
@@ -204,9 +202,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o arquivo a pasta.
@@ -226,9 +224,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o arquivo na pasta
@@ -248,9 +246,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona uma pasta a pasta
@@ -269,9 +267,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove uma pasta da pasta
@@ -290,9 +288,9 @@ class FolderController {
                 this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Abre a pasta e retorna os IDs dos arquivos
@@ -305,9 +303,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.open(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Fecha a pasta e estabelece o status "Disponível" para novas operações.
@@ -320,9 +318,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.close(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Protege a pasta.
@@ -336,9 +334,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.protect(cid, access, passphrase));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desprotege a pasta.
@@ -353,9 +351,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.unProtect(cid, access, { key, passphrase }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Libera o compartilhamento da pasta.
@@ -369,9 +367,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.share(cid, access, title));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o compartilhamento da pasta.
@@ -386,9 +384,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.unShare(cid, access, { link, secret }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica o bloqueio da pasta.
@@ -401,9 +399,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.verifyBlocked(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desbloqueia a pasta.
@@ -416,9 +414,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.unBlocked(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por data.
@@ -448,9 +446,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por mês.
@@ -473,9 +471,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por dia do mês.
@@ -497,9 +495,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por dia da semana.
@@ -521,9 +519,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por hora.
@@ -545,9 +543,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por minuto.
@@ -569,9 +567,9 @@ class FolderController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Coloca a pasta na lixeira.
@@ -585,9 +583,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.moveToGarbage(cid, access, accessFile));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retira a pasta da lixeira.
@@ -601,9 +599,9 @@ class FolderController {
                 return resolve(await FolderManagerDB.removeOfGarbage(cid, access, accessFile));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Reciclagem das pastas na lixeira
@@ -630,17 +628,17 @@ class FolderController {
 
                     for (const folderId of foldersId) {
                         await this.delete(folderId, access, accessFile);
-                    };
+                    }
 
                     return resolve(`${foldersId.length} pasta(s) da lixeira foram recicladas.`);
                 } else {
                     return resolve(`Nenhuma pasta da lixeira foi reciclada.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new FolderController();

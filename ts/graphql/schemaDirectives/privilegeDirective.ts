@@ -23,7 +23,7 @@ export default function PrivilegeDirective(directiveName: string) {
 
                     if (resolve)
                         fieldConfig.resolve = async function (source, args, context, info) {
-                            const token = decompressFromEncodedURIComponent(String(context.req.headers['token'])) || String(context.req.headers['token']);
+                            const token = decompressFromEncodedURIComponent(String(context.express.req.headers['token'])) || String(context.express.req.headers['token']);
 
                             const keys = PrivilegeDirective.args?.keys;
 
@@ -56,4 +56,4 @@ export default function PrivilegeDirective(directiveName: string) {
             }
         }),
     };
-};
+}

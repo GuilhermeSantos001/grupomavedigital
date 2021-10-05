@@ -1,20 +1,20 @@
 /**
  * @description Websocket Router -> Storage Hercules
  * @author @GuilhermeSantos001
- * @update 08/09/2021
- * @version 1.3.0
+ * @update 29/09/2021
  */
 
+import { Server, Socket } from "socket.io";
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
 
-import { fileInterface } from '@/mongo/files-manager-mongo';
+// import { fileInterface } from '@/mongo/files-manager-mongo';
 import { folderInterface } from "@/mongo/folders-manager-mongo";
 import FileController from '@/controllers/files';
 import FolderController from '@/controllers/folders';
-import userDB from '@/db/user-db';
-import Jobs from '@/core/jobs';
+// import userDB from '@/db/user-db';
+// import Jobs from '@/core/jobs';
 
-export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
+export default function WebSocketRouterHerculesStorage(io: Server, socket: Socket): void {
   const
     getItem = async (cid: string, type: string) => {
       let item: any = [];
@@ -23,7 +23,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         item = await FolderController.get({ cid }, 0, 1);
       } else if (type === 'file') {
         item = await FileController.get({ cid }, 0, 1);
-      };
+      }
 
       return item.length > 0 ? item[0] : false;
     },
@@ -32,7 +32,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         return { group: { name: Object.values(permission)[0], permission: value } };
       } else if (Object.keys(permission).includes('email')) {
         return { user: { email: Object.values(permission)[0], permission: value } };
-      };
+      }
     },
     updateItem = async (cid: string, type: string) => {
       const item = await getItem(cid, type);
@@ -61,8 +61,8 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
           compressToEncodedURIComponent(JSON.stringify(item)),
           compressToEncodedURIComponent(type)
         );
-      };
-    };
+      }
+    }
 
     if (channel === 'ITEM-UPDATE-AND-UPDATE-VERSION') {
       const
@@ -88,8 +88,8 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
           compressToEncodedURIComponent(String(item.history.length)),
           compressToEncodedURIComponent(String(item.version))
         );
-      };
-    };
+      }
+    }
 
     if (channel === 'ITEM-UPDATE-AND-APPEND') {
       const
@@ -108,8 +108,8 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
           compressToEncodedURIComponent(JSON.stringify(item)),
           compressToEncodedURIComponent(type)
         );
-      };
-    };
+      }
+    }
   });
 
   /**
@@ -121,7 +121,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         cid = decompressFromEncodedURIComponent(args[0]) || "";
 
       return socket.broadcast.emit('ITEM-BUSY-HOLD', compressToEncodedURIComponent(cid));
-    };
+    }
   });
 
   /**
@@ -138,7 +138,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         tag,
       } = JSON.parse(decompressFromEncodedURIComponent(args[0]) || "");
 
-      let
+      const
         file = await FileController.newFile({
           authorId,
           permission: ['Write', 'Read', 'Delete', 'Protect', 'Share', 'Security', 'Block'],
@@ -158,7 +158,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       socket.emit('CREATE-FILE-SUCCESS', compressToEncodedURIComponent(JSON.stringify(file)));
     } catch (error: any) {
       socket.emit('CREATE-FILE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -190,7 +190,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       );
     } catch (error: any) {
       socket.emit('UPDATE-FILE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -246,7 +246,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       socket.emit('CREATE-FOLDER-SUCCESS', compressToEncodedURIComponent(JSON.stringify(response)));
     } catch (error: any) {
       socket.emit('CREATE-FOLDER-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(name));
-    };
+    }
   });
 
   /**
@@ -261,7 +261,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         groupName = decompressFromEncodedURIComponent(args[3]) || "",
         permissions = JSON.parse(decompressFromEncodedURIComponent(args[4]) || "");
 
-      let group: any = { name: groupName, permissions };
+      const group: any = { name: groupName, permissions };
 
       const usr_permission: any = getPermission(permission, "Security");
 
@@ -272,7 +272,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         await FolderController.insertGroupId(cid, usr_permission, group);
       } else if (type === 'file') {
         await FileController.insertGroupId(cid, usr_permission, group);
-      };
+      }
 
       const item = await updateItem(cid, type);
 
@@ -285,7 +285,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       io.emit('WHITELIST-GROUP-UPDATE-SUCCESS', compressToEncodedURIComponent(cid), compressToEncodedURIComponent(groupName), compressToEncodedURIComponent(JSON.stringify(group)));
     } catch (error: any) {
       socket.emit('WHITELIST-GROUP-UPDATE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -300,7 +300,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         userEmail = decompressFromEncodedURIComponent(args[3]) || "",
         permissions = JSON.parse(decompressFromEncodedURIComponent(args[4]) || "");
 
-      let userId: any = { email: userEmail, permissions };
+      const userId: any = { email: userEmail, permissions };
 
       const usr_permission: any = getPermission(permission, "Security");
 
@@ -311,7 +311,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         await FolderController.insertUserId(cid, usr_permission, userId);
       } else if (type === 'file') {
         await FileController.insertUserId(cid, usr_permission, userId);
-      };
+      }
 
       const item = await updateItem(cid, type);
 
@@ -324,7 +324,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       io.emit('WHITELIST-USER-UPDATE-SUCCESS', compressToEncodedURIComponent(cid), compressToEncodedURIComponent(JSON.stringify(userId)));
     } catch (error: any) {
       socket.emit('WHITELIST-USER-UPDATE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -345,14 +345,14 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         throw new Error(`Você não tem permissão para executar essa tarefa.`);
 
       for (const groupName of groupsName) {
-        let group: any = { name: groupName };
+        const group: any = { name: groupName };
 
         if (type === 'folder') {
           await FolderController.removeGroupId(cid, usr_permission, group);
         } else if (type === 'file') {
           await FileController.removeGroupId(cid, usr_permission, group);
-        };
-      };
+        }
+      }
 
       const item = await updateItem(cid, type);
 
@@ -365,7 +365,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       io.emit('WHITELIST-GROUP-REMOVE-SUCCESS', compressToEncodedURIComponent(socket.id), compressToEncodedURIComponent(cid), compressToEncodedURIComponent(itemsId), compressToEncodedURIComponent(JSON.stringify(groupsName)));
     } catch (error: any) {
       socket.emit('WHITELIST-GROUP-REMOVE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -386,14 +386,14 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         throw new Error(`Você não tem permissão para executar essa tarefa.`);
 
       for (const userEmail of usersEmail) {
-        let user: any = { email: userEmail };
+        const user: any = { email: userEmail };
 
         if (type === 'folder') {
           await FolderController.removeUserId(cid, usr_permission, user);
         } else if (type === 'file') {
           await FileController.removeUserId(cid, usr_permission, user);
-        };
-      };
+        }
+      }
 
       const item = await updateItem(cid, type);
 
@@ -406,7 +406,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
       io.emit('WHITELIST-USER-REMOVE-SUCCESS', compressToEncodedURIComponent(socket.id), compressToEncodedURIComponent(cid), compressToEncodedURIComponent(itemsId), compressToEncodedURIComponent(JSON.stringify(usersEmail)));
     } catch (error: any) {
       socket.emit('WHITELIST-USER-REMOVE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)));
-    };
+    }
   });
 
   /**
@@ -431,7 +431,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         await FolderController.moveToGarbage(cid, usr_permission, usr_permission);
       } else {
         throw new Error(`O tipo(${type}) não está valido. Fale com o administrador do sistema`);
-      };
+      }
 
       const item = await updateItem(cid, type);
 
@@ -445,7 +445,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('MOVE-TO-TRASH-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid), compressToEncodedURIComponent(key));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid), compressToEncodedURIComponent('available'));
-    };
+    }
   });
 
   /**
@@ -469,7 +469,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
         await FolderController.removeOfGarbage(cid, usr_permission, usr_permission);
       } else {
         throw new Error(`O tipo(${type}) não está valido. Fale com o administrador do sistema`);
-      };
+      }
 
       const item = await updateItem(cid, type);
 
@@ -483,7 +483,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('TRASH-RECOVERY-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid), compressToEncodedURIComponent('trash'));
-    };
+    }
   });
 
   /**
@@ -523,7 +523,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('FILE-VERSION-REMOVE-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid), compressToEncodedURIComponent('available'));
-    };
+    }
   });
 
   /**
@@ -554,7 +554,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('MOVE-FILE-FOR-FOLDER-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid_file));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid_file), compressToEncodedURIComponent('available'));
-    };
+    }
   });
 
   /**
@@ -583,7 +583,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('MOVE-FOLDER-FOR-FOLDER-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid_folderSecondary));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid_folderSecondary), compressToEncodedURIComponent('available'));
-    };
+    }
   });
 
   /**
@@ -616,7 +616,7 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('MOVE-FILE-FOR-FOLDER-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid), compressToEncodedURIComponent('available'));
-    };
+    }
   });
 
   /**
@@ -649,6 +649,6 @@ export default function WebSocketRouterHerculesStorage(io: any, socket: any) {
     } catch (error: any) {
       socket.emit('MOVE-FOLDER-FOR-FOLDER-ERROR', compressToEncodedURIComponent(JSON.stringify(error.message || error)), compressToEncodedURIComponent(cid));
       socket.broadcast.emit('ITEM-BUSY-RELEASE', compressToEncodedURIComponent(cid), compressToEncodedURIComponent('available'));
-    };
+    }
   });
-};
+}

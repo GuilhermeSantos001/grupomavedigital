@@ -15,12 +15,12 @@ export interface Reader {
     stream: ReadStream | GridFSBucketReadStream,
     filename: string;
     version: string;
-};
+}
 
 export default class Archive {
     constructor() {
         throw new Error('this is static class');
-    };
+    }
 
     static base = archiver('zip', {
         zlib: { level: constants.Z_BEST_COMPRESSION }
@@ -30,9 +30,9 @@ export default class Archive {
      * @description Obtém vários fluxos(ReadStreams) de arquivos e junta-os
      * na stream(WriteStream | Response) principal.
      */
-    static joinWithReaders(stream: WriteStream | Response, readers: Reader[]) {
-        return new Promise<void>((resolve, reject) => {
-            let archive = this.base;
+    static joinWithReaders(stream: WriteStream | Response, readers: Reader[]): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const archive = this.base;
 
             // Ouvir todos os dados do arquivo a serem gravados
             // 'close' evento é disparado apenas quando um descritor de arquivo está envolvido
@@ -48,13 +48,13 @@ export default class Archive {
             });
 
             // Boa prática para detectar avisos (ou seja, falhas de estatísticas e outros erros sem bloqueio)
-            archive.on('warning', function (err) {
-                return reject(err);
+            archive.on('warning', function (error) {
+                return reject(error);
             });
 
             // Boa prática para detectar este erro explicitamente
-            archive.on('error', function (err) {
-                return reject(err);
+            archive.on('error', function (error) {
+                return reject(error);
             });
 
             // pipe arquivar dados para o arquivo
@@ -62,12 +62,12 @@ export default class Archive {
 
             // Anexar um arquivo do fluxo
             for (const reader of readers) {
-                archive.append(reader.stream, { name: reader.filename, prefix: `version_${reader.version}`});
-            };
+                archive.append(reader.stream, { name: reader.filename, prefix: `version_${reader.version}` });
+            }
 
             // Finalize o arquivo (ou seja, terminamos de anexar os arquivos, mas os fluxos ainda precisam terminar)
             // 'close', 'end' or 'finish' pode ser disparado logo após chamar este método, então registre-se neles com antecedência
             archive.finalize();
         });
-    };
-};
+    }
+}

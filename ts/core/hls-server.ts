@@ -12,13 +12,12 @@ import { localPath } from '@/utils/localpath';
 import Debug from '@/core/log4';
 
 class HLS_SERVER {
-
     constructor(
         private server: HTTPServer,
         private folderPath: string
     ) {
         this.define();
-    };
+    }
 
     private define() {
         const
@@ -28,20 +27,20 @@ class HLS_SERVER {
         this.server =
             new hls(this.server, {
                 provider: {
-                    exists: (req: any, callback: Function) => {
+                    exists: (req: any, callback: any) => {
                         const ext = req.url.split('.').pop(),
                             filePath = localPath(folderPath + '\\' + req.url);
 
                         if (ext !== 'm3u8' && ext !== 'ts' && ext !== '.vtt') {
                             return callback(null, true);
-                        };
+                        }
 
                         access(filePath, constants.F_OK, function (err) {
                             if (err) {
                                 Debug.fatal('hls', `File not exist ${filePath}`, `IP-Request: ${req.connection.remoteAddress}`, `Class -> HLS_SERVER`, 'Method -> exists');
 
                                 return callback(null, false);
-                            };
+                            }
 
                             callback(null, true);
                         });
@@ -54,7 +53,7 @@ class HLS_SERVER {
                                 Debug.fatal('hls', `File not exist ${filePath}`, `IP-Request: ${req.connection.remoteAddress}`, `Class -> HLS_SERVER`, 'Method -> getManifestStream');
 
                                 return callback(null, false);
-                            };
+                            }
 
                             callback(null, createReadStream(filePath));
                         });
@@ -67,16 +66,16 @@ class HLS_SERVER {
                                 Debug.fatal('hls', `File not exist ${filePath}`, `IP-Request: ${req.connection.remoteAddress}`, `Class -> HLS_SERVER`, 'Method -> getSegmentStream');
 
                                 return callback(null, false);
-                            };
+                            }
 
                             callback(null, createReadStream(filePath));
                         });
                     }
                 }
             });
-    };
-};
+    }
+}
 
 export default function SERVER(server: HTTPServer) {
     return new HLS_SERVER(server, 'public\\assets\\hls');
-};
+}

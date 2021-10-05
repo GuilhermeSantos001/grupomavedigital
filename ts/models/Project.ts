@@ -22,14 +22,14 @@ interface ProjectAttributes {
     id: number;
     ownerId: number;
     name: string;
-};
+}
 
 /**
  * @description Atributos opcionais dos projetos
  * Alguns atributos são opcionais para chamadas como por exemplo:
  * 'Project.build' e 'Project.create'
  */
-interface ProjectCreationAttributes extends Optional<ProjectAttributes, "id"> { };
+type ProjectCreationAttributes = Optional<ProjectAttributes, "id">
 
 /**
  * @description Classe dos projetos
@@ -41,7 +41,7 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implem
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
-};
+}
 
 /**
  * @description Inicialização do modelo representado na tabela, com atributos e opções.

@@ -17,7 +17,7 @@ import User from '@/models/User';
 /**
  * @description Cria um novo usuário
  */
-export async function createUser() {
+export async function createUser(): Promise<User> {
     const newUser = await User.create({
         name: "Johnny 2",
         preferredName: "John 2",
@@ -42,12 +42,12 @@ export async function createUser() {
     console.log('User props', ourUser);
 
     return newUser;
-};
+}
 
 /**
  * @description Busca pelo usuário
  */
-export async function updateUser(userId: number) {
+export async function updateUser(userId: number): Promise<User> {
     const user = await User.findByPk(userId, { rejectOnEmpty: true });
 
     await user.update({ name: 'Guilherme', email: 'suporte@grupomave.com.br' });
@@ -55,12 +55,12 @@ export async function updateUser(userId: number) {
     await user.save({ fields: ["name", "email"] });
 
     return user;
-};
+}
 
 /**
  * @description Busca pelo usuário
  */
-export async function findUser(userId: number) {
+export async function findUser(userId: number): Promise<User> {
     const user = await User.findByPk(userId, {
         rejectOnEmpty: true,
         include: [User.associations.projects],
@@ -70,9 +70,9 @@ export async function findUser(userId: number) {
     });
 
     return user;
-};
+}
 
-export async function findAllUserByProjectName(projectName: string) {
+export async function findAllUserByProjectName(projectName: string): Promise<User[]> {
     const user = await User.findAll({
         attributes: {
             exclude: ['preferredName'] // Retorna os atributos, menos o preferredName
@@ -91,10 +91,10 @@ export async function findAllUserByProjectName(projectName: string) {
     });
 
     return user;
-};
+}
 
-export async function removeUser(userId: number) {
-    return new Promise<boolean>(async (resolve, reject) => {
+export async function removeUser(userId: number): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findByPk(userId, { rejectOnEmpty: true });
 
@@ -103,6 +103,6 @@ export async function removeUser(userId: number) {
             return resolve(true);
         } catch (error) {
             return reject(error);
-        };
+        }
     });
-};
+}

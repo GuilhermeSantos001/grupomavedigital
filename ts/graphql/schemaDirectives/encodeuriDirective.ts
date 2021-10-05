@@ -13,7 +13,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 function decompress(method: string, value: string): string | object {
     switch (method) {
         case "lz-string":
-            let decode = decompressFromEncodedURIComponent(value);
+            const decode = decompressFromEncodedURIComponent(value);
 
             if (typeof decode === 'string') {
                 if (
@@ -30,7 +30,7 @@ function decompress(method: string, value: string): string | object {
         default:
             return value;
     }
-};
+}
 
 export default function EncodeUriDirective(directiveName: string) {
     return {
@@ -45,12 +45,12 @@ export default function EncodeUriDirective(directiveName: string) {
                         fieldConfig.resolve = async function (source, args, context, info) {
                             const
                                 method = EncodeUriDirective.args?.method,
-                                bool = String(context.req.headers['encodeuri']).match(/true|false/gi),
+                                bool = String(context.express.req.headers['encodeuri']).match(/true|false/gi),
                                 option = bool ? bool[0] : "",
                                 encodeuri = eval(option);
 
                             if (encodeuri) {
-                                let newProps: any = {};
+                                const newProps: any = {};
 
                                 Object
                                     .keys(args)
@@ -67,4 +67,4 @@ export default function EncodeUriDirective(directiveName: string) {
             }
         }),
     };
-};
+}

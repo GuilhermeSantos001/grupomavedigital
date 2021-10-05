@@ -8,6 +8,7 @@
 import { ReadStream, WriteStream } from 'fs-extra';
 import { Response } from 'express';
 import { ObjectId } from 'mongodb';
+import { FilterQuery } from 'mongoose';
 
 import { GroupId, UserId, Assignee, Order, OrderAnswer, fileInterface, fileModelInterface } from '@/mongo/files-manager-mongo';
 import fileManagerDB, { Access, BlockVerify } from '@/db/files-db';
@@ -16,10 +17,6 @@ import FileGridFS from '@/drivers/file-gridfs';
 import Archive, { Reader } from '@/utils/archive';
 
 class FileController {
-
-    constructor(
-    ) { };
-
     /**
      * @description Extensões de arquivo autorizadas
      */
@@ -42,16 +39,16 @@ class FileController {
      * @param access {Access} - Propriedades do acesso
      */
     private closeAfterInteraction(cid: string, access: Access) {
-        return new Promise<void>(async (resolve, reject) => {
+        return new Promise<void>(async (resolve) => {
             try {
                 await fileManagerDB.close(cid, access);
 
                 return resolve();
             } catch (error) {
                 return resolve();
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retorna uma lista de arquivos
@@ -59,8 +56,8 @@ class FileController {
      * @param skip {Number} - Pular x itens iniciais no banco de dados
      * @param limit {Number} - Limite de itens a serem retornados
      */
-    public get(filter: object, skip: number, limit: number) {
-        return new Promise<fileInterface[]>(async (resolve, reject) => {
+    public get(filter: FilterQuery<fileModelInterface>, skip: number, limit: number): Promise<fileInterface[]> {
+        return new Promise(async (resolve, reject) => {
             try {
                 const files = await fileManagerDB.get(filter, skip, limit);
 
@@ -93,9 +90,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Cria um novo arquivo
@@ -107,9 +104,9 @@ class FileController {
                 return resolve(await fileManagerDB.save(file));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Atualiza as informações do arquivo
@@ -131,9 +128,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o arquivo.
@@ -153,9 +150,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona o grupo na whitelist do arquivo.
@@ -174,9 +171,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o grupo da whitelist do arquivo.
@@ -195,9 +192,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um usuário na whitelist
@@ -216,9 +213,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o usuário da whitelist
@@ -237,9 +234,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Adiciona um novo procurador
@@ -258,9 +255,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o procurador
@@ -279,9 +276,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Renomeia o arquivo.
@@ -303,8 +300,8 @@ class FileController {
                     if (filesID.length > 0)
                         for (const fileID of filesID) {
                             await FileGridFS.rename(new ObjectId(fileID), `${name}${type}`);
-                        };
-                };
+                        }
+                }
 
                 await fileManagerDB.close(cid, access);
 
@@ -313,9 +310,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Escreve dados para o arquivo.
@@ -344,9 +341,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove dados do arquivo.
@@ -369,9 +366,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Lê dados do arquivo.
@@ -394,9 +391,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Gera um compilado das versões do arquivo.
@@ -408,7 +405,7 @@ class FileController {
     public readCompile(cid: string, access: Access, versions: number[], stream: WriteStream | Response) {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                let readers: Reader[] = [];
+                const readers: Reader[] = [];
 
                 for (const version of versions) {
                     const { fileId, filename } = await fileManagerDB.read(cid, access, version, true),
@@ -419,7 +416,7 @@ class FileController {
                         filename,
                         version: String(version)
                     });
-                };
+                }
 
                 await Archive.joinWithReaders(stream, readers);
 
@@ -430,9 +427,9 @@ class FileController {
                 await this.closeAfterInteraction(cid, access);
 
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Fecha o arquivo e estabelece o status "Disponível" para novas operações.
@@ -445,9 +442,9 @@ class FileController {
                 return resolve(await fileManagerDB.close(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Protege o arquivo.
@@ -461,9 +458,9 @@ class FileController {
                 return resolve(await fileManagerDB.protect(cid, access, passphrase));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desprotege o arquivo.
@@ -478,9 +475,9 @@ class FileController {
                 return resolve(await fileManagerDB.unProtect(cid, access, { key, passphrase }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Libera o compartilhamento do arquivo.
@@ -494,9 +491,9 @@ class FileController {
                 return resolve(await fileManagerDB.share(cid, access, title));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o compartilhamento do arquivo.
@@ -511,9 +508,9 @@ class FileController {
                 return resolve(await fileManagerDB.unShare(cid, access, { link, secret }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Verifica o bloqueio do arquivo.
@@ -526,9 +523,9 @@ class FileController {
                 return resolve(await fileManagerDB.verifyBlocked(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Desbloqueia o arquivo.
@@ -541,9 +538,9 @@ class FileController {
                 return resolve(await fileManagerDB.unBlocked(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia o arquivo por data.
@@ -573,9 +570,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia o arquivo por mês.
@@ -598,9 +595,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por dia do mês.
@@ -623,9 +620,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia a pasta por dia da semana.
@@ -648,9 +645,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia o arquivo por hora.
@@ -673,9 +670,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Bloqueia o arquivo por minuto.
@@ -698,9 +695,9 @@ class FileController {
                 }));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Coloca o arquivo na lixeira.
@@ -713,9 +710,9 @@ class FileController {
                 return resolve(await fileManagerDB.moveToGarbage(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Retira o arquivo da lixeira.
@@ -728,9 +725,9 @@ class FileController {
                 return resolve(await fileManagerDB.removeOfGarbage(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Reciclagem dos arquivos na lixeira
@@ -757,17 +754,17 @@ class FileController {
 
                     for (const fileId of filesId) {
                         await this.delete(fileId, access, accessFolder);
-                    };
+                    }
 
                     return resolve(`${filesId.length} arquivo(s) da lixeira foram reciclados.`);
                 } else {
                     return resolve(`Nenhum arquivo da lixeira foi reciclado.`);
-                };
+                }
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Gera um pedido aos procuradores para mover o arquivo para a lixeira
@@ -781,9 +778,9 @@ class FileController {
                 return resolve(await fileManagerDB.orderMoveToGarbage(cid, access, order));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Remove o pedido enviado aos procuradores
@@ -796,9 +793,9 @@ class FileController {
                 return resolve(await fileManagerDB.orderRemove(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Responde o pedido enviado ao procurador
@@ -812,9 +809,9 @@ class FileController {
                 return resolve(await fileManagerDB.orderAssigneeSetDecision(cid, access, answer));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
+    }
 
     /**
      * @description Processa o pedido enviado aos procuradores
@@ -827,9 +824,9 @@ class FileController {
                 return resolve(await fileManagerDB.orderProcess(cid, access));
             } catch (error) {
                 return reject(error);
-            };
+            }
         });
-    };
-};
+    }
+}
 
 export default new FileController();

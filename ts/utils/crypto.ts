@@ -15,13 +15,13 @@ declare interface Config {
     algorithm: 'aes-128-gcm' | 'aes-192-gcm' | 'aes-256-gcm';
     password: string;
     authTagLength: number;
-};
+}
 
 declare interface Encrypted {
     content: string;
     iv: string;
     tag: Buffer;
-};
+}
 
 /**
  * @description Cria uma criptografia para a string
@@ -47,7 +47,7 @@ export function Encrypt(txt: string, password?: string): Encrypted {
         iv,
         tag
     };
-};
+}
 
 /**
  * @description Gera a descriptografa para a string
@@ -71,5 +71,5 @@ export function Decrypt(encrypted: Encrypted, password?: string): string {
         return txt;
     } catch (error) {
         return `Error ${error}`;
-    };
-};
+    }
+}
