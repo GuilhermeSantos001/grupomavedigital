@@ -1,8 +1,7 @@
 /**
  * @description Rotas dos usuários
  * @author @GuilhermeSantos001
- * @update 21/09/2021
- * @version 3.0.0
+ * @update 30/10/2021
  */
 
 import getReqProps from '@/utils/getReqProps';
@@ -100,11 +99,12 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authLogout: async (parent: unknown, args: { auth: string, privileges: PrivilegesSystem[], token: string, signature: string }, context: { express: ExpressContext }) => {
+        authLogout: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext }) => {
             try {
                 const
                     { ip } = geoIP(context.express.req),
-                    internetadress = ip;
+                    internetadress = ip,
+                    { privileges } = await userManagerDB.getInfo(args.auth);
 
                 await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
                 await userManagerDB.disconnected(args.auth, args.token);
@@ -114,7 +114,7 @@ export default {
                 await activityManagerDB.register({
                     ipremote: ip,
                     auth: args.auth,
-                    privileges: args.privileges,
+                    privileges,
                     roadmap: 'Se desconectou do sistema'
                 });
 
@@ -355,7 +355,6 @@ export default {
         getUserInfo: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const {
-                    authorization,
                     privileges,
                     photoProfile,
                     username,
@@ -367,7 +366,6 @@ export default {
                 } = await userManagerDB.getInfo(args.auth);
 
                 return {
-                    authorization,
                     privileges,
                     photoProfile,
                     username,
