@@ -47,19 +47,17 @@ describe("Hercules Storage", () => {
         expect(typeof cid).toBe("string");
         expect(await FileController.get({ cid }, 0, 1)).toHaveLength(1);
 
-        const updated = await FileController.update(cid, { group: { name: "administrador", permission: "Write" } }, {
+        expect(await FileController.update(cid, { group: { name: "administrador", permission: "Write" } }, {
             name: "Arquivo Renomeado",
             description: "Testando a renomeação do arquivo",
             tag: "Developers"
-        });
+        })).toBe(true);
 
         const updateFile = await FileController.get({ cid }, 0, 1);
 
         expect(updateFile[0].name).toBe("Arquivo Renomeado");
         expect(updateFile[0].description).toBe("Testando a renomeação do arquivo");
         expect(updateFile[0].tag).toBe("Developers");
-
-        expect(updated).toBe(true);
     });
 
     it("Remoção do Arquivo", async () => {
@@ -2057,7 +2055,7 @@ describe("Hercules Storage", () => {
 });
 
 afterAll(async () => {
-    const files = await FileController.get({ }, 0, 9e9);
+    const files = await FileController.get({}, 0, 9e9);
 
     for (const file of files) {
         if (!file.trash) {
@@ -2067,7 +2065,7 @@ afterAll(async () => {
         }
     }
 
-    const folders = await FolderController.get({ }, 0, 9e9);
+    const folders = await FolderController.get({}, 0, 9e9);
 
     for (const folder of folders) {
         if (!folder.trash && !folder.folderId) {

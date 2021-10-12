@@ -1,8 +1,7 @@
 /**
  * @description Metodos do modelo de usuários
  * @author @GuilhermeSantos001
- * @update 31/08/2021
- * @version 1.0.0
+ * @update 12/10/2021
  */
 
 import {
@@ -94,15 +93,13 @@ export async function findAllUserByProjectName(projectName: string): Promise<Use
 }
 
 export async function removeUser(userId: number): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const user = await User.findByPk(userId, { rejectOnEmpty: true });
+    try {
+        const user = await User.findByPk(userId, { rejectOnEmpty: true });
 
-            await user.destroy();
+        await user.destroy();
 
-            return resolve(true);
-        } catch (error) {
-            return reject(error);
-        }
-    });
+        return true;
+    } catch (error) {
+        throw new Error(JSON.stringify(error));
+    }
 }

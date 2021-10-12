@@ -27,4 +27,18 @@ export default class Moment {
         else
             return this.moment.format(options?.layout).replace(options.exclude, ' || ');
     }
+
+    static formatDate(date: string) {
+        const
+            year = date.substring(0, 4),
+            month = date.substring(4, 6),
+            day = date.substring(6, 8);
+
+        const result = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD');
+
+        if (!result.isValid())
+            return moment();
+
+        return result;
+    }
 }

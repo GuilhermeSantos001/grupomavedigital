@@ -200,8 +200,8 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         /**
          * @description Jobs started
          */
-        Jobs.reset();
-        Jobs.start();
+        // Jobs.reset();
+        // Jobs.start();
 
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.

@@ -2,8 +2,7 @@
 /**
  * @description Armazenamento de estrutura de dados em memória, usado como um banco de dados em memória distribuído de chave-valor.
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.1
+ * @update 12/10/2021
  */
 
 import LZString from 'lz-string';
@@ -127,7 +126,7 @@ export default class REDIS {
     }
 
     flush(): Promise<string> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (this.client && this.client?.connected) {
                 this.client?.select(this.db, async (error) => {
                     if (error)

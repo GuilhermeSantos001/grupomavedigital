@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 01/10/2021
+ * @update 12/10/2021
  */
 
 import jobDB, { jobInterface, jobModelInterface } from '@/mongo/jobs-manager-mongo';
@@ -11,114 +11,72 @@ class jobManagerDB {
     /**
      * @description Registra o serviço
      */
-    public register(job: jobInterface) {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                const model = await jobDB.create({
-                    ...job,
-                    createdAt: Moment.format()
-                });
-
-                await model.validate();
-                await model.save();
-
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
+    public async register(job: jobInterface): Promise<boolean> {
+        const model = await jobDB.create({
+            ...job,
+            createdAt: Moment.format()
         });
+
+        await model.validate();
+        await model.save();
+
+        return true;
     }
 
     /**
      * @description Atualiza o serviço
      */
-    public update(cid: string, data: { status: string, error?: string }): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await jobDB.updateMany({ cid }, { $set: data });
+    public async update(cid: string, data: { status: string, error?: string }): Promise<boolean> {
+        await jobDB.updateMany({ cid }, { $set: data });
 
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return true;
     }
 
     /**
      * @description Remove o serviço
      */
-    public remove(cid: string) {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                await jobDB.deleteMany({ cid });
+    public async remove(cid: string): Promise<boolean> {
+        await jobDB.deleteMany({ cid });
 
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return true;
     }
 
     /**
      * @description Remove o serviço
      */
-    public removeByName(name: string) {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                await jobDB.deleteMany({ name });
+    public async removeByName(name: string): Promise<boolean> {
+        await jobDB.deleteMany({ name });
 
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return true;
     }
 
     /**
      * @description Restaura o status dos serviços
      */
-    public reset() {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                await jobDB.updateMany({ status: { $ne: 'Finish' } }, { $set: { status: 'Available' }, $unset: { error: "" } });
+    public async reset(): Promise<boolean> {
+        await jobDB.updateMany({ status: { $ne: 'Finish' } }, { $set: { status: 'Available' }, $unset: { error: "" } });
 
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return true;
     }
 
     /**
      * @description Deleta todos os serviços
      */
-    public clear() {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                await jobDB.deleteMany({});
+    public async clear(): Promise<boolean> {
+        await jobDB.deleteMany({});
 
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return true;
     }
 
     /**
      * @description Retorna os serviços
      */
-    public get() {
-        return new Promise<jobModelInterface[]>(async (resolve, reject) => {
-            try {
-                let jobs: jobModelInterface[] = [];
+    public async get(): Promise<jobModelInterface[]> {
+        let jobs: jobModelInterface[] = [];
 
-                jobs = await jobDB.find({});
+        jobs = await jobDB.find({});
 
-                return resolve(jobs);
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        return jobs;
     }
 }
 

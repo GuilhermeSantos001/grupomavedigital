@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de Processamentos Paralelos
  * @author @GuilhermeSantos001
- * @update 01/10/2021
+ * @update 12/10/2021
  */
 
 import { v4 } from 'uuid';
@@ -67,84 +67,62 @@ export default class Jobs {
     }
 
     static reset(): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await this.setWork('false');
-                await jobManagerDB.reset();
-
-                return resolve();
-            } catch (error) {
-                return reject(error);
-            }
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                this.setWork('false'),
+                jobManagerDB.reset()
+            ])
+                .then(() => resolve())
+                .catch(error => reject(error))
         });
     }
 
-    static clear(): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                return resolve(await jobManagerDB.clear());
-            } catch (error) {
-                return reject(error);
-            }
-        });
+    static async clear(): Promise<boolean> {
+        try {
+            return await jobManagerDB.clear();
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
-    static async save(job: jobInterface): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await jobManagerDB.register(job);
-
-                return resolve();
-            } catch (error) {
-                return reject(error);
-            }
-        });
+    static async save(job: jobInterface): Promise<boolean> {
+        try {
+            return await jobManagerDB.register(job);
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
     static async load(): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                this.jobs = await jobManagerDB.get();
-
-                return resolve();
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        try {
+            this.jobs = await jobManagerDB.get();
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
-    static async updateJob(cid: string, data: { status: string, error?: string }): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await jobManagerDB.update(cid, data);
-
-                return resolve();
-            } catch (error) {
-                return reject(error);
-            }
-        });
+    static async updateJob(cid: string, data: { status: string, error?: string }): Promise<boolean> {
+        try {
+            return await jobManagerDB.update(cid, data);
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
-    static async removeJob(cid: string): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await jobManagerDB.remove(cid);
-
-                return resolve();
-            } catch (error) {
-                return reject(error);
-            }
-        });
+    static async removeJob(cid: string): Promise<boolean> {
+        try {
+            return await jobManagerDB.remove(cid);
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
     static async removeJobByName(name: string): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                return resolve(await jobManagerDB.removeByName(name));
-            } catch (error) {
-                return reject(error);
-            }
-        });
+        try {
+            return await jobManagerDB.removeByName(name);
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
     static isAvailable(job: jobModelInterface): boolean {
@@ -159,48 +137,50 @@ export default class Jobs {
         return job.isError;
     }
 
-    static append(job: jobInterface): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                if (job.runAt) {
-                    const now = new Date();
+    static async append(job: jobInterface): Promise<boolean> {
+        try {
+            if (job.runAt) {
+                const now = new Date();
 
-                    if (job.runAt.type === 'Days') {
-                        now.setDate(now.getDate() + job.runAt.add);
-                    }
-                    else if (job.runAt.type === 'hours') {
-                        now.setHours(now.getHours() + job.runAt.add);
-                    }
-                    else if (job.runAt.type === 'minutes') {
-                        now.setMinutes(now.getMinutes() + job.runAt.add);
-                    }
-                    else if (job.runAt.type === 'seconds') {
-                        now.setSeconds(now.getSeconds() + job.runAt.add);
-                    }
-
-                    job.date = now.toISOString();
+                if (job.runAt.type === 'Days') {
+                    now.setDate(now.getDate() + job.runAt.add);
+                }
+                else if (job.runAt.type === 'hours') {
+                    now.setHours(now.getHours() + job.runAt.add);
+                }
+                else if (job.runAt.type === 'minutes') {
+                    now.setMinutes(now.getMinutes() + job.runAt.add);
+                }
+                else if (job.runAt.type === 'seconds') {
+                    now.setSeconds(now.getSeconds() + job.runAt.add);
                 }
 
-                job.cid = v4();
-                job.createdAt = Moment.format();
-
-                await this.save(job);
-
-                if (this.jobs.length <= 0)
-                    await this.setWork('true');
-
-                return resolve(true);
-            } catch (error) {
-                return reject(error);
+                job.date = now.toISOString();
             }
-        });
+
+            job.cid = v4();
+            job.createdAt = Moment.format();
+
+            await this.save(job);
+
+            if (this.jobs.length <= 0)
+                await this.setWork('true');
+
+            return true;
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
     static async splice(job: jobInterface): Promise<void> {
-        await this.removeJob(job.cid || "");
+        try {
+            await this.removeJob(job.cid || "");
 
-        if (this.jobs.filter(_job => _job.cid !== job.cid).length <= 0)
-            await this.setWork('false');
+            if (this.jobs.filter(_job => _job.cid !== job.cid).length <= 0)
+                await this.setWork('false');
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
+        }
     }
 
     static async start(): Promise<void> {
@@ -210,16 +190,28 @@ export default class Jobs {
     }
 
     static async update(): Promise<void> {
-        if (await this.isWorking()) {
-            await this.load();
+        try {
+            if (await this.isWorking()) {
+                await this.load();
 
-            for (const job of this.jobs) {
-                if (job.runAt) {
-                    const
-                        now = new Date(),
-                        date = new Date(job.date || '');
+                for (const job of this.jobs) {
+                    if (job.runAt) {
+                        const
+                            now = new Date(),
+                            date = new Date(job.date || '');
 
-                    if (now >= date) {
+                        if (now >= date) {
+                            try {
+                                await this.run(job);
+
+                                break;
+                            } catch (error) {
+                                Debug.info('jobs', `Job(${job.cid}) processing error`, String(error));
+
+                                break;
+                            }
+                        }
+                    } else {
                         try {
                             await this.run(job);
 
@@ -230,241 +222,206 @@ export default class Jobs {
                             break;
                         }
                     }
-                } else {
-                    try {
-                        await this.run(job);
-
-                        break;
-
-                    } catch (error) {
-                        Debug.info('jobs', `Job(${job.cid}) processing error`, String(error));
-
-                        break;
-                    }
                 }
+
+                if (this.jobs.length <= 0)
+                    await this.setWork('false');
             }
 
-            if (this.jobs.length <= 0)
-                await this.setWork('false');
+            if (this.process)
+                clearTimeout(this.process);
+
+            this.process = setTimeout(this.update.bind(this), this.delay);
+        } catch (error) {
+            throw new Error(JSON.stringify(error));
         }
-
-        if (this.process)
-            clearTimeout(this.process);
-
-        this.process = setTimeout(this.update.bind(this), this.delay);
     }
 
     static async run(job: jobModelInterface): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            if (this.isAvailable(job)) {
-                try {
-                    Debug.info('jobs', `Job(${job.cid}) started process`);
+        if (this.isAvailable(job)) {
+            try {
+                Debug.info('jobs', `Job(${job.cid}) started process`);
 
-                    if (job.type === 'mailsend') {
-                        Debug.info('jobs', `Job(${job.cid}) processing mail send...`);
+                if (job.type === 'mailsend') {
+                    Debug.info('jobs', `Job(${job.cid}) processing mail send...`);
 
-                        job.status = 'Processing';
+                    job.status = 'Processing';
 
-                        await this.updateJob(job.cid || '', { status: job.status });
-                        await this.mailsend(job);
-
-                        return resolve();
-                    }
-                } catch (error) {
-                    return reject(error);
+                    await this.updateJob(job.cid || '', { status: job.status });
+                    await this.mailsend(job);
                 }
+            } catch (error) {
+                throw new Error(JSON.stringify(error));
             }
-            else if (this.isFinish(job)) {
-                try {
-                    Debug.info('jobs', `Job(${job.cid}) finish with success!`);
+        }
+        else if (this.isFinish(job)) {
+            try {
+                Debug.info('jobs', `Job(${job.cid}) finish with success!`);
 
-                    await this.splice(job);
-
-                    return resolve();
-                } catch (error) {
-                    return reject(error);
-                }
+                await this.splice(job);
+            } catch (error) {
+                throw new Error(JSON.stringify(error));
             }
-            else if (this.isError(job)) {
-                try {
-                    Debug.fatal('jobs', `Job(${job.cid}) error`, job.error || "");
-                    Debug.info('jobs', `Job(${job.cid}) will be processed again...`);
+        }
+        else if (this.isError(job)) {
+            try {
+                Debug.fatal('jobs', `Job(${job.cid}) error`, job.error || "");
+                Debug.info('jobs', `Job(${job.cid}) will be processed again...`);
 
-                    job.status = 'Available';
+                job.status = 'Available';
 
-                    await this.updateJob(job.cid || '', { status: job.status, error: undefined });
-
-                    return resolve();
-                } catch (error) {
-                    return reject(error);
-                }
+                await this.updateJob(job.cid || '', { status: job.status, error: undefined });
+            } catch (error) {
+                throw new Error(JSON.stringify(error));
             }
-        });
+        }
     }
 
     static async mailsend(job: jobModelInterface): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            const args = job.args;
+        const args = job.args;
+
+        try {
+            if ('temporarypass' in args) {
+                mailsend.econfirm(args.email, args.username, args.token, args.temporarypass)
+                    .then(async (info: SMTPTransport.SentMessageInfo) => {
+                        try {
+                            Debug.info('user', `E-mail de confirmação da conta enviado para o usuário(${args.auth})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Finish';
+
+                            await this.updateJob(job.cid || '', { status: job.status });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    })
+                    .catch(async error => {
+                        try {
+                            Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, error, `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Error';
+                            job.error = error;
+
+                            await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    });
+            }
+            else if ('navigator' in args) {
+                mailsend.sessionNewAccess(args.email, args.username, args.navigator)
+                    .then(async (info: SMTPTransport.SentMessageInfo) => {
+                        try {
+                            Debug.info('user', `E-mail de novo acesso da conta enviado para o usuário(${args.email})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Finish';
+
+                            await this.updateJob(job.cid || '', { status: job.status });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    })
+                    .catch(async error => {
+                        try {
+                            Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de novo acesso da conta do usuário(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Error';
+                            job.error = error;
+
+                            await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    });
+            }
+            else if ('forgotPassword' in args) {
+                mailsend.accountForgotPassword(args.email, args.username, args.signature, args.token)
+                    .then(async (info: SMTPTransport.SentMessageInfo) => {
+                        try {
+                            Debug.info('user', `E-mail de alteração de senha da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Finish';
+
+                            await this.updateJob(job.cid || '', { status: job.status });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    })
+                    .catch(async error => {
+                        try {
+                            Debug.fatal('user', `Erro na hora de enviar o e-mail de alteração da senha da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Error';
+                            job.error = error;
+
+                            await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    });
+            }
+            else if ('twofactor' in args) {
+                mailsend.accountRetrieveTwofactor(args.email, args.username, args.token)
+                    .then(async (info: SMTPTransport.SentMessageInfo) => {
+                        try {
+                            Debug.info('user', `E-mail de recuperação da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Finish';
+
+                            await this.updateJob(job.cid || '', { status: job.status });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    })
+                    .catch(async error => {
+                        try {
+                            Debug.fatal('user', `Erro na hora de enviar o e-mail de recuperação da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Error';
+                            job.error = error;
+
+                            await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    });
+            }
+            else if ('order' in args) {
+                mailsend.herculesOrders(args.email, args.username, args.title, args.description, args.link)
+                    .then(async (info: SMTPTransport.SentMessageInfo) => {
+                        try {
+                            Debug.info('user', `E-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Finish';
+
+                            await this.updateJob(job.cid || '', { status: job.status });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    })
+                    .catch(async error => {
+                        try {
+                            Debug.fatal('user', `Erro na hora de enviar o e-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, error, `IP-Request: ${args.clientAddress}`);
+
+                            job.status = 'Error';
+                            job.error = error;
+
+                            await this.updateJob(job.cid || '', { status: job.status, error: job.error });
+                        } catch (error) {
+                            throw new Error(JSON.stringify(error));
+                        }
+                    });
+            }
+        } catch (error) {
+            job.status = 'Error';
+            job.error = JSON.stringify(error);
 
             try {
-                if ('temporarypass' in args) {
-                    mailsend.econfirm(args.email, args.username, args.token, args.temporarypass)
-                        .then(async (info: SMTPTransport.SentMessageInfo) => {
-                            try {
-                                Debug.info('user', `E-mail de confirmação da conta enviado para o usuário(${args.auth})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Finish';
-
-                                await this.updateJob(job.cid || '', { status: job.status });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        })
-                        .catch(async error => {
-                            try {
-                                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, error, `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Error';
-                                job.error = error;
-
-                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        });
-                }
-                else if ('navigator' in args) {
-                    mailsend.sessionNewAccess(args.email, args.username, args.navigator)
-                        .then(async (info: SMTPTransport.SentMessageInfo) => {
-                            try {
-                                Debug.info('user', `E-mail de novo acesso da conta enviado para o usuário(${args.email})`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Finish';
-
-                                await this.updateJob(job.cid || '', { status: job.status });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        })
-                        .catch(async error => {
-                            try {
-                                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de novo acesso da conta do usuário(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Error';
-                                job.error = error;
-
-                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        });
-                }
-                else if ('forgotPassword' in args) {
-                    mailsend.accountForgotPassword(args.email, args.username, args.signature, args.token)
-                        .then(async (info: SMTPTransport.SentMessageInfo) => {
-                            try {
-                                Debug.info('user', `E-mail de alteração de senha da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Finish';
-
-                                await this.updateJob(job.cid || '', { status: job.status });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        })
-                        .catch(async error => {
-                            try {
-                                Debug.fatal('user', `Erro na hora de enviar o e-mail de alteração da senha da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Error';
-                                job.error = error;
-
-                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        });
-                }
-                else if ('twofactor' in args) {
-                    mailsend.accountRetrieveTwofactor(args.email, args.username, args.token)
-                        .then(async (info: SMTPTransport.SentMessageInfo) => {
-                            try {
-                                Debug.info('user', `E-mail de recuperação da conta(${args.email}) enviado`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Finish';
-
-                                await this.updateJob(job.cid || '', { status: job.status });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        })
-                        .catch(async error => {
-                            try {
-                                Debug.fatal('user', `Erro na hora de enviar o e-mail de recuperação da conta(${args.email})`, error, `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Error';
-                                job.error = error;
-
-                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        });
-                }
-                else if ('order' in args) {
-                    mailsend.herculesOrders(args.email, args.username, args.title, args.description, args.link)
-                        .then(async (info: SMTPTransport.SentMessageInfo) => {
-                            try {
-                                Debug.info('user', `E-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, JSON.stringify(info), `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Finish';
-
-                                await this.updateJob(job.cid || '', { status: job.status });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        })
-                        .catch(async error => {
-                            try {
-                                Debug.fatal('user', `Erro na hora de enviar o e-mail com o pedido aos procuradores do arquivo/pasta enviado para ${args.email}`, error, `IP-Request: ${args.clientAddress}`);
-
-                                job.status = 'Error';
-                                job.error = error;
-
-                                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                                return resolve();
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        });
-                }
+                await this.updateJob(job.cid || '', { status: job.status, error: job.error })
             } catch (error) {
-                job.status = 'Error';
-                job.error = JSON.stringify(error);
-
-                await this.updateJob(job.cid || '', { status: job.status, error: job.error });
-
-                return reject(error);
+                throw new Error(JSON.stringify(error));
             }
-        });
+
+            throw new Error(JSON.stringify(error));
+        }
     }
 }
