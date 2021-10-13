@@ -134,7 +134,7 @@ export default class CSVParser {
       results: any = [];
 
     return new Promise((resolve, reject) => {
-      createReadStream(localPath(`data/${filename}.csv`))
+      createReadStream(localPath(`database/${filename}.csv`))
         .pipe(csv({
           separator: ";",
           mapHeaders: ({ header }) =>
