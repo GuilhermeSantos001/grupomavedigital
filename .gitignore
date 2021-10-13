@@ -6,8 +6,8 @@
 **/dist/**
 **/log/**
 **/coverage/**
-**/test/data/**
-**/data/**
+**/test/database/**
+**/database/**
 
 # Developer
 *.env

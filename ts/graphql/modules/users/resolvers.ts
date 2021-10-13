@@ -66,6 +66,8 @@ export default {
                     }
                 }
 
+                await userManagerDB.clearExpiredRefreshToken(args.auth);
+
                 userInfo['refreshToken'] = await userManagerDB.addRefreshToken(args.auth);
 
                 await userManagerDB.connected(args.auth, {

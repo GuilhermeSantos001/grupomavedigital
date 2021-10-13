@@ -1,0 +1,62 @@
+# Schema dos Clientes
+type Clients {
+  id: String!
+  filial: String!
+  name: String!
+  fullname: String!
+  store: String!
+}
+
+# Schema das Filiais
+type Filial {
+  id: String!
+  name: String!
+  cnpj: String!
+}
+
+type Query {
+  """
+  Dados dos Clientes
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=dataclients
+  """
+  dataClients(
+    """
+    Nome da filial
+    """
+    filial: String
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Clients]!
+    @auth(
+      keys: ["Z7qK6RpqqYKYKaMXnsurANrBF4X6adkj3v3LXtdL6PNn2dgd2AYChDsPJxPe2L7J"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados das Filiais
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=datafilial
+  """
+  dataFilial(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Filial]!
+    @auth(
+      keys: ["EEcDrRbDe6Vd2METYWWNuHpE7DbQt8S7nNzgFfyXkfFbZ2WgS9kvP2svxc7RXXFA"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+}
+
+directive @auth(keys: [String!]!) on FIELD_DEFINITION
+
+directive @token(ignore: Boolean!) on FIELD_DEFINITION
+
+directive @privilege(keys: [String!]!) on FIELD_DEFINITION
+
+directive @encodeuri(method: String!) on FIELD_DEFINITION
