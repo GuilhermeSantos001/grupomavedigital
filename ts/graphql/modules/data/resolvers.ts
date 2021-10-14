@@ -40,6 +40,63 @@ interface FilialResponse {
     cnpj: string
 }
 
+/**
+ * @description Schema da tabela: "Tipos de Titulos"
+ */
+interface BillsType {
+    filial: string
+    chave: string
+    descri: string
+}
+
+interface BillsTypeResponse {
+    filial: string
+    key: string
+    description: string
+}
+
+/**
+ * @description Schema da tabela: "Bancos"
+ */
+interface Banking {
+    filial: string
+    cod: string
+    agencia: string
+    dvage: string
+    numcon: string
+    dvcta: string
+    nome: string
+    nreduz: string
+}
+
+interface BankingResponse {
+    id: string
+    filial: string
+    agency: string
+    agencyDigit: string
+    account: string
+    accountDigit: string
+    name: string
+    fullname: string
+}
+
+/**
+ * @description Schema da tabela: "Naturezas Bancarias"
+ */
+interface BankingNatures {
+    filial: string
+    codigo: string
+    descric: string
+    conta: string
+}
+
+interface BankingNaturesResponse {
+    id: string
+    filial: string
+    description: string
+    account: string
+}
+
 module.exports = {
     Query: {
         dataClients: async (parent: unknown, args: { filial: string, cache: boolean }) => {
@@ -92,6 +149,105 @@ module.exports = {
                                 id: branch.cod,
                                 name: branch.nome,
                                 cnpj: branch.cnpj
+                            })
+                        }
+
+                        return resolve(response);
+                    } catch (error) {
+                        return reject(error);
+                    }
+                })
+
+                return await exec();
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        dataBillsType: async (parent: unknown, args: { cache: boolean }) => {
+            try {
+                let
+                    X5_filter: any = {};
+
+                const
+                    billsType = await CSVParser.read<BillsType>('tipos_de_titulos', "X5", X5_filter, args.cache),
+                    response: BillsTypeResponse[] = [];
+
+                const exec = () => new Promise(async (resolve, reject) => {
+                    try {
+                        for (const bills of billsType) {
+                            response.push({
+                                filial: bills.filial,
+                                description: bills.descri,
+                                key: bills.chave
+                            })
+                        }
+
+                        return resolve(response);
+                    } catch (error) {
+                        return reject(error);
+                    }
+                })
+
+                return await exec();
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        dataBanking: async (parent: unknown, args: { cache: boolean }) => {
+            try {
+                let
+                    A6_filter: any = {};
+
+                const
+                    bankings = await CSVParser.read<Banking>('bancos', "A6", A6_filter, args.cache),
+                    response: BankingResponse[] = [];
+
+                const exec = () => new Promise(async (resolve, reject) => {
+                    try {
+                        for (const banking of bankings) {
+                            response.push({
+                                id: banking.cod,
+                                filial: banking.filial,
+                                agency: banking.agencia,
+                                agencyDigit: banking.dvage,
+                                account: banking.numcon,
+                                accountDigit: banking.dvcta,
+                                name: banking.nreduz,
+                                fullname: banking.nome
+                            })
+                        }
+
+                        return resolve(response);
+                    } catch (error) {
+                        return reject(error);
+                    }
+                })
+
+                return await exec();
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        dataBankingNatures: async (parent: unknown, args: { id: string, cache: boolean }) => {
+            try {
+                let
+                    ED_filter: any = {};
+
+                if (args.id)
+                    ED_filter['codigo'] = args.id;
+
+                const
+                    bankingNatures = await CSVParser.read<BankingNatures>('naturezas', "ED", ED_filter, args.cache),
+                    response: BankingNaturesResponse[] = [];
+
+                const exec = () => new Promise(async (resolve, reject) => {
+                    try {
+                        for (const natures of bankingNatures) {
+                            response.push({
+                                id: natures.codigo,
+                                filial: natures.filial,
+                                description: natures.descric,
+                                account: natures.conta
                             })
                         }
 

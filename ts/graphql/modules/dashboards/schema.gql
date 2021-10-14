@@ -8,6 +8,39 @@ type Revenues {
   released: String!
 }
 
+# Schema do painel de "Contas a Receber"
+type BillsReceiveClient {
+  id: String!
+  name: String!
+  store: String!
+}
+
+type BillsReceiveTaxes {
+  IRRF: String!
+  ISS: String!
+  INSS: String!
+  CSLL: String!
+  COFINS: String!
+  PIS: String!
+}
+
+type BillsReceive {
+  prefix: String!
+  num: String!
+  parcel: String!
+  type: String!
+  bankingNature: String!
+  client: BillsReceiveClient!
+  released: String!
+  finished: String!
+  expectedExpiration: String!
+  realExpiration: String!
+  taxes: BillsReceiveTaxes!
+  grossValue: BigInt!
+  liquidValue: BigInt!
+  balanceValue: BigInt!
+}
+
 type Query {
   """
   Dados do Painel de "Faturamento"
@@ -37,6 +70,46 @@ type Query {
   ): [Revenues]!
     @auth(
       keys: ["tfbCBnLCNhfdkWbvEvYWQYg2Ye9JnjP7J78mBwR95NHU6CTSFcKxgnkW2xYcpz2r"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados do Painel de "Contas a Receber"
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/dashboards-query?id=dashboardreceive
+  """
+  dashboardReceive(
+    """
+    Nome da filial
+    """
+    filial: String
+    """
+    Nome do Cliente
+    """
+    client: String
+    """
+    Loja do Cliente
+    """
+    store: String
+    """
+    Tipo de titulo
+    """
+    type: String
+    """
+    Natureza Bancaria
+    """
+    bankingNature: String
+    """
+    Período de apuração
+    """
+    period: [String!]!
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [BillsReceive]!
+    @auth(
+      keys: ["SsPaTUXVfLTjnNm3XGQeYRFPGLS9N2c53e3vxtRTVD2b9VZBRmYqaANcyRp54SQP"]
     )
   # @privilege(keys: ["administrador"])
   # @token(ignore: false)
