@@ -14,6 +14,33 @@ type Filial {
   cnpj: String!
 }
 
+# Schema dos tipos de titulo
+type BillsType {
+  filial: String!
+  key: String!
+  description: String!
+}
+
+# Schema dos bancos
+type Banking {
+  id: String!
+  filial: String!
+  agency: String!
+  agencyDigit: String!
+  account: String!
+  accountDigit: String!
+  name: String!
+  fullname: String!
+}
+
+# Schema das naturezas bancarias
+type BankingNatures {
+  id: String!
+  filial: String!
+  description: String!
+  account: String!
+}
+
 type Query {
   """
   Dados dos Clientes
@@ -47,6 +74,58 @@ type Query {
   ): [Filial]!
     @auth(
       keys: ["EEcDrRbDe6Vd2METYWWNuHpE7DbQt8S7nNzgFfyXkfFbZ2WgS9kvP2svxc7RXXFA"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados dos tipos de titulos
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databillstype
+  """
+  dataBillsType(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [BillsType]!
+    @auth(
+      keys: ["zf4M4cYmEYDzrWwLG6kgUUpS2CuQmDsDqPV9FQxth5KT3y3EdTrsargJvN3bpjHM"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados dos bancos
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databanking
+  """
+  dataBanking(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Banking]!
+    @auth(
+      keys: ["g8WyFaLqxv6xekH22QkNf4EH3qFrMTKWUaYSLU4ntLSjJxw7jmxycPtRs59fuM9f"]
+    )
+  # @privilege(keys: ["administrador"])
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados das naturezas bancarias
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databankingnatures
+  """
+  dataBankingNatures(
+    """
+    Informa o código da natureza bancaria
+    """
+    id: String
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [BankingNatures]!
+    @auth(
+      keys: ["HrqFw3EvjvrRQVkMGgKJYgTW9KY2ePDUbrzZaer9TRu5pQxyaUyakbgRUVtFXUvT"]
     )
   # @privilege(keys: ["administrador"])
   # @token(ignore: false)

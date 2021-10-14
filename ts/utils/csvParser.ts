@@ -135,17 +135,18 @@ export default class CSVParser {
 
     return new Promise((resolve, reject) => {
       createReadStream(localPath(`database/${filename}.csv`))
+        .setEncoding('utf8')
         .pipe(csv({
           separator: ";",
           mapHeaders: ({ header }) =>
-            header.replace(String(`${headerPreffix}_`).toUpperCase(), '').trim().toLowerCase()
+            String(header).replace(String(`${headerPreffix}_`).toUpperCase(), '').trim().toLowerCase()
           ,
           mapValues: ({ header, index, value }) => {
             let
               filterSuccess = false,
               inPeriod = false;
 
-            value = value.replace('�', '').trim();
+            value = String(value).replace(/�/g, '').trim();
 
             if (filter[header]) {
               if (filter[header].slice(0, 4).indexOf('time') !== -1) {
