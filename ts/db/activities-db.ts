@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 15/12/2021
  */
 
 import activityDB, { activityInterface, activityModelInterface } from '@/mongo/activities-manager-mongo';
@@ -36,11 +36,9 @@ class activityManagerDB {
      * @description Retorna as ultimas atividades com limite de itens a serem retornados
      */
     public async get(limit: number): Promise<ActivityInfo[]> {
-        let activities: ActivityInfo[];
-
         const _activities = await activityDB.find({}).sort({ $natural: -1 }).limit(limit);
 
-        activities = _activities.map((activity: activityModelInterface) => {
+        return _activities.map((activity: activityModelInterface) => {
             return {
                 id: activity._id,
                 ipremote: activity.ipremote,
@@ -49,9 +47,7 @@ class activityManagerDB {
                 roadmap: activity.roadmap,
                 createdAt: activity.createdAt
             }
-        })
-
-        return activities;
+        });
     }
 }
 

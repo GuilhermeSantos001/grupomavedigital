@@ -122,6 +122,6 @@ export default async function vcard(vcard: VCard): Promise<string> {
 
         return filename;
     } catch (error) {
-        throw new Error(JSON.stringify(error));
+        throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
     }
 }

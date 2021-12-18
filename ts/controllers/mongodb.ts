@@ -2,8 +2,7 @@
  * MongoDB
  * @description Controlador de conexões com o MongoDB
  * @author GuilhermeSantos001
- * @update 01/09/2021
- * @version 1.4.1
+ * @update 03/12/2021
  */
 import { connection, connect } from 'mongoose';
 

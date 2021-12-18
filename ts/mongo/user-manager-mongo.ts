@@ -1,34 +1,68 @@
 /**
  * @description Schema dos usuários
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.1
+ * @update 15/12/2021
  */
 
 import { Document, Schema, model } from "mongoose";
 
-import { v4 } from 'uuid';
+import generatePassword from '@/utils/generatePassword';
 
 import JsonWebToken from '@/core/jsonWebToken';
 
-import Random from '@/utils/random';
+import Privilege from '@/utils/privilege';
 
 /**
  * Types
  */
-export type Unit = 'm' | 'h' | 'd'; // Minuto, Hora e Dia
 
+// ! Tipos de unidade permitidas para o tempo de expiração da sessão
+export type Unit = 's' | 'm' | 'h' | 'd'; // Segundo, Minuto, Hora e Dia
+
+// ! Tipos de dispositivos que podem ser conectados ao sistema
 export type Devices = 'desktop' | 'phone' | 'tablet' | 'tv';
 
-export type PrivilegesSystem = 'administrador'
+// ! Privilegios do sistema
+export type PrivilegesSystem =
+    // Sistema
+    | 'common'
+    | 'administrador'
     | 'moderador'
     | 'supervisor'
-    | 'common'
+    | 'diretoria'
+    // Financeiro
+    | 'fin_faturamento'
+    | 'fin_assistente'
+    | 'fin_gerente'
+    // RH/DP
+    | 'rh_beneficios'
+    | 'rh_encarregado'
+    | 'rh_juridico'
+    | 'rh_recrutamento'
+    | 'rh_sesmet'
+    // Suprimentos
+    | 'sup_compras'
+    | 'sup_estoque'
+    | 'sup_assistente'
+    | 'sup_gerente'
+    // Comercial
+    | 'com_vendas'
+    | 'com_adm'
+    | 'com_gerente'
+    | 'com_qualidade'
+    // Operacional
+    | 'ope_mesa'
+    | 'ope_coordenador'
+    | 'ope_supervisor'
+    | 'ope_gerente'
+    // Marketing
+    | 'mkt_geral'
+    // Juridico
+    | 'jur_advogado'
+    // Contabilidade
+    | 'cont_contabil'
     ;
 
-/**
- * Interfaces
- */
 export interface Email {
     value: string;
     status: boolean;
@@ -57,6 +91,7 @@ export interface Authentication {
 export interface Token {
     signature: string;
     value: string;
+    expiry: string;
     status: boolean;
 }
 
@@ -94,6 +129,9 @@ export interface Session {
     device: Device;
 }
 
+/**
+ * @description Interface do usuário
+ */
 export interface UserInterface {
     authorization: string;
     privileges: PrivilegesSystem[];
@@ -115,6 +153,7 @@ export interface UserModelInterface extends UserInterface, Document {
     isEnabled: boolean;
     signature: string;
     token: string;
+    privilege: string
     refreshToken: string;
 }
 
@@ -129,7 +168,11 @@ export const authenticationDefault: Authentication = {
 export const sessionDefault: Session = {
     connected: 0,
     limit: 4,
-    alerts: ["::ffff:127.0.0.1"],
+    alerts: [
+        "::ffff:127.0.0.1",
+        '127.0.0.1',
+        'localhost'
+    ],
     cache: {
         tmp: 15,
         unit: "m",
@@ -149,14 +192,14 @@ export const sessionDefault: Session = {
 };
 
 export const emailSchema: Schema = new Schema({
-    value: { // Endereço de Email único do usuário
+    value: { // Endereço de e-mail único do usuário
         type: String,
         lowercase: true,
         trim: true,
         unique: true,
         match: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/
     },
-    status: { // Se o email está confirmado
+    status: { // Se o e-mail está confirmado
         type: Boolean,
         default: false
     }
@@ -197,17 +240,18 @@ export const sessionSchema: Schema = new Schema({
     connected: {
         type: Number,
         min: 0,
-        default: 1
+        max: 4,
+        default: 0
     },
     limit: {
         type: Number,
         min: 1,
-        max: 99,
+        max: 4,
         default: 4
     },
     alerts: {
         type: [String],
-        default: ["::ffff:127.0.0.1"]
+        default: ["::ffff:127.0.0.1", "127.0.0.1", "localhost"]
     },
     cache: {
         type: Object,
@@ -272,10 +316,43 @@ export const userSchema: Schema = new Schema({
         default: ['common'],
         enum: {
             values: [
+                // Sistema
                 'common',
                 'administrador',
                 'moderador',
-                'supervisor'
+                'supervisor',
+                'diretoria',
+                // Financeiro
+                'fin_faturamento',
+                'fin_assistente',
+                'fin_gerente',
+                // RH/DP
+                'rh_beneficios',
+                'rh_encarregado',
+                'rh_juridico',
+                'rh_recrutamento',
+                'rh_sesmet',
+                // Suprimentos
+                'sup_compras',
+                'sup_estoque',
+                'sup_assistente',
+                'sup_gerente',
+                // Comercial
+                'com_vendas',
+                'com_adm',
+                'com_gerente',
+                'com_qualidade',
+                // Operacional
+                'ope_mesa',
+                'ope_coordenador',
+                'ope_supervisor',
+                'ope_gerente',
+                // Marketing
+                'mkt_geral',
+                // Juridico
+                'jur_advogado',
+                // Contabilidade
+                'cont_contabil'
             ],
             message: '{VALUE} este valor não é suportado'
         },
@@ -357,7 +434,7 @@ userSchema.virtual("isEnabled").get(function (this: UserModelInterface) {
 });
 
 userSchema.virtual("signature").get(function (this: UserModelInterface) {
-    return Random.HASH(32, "hex");
+    return generatePassword.unique();
 });
 
 userSchema.virtual("token").get(async function (this: UserModelInterface) {
@@ -365,7 +442,9 @@ userSchema.virtual("token").get(async function (this: UserModelInterface) {
         this.session = sessionDefault;
 
     return await JsonWebToken.sign({
-        payload: {},
+        payload: {
+            auth: this.authorization
+        },
         options: {
             expiresIn: `${this.session.cache.tmp}${this.session.cache.unit}`
         }
@@ -373,7 +452,14 @@ userSchema.virtual("token").get(async function (this: UserModelInterface) {
 });
 
 userSchema.virtual("refreshToken").get(function (this: UserModelInterface) {
-    return v4();
+    return generatePassword.unique();
+});
+
+userSchema.virtual("privilege").get(function (this: UserModelInterface) {
+    if (this.privileges instanceof Array === false)
+        this.privileges = [];
+
+    return Privilege.alias(this.privileges[this.privileges.length - 1]);
 });
 
 export default model<UserModelInterface>("users", userSchema);

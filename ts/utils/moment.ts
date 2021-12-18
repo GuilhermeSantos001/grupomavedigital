@@ -1,7 +1,7 @@
 /**
- * @class Manipulador de datas
+ * @class Manipulador de hora, data e formatação de datas
  * @author @GuilhermeSantos001
- * @update 29/09/2021
+ * @update 17/11/2021
  */
 
 import moment from 'moment';
@@ -14,20 +14,22 @@ declare interface Options {
 export default class Moment {
 
     constructor() {
-        throw new Error('this is static class');
+        throw new TypeError('this is static class');
     }
 
-    static get moment(): moment.Moment {
-        return moment();
-    }
-
+    /**
+     * @description Formata uma data para a localidade do sistema com as opções de layout e exclusão de algumas partes
+     */
     static format(options?: Options): string {
         if (!options?.exclude)
-            return this.moment.format(options?.layout);
+            return moment().format(options?.layout);
         else
-            return this.moment.format(options?.layout).replace(options.exclude, ' || ');
+            return moment().format(options?.layout).replace(options.exclude, ' || ');
     }
 
+    /**
+     * @description Formata a data para o padrão Ano, Mês, Dia
+     */
     static formatDate(date: string) {
         const
             year = date.substring(0, 4),

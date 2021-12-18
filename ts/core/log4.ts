@@ -44,10 +44,6 @@ configure({
             type: 'file',
             filename: `${path}/router_files_upload.log`
         },
-        router_redis_logs: {
-            type: 'file',
-            filename: `${path}/router_redis.log`
-        },
         jobs_logs: {
             type: 'file',
             filename: `${path}/jobs.log`
@@ -61,13 +57,12 @@ configure({
         router_hls: { appenders: ['router_hls_logs'], level: 'ALL' },
         router_files_upload: { appenders: ['router_files_upload_logs'], level: 'ALL' },
         database_mongoDB: { appenders: ['router_mongodb_logs'], level: 'ALL' },
-        database_redis: { appenders: ['router_redis_logs'], level: 'ALL' },
         jobs: { appenders: ['jobs_logs'], level: 'ALL' },
         default: { appenders: ['console'], level: 'ALL' }
     }
 });
 
-declare type Category = 'default' | 'hls' | 'user' | 'mongoDB' | 'files_upload' | 'redis' | 'jobs';
+declare type Category = 'default' | 'hls' | 'user' | 'mongoDB' | 'files_upload' | 'jobs';
 
 export default class Debug {
     static isHomolog(): boolean {
@@ -84,8 +79,6 @@ export default class Debug {
                 return 'database_mongoDB';
             case 'files_upload':
                 return 'router_files_upload';
-            case 'redis':
-                return 'database_redis';
             case 'jobs':
                 return 'jobs';
             case 'default':

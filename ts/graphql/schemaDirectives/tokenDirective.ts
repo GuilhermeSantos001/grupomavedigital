@@ -1,8 +1,7 @@
 /**
  * @description Diretivas para verificar o token da rota
  * @author @GuilhermeSantos001
- * @update 01/08/2021
- * @version 3.0.0
+ * @update 16/12/2021
  */
 
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
@@ -30,33 +29,29 @@ export default function TokenDirective(directiveName: string) {
                             if (ignore)
                                 return await resolve(source, args, context, info);
 
-                            const { ip } = geoIP(context.express.req);
-
                             const
                                 auth = decompressFromEncodedURIComponent(String(context.express.req.headers['auth'])) || String(context.express.req.headers['auth']),
                                 token = decompressFromEncodedURIComponent(String(context.express.req.headers['token'])) || String(context.express.req.headers['token']),
+                                refreshToken = JSON.parse(decompressFromEncodedURIComponent(String(context.express.req.headers['refreshtoken'])) || String(context.express.req.headers['refreshtoken'])),
                                 signature = decompressFromEncodedURIComponent(String(context.express.req.headers['signature'])) || String(context.express.req.headers['signature']),
+                                { ip } = geoIP(context.express.req),
                                 internetadress = ip;
 
-                            const decoded = await JsonWebToken.verify(token);
-
-                            if (!decoded)
-                                throw new Error('Token informado está invalido!');
-
                             try {
+                                await JsonWebToken.verify(token);
                                 await userManagerDB.verifytoken(auth, token, signature, internetadress);
 
                                 return await resolve(source, args, context, info);
-                            } catch (err: any) {
-                                if (err['code'] === 1) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que foi finalizada anteriormente.');
-                                } else if (err['code'] === 2) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de internet.');
-                                } else if (err['code'] === 3) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de IP.');
+                            } catch {
+                                if (refreshToken) {
+                                    await userManagerDB.verifyRefreshToken(auth, refreshToken.signature, refreshToken.value);
+
+                                    const updateHistory = await userManagerDB.updateTokenHistory(auth, token);
+
+                                    return await resolve(source, { ...args, updatedToken: { signature: updateHistory[0], token: updateHistory[1] } }, context, info);
                                 }
 
-                                throw new Error(err);
+                                throw new TypeError(`Token informado está invalido!`);
                             }
                         };
 

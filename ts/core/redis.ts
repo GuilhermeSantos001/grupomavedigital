@@ -2,189 +2,115 @@
 /**
  * @description Armazenamento de estrutura de dados em memória, usado como um banco de dados em memória distribuído de chave-valor.
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 26/11/2021
  */
 
 import LZString from 'lz-string';
-import { createClient, RedisClient } from 'redis';
-
-import Debug from '@/core/log4';
-
-declare function events(error?: string): string;
-declare function _callback(response: boolean, values: string[]): void;
-declare function finish(key: string, operation: string, error: string, callback: typeof _callback, ...args: string[]): void;
+import Redis from 'ioredis';
 
 declare type Config = {
     host: string;
     port: number;
-    connect_timeout: number;
 };
 
-export default class REDIS {
-    private onError: typeof events;
-    private onConnect: typeof events;
-    private onReady: typeof events;
-    private onContinue: typeof events;
-    private onEnd: typeof events;
-    private onFinish: typeof finish;
-    private config: Config;
+class REDIS {
     private readonly db: number;
-    private client?: RedisClient;
+    private config: Config;
+    private client?: Redis.Redis;
     private lzstring: LZString.LZStringStatic;
 
     constructor(db = 1) {
-        this.onError = function (error?: string) {
-            return `Redis(Client | DB: ${this.getDB()}) -> Error ${error}`;
-        };
-
-        this.onConnect = function () {
-            return `Redis(Client | DB: ${this.getDB()}) -> Connected`;
-        };
-
-        this.onReady = function () {
-            return `Redis(Client | DB: ${this.getDB()}) -> Ready for the next operation`;
-        };
-
-        this.onContinue = function () {
-            return `Redis(Client | DB: ${this.getDB()}) -> Connection successfully established`;
-        };
-
-        this.onEnd = function () {
-            return `Redis(Client | DB: ${this.getDB()}) -> Disconnected`;
-        };
-
-        this.onFinish = function (key, operation, error, callback: typeof _callback, ...args: string[]) {
-            if (error !== 'null') {
-                const msg = `Redis(Client | DB: ${this.getDB()}) -> Error occurred in the database operation: ${operation} \n Key: ${key} \n ${error}`;
-
-                Debug.fatal('redis', msg);
-
-                return callback(false, args);
-            }
-
-            const msg = `Redis(Client | DB: ${this.getDB()}) -> Success occurred in the database operation: ${operation} \n Key: ${key}`;
-
-            Debug.info('redis', msg);
-
-            return callback(true, args);
-        };
-
         this.config = {
             host: String(process.env.REDIS_HOST),
-            port: Number(process.env.REDIS_PORT),
-            connect_timeout: Number(process.env.REDIS_CONNECT_TIMEOUT)
+            port: Number(process.env.REDIS_PORT)
         };
+
         this.db = db;
+
         this.lzstring = LZString;
+
+        this.client = new Redis(this.config);
     }
 
     getDB(): number {
         return this.db;
     }
 
-    connect(): Promise<string> {
+    flush(): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (typeof this.client === "undefined" || this.client && !this.client?.connected) {
-                this.client = createClient(this.config);
-            } else {
-                return resolve(this.onContinue());
-            }
+            this.client?.flushdb((error) => {
+                if (error)
+                    return reject(error);
 
-            this.client?.on('error', (error) => {
-                const msg = this.onError(error);
-
-                Debug.fatal('redis', msg);
-
-                return reject(msg);
-            });
-
-            this.client?.on('connect', () => {
-                const msg = this.onConnect();
-
-                return Debug.info('redis', msg);
-            });
-
-            this.client?.on('ready', () => {
-                const msg = this.onReady();
-
-                Debug.info('redis', msg);
-
-                return resolve(msg);
-            });
-
-            this.client?.on('end', () => {
-                const msg = this.onEnd();
-
-                return Debug.info('redis', msg);
+                resolve();
             });
         });
     }
 
-    disconnect(): boolean | undefined {
-        if (this.client && this.client?.connected)
-            return this.client?.quit();
+    async set(key: string, value: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.client?.select(this.db, (error) => {
+                    if (error)
+                        return reject(error);
+
+                    this.client?.set(key, this.lzstring.compressToBase64(value), (error) => {
+                        if (error)
+                            return reject(error);
+
+                        resolve();
+                    });
+                });
+            } catch (error) {
+                return reject(error);
+            }
+        });
     }
 
-    flush(): Promise<string> {
+    async get(key: string): Promise<string | boolean> {
         return new Promise((resolve, reject) => {
-            if (this.client && this.client?.connected) {
+            try {
                 this.client?.select(this.db, async (error) => {
                     if (error)
-                        return Debug.fatal('redis', this.onError(String(error)));
+                        return reject(error);
 
-                    const status = await this.client?.flushdb();
+                    this.client?.get(key, (error, reply) => {
+                        if (error)
+                            return reject(error);
 
-                    if (status) {
-                        const msg = `Redis(Client | DB: ${this.getDB()}) -> Success occurred in the database operation: ${'CLEAR DATABASE'} \n db: ${this.db}`;
+                        if (reply)
+                            return resolve(this.lzstring.decompressFromBase64(reply) || "");
 
-                        Debug.info('redis', msg);
-
-                        return resolve(msg);
-                    } else {
-                        const msg = `Redis(Client | DB: ${this.getDB()}) -> Error occurred in the database operation: ${'CLEAR DATABASE'} \n db: ${this.db}`;
-
-                        Debug.fatal('redis', msg);
-
-                        return reject(msg);
-                    }
+                        resolve(false);
+                    });
                 });
-            } else {
-                const msg = `Redis(Client | DB: ${this.getDB()}) -> Error occurred in the database operation: ${'CLEAR DATABASE'} \n db: ${this.db} \n Error: Client is not connected`;
-
-                Debug.fatal('redis', msg);
-
-                return reject(msg);
+            } catch (error) {
+                return reject(error);
             }
         });
     }
 
-    async set(key: string, value: string, callback: typeof _callback): Promise<void> {
-        try {
-            await this.connect();
+    async delete(key: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.client?.select(this.db, async (error) => {
+                    if (error)
+                        return reject(error);
 
-            this.client?.select(this.db, (error) => {
-                if (error)
-                    return Debug.fatal('redis', this.onError(String(error)));
+                    this.client?.del(key, (error) => {
+                        if (error)
+                            return reject(error);
 
-                this.client?.set(key, this.lzstring.compressToBase64(value), (error, reply: string) => this.onFinish(key, 'SET VALUE', String(error), callback, reply));
-            });
-        } catch (error) {
-            return Debug.fatal('redis', this.onError(String(error)));
-        }
+                        resolve();
+                    });
+                });
+            } catch (error) {
+                return reject(error);
+            }
+        });
     }
+}
 
-    async get(key: string, callback: typeof _callback): Promise<void> {
-        try {
-            await this.connect();
-
-            this.client?.select(this.db, async (error) => {
-                if (error)
-                    return Debug.fatal('redis', this.onError(String(error)));
-
-                this.client?.get(key, async (error, value: string | null) => this.onFinish(key, 'GET VALUE', String(error), callback, this.lzstring.decompressFromBase64(value || "") || ""));
-            });
-        } catch (error) {
-            return Debug.fatal('redis', this.onError(String(error)));
-        }
-    }
+export default function clientRedis(db: number) {
+    return new REDIS(db);
 }

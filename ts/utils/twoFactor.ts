@@ -34,11 +34,11 @@ export async function generateQRCode(username: string): Promise<QRCode> {
 export async function verify(tempBase32Secret: string, userToken: string): Promise<boolean> {
     try {
         if (!verifyToken(tempBase32Secret, userToken)) {
-            throw new Error(`Código de autenticação de duas etapas está inválido.`);
+            throw new TypeError(`Código de autenticação de duas etapas está inválido.`);
         } else {
             return true;
         }
     } catch (err) {
-        throw new Error(`Two Factor Validation Failed, error: ${err}`);
+        throw new TypeError(`Two Factor Validation Failed, error: ${err}`);
     }
 }

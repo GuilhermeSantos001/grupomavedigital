@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 16/12/2021
  */
 
 import { FilterQuery } from 'mongoose';
@@ -31,7 +31,7 @@ class cardsManagerDB {
             await model.validate();
             await model.save();
         } else {
-            throw new Error(`Cartão Digital com o ID(${card.cid}) já está registrado.`);
+            throw new TypeError(`Cartão Digital com o ID(${card.cid}) já está registrado.`);
         }
 
         return true;
@@ -53,9 +53,20 @@ class cardsManagerDB {
             _card.vcard = card.vcard;
             _card.footer = card.footer;
 
-            await _card.save();
+            await cardsDB.updateOne({ cid }, {
+                $set: {
+                    version: _card.version,
+                    photo: _card.photo,
+                    name: _card.name,
+                    jobtitle: _card.jobtitle,
+                    phones: _card.phones,
+                    whatsapp: _card.whatsapp,
+                    vcard: _card.vcard,
+                    footer: _card.footer
+                }
+            });
         } else {
-            throw new Error(`Cartão Digital com o ID(${cid}) não está registrado.`);
+            throw new TypeError(`Cartão Digital com o ID(${cid}) não está registrado.`);
         }
 
         return true;
@@ -70,7 +81,7 @@ class cardsManagerDB {
         if (_card) {
             await _card.remove();
         } else {
-            throw new Error(`Cartão Digital com o ID(${cid}) não está registrado.`);
+            throw new TypeError(`Cartão Digital com o ID(${cid}) não está registrado.`);
         }
 
         return true;

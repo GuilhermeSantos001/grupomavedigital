@@ -1,14 +1,12 @@
 /**
  * @description Controle dos JSON Web Tokens
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.2
+ * @update 26/11/2021
  */
 
 import { sign, verify, Secret } from 'jsonwebtoken';
 
-import REDIS from '@/core/redis';
-import Moment from '@/utils/moment';
+import Redis from '@/core/redis';
 
 declare type Options = { expiresIn: string | '3m' | '10m' | '1h' | '7d' };
 
@@ -24,10 +22,8 @@ export default class JsonWebToken {
     static flush(): Promise<void> {
         return new Promise(async (resolve, reject) => {
             try {
-                const client = new REDIS(this.db);
-                await client.connect();
-                await client.flush();
-                client.disconnect();
+                await Redis(JsonWebToken.db).flush();
+
                 resolve();
             } catch (error) {
                 reject(error);
@@ -37,19 +33,17 @@ export default class JsonWebToken {
 
     static isCancelled(token: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
-            const client = new REDIS(this.db);
+            try {
+                const value = await Redis(JsonWebToken.db).get(`token_cancelled_${token}`);
 
-            client.get(`token_cancelled_${token}`, (response: boolean, values: any[]) => {
-                client.disconnect();
-
-                if (!response)
-                    return reject();
-
-                if (values.filter(value => value !== '').length > 0)
+                if (typeof value === 'string' && value === token) {
                     return resolve(true);
+                }
 
                 resolve(false);
-            });
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -81,17 +75,13 @@ export default class JsonWebToken {
 
     static cancel(token: string) {
         return new Promise<boolean>(async (resolve, reject) => {
-            const client = new REDIS(this.db);
+            try {
+                await Redis(JsonWebToken.db).set(`token_cancelled_${token}`, token);
 
-            client.set(`token_cancelled_${token}`, Moment.format(), (response: boolean, values: any[]) => {
-                client.disconnect();
-
-                if (!response) {
-                    return resolve(false);
-                }
-
-                return resolve(true);
-            });
+                resolve(true);
+            } catch (error) {
+                reject(error);
+            };
         });
     }
 }

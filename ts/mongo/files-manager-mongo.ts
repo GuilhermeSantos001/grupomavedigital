@@ -1,14 +1,14 @@
 /**
  * @description Schema dos Arquivos
  * @author @GuilhermeSantos001
- * @update 17/08/2021
- * @version 1.6.4
+ * @update 18/11/2021
  */
 
 import { Model, Schema, model } from "mongoose";
 import { ObjectId } from 'bson';
 
 import { PrivilegesSystem } from "@/mongo/user-manager-mongo";
+import Users from "@/db/user-db";
 
 export type FileStatus = 'Available' | 'Protected' | 'Blocked' | 'Writing' | 'Reading' | 'Removing' | 'Updating' | 'Trash' | 'Recycle';
 
@@ -49,6 +49,10 @@ export interface FileBlocked {
 }
 
 export interface HistoryFile {
+    authorId: string;
+    uploadDate: Date;
+    size: number;
+    compressedSize: number;
     fileId: ObjectId;
     version: number;
 }
@@ -86,6 +90,7 @@ export interface OrderAnswer {
 
 export interface fileInterface {
     cid?: string;
+    room?: string[];
     authorId: string;
     accessGroupId?: GroupId[];
     accessUsersId?: UserId[];
@@ -93,6 +98,8 @@ export interface fileInterface {
     description: string;
     version?: number;
     history?: HistoryFile[];
+    size: number;
+    compressedSize: number;
     type: string;
     tag: string;
     status: FileStatus;
@@ -132,14 +139,22 @@ export interface fileModelInterface extends fileInterface, Model<fileInterface> 
     allowsBlock: boolean;
     getActualFileId: ObjectId;
     getHistoryFilesId: ObjectId[];
+    checkGroupAccess: (group: Pick<GroupId, "name">, permission: FilePermission) => boolean;
+    checkUserAccess: (user: Pick<UserId, "email">, permission: FilePermission) => boolean;
     orderTimelapseExpired: () => boolean;
     orderTypeIs: (type: OrderType) => boolean;
     orderAllAssigneesApproved: () => boolean;
     orderAnswerIndex: (answer: OrderAnswer) => number;
+    sizeAdd: (size: number, compressedSize: number) => void;
+    sizeSubtract: (size: number, compressedSize: number) => void;
+    inRoom: (room: string[]) => boolean;
+    getAuthorUsername: () => Promise<string>;
+    getAuthorEmail: () => Promise<string>;
 }
 
 export const matches: Matches = {
-    specialCharacters: /[!@#$%¨`´&*()-_+=§}º{}[]'".,;<>^~?|\\]/g,
+    // eslint-disable-next-line no-useless-escape
+    specialCharacters: /[\!\@\#\$\%\¨\`\´\&\*\(\)\-\_\+\=\§\}\º\{\}\[\]\'\"\/\.\,\;\<\>\^\~\?\|\\]/g,
     mail: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/g
 };
 
@@ -148,10 +163,43 @@ export const groupIdSchema: Schema = new Schema({
         type: String,
         enum: {
             values: [
+                // Sistema
+                'common',
                 'administrador',
-                'supervisor',
                 'moderador',
-                'common'
+                'supervisor',
+                'diretoria',
+                // Financeiro
+                'fin_faturamento',
+                'fin_assistente',
+                'fin_gerente',
+                // RH/DP
+                'rh_beneficios',
+                'rh_encarregado',
+                'rh_juridico',
+                'rh_recrutamento',
+                'rh_sesmet',
+                // Suprimentos
+                'sup_compras',
+                'sup_estoque',
+                'sup_assistente',
+                'sup_gerente',
+                // Comercial
+                'com_vendas',
+                'com_adm',
+                'com_gerente',
+                'com_qualidade',
+                // Operacional
+                'ope_mesa',
+                'ope_coordenador',
+                'ope_supervisor',
+                'ope_gerente',
+                // Marketing
+                'mkt_geral',
+                // Juridico
+                'jur_advogado',
+                // Contabilidade
+                'cont_contabil'
             ],
             message: '{VALUE} este valor não é suportado'
         },
@@ -264,6 +312,27 @@ export const blockedSchema: Schema = new Schema({
 });
 
 export const historySchema: Schema = new Schema({
+    authorId: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    uploadDate: {
+        type: Date,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    size: {
+        type: Number,
+        min: 0,
+        default: 0,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    compressedSize: {
+        type: Number,
+        min: 0,
+        default: 0,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
     fileId: {
         type: String,
         trim: true,
@@ -364,6 +433,11 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
         trim: true,
         required: [true, '{PATH} este campo é obrigatório']
     },
+    room: {
+        type: [String],
+        default: ['*'],
+        required: [false, '{PATH} este campo é obrigatório']
+    },
     authorId: {
         type: String,
         trim: true,
@@ -441,8 +515,7 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
             message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [25, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+        required: [false, '{PATH} este campo é obrigatório']
     },
     version: {
         type: Number,
@@ -455,23 +528,29 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
         default: [],
         required: [true, '{PATH} este campo é obrigatório']
     },
+    size: {
+        type: Number,
+        min: 0,
+        default: 0,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    compressedSize: {
+        type: Number,
+        min: 0,
+        default: 0,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
     type: {
         type: String,
         trim: true,
         validate: {
             validator: function (value: string) {
-                const index = value.lastIndexOf('.');
+                value = value.substring(value.lastIndexOf('.'));
 
-                if (index !== -1) {
-                    value = value.substr(index);
-
-                    if (value.length <= 0)
-                        return false;
-
-                    return true;
-                } else {
+                if (value.length <= 0)
                     return false;
-                }
+
+                return true;
             },
             message: (props: { value: string }) => `${props.value} não é uma extensão de arquivo valida.`
         },
@@ -489,8 +568,7 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
             message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+        required: [false, '{PATH} este campo é obrigatório']
     },
     status: {
         type: String,
@@ -578,89 +656,89 @@ export const fileSchema = new Schema<fileModelInterface, Model<fileModelInterfac
     }
 });
 
-fileSchema.virtual("available").get(function (this: fileModelInterface) {
+fileSchema.virtual("available").get(function (this: fileModelInterface): boolean {
     return this.status === 'Available' ? true : false;
 });
 
-fileSchema.virtual("protected").get(function (this: fileModelInterface) {
+fileSchema.virtual("protected").get(function (this: fileModelInterface): boolean {
     return this.protect !== undefined || this.status === 'Protected' ? true : false;
 });
 
-fileSchema.virtual("blocked").get(function (this: fileModelInterface) {
+fileSchema.virtual("blocked").get(function (this: fileModelInterface): boolean {
     return this.block !== undefined || this.status === 'Blocked' ? true : false;
 });
 
-fileSchema.virtual("writing").get(function (this: fileModelInterface) {
+fileSchema.virtual("writing").get(function (this: fileModelInterface): boolean {
     return this.status === 'Writing' ? true : false;
 });
 
-fileSchema.virtual("reading").get(function (this: fileModelInterface) {
+fileSchema.virtual("reading").get(function (this: fileModelInterface): boolean {
     return this.status === 'Reading' ? true : false;
 });
 
-fileSchema.virtual("removing").get(function (this: fileModelInterface) {
+fileSchema.virtual("removing").get(function (this: fileModelInterface): boolean {
     return this.status === 'Removing' ? true : false;
 });
 
-fileSchema.virtual("updating").get(function (this: fileModelInterface) {
+fileSchema.virtual("updating").get(function (this: fileModelInterface): boolean {
     return this.status === 'Updating' ? true : false;
 });
 
-fileSchema.virtual("shared").get(function (this: fileModelInterface) {
+fileSchema.virtual("shared").get(function (this: fileModelInterface): boolean {
     return this.share !== undefined;
 });
 
-fileSchema.virtual("garbage").get(function (this: fileModelInterface) {
+fileSchema.virtual("garbage").get(function (this: fileModelInterface): boolean {
     return this.trash !== undefined;
 });
 
-fileSchema.virtual("isAssociatedFolder").get(function (this: fileModelInterface) {
+fileSchema.virtual("isAssociatedFolder").get(function (this: fileModelInterface): boolean {
     return this.folderId !== undefined;
 });
 
-fileSchema.virtual("isAssociatedGroup").get(function (this: fileModelInterface) {
+fileSchema.virtual("isAssociatedGroup").get(function (this: fileModelInterface): boolean {
     if (!this.accessGroupId)
         return false;
 
     return this.accessGroupId.length > 0;
 });
 
-fileSchema.virtual("isAssociatedUser").get(function (this: fileModelInterface) {
+fileSchema.virtual("isAssociatedUser").get(function (this: fileModelInterface): boolean {
     if (!this.accessUsersId)
         return false;
 
     return this.accessUsersId.length > 0;
 });
 
-fileSchema.virtual("allowsWrite").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsWrite").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Write').length > 0;
 });
 
-fileSchema.virtual("allowsRead").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsRead").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Read').length > 0;
 });
 
-fileSchema.virtual("allowsDelete").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsDelete").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Delete').length > 0;
 });
 
-fileSchema.virtual("allowsProtect").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsProtect").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Protect').length > 0;
 });
 
-fileSchema.virtual("allowsShare").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsShare").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Share').length > 0;
 });
 
-fileSchema.virtual("allowsSecurity").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsSecurity").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Security').length > 0;
 });
 
-fileSchema.virtual("allowsBlock").get(function (this: fileModelInterface) {
+fileSchema.virtual("allowsBlock").get(function (this: fileModelInterface): boolean {
     return this.permission.filter(permission => permission === 'Block').length > 0;
 });
 
-fileSchema.virtual("getActualFileId").get(function (this: fileModelInterface) {
+fileSchema.virtual("getActualFileId").get(function (this: fileModelInterface): string | ObjectId {
     if (!this.history)
         this.history = [];
 
@@ -672,7 +750,7 @@ fileSchema.virtual("getActualFileId").get(function (this: fileModelInterface) {
     return `File with version(${this.version}) has not ID.`;
 });
 
-fileSchema.virtual("getHistoryFilesId").get(function (this: fileModelInterface) {
+fileSchema.virtual("getHistoryFilesId").get(function (this: fileModelInterface): string | ObjectId[] {
     if (!this.history)
         this.history = [];
 
@@ -687,7 +765,7 @@ fileSchema.virtual("getHistoryFilesId").get(function (this: fileModelInterface) 
 /**
  * @description Verifica se o tempo para responder o pedido expirou
  */
-fileSchema.method('orderTimelapseExpired', function (this: fileModelInterface) {
+fileSchema.method('orderTimelapseExpired', function (this: fileModelInterface): boolean {
     if (this.order && this.order.timelapse) {
         const now = new Date();
 
@@ -700,7 +778,7 @@ fileSchema.method('orderTimelapseExpired', function (this: fileModelInterface) {
 /**
  * @description Verifica se o tipo do pedido é igual a X
  */
-fileSchema.method('orderTypeIs', function (this: fileModelInterface, type: OrderType) {
+fileSchema.method('orderTypeIs', function (this: fileModelInterface, type: OrderType): boolean {
     if (this.order) {
         return type === this.order.type;
     }
@@ -711,7 +789,7 @@ fileSchema.method('orderTypeIs', function (this: fileModelInterface, type: Order
 /**
  * @description Verifica se todos os procuradores aprovaram o pedido
  */
-fileSchema.method('orderAllAssigneesApproved', function (this: fileModelInterface) {
+fileSchema.method('orderAllAssigneesApproved', function (this: fileModelInterface): boolean {
     if (this.assignees && this.order && this.order.answers) {
         const approved = this.order.answers.filter((answer: OrderAnswer) => answer.decision === 'Approved');
 
@@ -724,21 +802,80 @@ fileSchema.method('orderAllAssigneesApproved', function (this: fileModelInterfac
 /**
  * @description Retorna o index da resposta do procurador
  */
-fileSchema.method('orderAnswerIndex', function (this: fileModelInterface, answer: OrderAnswer) {
-    if (this.order && this.order.answers) {
-        let indexOf = 0;
+fileSchema.method('orderAnswerIndex', function (this: fileModelInterface, answer: OrderAnswer): number {
+    if (this.order && this.order.answers)
+        return this.order.answers.findIndex((item) => item.assignee.email === answer.assignee.email);
 
-        for (const [i, _answer] of this.order.answers.entries()) {
-            if (_answer.assignee.email === answer.assignee.email) {
-                indexOf = i;
-                break;
-            }
-        }
+    return -1;
+});
 
-        return indexOf;
+/**
+ * @description Retorna se o grupo tem permissão para acessar o arquivo
+ */
+fileSchema.method('checkGroupAccess', function (this: fileModelInterface, group: Pick<GroupId, "name">, permission: FilePermission): boolean {
+    if (this.accessGroupId) {
+        return this.accessGroupId.filter(access => access.name === group.name && access.permissions.find(item => item === permission)).length > 0;
     }
 
-    return 0;
+    return false;
+});
+
+/**
+ * @description Retorna se o usuario tem permissão para acessar o arquivo
+ */
+fileSchema.method('checkUserAccess', function (this: fileModelInterface, user: Pick<UserId, "email">, permission: FilePermission): boolean {
+    if (this.accessUsersId) {
+        return this.accessUsersId.filter(access => access.email === user.email && access.permissions.find(item => item === permission)).length > 0;
+    }
+
+    return false;
+});
+
+/**
+ * @description Aumenta o tamanho do arquivo
+ */
+fileSchema.method('sizeAdd', function (this: fileModelInterface, size: number, compressedSize: number): void {
+    this.size += size;
+    this.compressedSize += compressedSize;
+});
+
+/**
+ * @description Diminui o tamanho do arquivo
+ */
+fileSchema.method('sizeSubtract', function (this: fileModelInterface, size: number, compressedSize: number): void {
+    this.size -= size;
+    this.compressedSize -= compressedSize;
+});
+
+/**
+ * @description Verifica se o arquivo está disponível no quarto informado
+ */
+fileSchema.method('inRoom', function (this: fileModelInterface, room: string[]): boolean {
+    if (!this.room)
+        this.room = [];
+
+    if (this.room.includes('*'))
+        return true;
+
+    return this.room.filter(item => room.includes(item)).length > 0;
+});
+
+/**
+ * @description Retorna o nome de usuário do autor do arquivo
+ */
+fileSchema.method('getAuthorUsername', async function (this: fileModelInterface): Promise<string> {
+    const { username } = await Users.getInfo(this.authorId);
+
+    return username;
+});
+
+/**
+ * @description Retorna o email do autor do arquivo
+ */
+fileSchema.method('getAuthorEmail', async function (this: fileModelInterface): Promise<string> {
+    const { email } = await Users.getInfo(this.authorId);
+
+    return email;
 });
 
 export default model<fileModelInterface>("files", fileSchema);

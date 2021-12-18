@@ -1,0 +1,27 @@
+# Schema de uploads
+scalar Upload
+
+type File {
+  authorId: String!
+  name: String!
+  size: Int!
+  compressedSize: Int!
+  fileId: String!
+  version: Int!
+  status: String!
+}
+
+type Mutation {
+  singleUpload(
+    file: Upload!
+    size: String!
+    signedUrl: String!
+    auth: String!
+  ): File!
+  multipleUpload(
+    files: [Upload!]!
+    sizes: [String!]!
+    signedUrl: String!
+    auth: String!
+  ): [File!]!
+}

@@ -1,58 +1,56 @@
 /**
  * @description Servidor Socket.io
  * @author @GuilhermeSantos001
- * @update 17/07/2021
- * @version 1.0.3
+ * @update 19/10/2021
  */
 
-import { Server as HTTPServer } from 'http';
-import { Server, Socket } from "socket.io";
+import { Server, Socket, ServerOptions } from "socket.io";
 import { createAdapter } from '@socket.io/redis-adapter';
 import { ExtendedError } from 'socket.io/dist/namespace';
-import { RedisClient } from 'redis';
+import { decompressFromBase64 } from 'lz-string';
+import Redis from 'ioredis';
 
-import JsonWebToken from "@/core/JsonWebToken";
-import WebSocketRouterMiddlewares from '@/web/webSocketRouterMiddlewares';
-import WebSocketRouterCards from '@/web/webSocketRouterCards';
-import WebSocketRouterHerculesStorage from '@/web/webSocketRouterHerculesStorage';
+import verifySignedURL from '@/utils/verifySignedURL';
+import routerMiddlewares from '@/socketIO/routerMiddlewares';
+import routerHercules from '@/socketIO/routerHercules';
 
 class IO {
     static readonly db: number = 3;
-    static _context: Server;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static context: any;
 
     constructor() {
-        throw new Error('this is static class');
+        throw new TypeError('this is static class');
     }
 
-    static get context(): Server {
-        return this._context;
-    }
-
-    static set context(value: Server) {
-        this._context = value;
-    }
-
-    static create(server: HTTPServer) {
-        let options = {};
+    static create() {
+        let options: Partial<ServerOptions> = {};
 
         if (process.env.NODE_ENV === 'development') {
             options = {
                 cors: {
-                    origin: "*:*",
-                    methods: ["GET", "POST"]
-                }
+                    origin: '*',
+                    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+                    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
+                    credentials: false,
+                },
+                pingTimeout: 60000,
+                pingInterval: 25000,
             };
         } else {
             options = {
                 cors: {
                     origin: "https://grupomavedigital.com.br",
-                    methods: ["GET", "POST"]
+                    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+                    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
+                    credentials: true,
                 },
-                transports: ['websocket', 'polling']
+                pingTimeout: 60000,
+                pingInterval: 25000,
             };
         }
 
-        this.context = new Server(server, options);
+        this.context = new Server(5000, options);
 
         this.listening();
     }
@@ -61,37 +59,17 @@ class IO {
         /**
          * Redis Adapter & Middlewares
          */
-        const pubClient = new RedisClient({ host: process.env.REDIS_HOST, port: Number(process.env.REDIS_PORT), db: this.db });
+        const pubClient = new Redis({ host: process.env.REDIS_HOST, port: Number(process.env.REDIS_PORT), db: this.db });
         const subClient = pubClient.duplicate();
 
         this.context.adapter(createAdapter(pubClient, subClient));
 
-        this.context.use((socket: Socket, next: (err?: ExtendedError | undefined) => void) => {
-            const token = socket.handshake.auth.token;
-
-            JsonWebToken.verify(token)
-                .then(result => {
-                    if (
-                        !result
-                    ) {
-                        const err = new Error("not authorized");
-
-                        return next({
-                            ...err,
-                            data: { content: "Please retry later" }
-                        });
-                    }
-
-                    return next();
-                })
-                .catch(error => {
-                    const err = new Error("not authorized");
-
-                    return next({
-                        ...err,
-                        data: { content: "Error with token ->", error }
-                    });
-                });
+        this.context.use(async (socket: Socket, next: (err?: ExtendedError | undefined) => void) => {
+            if (verifySignedURL(decompressFromBase64(socket.handshake.auth.signedUrl) || "")) {
+                return next();
+            } else {
+                return next(new Error('Session expired!'));
+            }
         });
 
         /**
@@ -99,13 +77,12 @@ class IO {
          */
 
         this.context.on('connection', (socket: Socket) => {
-            WebSocketRouterMiddlewares(this.context, socket);
-            WebSocketRouterCards(this.context, socket);
-            WebSocketRouterHerculesStorage(this.context, socket);
+            routerMiddlewares(this.context, socket);
+            routerHercules(this.context, socket);
         });
     }
 }
 
-export default function SocketIO(server: HTTPServer): void {
-    IO.create(server);
+export default function SocketIO(): void {
+    IO.create();
 }

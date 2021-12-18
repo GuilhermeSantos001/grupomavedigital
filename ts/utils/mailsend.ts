@@ -56,7 +56,7 @@ declare type Options = {
 
 export default class MailSend {
     constructor() {
-        throw new Error('this is static class');
+        throw new TypeError('this is static class');
     }
 
     static baseurl = BASE_URL;
@@ -88,7 +88,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new Error(String(error));
+            throw new TypeError(String(error));
         }
     }
 
@@ -118,7 +118,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new Error(String(error));
+            throw new TypeError(String(error));
         }
     }
 
@@ -147,7 +147,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new Error(String(error));
+            throw new TypeError(String(error));
         }
     }
 
@@ -179,7 +179,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new Error(String(error));
+            throw new TypeError(String(error));
         }
     }
 
@@ -210,7 +210,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new Error(String(error));
+            throw new TypeError(String(error));
         }
     }
 }

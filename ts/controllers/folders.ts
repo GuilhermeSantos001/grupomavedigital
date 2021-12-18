@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciamento de pastas
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 25/11/2021
  */
 
 import { GroupId, UserId, folderInterface, folderModelInterface } from '@/mongo/folders-manager-mongo';
 import FolderManagerDB, { Access } from '@/db/folders-db';
 import { Access as AccessFile, BlockVerify } from '@/db/files-db';
 import { FilterQuery } from 'mongoose';
+
+export interface responseDataFolder extends folderInterface, Pick<folderModelInterface, 'checkGroupAccess' | 'checkUserAccess' | 'inRoom' | 'getAuthorUsername' | 'getAuthorEmail'> { }
 
 class FolderController {
     /**
@@ -16,12 +20,14 @@ class FolderController {
      * @param access {Access} - Propriedades do acesso
      */
     private async closeAfterInteraction(cid: string, access: Access): Promise<void> {
-        return new Promise((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve())
-                .catch(error => reject(error))
+        return new Promise(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.close(cid, access);
+
+                resolve();
+            } catch (error: any) {
+                reject(error.message);
+            }
         });
     }
 
@@ -31,42 +37,47 @@ class FolderController {
      * @param skip {Number} - Pular x itens iniciais no banco de dados
      * @param limit {Number} - Limite de itens a serem retornados
      */
-    public get(filter: FilterQuery<folderModelInterface>, skip: number, limit: number): Promise<folderInterface[]> {
-        return new Promise((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.get(filter, skip, limit)
-            ])
-                .then(values => {
-                    const folders = values[0];
-                    resolve(folders.map(folder => {
-                        return {
-                            cid: folder.cid,
-                            authorId: folder.authorId,
-                            accessGroupId: folder.accessGroupId,
-                            accessUsersId: folder.accessUsersId,
-                            name: folder.name,
-                            description: folder.description,
-                            status: folder.status,
-                            type: folder.type,
-                            tag: folder.tag,
-                            permission: folder.permission,
-                            filesId: folder.filesId,
-                            foldersId: folder.foldersId,
-                            folderId: folder.folderId,
-                            share: folder.share,
-                            protect: folder.protect,
-                            block: folder.block,
-                            trash: folder.trash,
-                            recycle: folder.recycle,
-                            assignees: folder.assignees,
-                            order: folder.order,
-                            updated: folder.updated,
-                            lastAccess: folder.lastAccess,
-                            createdAt: folder.createdAt
-                        };
-                    }));
-                })
-                .catch(error => reject(error))
+    public get(filter: FilterQuery<folderModelInterface>, skip: number, limit: number): Promise<responseDataFolder[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const folders = await FolderManagerDB.get(filter, skip, limit);
+
+                resolve(folders.map(folder => {
+                    return {
+                        cid: folder.cid,
+                        room: folder.room,
+                        authorId: folder.authorId,
+                        accessGroupId: folder.accessGroupId,
+                        accessUsersId: folder.accessUsersId,
+                        name: folder.name,
+                        description: folder.description,
+                        status: folder.status,
+                        type: folder.type,
+                        tag: folder.tag,
+                        permission: folder.permission,
+                        filesId: folder.filesId,
+                        foldersId: folder.foldersId,
+                        folderId: folder.folderId,
+                        share: folder.share,
+                        protect: folder.protect,
+                        block: folder.block,
+                        trash: folder.trash,
+                        recycle: folder.recycle,
+                        assignees: folder.assignees,
+                        order: folder.order,
+                        updated: folder.updated,
+                        lastAccess: folder.lastAccess,
+                        createdAt: folder.createdAt,
+                        checkGroupAccess: folder.checkGroupAccess,
+                        checkUserAccess: folder.checkUserAccess,
+                        inRoom: folder.inRoom,
+                        getAuthorEmail: folder.getAuthorEmail,
+                        getAuthorUsername: folder.getAuthorUsername
+                    };
+                }));
+            } catch (error: any) {
+                reject(error.message);
+            }
         });
     }
 
@@ -75,7 +86,13 @@ class FolderController {
      * @param folder {folderInterface} - Propriedades da pasta.
      */
     public async newFolder(folder: folderInterface): Promise<folderModelInterface> {
-        return await FolderManagerDB.save(folder);
+        return new Promise(async (resolve, reject) => {
+            try {
+                resolve(await FolderManagerDB.save(folder));
+            } catch (error: any) {
+                reject(error.message);
+            }
+        });
     }
 
     /**
@@ -93,13 +110,37 @@ class FolderController {
      * @param accessFile {accessFile} - Propriedades do acesso para arquivos
      */
     public delete(cid: string, access: Access, accessFile: AccessFile) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.delete(cid, access, accessFile)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.delete(cid, access, accessFile);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
+        });
+    }
+
+    /**
+     * @description Atualiza as propriedades da pasta
+     * @param cid {String} - CustomId da pasta
+     * @param access {Access} - Propriedades do acesso para pastas
+     * @param props {Pick<folderInterface, 'name' | 'description' | 'tag' | 'type'>} - Propriedades a serem atualizadas
+     */
+    public update(cid: string, access: Access, props: Pick<folderInterface, 'name' | 'description' | 'tag' | 'type'>) {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.update(cid, access, props);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -110,14 +151,17 @@ class FolderController {
      * @param group {GroupId} - Grupo do usuário
      */
     public insertGroupId(cid: string, access: Access, group: GroupId) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.addGroupId(cid, access, group),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.addGroupId(cid, access, group);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -128,14 +172,17 @@ class FolderController {
      * @param group {GroupId} - Grupo do usuário
      */
     public removeGroupId(cid: string, access: Access, group: GroupId) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.removeGroupId(cid, access, group),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.removeGroupId(cid, access, group);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -146,14 +193,17 @@ class FolderController {
      * @param user {UserId} - Propriedades do usuário
      */
     public insertUserId(cid: string, access: Access, user: UserId) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.addUserId(cid, access, user),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.addUserId(cid, access, user);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -164,14 +214,17 @@ class FolderController {
      * @param user {UserId} - Propriedades do usuário
      */
     public removeUserId(cid: string, access: Access, user: UserId) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.removeUserId(cid, access, user),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.removeUserId(cid, access, user);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -183,14 +236,17 @@ class FolderController {
      * @param accessFile {accessFile} - Propriedades do acesso para arquivos
      */
     public append(cid: string, access: Access, fileId: string, accessFile: AccessFile) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.append(cid, access, fileId, accessFile),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.append(cid, access, fileId, accessFile);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -202,14 +258,17 @@ class FolderController {
      * @param accessFile {accessFile} - Propriedades do acesso para arquivos
      */
     public remove(cid: string, access: Access, fileId: string, accessFile: AccessFile) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.remove(cid, access, fileId, accessFile),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.remove(cid, access, fileId, accessFile);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -220,14 +279,17 @@ class FolderController {
      * @param folderId {String} - CustomId da pasta a ser adicionada
      */
     public push(cid: string, access: Access, folderId: string) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.push(cid, access, folderId),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.push(cid, access, folderId);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -238,14 +300,17 @@ class FolderController {
      * @param folderId {String} - CustomId da pasta a ser adicionada
      */
     public splice(cid: string, access: Access, folderId: string) {
-        return new Promise<boolean>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.splice(cid, access, folderId),
-                FolderManagerDB.close(cid, access)
-            ])
-                .then(() => resolve(true))
-                .finally(() => this.closeAfterInteraction(cid, access).catch(error => reject(error)))
-                .catch(error => reject(error));
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                await FolderManagerDB.splice(cid, access, folderId);
+                await FolderManagerDB.close(cid, access);
+
+                resolve(true);
+            } catch (error: any) {
+                this.closeAfterInteraction(cid, access)
+                    .then(() => reject(error.message))
+                    .catch(_error => reject(_error));
+            }
         });
     }
 
@@ -468,38 +533,36 @@ class FolderController {
      * @description Reciclagem das pastas na lixeira
      */
     public recycleGarbage() {
-        return new Promise<string>((resolve, reject) => {
-            Promise.all([
-                FolderManagerDB.recycleGarbage()
-            ])
-                .then(values => {
-                    const foldersId = values[0];
+        return new Promise<string>(async (resolve, reject) => {
+            try {
+                const foldersId = await FolderManagerDB.recycleGarbage();
 
-                    if (foldersId.length > 0) {
-                        const
-                            access: Access = {
-                                group: {
-                                    name: "administrador",
-                                    permission: "Delete"
-                                }
-                            },
-                            accessFile: AccessFile = {
-                                group: {
-                                    name: "administrador",
-                                    permission: "Delete"
-                                }
-                            };
+                if (foldersId.length > 0) {
+                    const
+                        access: Access = {
+                            group: {
+                                name: "administrador",
+                                permission: "Delete"
+                            }
+                        },
+                        accessFile: AccessFile = {
+                            group: {
+                                name: "administrador",
+                                permission: "Delete"
+                            }
+                        };
 
-                        for (const folderId of foldersId) {
-                            this.delete(folderId, access, accessFile).catch(error => reject(error));
-                        }
-
-                        return resolve(`${foldersId.length} pasta(s) da lixeira foram recicladas.`);
-                    } else {
-                        return resolve(`Nenhuma pasta da lixeira foi reciclada.`);
+                    for (const folderId of foldersId) {
+                        this.delete(folderId, access, accessFile).catch(error => reject(error.message));
                     }
-                })
-                .catch(error => reject(error))
+
+                    return resolve(`${foldersId.length} pasta(s) da lixeira foram recicladas.`);
+                } else {
+                    return resolve(`Nenhuma pasta da lixeira foi reciclada.`);
+                }
+            } catch (error: any) {
+                reject(error.message)
+            }
         });
     }
 }

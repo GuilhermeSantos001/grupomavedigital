@@ -1,8 +1,7 @@
 /**
  * @description Retorna as informações de IP do cliente
  * @author @GuilhermeSantos001
- * @update 21/09/2021
- * @version 1.0.0
+ * @update 13/11/2021
  */
 
 import express from 'express';
@@ -17,7 +16,7 @@ interface IP {
 }
 
 export default function (req: express.Request): IP {
-  const ip = req.ip,
+  const ip: string | number = req.headers['x-real-ip'] instanceof Array ? req.headers['x-real-ip'][0] : req.headers['x-real-ip'] || req.ip,
     geoIP = lookup(ip) || { 'country': 'Unknown', 'region': 'Unknown', 'city': 'Unknown' },
     userIP: IP = {
       country: geoIP['country'],

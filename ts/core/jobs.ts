@@ -1,12 +1,13 @@
+/* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciador de Processamentos Paralelos
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 26/11/2021
  */
 
 import { v4 } from 'uuid';
 
-import REDIS from '@/core/redis';
+import Redis from '@/core/redis';
 import { jobInterface, jobModelInterface } from '@/mongo/jobs-manager-mongo';
 import jobManagerDB from '@/db/jobs-db';
 import mailsend from '@/utils/mailsend';
@@ -20,60 +21,50 @@ export default class Jobs {
     static readonly delay: number = 30000; // 5 Segundos
 
     constructor() {
-        throw new Error('this is static class');
+        throw new TypeError('this is static class');
     }
 
     static jobs: jobModelInterface[] = [];
 
     static process: NodeJS.Timeout;
 
-    static isWorking(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            const client = new REDIS(this.db);
+    static isWorking(): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const value = await Redis(this.db).get(`jobsWorking`);
 
-            client.get(`jobsWorking`, (response: boolean, values: unknown[]) => {
-                client.disconnect();
-
-                if (!response)
+                if (!value)
                     return reject();
 
-                if (values.filter(value => value !== '').length > 0) {
-                    if (values[0] === 'true') {
-                        return resolve(true);
-                    } else {
-                        return resolve(false);
-                    }
-                }
-
-                return resolve(false);
-            });
+                resolve();
+            } catch (error) {
+                return reject(error);
+            }
         });
     }
 
-    static setWork(status: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            const client = new REDIS(this.db);
+    static setWork(status: string): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await Redis(this.db).set(`jobsWorking`, status);
 
-            client.set(`jobsWorking`, status, (response: boolean) => {
-                client.disconnect();
-
-                if (!response) {
-                    return resolve(false);
-                }
-
-                return resolve(true);
-            });
+                resolve();
+            } catch (error) {
+                return reject(error);
+            }
         });
     }
 
     static reset(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            Promise.all([
-                this.setWork('false'),
-                jobManagerDB.reset()
-            ])
-                .then(() => resolve())
-                .catch(error => reject(error))
+        return new Promise(async (resolve, reject) => {
+            try {
+                await this.setWork('false');
+                await jobManagerDB.reset();
+
+                return resolve();
+            } catch (error) {
+                return reject(error);
+            }
         });
     }
 
@@ -81,7 +72,7 @@ export default class Jobs {
         try {
             return await jobManagerDB.clear();
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -89,7 +80,7 @@ export default class Jobs {
         try {
             return await jobManagerDB.register(job);
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -97,7 +88,7 @@ export default class Jobs {
         try {
             this.jobs = await jobManagerDB.get();
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -105,7 +96,7 @@ export default class Jobs {
         try {
             return await jobManagerDB.update(cid, data);
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -113,7 +104,7 @@ export default class Jobs {
         try {
             return await jobManagerDB.remove(cid);
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -121,7 +112,7 @@ export default class Jobs {
         try {
             return await jobManagerDB.removeByName(name);
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -168,7 +159,7 @@ export default class Jobs {
 
             return true;
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -179,39 +170,31 @@ export default class Jobs {
             if (this.jobs.filter(_job => _job.cid !== job.cid).length <= 0)
                 await this.setWork('false');
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
     static async start(): Promise<void> {
         await this.setWork('true');
 
+        if (this.process)
+            clearTimeout(this.process);
+
         this.process = setTimeout(this.update.bind(this), this.delay);
     }
 
     static async update(): Promise<void> {
         try {
-            if (await this.isWorking()) {
-                await this.load();
+            await this.isWorking();
+            await this.load();
 
-                for (const job of this.jobs) {
-                    if (job.runAt) {
-                        const
-                            now = new Date(),
-                            date = new Date(job.date || '');
+            for (const job of this.jobs) {
+                if (job.runAt) {
+                    const
+                        now = new Date(),
+                        date = new Date(job.date || '');
 
-                        if (now >= date) {
-                            try {
-                                await this.run(job);
-
-                                break;
-                            } catch (error) {
-                                Debug.info('jobs', `Job(${job.cid}) processing error`, String(error));
-
-                                break;
-                            }
-                        }
-                    } else {
+                    if (now >= date)
                         try {
                             await this.run(job);
 
@@ -221,19 +204,28 @@ export default class Jobs {
 
                             break;
                         }
+                } else {
+                    try {
+                        await this.run(job);
+
+                        break;
+                    } catch (error) {
+                        Debug.info('jobs', `Job(${job.cid}) processing error`, String(error));
+
+                        break;
                     }
                 }
-
-                if (this.jobs.length <= 0)
-                    await this.setWork('false');
             }
+
+            if (this.jobs.length <= 0)
+                await this.setWork('false');
 
             if (this.process)
                 clearTimeout(this.process);
 
             this.process = setTimeout(this.update.bind(this), this.delay);
         } catch (error) {
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 
@@ -251,7 +243,7 @@ export default class Jobs {
                     await this.mailsend(job);
                 }
             } catch (error) {
-                throw new Error(JSON.stringify(error));
+                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
             }
         }
         else if (this.isFinish(job)) {
@@ -260,7 +252,7 @@ export default class Jobs {
 
                 await this.splice(job);
             } catch (error) {
-                throw new Error(JSON.stringify(error));
+                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
             }
         }
         else if (this.isError(job)) {
@@ -272,7 +264,7 @@ export default class Jobs {
 
                 await this.updateJob(job.cid || '', { status: job.status, error: undefined });
             } catch (error) {
-                throw new Error(JSON.stringify(error));
+                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
             }
         }
     }
@@ -291,7 +283,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     })
                     .catch(async error => {
@@ -303,7 +295,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status, error: job.error });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     });
             }
@@ -317,7 +309,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     })
                     .catch(async error => {
@@ -329,7 +321,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status, error: job.error });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     });
             }
@@ -343,7 +335,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     })
                     .catch(async error => {
@@ -355,7 +347,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status, error: job.error });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     });
             }
@@ -369,7 +361,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     })
                     .catch(async error => {
@@ -381,7 +373,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status, error: job.error });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     });
             }
@@ -395,7 +387,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     })
                     .catch(async error => {
@@ -407,7 +399,7 @@ export default class Jobs {
 
                             await this.updateJob(job.cid || '', { status: job.status, error: job.error });
                         } catch (error) {
-                            throw new Error(JSON.stringify(error));
+                            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
                         }
                     });
             }
@@ -418,10 +410,10 @@ export default class Jobs {
             try {
                 await this.updateJob(job.cid || '', { status: job.status, error: job.error })
             } catch (error) {
-                throw new Error(JSON.stringify(error));
+                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
             }
 
-            throw new Error(JSON.stringify(error));
+            throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
         }
     }
 }

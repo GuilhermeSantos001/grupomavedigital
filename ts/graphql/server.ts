@@ -1,8 +1,7 @@
 /**
  * @description Configurações do servidor
  * @author @GuilhermeSantos001
- * @update 28/09/2021
- * @version 1.0.0
+ * @update 18/11/2021
  */
 
 import { createServer } from "http";
@@ -11,8 +10,12 @@ import { SubscriptionServer } from "subscriptions-transport-ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers } from "@graphql-tools/utils";
 import { ApolloServer } from "apollo-server-express";
+import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
+import path from "path";
 import express from "express";
 import cors from 'cors';
+import routerFiles from "@/router/files";
+import routerUtils from "@/router/utils";
 
 /**
  * @description Cluster
@@ -31,7 +34,7 @@ import Jobs from '@/core/jobs';
 import mongoDB from '@/controllers/mongodb';
 
 /**
- * @description Middlewares
+ * @description Directives
  */
 import AuthDirective from '@/graphql/schemaDirectives/authDirective';
 import TokenDirective from '@/graphql/schemaDirectives/tokenDirective';
@@ -49,14 +52,21 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     const
         origin = process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
         allowedHeaders = [
-            'Origin',
-            'X-Requested-With',
-            'Content-Type',
-            'Accept',
-            'X-Access-Token',
+            'host',
+            'origin',
+            'x-requested-with',
+            'x-real-ip',
+            'x-access-token',
+            'content-type',
+            'accept',
+            'referer',
+            'accept-encoding',
+            'accept-language',
+            'connection',
             'authorization',
-            'token',
             'auth',
+            'token',
+            'refreshToken',
             'signature',
             'encodeuri',
             'temporarypass'
@@ -72,41 +82,41 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         next();
     });
 
+    app.use(graphqlUploadExpress({
+        maxFileSize: 100000000, // 100 MB
+        maxFieldSize: 100000000 // 100 MB
+    }));
+
     //options for cors middlewares
     let corsOptions: cors.CorsOptions = {};
 
     if (process.env.NODE_ENV === 'development') {
         corsOptions = {
-            allowedHeaders,
-            credentials: true,
-            methods: 'POST',
             origin,
-            preflightContinue: false,
+            methods: 'GET, POST',
+            allowedHeaders,
+            credentials: false,
         };
     } else {
         corsOptions = {
-            allowedHeaders: [
-                'Origin',
-                'X-Requested-With',
-                'Content-Type',
-                'Accept',
-                'X-Access-Token',
-                'authorization',
-                'token',
-                'auth',
-                'signature',
-                'encodeuri',
-                'temporarypass'
-            ],
-            credentials: true,
-            methods: 'POST',
             origin,
+            methods: 'GET, POST',
+            allowedHeaders,
+            credentials: true,
             preflightContinue: false,
         };
     }
 
     //use cors middleware
     app.use(cors(corsOptions));
+
+    // View engine setup
+    app.set('view engine', 'pug');
+    app.set('views', path.join(__dirname, 'views'));
+
+    //use routers
+    app.use('/files', routerFiles);
+    app.use('/utils', routerUtils);
 
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
@@ -121,7 +131,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             httpServer = createServer(app),
             schema = makeExecutableSchema({
                 typeDefs: options.typeDefs,
-                resolvers: options.resolvers
+                resolvers: { Upload: GraphQLUpload, ...options.resolvers }
             });
 
         /**
@@ -164,6 +174,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
         const server = new ApolloServer({
             schema,
+            introspection: true,
             context: req => ({ express: req, ...options.context })
         });
 
@@ -184,14 +195,14 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         httpServer.on('listening', onListening);
 
         /**
-         * @description HTTP Live Streaming started
+         * @description HTTP Live Streaming
          */
         hls(httpServer);
 
         /**
-         * @description Web Socket Server started
+         * @description Web Socket Server
          */
-        socketIO(httpServer);
+        socketIO();
     }
 
     if (!cluster.isWorker) {
@@ -200,8 +211,8 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         /**
          * @description Jobs started
          */
-        // Jobs.reset();
-        // Jobs.start();
+        Jobs.reset();
+        Jobs.start();
 
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.

@@ -1,13 +1,13 @@
 /**
  * @description Schema das Pastas
  * @author @GuilhermeSantos001
- * @update 23/08/2021
- * @version 1.7.2
+ * @update 25/11/2021
  */
 
 import { Model, Schema, model } from "mongoose";
 
 import { PrivilegesSystem } from "@/mongo/user-manager-mongo";
+import Users from "@/db/user-db";
 
 import { FileShare, FileProtected, FileBlocked, matches, protectSchema, blockedSchema, shareSchema, Assignee, Order, OrderAnswer, OrderType, assigneesSchema, orderSchema } from '@/mongo/files-manager-mongo';
 
@@ -27,6 +27,7 @@ export interface UserId {
 
 export interface folderInterface {
     cid?: string;
+    room: string[];
     authorId: string;
     accessGroupId?: GroupId[];
     accessUsersId?: UserId[];
@@ -68,6 +69,11 @@ export interface folderModelInterface extends folderInterface, Model<folderInter
     allowsShare: boolean;
     allowsSecurity: boolean;
     allowsBlock: boolean;
+    checkGroupAccess: (group: Pick<GroupId, "name">, permission: FolderPermission) => boolean;
+    checkUserAccess: (user: Pick<UserId, "email">, permission: FolderPermission) => boolean;
+    inRoom: (room: string[]) => boolean;
+    getAuthorUsername: () => Promise<string>;
+    getAuthorEmail: () => Promise<string>;
     orderTimelapseExpired: () => boolean;
     orderTypeIs: (type: OrderType) => boolean;
     orderAllAssigneesApproved: () => boolean;
@@ -79,10 +85,43 @@ export const groupIdSchema: Schema = new Schema({
         type: String,
         enum: {
             values: [
+                // Sistema
+                'common',
                 'administrador',
-                'supervisor',
                 'moderador',
-                'common'
+                'supervisor',
+                'diretoria',
+                // Financeiro
+                'fin_faturamento',
+                'fin_assistente',
+                'fin_gerente',
+                // RH/DP
+                'rh_beneficios',
+                'rh_encarregado',
+                'rh_juridico',
+                'rh_recrutamento',
+                'rh_sesmet',
+                // Suprimentos
+                'sup_compras',
+                'sup_estoque',
+                'sup_assistente',
+                'sup_gerente',
+                // Comercial
+                'com_vendas',
+                'com_adm',
+                'com_gerente',
+                'com_qualidade',
+                // Operacional
+                'ope_mesa',
+                'ope_coordenador',
+                'ope_supervisor',
+                'ope_gerente',
+                // Marketing
+                'mkt_geral',
+                // Juridico
+                'jur_advogado',
+                // Contabilidade
+                'cont_contabil'
             ],
             message: '{VALUE} este valor não é suportado'
         },
@@ -134,6 +173,11 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
         type: String,
         unique: true,
         trim: true,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    room: {
+        type: [String],
+        default: ['*'],
         required: [true, '{PATH} este campo é obrigatório']
     },
     authorId: {
@@ -210,8 +254,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
             message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [25, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+        required: [false, '{PATH} este campo é obrigatório']
     },
     type: {
         type: String,
@@ -224,8 +267,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
             message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+        required: [false, '{PATH} este campo é obrigatório']
     },
     tag: {
         type: String,
@@ -238,8 +280,7 @@ export const folderSchema = new Schema<folderModelInterface, Model<folderModelIn
             message: (props: { value: string }) => `${props.value} contém caracteres especiais e não é permitido.`
         },
         maxlength: [256, 'O valor do caminho `{PATH}` (`{VALUE}`) excedeu o comprimento máximo permitido ({MAXLENGTH}).'],
-        minlength: [5, 'O valor do caminho `{PATH}` (`{VALUE}`) é menor que o comprimento mínimo permitido ({MINLENGTH}).'],
-        required: [true, '{PATH} este campo é obrigatório']
+        required: [false, '{PATH} este campo é obrigatório']
     },
     status: {
         type: String,
@@ -405,6 +446,59 @@ folderSchema.virtual("allowsBlock").get(function (this: folderModelInterface) {
 });
 
 /**
+ * @description Retorna se o grupo tem permissão para acessar a pasta
+ */
+folderSchema.method('checkGroupAccess', function (this: folderModelInterface, group: Pick<GroupId, "name">, permission: FolderPermission): boolean {
+    if (this.accessGroupId) {
+        return this.accessGroupId.filter(access => access.name === group.name && access.permissions.find(item => item === permission)).length > 0;
+    }
+
+    return false;
+});
+
+/**
+ * @description Retorna se o usuario tem permissão para acessar a pasta
+ */
+folderSchema.method('checkUserAccess', function (this: folderModelInterface, user: Pick<UserId, "email">, permission: FolderPermission): boolean {
+    if (this.accessUsersId) {
+        return this.accessUsersId.filter(access => access.email === user.email && access.permissions.find(item => item === permission)).length > 0;
+    }
+
+    return false;
+});
+
+/**
+ * @description Verifica se a pasta está disponível no quarto informado
+ */
+folderSchema.method('inRoom', function (this: folderModelInterface, room: string[]): boolean {
+    if (!this.room)
+        this.room = [];
+
+    if (this.room.includes('*'))
+        return true;
+
+    return this.room.filter(item => room.includes(item)).length > 0;
+});
+
+/**
+ * @description Retorna o nome de usuário do autor do arquivo
+ */
+folderSchema.method('getAuthorUsername', async function (this: folderModelInterface): Promise<string> {
+    const { username } = await Users.getInfo(this.authorId);
+
+    return username;
+});
+
+/**
+ * @description Retorna o email do autor do arquivo
+ */
+folderSchema.method('getAuthorEmail', async function (this: folderModelInterface): Promise<string> {
+    const { email } = await Users.getInfo(this.authorId);
+
+    return email;
+});
+
+/**
  * @description Verifica se o tempo para responder o pedido expirou
  */
 folderSchema.method('orderTimelapseExpired', function (this: folderModelInterface) {
@@ -445,20 +539,10 @@ folderSchema.method('orderAllAssigneesApproved', function (this: folderModelInte
  * @description Retorna o index da resposta do procurador
  */
 folderSchema.method('orderAnswerIndex', function (this: folderModelInterface, answer: OrderAnswer) {
-    if (this.order && this.order.answers) {
-        let indexOf = 0;
+    if (this.order && this.order.answers)
+        return this.order.answers.findIndex((item) => item.assignee.email === answer.assignee.email);
 
-        for (const [i, _answer] of this.order.answers.entries()) {
-            if (_answer.assignee.email === answer.assignee.email) {
-                indexOf = i;
-                break;
-            }
-        }
-
-        return indexOf;
-    }
-
-    return 0;
+    return -1;
 });
 
 export default model<folderModelInterface>("folders", folderSchema);

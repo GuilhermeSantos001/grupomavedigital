@@ -1,14 +1,17 @@
 {
+  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
     "module": "CommonJS",
-    "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "removeComments": true,
     "strict": true,
     "outDir": "./dist",
     "baseUrl": ".",
+    "types": [
+      "node",
+      "jest"
+    ],
     "paths": {
       "@/app/*": [
         "ts/*"
@@ -24,6 +27,12 @@
       ],
       "@/graphql/*": [
         "ts/graphql/*"
+      ],
+      "@/router/*": [
+        "ts/graphql/router/*"
+      ],
+      "@/middlewares/*": [
+        "ts/graphql/middlewares/*"
       ],
       "@/bin/*": [
         "ts/bin/*"
@@ -43,14 +52,14 @@
       "@/mongo/*": [
         "ts/mongo/*"
       ],
-      "@/routers/*": [
-        "ts/routers/*"
-      ],
       "@/utils/*": [
         "ts/utils/*"
       ],
-      "@/web/*": [
-        "ts/web/*"
+      "@/socketIO/*": [
+        "ts/socketIO/*"
+      ],
+      "@/providers/*": [
+        "ts/providers/*"
       ]
     }
   },

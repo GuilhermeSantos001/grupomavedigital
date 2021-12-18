@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author @GuilhermeSantos001
- * @update 12/10/2021
+ * @update 16/12/2021
  */
 
 import jobDB, { jobInterface, jobModelInterface } from '@/mongo/jobs-manager-mongo';
@@ -12,22 +12,26 @@ class jobManagerDB {
      * @description Registra o serviço
      */
     public async register(job: jobInterface): Promise<boolean> {
-        const model = await jobDB.create({
-            ...job,
-            createdAt: Moment.format()
-        });
+        try {
+            const model = await jobDB.create({
+                ...job,
+                createdAt: Moment.format()
+            });
 
-        await model.validate();
-        await model.save();
+            await model.validate();
+            await model.save();
 
-        return true;
+            return true;
+        } catch {
+            throw new TypeError(`Não foi possível registrar o serviço ${job.name}`);
+        }
     }
 
     /**
      * @description Atualiza o serviço
      */
     public async update(cid: string, data: { status: string, error?: string }): Promise<boolean> {
-        await jobDB.updateMany({ cid }, { $set: data });
+        await jobDB.updateOne({ cid }, { $set: data });
 
         return true;
     }
@@ -36,7 +40,7 @@ class jobManagerDB {
      * @description Remove o serviço
      */
     public async remove(cid: string): Promise<boolean> {
-        await jobDB.deleteMany({ cid });
+        await jobDB.deleteOne({ cid });
 
         return true;
     }
@@ -45,7 +49,7 @@ class jobManagerDB {
      * @description Remove o serviço
      */
     public async removeByName(name: string): Promise<boolean> {
-        await jobDB.deleteMany({ name });
+        await jobDB.deleteOne({ name });
 
         return true;
     }

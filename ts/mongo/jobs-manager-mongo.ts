@@ -125,6 +125,7 @@ export const jobSchema: Schema = new Schema({
     cid: {
         type: String,
         trim: true,
+        unique: true,
         required: [true, '{PATH} este campo é obrigatório']
     },
     name: {

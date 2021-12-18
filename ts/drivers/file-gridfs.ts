@@ -11,15 +11,21 @@ import { ReadStream, WriteStream } from 'fs-extra';
 import { Response } from 'express';
 import { GridFSBucket, GridFSBucketReadStream, ObjectId } from 'mongodb';
 
-import { HistoryFile } from '@/mongo/files-manager-mongo';
 import mongoDB from '@/controllers/mongodb';
 
 export type MetadataFile = {
-    filename: string;
-    fileType: string;
-    authorId: string;
-    version: number;
+    filename: string
+    filetype: string
+    authorId: string
+    size: string
+    version: number
+    status: FileType
 }
+
+export type FileType =
+    | 'Active'
+    | 'Inactive'
+    | 'Corrupted'
 
 class FileGridFS {
 
@@ -35,27 +41,45 @@ class FileGridFS {
      * @param metadata {MetadataFile} - Metadados do arquivo
      */
     public openUploadStream(stream: ReadStream, metadata: MetadataFile) {
-        return new Promise<HistoryFile>(async (resolve, reject) => {
+        return new Promise<{
+            fileId: ObjectId
+            version: number
+            compressedSize: number
+            status: FileType
+        }>(async (resolve, reject) => {
             try {
                 const
                     bucket = new GridFSBucket(this.dbName()),
-                    streamBucket = bucket.openUploadStream(`${metadata.filename}${metadata.fileType}`, {
+                    streamBucket = bucket.openUploadStream(`${String(metadata.filename).trim()}${String(metadata.filetype).trim()}`, {
                         metadata: {
                             authorId: metadata.authorId,
-                            version: metadata.version
+                            size: metadata.size,
+                            version: metadata.version,
+                            status: metadata.status
                         }
                     });
 
                 const pipe = promisify(pipeline);
 
-                await pipe(stream, createGzip({ level: constants.Z_BEST_COMPRESSION }), streamBucket);
+                try {
+                    await pipe(stream, createGzip({ level: constants.Z_BEST_COMPRESSION }), streamBucket)
+                } catch(error: any) {
+                    return resolve({
+                        fileId: streamBucket.id,
+                        version: metadata.version,
+                        compressedSize: streamBucket.length,
+                        status: 'Corrupted'
+                    });
+                }
 
                 return resolve({
                     fileId: streamBucket.id,
-                    version: metadata.version
+                    version: metadata.version,
+                    compressedSize: streamBucket.length,
+                    status: metadata.status
                 });
-            } catch (error) {
-                return reject(error);
+            } catch(error: any) {
+                return reject(error.message);
             }
         });
     }
@@ -75,13 +99,13 @@ class FileGridFS {
                 streamBucket
                     .pipe(stream)
                     .on('error', async (error: any) => {
-                        return reject(error);
+                        return reject(error.message);
                     })
                     .on('finish', async () => {
                         return resolve();
                     });
-            } catch (error) {
-                return reject(error);
+            } catch(error: any) {
+                return reject(error.message);
             }
         });
     }
@@ -98,8 +122,39 @@ class FileGridFS {
                     streamBucket = bucket.openDownloadStream(fileId);
 
                 return resolve(streamBucket);
-            } catch (error) {
-                return reject(error);
+            } catch(error: any) {
+                return reject(error.message);
+            }
+        });
+    }
+
+    /**
+     * @description Retorna o arquivo no banco de dados.
+     * @param authorId {string} - Autor do arquivo
+     * @param filename {string} - Nome do arquivo
+     * @param filetype {string} - Tipo do arquivo
+     */
+    public get(authorId: string, filename: string, filetype: string) {
+        return new Promise<number>(async (resolve, reject) => {
+            try {
+                const
+                    bucket = new GridFSBucket(this.dbName()),
+                    files = await bucket.find({ filename: `${String(filename).trim()}${String(filetype).trim()}` }).toArray(),
+                    filesByAuthor = files.filter(file => file.metadata && file.metadata['authorId'] === authorId);
+
+                if (filesByAuthor.length > 0) {
+                    const metadata = filesByAuthor[filesByAuthor.length - 1].metadata;
+
+                    if (metadata) {
+                        return resolve(metadata['version']);
+                    } else {
+                        return resolve(0);
+                    }
+                }
+                else
+                    return resolve(0);
+            } catch(error: any) {
+                return reject(error.message);
             }
         });
     }
@@ -116,14 +171,14 @@ class FileGridFS {
                     bucket = new GridFSBucket(this.dbName());
 
                 bucket.rename(fileId, name, async (error: any) => {
-                    if (error) {
-                        return reject(error);
+                    if(error) {
+                        return reject(error.message);
                     }
 
                     return resolve(true);
                 });
-            } catch (error) {
-                return reject(error);
+            } catch(error: any) {
+                return reject(error.message);
             }
         });
     }
@@ -139,14 +194,14 @@ class FileGridFS {
                     bucket = new GridFSBucket(this.dbName());
 
                 bucket.delete(fileId, async (error: any) => {
-                    if (error) {
-                        return reject(error);
+                    if(error) {
+                        return reject(error.message);
                     }
 
                     return resolve();
                 });
-            } catch (error) {
-                return reject(error);
+            } catch(error: any) {
+                return reject(error.message);
             }
         });
     }

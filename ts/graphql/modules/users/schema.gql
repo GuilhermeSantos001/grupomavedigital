@@ -1,4 +1,15 @@
 # Schema de informações passadas dos usuários logados
+
+interface CommonResponse {
+  success: Boolean
+  updatedToken: UpdatedToken
+}
+
+type UpdatedToken {
+  signature: String!
+  token: String!
+}
+
 type AuthInfo {
   authorization: ID!
   privileges: [String!]!
@@ -35,8 +46,9 @@ type Location {
   zipcode: String!
 }
 
-type UserInfo {
+type UserInfo implements CommonResponse {
   privileges: [String!]!
+  privilege: String!
   photoProfile: String!
   username: String!
   email: String!
@@ -44,12 +56,20 @@ type UserInfo {
   surname: String!
   cnpj: String!
   location: Location!
+  success: Boolean
+  updatedToken: UpdatedToken
 }
 
 type AuthValidate {
   success: Boolean!
   signature: String
   token: String
+}
+
+type AuthSignTwoFactor implements CommonResponse {
+  qrcode: String!
+  success: Boolean
+  updatedToken: UpdatedToken
 }
 
 type Query {
@@ -220,21 +240,6 @@ type Query {
       keys: ["BkbcHMWNDyBqHn7GT8dzxB5KbAmhMSuKQFpPqtJmC6s94hrqqzRVdcSHf2uexRvm"]
     )
     @encodeuri(method: "lz-string")
-  """
-  Retorna as informações do usuário
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=getuserinfo
-  """
-  getUserInfo(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-  ): UserInfo!
-    @auth(
-      keys: ["NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
-    )
-    @token(ignore: false)
-    @encodeuri(method: "lz-string")
 }
 
 type Mutation {
@@ -327,7 +332,7 @@ type Mutation {
     Padrão: ["street", "number", "complement", "district", "state", "city", "zipcode"]
     """
     location: [String!]!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["OGh!pb@lX*fnElqYo8%#VO63KihIr$F1nhf!a@SFOB7$VeQ0*R+s!Sd8wqewq4eq"]
     )
@@ -347,7 +352,7 @@ type Mutation {
     Padrão: [filename].[extension]
     """
     photo: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["GHbqjX-RMmbKMbCfGZBV*xF48Lzqg74vq8G6eM3KTekCdaV3JZ+MYDz=RyGeWJ8N"]
     )
@@ -370,7 +375,7 @@ type Mutation {
     Nova senha do usuário
     """
     new_pwd: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic"]
     )
@@ -385,7 +390,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): String!
+  ): AuthSignTwoFactor!
     @auth(
       keys: ["bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo"]
     )
@@ -400,7 +405,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(keys: ["0bvNnE1JZN0d9hFVWgVpCrWa8ZhvgE8w"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -417,7 +422,7 @@ type Mutation {
     Código da verificação de duas etapas
     """
     qrcode: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["duhoHU4o#3!oCHogLw*6WUbrE2radr2CrlpLD+P7Ka*R-veSEB75lsT6PeblPuko"]
     )
@@ -432,7 +437,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
     )
@@ -447,7 +452,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): Boolean!
+  ): CommonResponse!
     @auth(
       keys: ["ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr"]
     )

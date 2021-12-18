@@ -100,6 +100,6 @@ export async function removeUser(userId: number): Promise<boolean> {
 
         return true;
     } catch (error) {
-        throw new Error(JSON.stringify(error));
+        throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
     }
 }
