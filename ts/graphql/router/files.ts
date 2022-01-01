@@ -32,6 +32,7 @@ router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware,
     ]);
 
     // TODO: Verificar o funcionamento do retorno do updatedToken por cookie
+    // TODO: Para que as solicitações ao express possam retornar o token atualizado
 
     if (updatedToken)
         res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
