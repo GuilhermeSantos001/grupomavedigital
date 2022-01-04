@@ -27,6 +27,7 @@ export async function createUser(): Promise<User> {
 
     const project = await newUser.createProject({
         name: `Teste ${new Date().toLocaleDateString('pt-br')} às ${new Date().toLocaleTimeString('pt-br')}`,
+        ownerId: newUser.id
     });
 
     const ourUser = await User.findByPk(newUser.id, {

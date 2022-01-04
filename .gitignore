@@ -1,8 +1,5 @@
 # Folders
 **/node_modules/**
-**/public/stylesheets/**.min**
-**/public/javascripts/**.min**
-**/public/assets/hls/**
 **/dist/**
 **/log/**
 **/coverage/**
@@ -11,23 +8,5 @@
 
 # Developer
 *.env
+*.env.*
 *ecosystem.config.js
-
-# Common Configurations
-
-# Audio
-*.wav
-*.mp3
-*.wma
-
-# Video
-*.wmv
-*.mpg
-*.mpeg
-*.mp4
-*.mov
-*.flv
-*.avi
-*.ogv
-*.ogg
-*.webm

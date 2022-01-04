@@ -1,10 +1,10 @@
 /**
  * @description Armazena os dados do arquivo
  * @author @GuilhermeSantos001
- * @update 28/09/2021
+ * @update 04/01/2022
  */
 
-import { createGzip, constants } from 'zlib';
+import { createGzip, constants, Gzip } from 'zlib';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 import { ReadStream, WriteStream } from 'fs-extra';
@@ -62,8 +62,8 @@ class FileGridFS {
                 const pipe = promisify(pipeline);
 
                 try {
-                    await pipe(stream, createGzip({ level: constants.Z_BEST_COMPRESSION }), streamBucket)
-                } catch(error: any) {
+                    await pipe<ReadStream, Gzip, any>(stream, createGzip({ level: constants.Z_BEST_COMPRESSION }), streamBucket)
+                } catch (error: any) {
                     return resolve({
                         fileId: streamBucket.id,
                         version: metadata.version,
@@ -78,7 +78,7 @@ class FileGridFS {
                     compressedSize: streamBucket.length,
                     status: metadata.status
                 });
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
@@ -104,7 +104,7 @@ class FileGridFS {
                     .on('finish', async () => {
                         return resolve();
                     });
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
@@ -122,7 +122,7 @@ class FileGridFS {
                     streamBucket = bucket.openDownloadStream(fileId);
 
                 return resolve(streamBucket);
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
@@ -153,7 +153,7 @@ class FileGridFS {
                 }
                 else
                     return resolve(0);
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
@@ -171,13 +171,13 @@ class FileGridFS {
                     bucket = new GridFSBucket(this.dbName());
 
                 bucket.rename(fileId, name, async (error: any) => {
-                    if(error) {
+                    if (error) {
                         return reject(error.message);
                     }
 
                     return resolve(true);
                 });
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
@@ -194,13 +194,13 @@ class FileGridFS {
                     bucket = new GridFSBucket(this.dbName());
 
                 bucket.delete(fileId, async (error: any) => {
-                    if(error) {
+                    if (error) {
                         return reject(error.message);
                     }
 
                     return resolve();
                 });
-            } catch(error: any) {
+            } catch (error: any) {
                 return reject(error.message);
             }
         });
