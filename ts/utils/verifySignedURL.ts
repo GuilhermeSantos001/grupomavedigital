@@ -1,6 +1,6 @@
 /**
  * @description Processa os dados da url assinada
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 03/12/2021
  */
 

@@ -1,6 +1,6 @@
 /**
  * @description Retorna as informações de IP do cliente
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 13/11/2021
  */
 

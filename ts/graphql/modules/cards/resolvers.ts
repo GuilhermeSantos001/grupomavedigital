@@ -1,6 +1,6 @@
 /**
  * @description Rotas dos cartões
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 28/09/2021
  */
 

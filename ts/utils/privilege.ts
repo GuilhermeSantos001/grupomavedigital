@@ -1,6 +1,6 @@
 /**
  * @class Manipulador dos privilégios do sistema
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 07/12/2021
  */
 

@@ -1,6 +1,6 @@
 /**
  * @description Controle dos JSON Web Tokens
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 26/11/2021
  */
 

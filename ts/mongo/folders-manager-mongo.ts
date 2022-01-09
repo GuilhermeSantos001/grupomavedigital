@@ -1,6 +1,6 @@
 /**
  * @description Schema das Pastas
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 25/11/2021
  */
 

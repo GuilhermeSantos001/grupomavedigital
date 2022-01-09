@@ -1,6 +1,6 @@
 /**
  * @description Envio de Emails
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 13/08/2021
  * @version 1.1.1
  */

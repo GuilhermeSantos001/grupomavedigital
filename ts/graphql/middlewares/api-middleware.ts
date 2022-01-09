@@ -1,6 +1,6 @@
 /**
  * @description Verifica se o token do usuário está válido
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 05/11/2021
  */
 import { Request, Response, NextFunction } from 'express';

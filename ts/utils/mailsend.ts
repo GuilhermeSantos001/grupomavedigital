@@ -1,6 +1,6 @@
 /**
  * @description Envio de emails padronizados
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 29/09/2020
  */
 

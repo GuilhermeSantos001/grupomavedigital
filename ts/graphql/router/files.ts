@@ -1,6 +1,6 @@
 /**
  * @description Rotas do Hercules Storage -> Files
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 16/12/2021
  */
 

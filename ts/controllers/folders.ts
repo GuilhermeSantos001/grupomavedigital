@@ -2,7 +2,7 @@
 /* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciamento de pastas
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 25/11/2021
  */
 

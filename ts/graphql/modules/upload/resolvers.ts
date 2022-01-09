@@ -1,6 +1,6 @@
 /**
  * @description Rotas de upload
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 15/11/2021
  */
 

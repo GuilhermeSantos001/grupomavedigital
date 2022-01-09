@@ -1,6 +1,6 @@
 /**
  * @description Armazena os dados do arquivo
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 04/01/2022
  */
 

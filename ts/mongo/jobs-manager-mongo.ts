@@ -1,6 +1,6 @@
 /**
  * @description Schema dos Jobs
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 01/10/2021
  */
 

@@ -1,6 +1,6 @@
 /**
  * @class Manipulador de hora, data e formatação de datas
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 17/11/2021
  */
 

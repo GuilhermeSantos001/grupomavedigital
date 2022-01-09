@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @description Retorna propriedades inseridas na rota.
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 16/12/2021
  */
 

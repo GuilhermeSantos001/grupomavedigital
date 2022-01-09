@@ -1,6 +1,6 @@
 /**
  * @description Geração aleatória de utilidades variadas
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 29/09/2021
  */
 

@@ -1,6 +1,6 @@
 /**
  * @description Rotas dos usuários
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 15/12/2021
  */
 

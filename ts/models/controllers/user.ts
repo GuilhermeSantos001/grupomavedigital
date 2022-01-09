@@ -1,6 +1,6 @@
 /**
  * @description Metodos do modelo de usuários
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 12/10/2021
  */
 

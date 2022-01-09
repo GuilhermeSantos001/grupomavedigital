@@ -1,6 +1,6 @@
 /**
  * @description Websocket Router -> Hercules Storage -> Files
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 13/12/2021
  */
 

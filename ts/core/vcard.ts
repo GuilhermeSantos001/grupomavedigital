@@ -1,6 +1,6 @@
 /**
  * @description Gerador de vcard
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 12/10/2021
  */
 

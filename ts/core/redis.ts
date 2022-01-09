@@ -1,7 +1,7 @@
 
 /**
  * @description Armazenamento de estrutura de dados em memória, usado como um banco de dados em memória distribuído de chave-valor.
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 26/11/2021
  */
 

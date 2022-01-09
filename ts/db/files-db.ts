@@ -1,6 +1,6 @@
 /**
  * ? Gerenciador de informações com o banco de dados
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 06/12/2021
  */
 

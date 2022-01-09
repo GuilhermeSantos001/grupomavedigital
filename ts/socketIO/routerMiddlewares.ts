@@ -1,6 +1,6 @@
 /**
  * @description Websocket Router -> Middlewares
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 19/10/2021
  */
 

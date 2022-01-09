@@ -1,6 +1,6 @@
 /**
  * @description Gerador de senhas
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 02/12/2021
  */
 

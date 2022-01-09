@@ -1,6 +1,6 @@
 /**
  * @description Rotas dos paineis
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 14/10/2021
  */
 

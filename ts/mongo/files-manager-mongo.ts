@@ -1,6 +1,6 @@
 /**
  * @description Schema dos Arquivos
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 18/11/2021
  */
 

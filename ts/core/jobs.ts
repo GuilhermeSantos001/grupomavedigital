@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciador de Processamentos Paralelos
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 26/11/2021
  */
 

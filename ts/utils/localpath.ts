@@ -1,5 +1,5 @@
 /**
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @description Controle de caminhos para pastas na aplicação
  * @update 05/11/2021
  */

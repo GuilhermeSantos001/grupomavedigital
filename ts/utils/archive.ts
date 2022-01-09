@@ -1,6 +1,6 @@
 /**
  * @description Compilador de streams
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 27/08/2021
  * @version 1.2.0
  */

@@ -1,6 +1,6 @@
 /**
  * @description Debug
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 30/08/2021
  * @version 1.0.4
  */

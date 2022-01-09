@@ -2,7 +2,7 @@
 /* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciamento de arquivos
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 06/12/2021
  */
 

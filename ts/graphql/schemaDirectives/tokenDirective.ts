@@ -1,6 +1,6 @@
 /**
  * @description Diretivas para verificar o token da rota
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 16/12/2021
  */
 

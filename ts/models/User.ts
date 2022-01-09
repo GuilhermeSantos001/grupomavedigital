@@ -1,6 +1,6 @@
 /**
  * @description Modelo dos usuários
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 31/08/2021
  * @version 1.0.0
  */
