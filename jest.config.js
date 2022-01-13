@@ -18,6 +18,7 @@ module.exports = {
     "^@/app/(.+)$": "<rootDir>/ts/app/$1",
     "^@/graphql/(.+)$": "<rootDir>/ts/graphql/$1",
     "^@/bin/(.+)$": "<rootDir>/ts/bin/$1",
+    "^@/contracts/(.+)$": "<rootDir>/ts/contracts/$1",
     "^@/controllers/(.+)$": "<rootDir>/ts/controllers/$1",
     "^@/core/(.+)$": "<rootDir>/ts/core/$1",
     "^@/db/(.+)$": "<rootDir>/ts/db/$1",

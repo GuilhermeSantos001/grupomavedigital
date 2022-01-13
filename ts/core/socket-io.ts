@@ -1,7 +1,7 @@
 /**
  * @description Servidor Socket.io
  * @author GuilhermeSantos001
- * @update 19/10/2021
+ * @update 10/01/2022
  */
 
 import { Server, Socket, ServerOptions } from "socket.io";
@@ -13,6 +13,7 @@ import Redis from 'ioredis';
 import verifySignedURL from '@/utils/verifySignedURL';
 import routerMiddlewares from '@/socketIO/routerMiddlewares';
 import routerHercules from '@/socketIO/routerHercules';
+import routerPayback from '@/socketIO/routerPayback';
 
 class IO {
     static readonly db: number = 3;
@@ -50,7 +51,7 @@ class IO {
             };
         }
 
-        this.context = new Server(5000, options);
+        this.context = new Server(parseInt(process.env.APP_SOCKET_PORT || '5000'), options);
 
         this.listening();
     }
@@ -79,6 +80,7 @@ class IO {
         this.context.on('connection', (socket: Socket) => {
             routerMiddlewares(this.context, socket);
             routerHercules(this.context, socket);
+            routerPayback(this.context, socket);
         });
     }
 }

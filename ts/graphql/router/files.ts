@@ -1,7 +1,8 @@
 /**
  * @description Rotas do Hercules Storage -> Files
+ * @extends {Upload}
  * @author GuilhermeSantos001
- * @update 16/12/2021
+ * @update 12/01/2022
  */
 
 import { Router, Request, Response } from 'express';
@@ -11,11 +12,69 @@ const router = Router({
     caseSensitive: true
 });
 
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+
 import APIMiddleware from '@/middlewares/api-middleware';
 import TokenMiddleware from '@/middlewares/token-middleware';
 import getReqProps from '@/utils/getReqProps';
 import FileController from '@/controllers/files';
-import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+import Upload from '@/controllers/upload';
+
+/**
+ * @description Baixa todos os arquivos hospedados
+ */
+router.get(['/uploads/all'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
+    let {
+        updatedToken,
+    } = getReqProps(req, [
+        'updatedToken'
+    ]);
+
+    if (updatedToken)
+        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+
+    try {
+        return res.status(200).send(compressToEncodedURIComponent(JSON.stringify(await Upload.getAll())));
+    } catch (error) {
+        return res.status(400).send({
+            success: false,
+            data: error
+        });
+    };
+});
+
+/**
+ * @description Baixa um arquivo hospedado
+ */
+router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
+    let {
+        fileId,
+        updatedToken,
+    } = getReqProps(req, [
+        'fileId',
+        'updatedToken'
+    ]);
+
+    if (updatedToken)
+        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+
+    fileId = decompressFromEncodedURIComponent(String(fileId));
+
+    if (String(fileId).length <= 0)
+        return res.status(400).send({
+            success: false,
+            data: `The route parameters are not valid.`
+        });
+
+    try {
+        await Upload.raw(res, fileId);
+    } catch (error) {
+        return res.status(400).send({
+            success: false,
+            data: error
+        });
+    };
+});
 
 /**
  * @description Baixa uma versão do arquivo
@@ -30,9 +89,6 @@ router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware,
         'version',
         'updatedToken'
     ]);
-
-    // TODO: Verificar o funcionamento do retorno do updatedToken por cookie
-    // TODO: Para que as solicitações ao express possam retornar o token atualizado
 
     if (updatedToken)
         res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));

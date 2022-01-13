@@ -1,15 +1,15 @@
 /**
  * @description Armazena os dados do arquivo
  * @author GuilhermeSantos001
- * @update 04/01/2022
+ * @update 11/01/2022
  */
 
-import { createGzip, constants, Gzip } from 'zlib';
+import { createGzip, createUnzip, constants, Gzip } from 'zlib';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 import { ReadStream, WriteStream } from 'fs-extra';
 import { Response } from 'express';
-import { GridFSBucket, GridFSBucketReadStream, ObjectId } from 'mongodb';
+import { GridFSBucket, GridFSBucketReadStream, GridFSFile, ObjectId } from 'mongodb';
 
 import mongoDB from '@/controllers/mongodb';
 
@@ -89,21 +89,27 @@ class FileGridFS {
      * @param stream {WriteStream | Response} - WriteStream (destino)
      * @param fileId {ObjectId} - ObjectId do arquivo
      */
-    public openDownloadStream(stream: WriteStream | Response, fileId: ObjectId) {
+    public openDownloadStream(stream: WriteStream | Response, fileId: ObjectId, decompress?: boolean) {
         return new Promise<void>(async (resolve, reject) => {
             try {
                 const
                     bucket = new GridFSBucket(this.dbName()),
                     streamBucket = bucket.openDownloadStream(fileId);
 
-                streamBucket
-                    .pipe(stream)
-                    .on('error', async (error: any) => {
-                        return reject(error.message);
-                    })
-                    .on('finish', async () => {
-                        return resolve();
-                    });
+                if (!decompress) {
+                    streamBucket
+                        .pipe(stream)
+                        .on('error', async (error: any) => {
+                            return reject(error.message);
+                        })
+                        .on('finish', async () => {
+                            return resolve();
+                        });
+                } else {
+                    const pipe = promisify(pipeline);
+
+                    return await pipe<GridFSBucketReadStream, Gzip, WriteStream | Response>(streamBucket, createUnzip({ level: constants.Z_BEST_COMPRESSION }), stream);
+                }
             } catch (error: any) {
                 return reject(error.message);
             }
@@ -153,6 +159,30 @@ class FileGridFS {
                 }
                 else
                     return resolve(0);
+            } catch (error: any) {
+                return reject(error.message);
+            }
+        });
+    }
+
+    /**
+     * @description Retorna o arquivo no banco de dados.
+     * @param fileId {ObjectId} - ObjectId do arquivo
+     */
+    public findById(fileId: ObjectId) {
+        return new Promise<GridFSFile>(async (resolve, reject) => {
+            try {
+                const
+                    bucket = new GridFSBucket(this.dbName()),
+                    files = await bucket.find({ _id: fileId }).toArray();
+
+                if (files.length > 0) {
+                    const metadata = files[files.length - 1];
+
+                    return resolve(metadata);
+                }
+                else
+                    throw new Error('File not found');
             } catch (error: any) {
                 return reject(error.message);
             }

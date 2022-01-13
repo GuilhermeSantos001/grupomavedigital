@@ -1,8 +1,10 @@
 /**
  * @description Geração aleatória de utilidades variadas
  * @author GuilhermeSantos001
- * @update 29/09/2021
+ * @update 11/01/2022
  */
+
+import { v4 as uuidv4 } from 'uuid';
 
 import { createHash } from 'crypto';
 
@@ -15,12 +17,20 @@ export default class Random {
         return Math.floor(max * Math.random());
     }
 
-    static HASH(length: number, digest: 'base64' | 'hex'): string {
+    static HASH(length: number, digest: 'base64' | 'base64url' | 'hex'): string {
         const hash = createHash('sha256');
 
         hash.update(this.STRING(length));
 
         return hash.digest(digest).substring(0, length);
+    }
+
+    static UUID(length: number, digest: 'base64' | 'base64url' | 'hex'): string {
+        const hash = createHash('sha256');
+
+        hash.update(uuidv4().replace(/\s{1,}/g, ''));
+
+        return hash.digest(digest).substring(0, length).replace('.', '');
     }
 
     static STRING(length: number): string {

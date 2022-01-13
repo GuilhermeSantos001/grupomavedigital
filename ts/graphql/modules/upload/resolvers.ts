@@ -14,6 +14,7 @@ import verifySignedURL from '@/utils/verifySignedURL';
 import userManagerDB from '@/db/user-db';
 
 import Sugar from 'sugar';
+import Random from '@/utils/random';
 
 const
   finished = (authorId: string, filename: string, stream: any, size: number) => new Promise<{
@@ -52,7 +53,7 @@ const
 
 module.exports = {
   Mutation: {
-    singleUpload: async (parent: unknown, args: { file: any, size: string, signedUrl: string, auth: string }) => {
+    singleUpload: async (parent: unknown, args: { file: any, size: string, signedUrl: string, auth: string, randomName: boolean }) => {
       try {
         if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
           const {
@@ -61,12 +62,13 @@ module.exports = {
 
           const
             { createReadStream, filename } = await args.file,
-            result = await finished(authorization, filename, createReadStream(), parseInt(args.size));
+            randomName = args.randomName ? `${Random.UUID(32, 'hex')}${filename.substring(filename.lastIndexOf('.'))}` : filename,
+            result = await finished(authorization, randomName, createReadStream(), parseInt(args.size));
 
           if (result.status === 'Active') {
             return {
               authorId: authorization,
-              name: filename,
+              name: randomName,
               size: parseInt(args.size),
               ...result
             };
@@ -81,7 +83,7 @@ module.exports = {
         throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
       }
     },
-    multipleUpload: async (parent: unknown, args: { files: any[], sizes: string[], signedUrl: string, auth: string }) => {
+    multipleUpload: async (parent: unknown, args: { files: any[], sizes: string[], signedUrl: string, auth: string, randomName: boolean }) => {
       try {
         if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
           const {
@@ -96,14 +98,15 @@ module.exports = {
             const
               { createReadStream, filename } = await file,
               size = parseInt(args.sizes[i++]),
-              result = await finished(authorization, filename, createReadStream(), size);
+              randomName = args.randomName ? `${Random.UUID(32, 'hex')}${filename.substring(filename.lastIndexOf('.'))}` : filename,
+              result = await finished(authorization, randomName, createReadStream(), size);
 
             if (result.status !== 'Active')
               await FileGridFS.deleteFile(result.fileId)
 
             results.push({
               authorId: authorization,
-              name: filename,
+              name: randomName,
               size,
               ...result
             });

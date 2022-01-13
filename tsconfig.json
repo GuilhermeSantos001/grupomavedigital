@@ -22,6 +22,9 @@
       "@/database/*": [
         "ts/database/*"
       ],
+      "@/contracts/*": [
+        "ts/contracts/*"
+      ],
       "@/controllers/*": [
         "ts/controllers/*"
       ],

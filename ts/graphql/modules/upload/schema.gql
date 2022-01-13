@@ -17,11 +17,13 @@ type Mutation {
     size: String!
     signedUrl: String!
     auth: String!
+    randomName: Boolean!
   ): File!
   multipleUpload(
     files: [Upload!]!
     sizes: [String!]!
     signedUrl: String!
     auth: String!
+    randomName: Boolean!
   ): [File!]!
 }

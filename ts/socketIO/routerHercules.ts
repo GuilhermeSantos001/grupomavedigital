@@ -9,7 +9,6 @@ import { Server } from "socket.io";
 import routerHerculesFolder from '@/socketIO/hercules/routerHerculesFolder';
 import routerHerculesFile from '@/socketIO/hercules/routerHerculesFile';
 
-
 export default function routerHercules(io: Server, socket: any): void {
     routerHerculesFolder(io, socket);
     routerHerculesFile(io, socket);
