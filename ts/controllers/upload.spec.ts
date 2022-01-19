@@ -50,7 +50,8 @@ describe('Gerenciador de Uploads', () => {
     const result = await Upload.register({
       fileId: stream.fileId.toString(),
       authorId: 'ti-gui',
-      name: 'Testing.txt',
+      filename: 'Testing',
+      filetype: '.txt',
       description: 'File for testing...',
       size: statSync(filePath).size,
       compressedSize: stream.compressedSize,
@@ -70,22 +71,25 @@ describe('Gerenciador de Uploads', () => {
     expect(file && file.expiredAt).toBeTruthy();
   })
 
-  it('Retorna o raw do arquivo hospedado', async () => {
-    const file = Upload.files[0];
 
-    const pathFile = `${localPath('ts/test/database/')}${file.name}.gz`;
+  it('Troca o tipo do arquivo para permanente', async () => {
+    const file = Upload.files[Upload.files.length - 1];
 
-    expect(file && file.fileId).toBeTruthy();
+    const make = await Upload.makePermanent(file.fileId);
 
-    if (file) {
-      const raw = await Upload.raw(createWriteStream(pathFile, { encoding: 'utf8' }), file.fileId);
+    expect(make).toBe(true);
+  })
 
-      expect(raw).toBeUndefined();
-    }
+  it('Troca o tipo do arquivo para temporario', async () => {
+    const file = Upload.files[Upload.files.length - 1];
+
+    const make = await Upload.makeTemporary(file.fileId);
+
+    expect(make).toBe(true);
   })
 
   it('Remove um arquivo hospedado', async () => {
-    const file = Upload.files[0];
+    const file = Upload.files[Upload.files.length - 1];
 
     expect(file && file.fileId).toBeTruthy();
 

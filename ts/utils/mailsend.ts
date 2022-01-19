@@ -1,12 +1,13 @@
 /**
  * @description Envio de emails padronizados
  * @author GuilhermeSantos001
- * @update 29/09/2020
+ * @update 14/01/2022
  */
 
 import Mail, { Templates, Priority } from "@/core/nodemailer";
 import BASE_URL from "@/utils/getBaseURL";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import { clearIPAddress } from "@/utils/geoIP";
 
 interface IVariablesEconfirm {
     username: string
@@ -166,7 +167,7 @@ export default class MailSend {
                     browser: navigator.browser,
                     os: navigator.os,
                     locationIP: navigator.locationIP,
-                    internetAdress: navigator.internetAdress.replace('::ffff:', '')
+                    internetAdress: clearIPAddress(String(navigator.internetAdress).replace('::1', '127.0.0.1'))
                 }
             };
 

@@ -9,13 +9,14 @@ import { WriteStream } from "fs";
 export interface IFileUpload {
   fileId: string
   authorId: string
-  name: string
+  filename: string
+  filetype: string
   description: string
   size: number
-  compressedSize?: number
-  version?: number
+  compressedSize: number
+  version: number
   temporary: boolean
-  expiredAt?: Date
+  expiredAt?: string
   createdAt?: string
 }
 

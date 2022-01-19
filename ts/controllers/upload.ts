@@ -41,7 +41,7 @@ class Upload implements IUploadContract {
 
   public async cleanTemporaryFiles(): Promise<any> {
     for (const file of this.files.filter(file => file.temporary)) {
-      if (!file.expiredAt || file.expiredAt && new Date() > file.expiredAt)
+      if (!file.expiredAt || file.expiredAt && new Date() > new Date(file.expiredAt))
         await this.remove(file.fileId);
     }
   }
@@ -62,12 +62,45 @@ class Upload implements IUploadContract {
 
     const newFile = {
       ...file,
-      expiredAt: file.temporary ? new Date(this.getTimeToExpire()) : undefined,
+      expiredAt: file.temporary ? new Date(this.getTimeToExpire()).toISOString() : undefined,
+      createdAt: new Date().toISOString()
     }
 
     this.files.push(newFile);
 
     return await uploadDB.register(newFile);
+  }
+
+  public async makeTemporary(fileId: string, version?: number): Promise<boolean> {
+    const indexOf = this.files.findIndex(file => file.fileId === fileId);
+
+    if (indexOf === -1)
+      return false;
+
+    const expiredAt = new Date(this.getTimeToExpire()).toISOString();
+
+    this.files[indexOf] = {
+      ...this.files[indexOf],
+      temporary: false,
+      expiredAt
+    }
+
+    return await uploadDB.makeTemporary(fileId, expiredAt, version);
+  }
+
+  public async makePermanent(fileId: string, version?: number): Promise<boolean> {
+    const indexOf = this.files.findIndex(file => file.fileId === fileId);
+
+    if (indexOf === -1)
+      return false;
+
+    this.files[indexOf] = {
+      ...this.files[indexOf],
+      temporary: false,
+      expiredAt: undefined,
+    }
+
+    return await uploadDB.makePermanent(fileId, version);
   }
 
   public async remove(fileId: string): Promise<boolean> {

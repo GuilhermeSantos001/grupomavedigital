@@ -1,7 +1,7 @@
 /**
  * @description Servidor Socket.io
  * @author GuilhermeSantos001
- * @update 10/01/2022
+ * @update 14/01/2022
  */
 
 import { Server, Socket, ServerOptions } from "socket.io";
@@ -34,9 +34,7 @@ class IO {
                     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
                     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
                     credentials: false,
-                },
-                pingTimeout: 60000,
-                pingInterval: 25000,
+                }
             };
         } else {
             options = {
@@ -45,9 +43,7 @@ class IO {
                     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
                     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
                     credentials: true,
-                },
-                pingTimeout: 60000,
-                pingInterval: 25000,
+                }
             };
         }
 
@@ -78,6 +74,7 @@ class IO {
          */
 
         this.context.on('connection', (socket: Socket) => {
+            socket.on('CONNECTION_PING', () => socket.emit('CONNECTION_PONG'));
             routerMiddlewares(this.context, socket);
             routerHercules(this.context, socket);
             routerPayback(this.context, socket);

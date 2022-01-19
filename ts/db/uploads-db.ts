@@ -1,7 +1,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author GuilhermeSantos001
- * @update 11/01/2022
+ * @update 17/01/2022
  */
 
 import uploadDB from '@/mongo/uploads-manager-mongo';
@@ -21,6 +21,40 @@ class uploadManagerDB {
 
     await model.validate();
     await model.save();
+
+    return true;
+  }
+
+  /**
+   * @description Torna um upload permanente
+   */
+  public async makePermanent(fileId: string, version?: number): Promise<boolean> {
+    const upload = await uploadDB.findOne({ fileId, version: version ? version : 1 });
+
+    if (!upload)
+      return false;
+
+    upload.temporary = false;
+    upload.expiredAt = undefined;
+
+    await upload.save();
+
+    return true;
+  }
+
+  /**
+   * @description Torna um upload temporario
+   */
+  public async makeTemporary(fileId: string, expiredAt: string, version?: number): Promise<boolean> {
+    const upload = await uploadDB.findOne({ fileId, version: version ? version : 1 });
+
+    if (!upload)
+      return false;
+
+    upload.temporary = true;
+    upload.expiredAt = expiredAt;
+
+    await upload.save();
 
     return true;
   }
@@ -48,12 +82,14 @@ class uploadManagerDB {
     return uploads.map(upload => ({
       authorId: upload.authorId,
       fileId: upload.fileId,
-      name: upload.name,
+      filename: upload.filename,
+      filetype: upload.filetype,
+      description: upload.description,
       size: upload.size,
       compressedSize: upload.compressedSize,
       version: upload.version,
       temporary: upload.temporary,
-      expire: upload.expire,
+      expiredAt: upload.expiredAt,
       createdAt: upload.createdAt
     }));
   }

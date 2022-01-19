@@ -15,6 +15,18 @@ interface IP {
   ip: string;
 }
 
+export function clearIPAddress(ip: string): string {
+  const words = [
+    '::',
+    ':',
+    'ffff'
+  ]
+
+  words.forEach(word => ip = ip.replace(word, ''));
+
+  return ip;
+}
+
 export default function (req: express.Request): IP {
   const ip: string | number = req.headers['x-real-ip'] instanceof Array ? req.headers['x-real-ip'][0] : req.headers['x-real-ip'] || req.ip,
     geoIP = lookup(ip) || { 'country': 'Unknown', 'region': 'Unknown', 'city': 'Unknown' },

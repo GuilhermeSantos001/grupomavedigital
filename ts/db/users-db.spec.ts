@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
-* @description Testes do controller de usuários
+* @description Testes da database dos usuários
 * @author GuilhermeSantos001
 * @update 02/12/2021
 */

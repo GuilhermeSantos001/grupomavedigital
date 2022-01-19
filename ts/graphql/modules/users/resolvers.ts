@@ -1,7 +1,7 @@
 /**
  * @description Rotas dos usuários
  * @author GuilhermeSantos001
- * @update 15/12/2021
+ * @update 14/01/2022
  */
 
 import getReqProps from '@/utils/getReqProps';
@@ -13,7 +13,7 @@ import Jobs from '@/core/jobs';
 import Debug from '@/core/log4';
 import generatePassword from '@/utils/generatePassword';
 import { PrivilegesSystem } from '@/mongo/user-manager-mongo';
-import geoIP from '@/utils/geoIP';
+import geoIP, {clearIPAddress} from '@/utils/geoIP';
 import { ExpressContext } from 'apollo-server-express';
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 
@@ -69,12 +69,12 @@ export default {
                 }
 
                 await userManagerDB.connected(args.auth, {
-                    ip: clientIP.ip,
+                    ip: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1')),
                     token: userInfo['token'],
                     device: device['type'],
                     location: {
                         locationIP: clientIP.location,
-                        internetAdress: clientIP.ip,
+                        internetAdress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1')),
                         browser: device.parser.useragent['family'],
                         os: device.parser.useragent['os']['family']
                     },
@@ -86,7 +86,7 @@ export default {
                 userInfo['refreshToken'] = await userManagerDB.addRefreshToken(args.auth);
 
                 await activityManagerDB.register({
-                    ipremote: clientIP.ip,
+                    ipremote: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1')),
                     auth: userInfo['authorization'],
                     privileges: userInfo['privileges'],
                     roadmap: 'Se conectou ao sistema'
@@ -98,7 +98,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de conectar o usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogin`);
+                Debug.fatal('user', `Erro ocorrido na hora de conectar o usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authLogin`);
 
                 throw new TypeError(String(error));
             }
@@ -110,7 +110,7 @@ export default {
                     internetadress = ip,
                     { privileges } = await userManagerDB.getInfo(args.auth);
 
-                await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
+                await userManagerDB.verifytoken(args.auth, args.token, args.signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
                 await userManagerDB.disconnected(args.auth, args.token);
                 await userManagerDB.clearExpiredRefreshToken(args.auth);
 
@@ -128,7 +128,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${args.auth}) desconectado`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authLogout`);
+                Debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${args.auth}) desconectado`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authLogout`);
 
                 throw new TypeError(String(error));
             }
@@ -149,7 +149,7 @@ export default {
 
                 try {
                     await JsonWebToken.verify(args.token);
-                    await userManagerDB.verifytoken(args.auth, args.token, args.signature, internetadress);
+                    await userManagerDB.verifytoken(args.auth, args.token, args.signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
 
                     return { success: true };
                 } catch {
@@ -171,7 +171,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão(${args.token}) está autorizada`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authValidate`);
+                Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão(${args.token}) está autorizada`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authValidate`);
 
                 throw new TypeError(String(error));
             }
@@ -210,7 +210,7 @@ export default {
                             signature,
                             token: jwt,
                             forgotPassword: true,
-                            clientAddress: clientIP.ip
+                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
                         },
                         status: 'Available'
                     });
@@ -224,7 +224,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de alteração de senha da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: authForgotPassword`);
+                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de alteração de senha da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authForgotPassword`);
 
                 throw new TypeError(String(error));
             }
@@ -272,7 +272,7 @@ export default {
                             auth: args.auth,
                             token: jwt,
                             temporarypass: temporarypass ? newpassword || '' : null,
-                            clientAddress: clientIP.ip
+                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
                         },
                         status: 'Available'
                     });
@@ -286,7 +286,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: emailResendConfirm`);
+                Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: emailResendConfirm`);
 
                 throw new TypeError(String(error));
             }
@@ -305,7 +305,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de confirmar a conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: mailConfirm`);
+                Debug.fatal('user', `Erro ocorrido na hora de confirmar a conta do usuário.`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: mailConfirm`);
 
                 throw new TypeError(String(error));
             }
@@ -339,7 +339,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de alterar a senha da conta do usuário.`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: processOrderForgotPassword`);
+                Debug.fatal('user', `Erro ocorrido na hora de alterar a senha da conta do usuário.`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: processOrderForgotPassword`);
 
                 throw new TypeError(String(error));
             }
@@ -375,7 +375,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de retornar as informações do usuário(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Query`, `Method: getUserInfo`);
+                Debug.fatal('user', `Erro ocorrido na hora de retornar as informações do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: getUserInfo`);
 
                 throw new TypeError(String(error));
             }
@@ -453,7 +453,7 @@ export default {
                                 auth: args.authorization,
                                 token: jwt,
                                 temporarypass: temporarypass ? args.password : null,
-                                clientAddress: clientIP.ip
+                                clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
                             },
                             status: 'Available'
                         });
@@ -467,7 +467,7 @@ export default {
                         req: any = context.express.req,
                         clientIP = geoIP(req);
 
-                    Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
+                    Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: registerUser`);
 
                     throw new TypeError(String(error));
                 }
@@ -476,7 +476,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: registerUser`);
+                Debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: registerUser`);
 
                 throw new TypeError(String(error));
             }
@@ -516,7 +516,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de atualizar as informações da conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updateData`);
+                Debug.fatal('user', `Erro na hora de atualizar as informações da conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: updateData`);
 
                 throw new TypeError(String(error));
             }
@@ -536,7 +536,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de atualizar a foto de perfil da conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: updatephotoProfile`);
+                Debug.fatal('user', `Erro na hora de atualizar a foto de perfil da conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: updatephotoProfile`);
 
                 throw new TypeError(String(error));
             }
@@ -554,7 +554,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de alterar a senha para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: changePassword`);
+                Debug.fatal('user', `Erro na hora de alterar a senha para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: changePassword`);
 
                 throw new TypeError(String(error));
             }
@@ -570,7 +570,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
+                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
 
                 throw new TypeError(String(error));
             }
@@ -586,7 +586,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
+                Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
 
                 throw new TypeError(String(error));
             }
@@ -602,7 +602,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de verificar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authVerifyTwofactor`);
+                Debug.fatal('user', `Erro na hora de verificar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authVerifyTwofactor`);
 
                 throw new TypeError(String(error));
             }
@@ -618,7 +618,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de ativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authEnabledTwofactor`);
+                Debug.fatal('user', `Erro na hora de ativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authEnabledTwofactor`);
 
                 throw new TypeError(String(error));
             }
@@ -634,7 +634,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de desativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authDisableTwofactor`);
+                Debug.fatal('user', `Erro na hora de desativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authDisableTwofactor`);
 
                 throw new TypeError(String(error));
             }
@@ -669,7 +669,7 @@ export default {
                             username,
                             token: jwt,
                             twofactor: true,
-                            clientAddress: clientIP.ip
+                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
                         },
                         status: 'Available'
                     });
@@ -683,7 +683,7 @@ export default {
                     req: any = context.express.req,
                     clientIP = geoIP(req);
 
-                Debug.fatal('user', `Erro na hora de recuperar a conta(${args.auth})`, String(error), `IP-Request: ${clientIP.ip}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`);
+                Debug.fatal('user', `Erro na hora de recuperar a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`);
 
                 throw new TypeError(String(error));
             }

@@ -1,7 +1,7 @@
 /**
  * @description Diretivas para verificar o token da rota
  * @author GuilhermeSantos001
- * @update 16/12/2021
+ * @update 14/01/2022
  */
 
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
@@ -11,7 +11,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 
 import JsonWebToken from '@/core/jsonWebToken';
 import userManagerDB from '@/db/user-db';
-import geoIP from '@/utils/geoIP';
+import geoIP, {clearIPAddress} from '@/utils/geoIP';
 
 export default function TokenDirective(directiveName: string) {
     return {
@@ -39,7 +39,7 @@ export default function TokenDirective(directiveName: string) {
 
                             try {
                                 await JsonWebToken.verify(token);
-                                await userManagerDB.verifytoken(auth, token, signature, internetadress);
+                                await userManagerDB.verifytoken(auth, token, signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
 
                                 return await resolve(source, args, context, info);
                             } catch {

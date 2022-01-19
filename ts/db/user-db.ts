@@ -2,7 +2,7 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author GuilhermeSantos001
- * @update 16/12/2021
+ * @update 14/01/2022
  */
 
 import userDB, { UserInterface, UserModelInterface, PrivilegesSystem, Unit, Location, Authentication, Session, Devices, History, Token, RefreshToken, authenticationDefault, sessionDefault } from '@/mongo/user-manager-mongo';
@@ -714,22 +714,20 @@ class userManagerDB {
                 tmp = _user.session.cache.tmp,
                 time = getTime(unit, tmp);
 
-            if (_user.session.cache.history.length > 0)
-                for (const _history of _user.session.cache.history) {
-                    if (_history.token === token) {
-                        _history.token = newToken;
-                        _history.tmp = time.toJSON();
-                    }
+            for (const _history of _user.session.cache.history) {
+                if (_history.token == token) {
+                    _history.token = newToken;
+                    _history.tmp = time.toJSON();
                 }
+            }
 
-            if (_user.session.cache.tokens.length > 0)
-                for (const _token of _user.session.cache.tokens) {
-                    if (_token.value === token) {
-                        _token.signature = newSignature;
-                        _token.value = newToken;
-                        _token.expiry = time.toJSON();
-                    }
+            for (const _token of _user.session.cache.tokens) {
+                if (_token.value == token) {
+                    _token.signature = newSignature;
+                    _token.value = newToken;
+                    _token.expiry = time.toJSON();
                 }
+            }
 
             await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
 

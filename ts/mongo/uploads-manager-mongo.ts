@@ -1,7 +1,7 @@
 /**
  * @description Schema dos uploads
  * @author GuilhermeSantos001
- * @update 11/01/2022
+ * @update 19/01/2022
  */
 
 import { Document, Schema, model } from "mongoose";
@@ -22,7 +22,12 @@ export const uploadSchema: Schema = new Schema({
     trim: true,
     required: [true, '{PATH} este campo é obrigatório']
   },
-  name: { // ! Nome do arquivo
+  filename: { // ! Nome do arquivo
+    type: String,
+    trim: true,
+    required: [true, '{PATH} este campo é obrigatório']
+  },
+  filetype: { // ! Tipo do arquivo
     type: String,
     trim: true,
     required: [true, '{PATH} este campo é obrigatório']
@@ -37,14 +42,25 @@ export const uploadSchema: Schema = new Schema({
     min: 0,
     required: [true, '{PATH} este campo é obrigatório']
   },
+  compressedSize: { // ! Tamanho do arquivo
+    type: Number,
+    min: 0,
+    required: [true, '{PATH} este campo é obrigatório']
+  },
+  version: { // ! Versão do arquivo
+    type: Number,
+    min: 1,
+    required: [true, '{PATH} este campo é obrigatório']
+  },
   temporary: { // ! Indica se o arquivo é temporário
     type: Boolean,
     default: false,
     required: [true, '{PATH} este campo é obrigatório']
   },
   expiredAt: { // ! Data de expiração do arquivo
-    type: Date,
-    default: undefined
+    type: String,
+    trim: true,
+    required: false
   },
   createdAt: { // ! Data de criação do arquivo
     type: String,
