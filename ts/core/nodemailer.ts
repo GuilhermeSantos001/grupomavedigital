@@ -39,7 +39,7 @@ export enum Templates {
 export default class Mail {
 
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     static test(recipient: Recipient) {

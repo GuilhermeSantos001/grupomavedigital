@@ -16,8 +16,11 @@ module.exports = {
   preset: "ts-jest",
   moduleNameMapper: {
     "^@/app/(.+)$": "<rootDir>/ts/app/$1",
+    "^@/config/(.+)$": "<rootDir>/ts/config/$1",
+    "^@/constants/(.+)$": "<rootDir>/ts/constants/$1",
     "^@/graphql/(.+)$": "<rootDir>/ts/graphql/$1",
     "^@/bin/(.+)$": "<rootDir>/ts/bin/$1",
+    "^@/jobs/(.+)$": "<rootDir>/ts/jobs/$1",
     "^@/contracts/(.+)$": "<rootDir>/ts/contracts/$1",
     "^@/controllers/(.+)$": "<rootDir>/ts/controllers/$1",
     "^@/core/(.+)$": "<rootDir>/ts/core/$1",

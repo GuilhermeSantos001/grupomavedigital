@@ -8,7 +8,7 @@ import { generate, generateMultiple } from 'generate-password';
 
 export default class Password {
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     /**

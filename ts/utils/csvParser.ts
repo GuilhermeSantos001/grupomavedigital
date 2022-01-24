@@ -25,7 +25,7 @@ export default class CSVParser {
     try {
       return await Redis(this.db).flush();
     } catch (error) {
-      throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+      throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 

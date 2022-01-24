@@ -46,7 +46,7 @@ export default function PrivilegeDirective(directiveName: string) {
                             }
 
                             // We has two options here. throw an error or return null (if field is nullable).
-                            throw new TypeError(
+                            throw new Error(
                                 `You have no privileges.`,
                             )
                         }

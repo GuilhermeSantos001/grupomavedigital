@@ -57,7 +57,7 @@ declare type Options = {
 
 export default class MailSend {
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     static baseurl = BASE_URL;
@@ -89,7 +89,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new TypeError(String(error));
+            throw new Error(String(error));
         }
     }
 
@@ -119,14 +119,14 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new TypeError(String(error));
+            throw new Error(String(error));
         }
     }
 
     /**
      * @description Envia o e-mail de recuperação da conta
      */
-    static async accountRetrieveTwofactor(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
+    static async accountRetrieve(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -148,7 +148,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new TypeError(String(error));
+            throw new Error(String(error));
         }
     }
 
@@ -180,7 +180,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new TypeError(String(error));
+            throw new Error(String(error));
         }
     }
 
@@ -211,7 +211,7 @@ export default class MailSend {
                 variables: options.variables
             });
         } catch (error) {
-            throw new TypeError(String(error));
+            throw new Error(String(error));
         }
     }
 }

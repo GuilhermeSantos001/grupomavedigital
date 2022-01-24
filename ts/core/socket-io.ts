@@ -1,87 +1,32 @@
 /**
  * @description Servidor Socket.io
  * @author GuilhermeSantos001
- * @update 14/01/2022
+ * @update 24/01/2022
  */
 
-import { Server, Socket, ServerOptions } from "socket.io";
-import { createAdapter } from '@socket.io/redis-adapter';
-import { ExtendedError } from 'socket.io/dist/namespace';
-import { decompressFromBase64 } from 'lz-string';
-import Redis from 'ioredis';
+import { Server, Socket } from "socket.io";
 
-import verifySignedURL from '@/utils/verifySignedURL';
-import routerMiddlewares from '@/socketIO/routerMiddlewares';
+import Moment from '@/utils/moment';
+
 import routerHercules from '@/socketIO/routerHercules';
 import routerPayback from '@/socketIO/routerPayback';
 
-class IO {
-    static readonly db: number = 3;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    static context: any;
-
-    constructor() {
-        throw new TypeError('this is static class');
-    }
-
-    static create() {
-        let options: Partial<ServerOptions> = {};
-
+function SocketIO(io: Server) {
+    /**
+     * Routers
+     */
+    io.on('connection', (socket: Socket) => {
         if (process.env.NODE_ENV === 'development') {
-            options = {
-                cors: {
-                    origin: '*',
-                    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-                    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
-                    credentials: false,
-                }
-            };
-        } else {
-            options = {
-                cors: {
-                    origin: "https://grupomavedigital.com.br",
-                    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-                    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept-Language', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
-                    credentials: true,
-                }
-            };
+            console.log(`[SOCKET ${socket.id}] [${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] Connected`);
+
+            socket.on("disconnect", (reason) => {
+                console.log(`[SOCKET ${socket.id}] [${Moment.format({ exclude: 'T', layout: 'DD/MM/YYYYTHH:mm:ss' })}] Disconnected -> Reason ${reason}`);
+            });
         }
 
-        this.context = new Server(parseInt(process.env.APP_SOCKET_PORT || '5000'), options);
-
-        this.listening();
-    }
-
-    static listening() {
-        /**
-         * Redis Adapter & Middlewares
-         */
-        const pubClient = new Redis({ host: process.env.REDIS_HOST, port: Number(process.env.REDIS_PORT), db: this.db });
-        const subClient = pubClient.duplicate();
-
-        this.context.adapter(createAdapter(pubClient, subClient));
-
-        this.context.use(async (socket: Socket, next: (err?: ExtendedError | undefined) => void) => {
-            if (verifySignedURL(decompressFromBase64(socket.handshake.auth.signedUrl) || "")) {
-                return next();
-            } else {
-                return next(new Error('Session expired!'));
-            }
-        });
-
-        /**
-         * Routers
-         */
-
-        this.context.on('connection', (socket: Socket) => {
-            socket.on('CONNECTION_PING', () => socket.emit('CONNECTION_PONG'));
-            routerMiddlewares(this.context, socket);
-            routerHercules(this.context, socket);
-            routerPayback(this.context, socket);
-        });
-    }
+        routerHercules(io, socket);
+        routerPayback(io, socket);
+    });
 }
 
-export default function SocketIO(): void {
-    IO.create();
-}
+export { SocketIO };

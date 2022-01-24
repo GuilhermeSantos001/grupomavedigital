@@ -8,7 +8,7 @@
 import userDB, { UserInterface, UserModelInterface, PrivilegesSystem, Unit, Location, Authentication, Session, Devices, History, Token, RefreshToken, authenticationDefault, sessionDefault } from '@/mongo/user-manager-mongo';
 import { Encrypt, Decrypt } from '@/utils/bcrypt';
 import { verify as twoFactorVerify, generateQRCode, QRCode } from '@/utils/twoFactor';
-import Jobs from '@/core/jobs';
+import Queue from '@/core/Queue';
 import JsonWebToken from '@/core/jsonWebToken';
 import Moment from '@/utils/moment';
 import { FilterQuery } from 'mongoose';
@@ -121,7 +121,7 @@ class userManagerDB {
         const _user = await userDB.findOne({ authorization: user.authorization });
 
         if (_user)
-            throw new TypeError(`Usuário(${user.authorization}) já está registrado`);
+            throw new Error(`Usuário(${user.authorization}) já está registrado`);
 
         user.password = await Encrypt(user.password); // ? Gera a criptografia da senha
 
@@ -148,7 +148,7 @@ class userManagerDB {
         totals.push(_user.filter((user: UserModelInterface) => !user.isEnabled).length);
 
         if (totals[0] <= 0 && totals[1] <= 0) {
-            throw new TypeError(`Nenhum usuário está registrado.`);
+            throw new Error(`Nenhum usuário está registrado.`);
         }
 
         return totals;
@@ -173,7 +173,7 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -194,7 +194,7 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -208,9 +208,9 @@ class userManagerDB {
 
         if (_user) {
             if (!await Decrypt(pwd, _user.password))
-                throw new TypeError(`Senha está invalida, tente novamente!`);
+                throw new Error(`Senha está invalida, tente novamente!`);
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         if (!_user.session)
@@ -258,14 +258,14 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
     }
 
     /**
-     * @description Registra a assinatura para que o usuario possa trocar a senha
+     * @description Registra a assinatura para que o usuário possa trocar a senha
      */
     public async forgotPasswordSignatureRegister(auth: string, signature: string): Promise<boolean> {
         const _user = await userDB.findOne({ authorization: auth });
@@ -282,20 +282,20 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
     }
 
     /**
-     * @description Atualiza as informações do usuario para UI/UX.
+     * @description Atualiza as informações do usuário para UI/UX.
      */
     public async updateData(auth: string, updateData: UpdateUserInfo): Promise<boolean> {
         const _user = await userDB.findOne({ authorization: auth });
 
         if (_user) {
-            // ? Verifica se o usuario alterou o e-mail
+            // ? Verifica se o usuário alterou o e-mail
             if (_user.clearEmail !== updateData.email) {
                 _user.email = {
                     status: false,
@@ -318,20 +318,12 @@ class userManagerDB {
                     });
 
                 // ? Cria um job para o envio de e-mail para confirmação da conta
-                await Jobs.append({
-                    name: 'Sends account confirmation after change in account email',
-                    type: 'mailsend',
-                    priority: 'High',
-                    args: {
-                        email,
-                        username,
-                        auth: authorization,
-                        token: jwt,
-                        temporarypass: null,
-                        clientAddress: 'System'
-                    },
-                    status: 'Available'
-                });
+                await Queue.addConfirmMail({
+                    email,
+                    username,
+                    token: jwt,
+                    temporarypass: null
+                })
             }
 
             _user.username = updateData.username;
@@ -351,7 +343,7 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -372,7 +364,7 @@ class userManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -385,7 +377,7 @@ class userManagerDB {
         const _user = await userDB.findOne({ authorization: auth });
 
         if (!_user)
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
 
         if (!_user.session)
             _user.session = sessionDefault;
@@ -430,11 +422,11 @@ class userManagerDB {
 
             // ? Verifica se o e-mail do usuário foi confirmado
             if (!_user.email.status)
-                throw new TypeError(`Usuário com a autorização(${auth}), não confirmou o email.`);
+                throw new Error(`Usuário com a autorização(${auth}), não confirmou o email.`);
 
             // ? Verifica se o dispositivo está liberado para acesso
             if (_user.session.device.allowed.filter(_device => _device === options.device).length <= 0)
-                throw new TypeError(`Usuário com a autorização(${auth}), está utilizando um dispositivo que não está permitido há estabelecer conexões.`);
+                throw new Error(`Usuário com a autorização(${auth}), está utilizando um dispositivo que não está permitido há estabelecer conexões.`);
 
             // ? Verifica se existe alguma sessão expirada
             _user.session.cache.history = _user.session.cache.history.filter((_history: History, i): History => {
@@ -474,27 +466,27 @@ class userManagerDB {
 
             // ? Remove os tokens de sessão que expiraram
             if (_user.session.cache.tokens.length > 0)
-                _user.session.cache.tokens = _user.session.cache.tokens.filter(_token => new Date(_token.expiry) > new Date());
+                _user.session.cache.tokens = _user.session.cache.tokens.filter(_token => new Date() <= new Date(_token.expiry));
 
             // ? Verifica se o numero de conexões permitidas foi atingido
             if (_user.session.connected >= _user.session.limit) {
-                throw new TypeError(`Usuário com a autorização(${auth}), excedeu o limite de sessões.`);
+                throw new Error(`Usuário com a autorização(${auth}), excedeu o limite de sessões.`);
             } else {
                 const
                     unit = _user.session.cache.unit,
                     tmp = _user.session.cache.tmp,
-                    time = getTime(unit, tmp);
+                    timeForExpirySession = getTime(unit, tmp);
 
                 _user.session.connected += 1;
 
                 _user.session.device.connected.push(options.device);
 
-                _user.session.cache.tokens.push({ signature: options.signature, value: options.token, expiry: time.toJSON(), status: true });
+                _user.session.cache.tokens.push({ signature: options.signature, value: options.token, expiry: timeForExpirySession.toJSON(), status: true });
 
                 _user.session.cache.history.push({
                     device: options.device,
                     token: options.token,
-                    tmp: time.toJSON(),
+                    tmp: timeForExpirySession.toJSON(),
                     internetAdress: options.location.internetAdress
                 });
 
@@ -504,30 +496,27 @@ class userManagerDB {
                     const email = _user.clearEmail,
                         username = _user.username;
 
-                    // Cria um job para o envio de email quando a conta é acessada de outro IP
-                    await Jobs.append({
-                        name: 'mail sent when the user accesses the account from another IP',
-                        type: 'mailsend',
-                        priority: 'High',
-                        args: {
-                            email,
-                            username,
-                            navigator: {
-                                browser: options.location.browser,
-                                os: options.location.os,
-                                locationIP: options.location.locationIP,
-                                internetAdress: options.location.internetAdress
-                            },
-                            clientAddress: 'System'
-                        },
-                        status: 'Available'
+                    // ! Cria um job para o envio de email quando a conta é acessada de outro IP
+                    await Queue.addSessionNewAccess({
+                        email,
+                        username,
+                        navigator: {
+                            browser: options.location.browser,
+                            os: options.location.os,
+                            locationIP: options.location.locationIP,
+                            internetAdress: options.location.internetAdress
+                        }
                     });
                 }
 
-                await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+                await userDB.updateOne({ authorization: auth }, {
+                    $set: {
+                        session: _user.session
+                    }
+                });
             }
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -574,9 +563,13 @@ class userManagerDB {
                         _user.session.cache.history.splice(i, 1)
                 });
 
-            await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+            await userDB.updateOne({ authorization: auth }, {
+                $set: {
+                    session: _user.session
+                }
+            });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -602,14 +595,18 @@ class userManagerDB {
                 enabled: false
             };
 
-            await userDB.updateOne({ authorization: auth }, { $set: { authentication: _user.authentication } });
+            await userDB.updateOne({ authorization: auth }, {
+                $set: {
+                    authentication: _user.authentication
+                }
+            });
 
             return {
                 secret,
                 qrcode
             };
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 
@@ -630,7 +627,7 @@ class userManagerDB {
                 return false;
             }
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 
@@ -646,9 +643,13 @@ class userManagerDB {
 
             _user.authentication.twofactor.enabled = true;
 
-            await userDB.updateOne({ authorization: auth }, { $set: { authentication: _user.authentication } });
+            await userDB.updateOne({ authorization: auth }, {
+                $set: {
+                    authentication: _user.authentication
+                }
+            });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -666,9 +667,13 @@ class userManagerDB {
 
             _user.authentication.twofactor.enabled = false;
 
-            await userDB.updateOne({ authorization: auth }, { $set: { authentication: _user.authentication } });
+            await userDB.updateOne({ authorization: auth }, {
+                $set: {
+                    authentication: _user.authentication
+                }
+            });
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -688,7 +693,7 @@ class userManagerDB {
 
             await twoFactorVerify(twofactor.secret, userToken);
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -729,11 +734,15 @@ class userManagerDB {
                 }
             }
 
-            await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+            await userDB.updateOne({ authorization: auth }, {
+                $set: {
+                    session: _user.session
+                }
+            });
 
             return [newSignature, newToken];
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 
@@ -756,20 +765,20 @@ class userManagerDB {
             ) {
                 // ? Verifica se o token está valido.
                 if (!_usrToken.status) {
-                    throw new TypeError(`Token de sessão não está mais valido.`);
+                    throw new Error(`Token de sessão não está mais valido.`);
                 } else {
                     // ? Verifica se o token está vinculado ao endereço de IP
                     if (
                         _user.session.cache.history.filter(_history => _history.internetAdress === internetAdress).length <= 0
                     ) {
-                        throw new TypeError(`Token de sessão está registrado em outro endereço de internet.`);
+                        throw new Error(`Token de sessão está registrado em outro endereço de internet.`);
                     }
                 }
             } else {
-                throw new TypeError(`Token de sessão não está registrado.`);
+                throw new Error(`Token de sessão não está registrado.`);
             }
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
 
         return true;
@@ -802,7 +811,11 @@ class userManagerDB {
                 if (_user.session.cache.refreshToken.length <= 0) {
                     _user.session.cache.refreshToken.push(token);
 
-                    await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+                    await userDB.updateOne({ authorization: auth }, {
+                        $set: {
+                            session: _user.session
+                        }
+                    });
 
                     return token;
                 } else {
@@ -810,10 +823,10 @@ class userManagerDB {
                     return _user.session.cache.refreshToken.find(refreshToken => new Date(refreshToken.expiry) > new Date()) || token;
                 }
             } else {
-                throw new TypeError(`Usuário(${auth}) não está registrado.`);
+                throw new Error(`Usuário(${auth}) não está registrado.`);
             }
         } catch {
-            throw new TypeError(`Não é possivel adicionar um novo refresh token para o usuário(${auth}).`);
+            throw new Error(`Não é possivel adicionar um novo refresh token para o usuário(${auth}).`);
         }
     }
 
@@ -835,9 +848,9 @@ class userManagerDB {
             }) || [];
 
             if (tokens.length <= 0)
-                throw new TypeError(`Refresh Token(${refreshToken}) não está registrado ou está expirado.`);
+                throw new Error(`Refresh Token(${refreshToken}) não está registrado ou está expirado.`);
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 
@@ -861,12 +874,16 @@ class userManagerDB {
             if (tokens.length > 0) {
                 _user.session.cache.refreshToken = tokens;
 
-                await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+                await userDB.updateOne({ authorization: auth }, {
+                    $set: {
+                        session: _user.session
+                    }
+                });
             } else {
-                throw new TypeError(`Usuário(${auth}) não possui refresh tokens.`);
+                throw new Error(`Usuário(${auth}) não possui refresh tokens.`);
             }
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 
@@ -890,10 +907,14 @@ class userManagerDB {
                     return false;
                 });
 
-                await userDB.updateOne({ authorization: auth }, { $set: { session: _user.session } });
+                await userDB.updateOne({ authorization: auth }, {
+                    $set: {
+                        session: _user.session
+                    }
+                });
             }
         } else {
-            throw new TypeError(`Usuário(${auth}) não está registrado.`);
+            throw new Error(`Usuário(${auth}) não está registrado.`);
         }
     }
 }

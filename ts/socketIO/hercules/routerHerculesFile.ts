@@ -160,12 +160,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               history,
             );
         } else {
-          throw new TypeError(`Você não tem permissão para adicionar versões nesse arquivo`);
+          throw new Error(`Você não tem permissão para adicionar versões nesse arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -210,12 +210,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, cid, updatedFile[0].version, updatedFile[0].history?.length, updatedFile[0].size, updatedFile[0].compressedSize, versions, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para remover versões desse arquivo`);
+          throw new Error(`Você não tem permissão para remover versões desse arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -274,7 +274,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -332,7 +332,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -377,12 +377,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, socket.id, cid, updatedFile[0].name, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para editar esse arquivo`);
+          throw new Error(`Você não tem permissão para editar esse arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -425,12 +425,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, socket.id, cid, updatedFile[0].description, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para editar esse arquivo`);
+          throw new Error(`Você não tem permissão para editar esse arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -473,12 +473,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, socket.id, cid, updatedFile[0].tag, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para editar esse arquivo`);
+          throw new Error(`Você não tem permissão para editar esse arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -530,12 +530,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               alias: Privilege.alias(updatedGroup.name),
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para adicionar um grupo na whitelist do arquivo`);
+          throw new Error(`Você não tem permissão para adicionar um grupo na whitelist do arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -594,12 +594,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               permissions: updatedUser.permissions,
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para adicionar um usuário na whitelist do arquivo`);
+          throw new Error(`Você não tem permissão para adicionar um usuário na whitelist do arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -649,12 +649,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               alias: Privilege.alias(group.name),
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para remover um grupo da whitelist do arquivo`);
+          throw new Error(`Você não tem permissão para remover um grupo da whitelist do arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -703,12 +703,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               permissions: user.permissions,
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para remover um usuário da whitelist do arquivo`);
+          throw new Error(`Você não tem permissão para remover um usuário da whitelist do arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -758,12 +758,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               alias: Privilege.alias(group.name),
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para adicionar uma permissão no grupo no arquivo`);
+          throw new Error(`Você não tem permissão para adicionar uma permissão no grupo no arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -812,12 +812,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               permissions: updatedFile[0].accessUsersId.filter(_user => _user.email === user.email)[0].permissions,
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para adicionar uma permissão do usuário no arquivo`);
+          throw new Error(`Você não tem permissão para adicionar uma permissão do usuário no arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -867,12 +867,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               alias: Privilege.alias(group.name),
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para remover uma permissão do grupo no arquivo`);
+          throw new Error(`Você não tem permissão para remover uma permissão do grupo no arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -921,12 +921,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               permissions: updatedFile[0].accessUsersId.filter(_user => _user.email === user.email)[0].permissions,
             }, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para remover uma permissão do usuário no arquivo`);
+          throw new Error(`Você não tem permissão para remover uma permissão do usuário no arquivo`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -968,12 +968,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, cid, updatedFile[0].trash, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para mover o arquivo para a lixeira`);
+          throw new Error(`Você não tem permissão para mover o arquivo para a lixeira`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -1015,12 +1015,12 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
           io
             .emit(channelSuccess, room, cid, updatedFile[0].updated, updatedFile[0].lastAccess);
         } else {
-          throw new TypeError(`Você não tem permissão para mover o arquivo para a lixeira`);
+          throw new Error(`Você não tem permissão para mover o arquivo para a lixeira`);
         }
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 }

@@ -31,7 +31,7 @@ class cardsManagerDB {
             await model.validate();
             await model.save();
         } else {
-            throw new TypeError(`Cartão Digital com o ID(${card.cid}) já está registrado.`);
+            throw new Error(`Cartão Digital com o ID(${card.cid}) já está registrado.`);
         }
 
         return true;
@@ -66,7 +66,7 @@ class cardsManagerDB {
                 }
             });
         } else {
-            throw new TypeError(`Cartão Digital com o ID(${cid}) não está registrado.`);
+            throw new Error(`Cartão Digital com o ID(${cid}) não está registrado.`);
         }
 
         return true;
@@ -81,7 +81,7 @@ class cardsManagerDB {
         if (_card) {
             await _card.remove();
         } else {
-            throw new TypeError(`Cartão Digital com o ID(${cid}) não está registrado.`);
+            throw new Error(`Cartão Digital com o ID(${cid}) não está registrado.`);
         }
 
         return true;

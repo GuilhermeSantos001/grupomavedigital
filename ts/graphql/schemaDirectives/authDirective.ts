@@ -38,7 +38,7 @@ export default function AuthDirective(directiveName: string) {
                                 return await resolve(source, args, context, info);
                             }
 
-                            throw new TypeError(`You are not authorized.`);
+                            throw new Error(`You are not authorized.`);
                         }
 
                     return fieldConfig;

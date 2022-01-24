@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 
 export default class Random {
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     static INT(max: number): number {

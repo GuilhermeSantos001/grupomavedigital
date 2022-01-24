@@ -1,12 +1,11 @@
 {
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "removeComments": true,
+    "sourceMap": true,
+    "outDir": "dist",
     "strict": true,
-    "outDir": "./dist",
+    "lib": ["esnext"],
+    "esModuleInterop": true,
     "baseUrl": ".",
     "types": [
       "node",
@@ -15,6 +14,9 @@
     "paths": {
       "@/app/*": [
         "ts/*"
+      ],
+      "@/constants/*": [
+        "ts/constants/*"
       ],
       "@/config/*": [
         "ts/config/*"
@@ -39,6 +41,9 @@
       ],
       "@/bin/*": [
         "ts/bin/*"
+      ],
+      "@/jobs/*": [
+        "ts/jobs/*"
       ],
       "@/models/*": [
         "ts/models/*"

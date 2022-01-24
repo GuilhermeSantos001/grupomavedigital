@@ -130,7 +130,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         dataFilial: async (parent: unknown, args: { cache: boolean }) => {
@@ -160,7 +160,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         dataBillsType: async (parent: unknown, args: { cache: boolean }) => {
@@ -190,7 +190,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         dataBanking: async (parent: unknown, args: { cache: boolean }) => {
@@ -225,7 +225,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         dataBankingNatures: async (parent: unknown, args: { id: string, cache: boolean }) => {
@@ -259,7 +259,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         }
     }

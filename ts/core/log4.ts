@@ -1,8 +1,7 @@
 /**
  * @description Debug
  * @author GuilhermeSantos001
- * @update 30/08/2021
- * @version 1.0.4
+ * @update 22/01/2022
  */
 
 import { configure, getLogger, Logger } from 'log4js';
@@ -44,10 +43,6 @@ configure({
             type: 'file',
             filename: `${path}/router_files_upload.log`
         },
-        jobs_logs: {
-            type: 'file',
-            filename: `${path}/jobs.log`
-        },
         console: { type: 'console' }
     },
     categories: {
@@ -57,12 +52,11 @@ configure({
         router_hls: { appenders: ['router_hls_logs'], level: 'ALL' },
         router_files_upload: { appenders: ['router_files_upload_logs'], level: 'ALL' },
         database_mongoDB: { appenders: ['router_mongodb_logs'], level: 'ALL' },
-        jobs: { appenders: ['jobs_logs'], level: 'ALL' },
         default: { appenders: ['console'], level: 'ALL' }
     }
 });
 
-declare type Category = 'default' | 'hls' | 'user' | 'mongoDB' | 'files_upload' | 'jobs';
+declare type Category = 'default' | 'hls' | 'user' | 'mongoDB' | 'files_upload';
 
 export default class Debug {
     static isHomolog(): boolean {
@@ -79,8 +73,6 @@ export default class Debug {
                 return 'database_mongoDB';
             case 'files_upload':
                 return 'router_files_upload';
-            case 'jobs':
-                return 'jobs';
             case 'default':
             default:
                 return 'router_general';

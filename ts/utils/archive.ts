@@ -19,7 +19,7 @@ export interface Reader {
 
 export default class Archive {
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     static base = archiver('zip', {

@@ -14,7 +14,7 @@ declare interface Options {
 export default class Moment {
 
     constructor() {
-        throw new TypeError('this is static class');
+        throw new Error('this is static class');
     }
 
     /**

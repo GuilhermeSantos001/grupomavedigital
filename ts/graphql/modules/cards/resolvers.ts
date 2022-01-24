@@ -94,7 +94,7 @@ module.exports = {
 
                 return compressToEncodedURIComponent(JSON.stringify(cards));
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         }
     },
@@ -103,7 +103,7 @@ module.exports = {
             try {
                 return await vcard(args.data);
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         cardCreate: async (parent: unknown, args: { data: Card }) => {
@@ -135,7 +135,7 @@ module.exports = {
 
                 return id;
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         cardUpdate: async (parent: unknown, args: { data: Card }) => {
@@ -166,7 +166,7 @@ module.exports = {
 
                 return id;
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         cardRemove: async (parent: unknown, args: { id: string }) => {
@@ -175,7 +175,7 @@ module.exports = {
 
                 return true
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
     }

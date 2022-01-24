@@ -1,7 +1,7 @@
 /**
- * ? Gerenciador de informações com o banco de dados
+ * @description Gerenciador de informações com o banco de dados
  * @author GuilhermeSantos001
- * @update 06/12/2021
+ * @update 22/01/2022
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +19,7 @@ import folderManagerDB, { Access as AccessFolder } from '@/db/folders-db';
 import Moment from '@/utils/moment';
 import Random from '@/utils/random';
 import generatePassword from '@/utils/generatePassword'
-import Jobs from '@/core/jobs';
+import Queue from '@/core/Queue';
 
 export interface Access {
     group?: {
@@ -301,19 +301,19 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está bloqueado
@@ -443,7 +443,7 @@ class fileManagerDB {
         const _files = await fileDB.find(filter, null, { skip, limit }).exec();
 
         if (_files.length < 0)
-            throw new TypeError(`Nenhum arquivo foi encontrado.`);
+            throw new Error(`Nenhum arquivo foi encontrado.`);
 
         return _files;
     }
@@ -458,7 +458,7 @@ class fileManagerDB {
         const _file = await fileDB.findOne({ name: file.name, type: file.type });
 
         if (_file)
-            throw new TypeError(`Arquivo(${file.name}.${file.type}) já está registrado.`);
+            throw new Error(`Arquivo(${file.name}.${file.type}) já está registrado.`);
 
         const
             now = Moment.format(),
@@ -488,7 +488,7 @@ class fileManagerDB {
         let _update = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se existe outro arquivo com o novo nome
@@ -496,13 +496,13 @@ class fileManagerDB {
         const _exist = await fileDB.findOne({ name: data.name, type: file.type });
 
         if (_exist && _exist.cid !== cid)
-            throw new TypeError(`Já existe um arquivo com o mesmo nome: ${data.name}${file.type}`);
+            throw new Error(`Já existe um arquivo com o mesmo nome: ${data.name}${file.type}`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -520,13 +520,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -566,7 +566,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não está disponível no momento, para há atualização.`);
+            throw new Error(`O arquivo com cid(${cid}) não está disponível no momento, para há atualização.`);
         }
     }
 
@@ -582,13 +582,13 @@ class fileManagerDB {
         let _delete = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -606,7 +606,7 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -642,7 +642,7 @@ class fileManagerDB {
                     await folderManagerDB.remove(file.folderId || "", accessFolder, cid, access);
                     await folderManagerDB.close(file.folderId || "", accessFolder);
                 } catch (error) {
-                    throw new TypeError(`A pasta(${file.folderId}) está protegida/bloqueada ou na lixeira, não é possível remover o arquivo no momento.`);
+                    throw new Error(`A pasta(${file.folderId}) está protegida/bloqueada ou na lixeira, não é possível remover o arquivo no momento.`);
                 }
             }
 
@@ -650,7 +650,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não pode ser deletado no momento.`);
+            throw new Error(`Arquivo com cid(${cid}) não pode ser deletado no momento.`);
         }
     }
 
@@ -668,16 +668,16 @@ class fileManagerDB {
         let _join = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${folderId}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${folderId}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -695,13 +695,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o arquivo com cid(${cid}) na pasta.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o arquivo com cid(${cid}) na pasta.`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -729,7 +729,7 @@ class fileManagerDB {
                 file.folderId !== folder.folderId ||
                 !file.folderId && this._isAssociatedFolder(file)
             ) {
-                throw new TypeError(`Arquivo com cid(${cid}) já está associado a uma pasta com o cid(${file.folderId}).`);
+                throw new Error(`Arquivo com cid(${cid}) já está associado a uma pasta com o cid(${file.folderId}).`);
             }
 
             file.status = 'Updating';
@@ -748,7 +748,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível associá-lo a pasta com o cid(${folderId}) no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível associá-lo a pasta com o cid(${folderId}) no momento.`);
         }
     }
 
@@ -766,16 +766,16 @@ class fileManagerDB {
         let _exit = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${folderId}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${folderId}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -793,13 +793,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da pasta.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da pasta.`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -839,10 +839,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`Arquivo com cid(${cid}) não está associado há pasta com o cid(${folderId}).`);
+                throw new Error(`Arquivo com cid(${cid}) não está associado há pasta com o cid(${folderId}).`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remove-lo da pasta com o cid(${folderId}) no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remove-lo da pasta com o cid(${folderId}) no momento.`);
         }
     }
 
@@ -858,13 +858,13 @@ class fileManagerDB {
         let _addGroupId = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -882,13 +882,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -923,7 +923,7 @@ class fileManagerDB {
                 const index = file.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name).length > 0;
 
                 if (index)
-                    throw new TypeError(`Grupo(${group.name}) já está adicionado na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) já está adicionado na whitelist do arquivo com cid(${cid})`);
 
                 file.accessGroupId.push(group);
 
@@ -939,10 +939,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o grupo(${group.name}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o grupo(${group.name}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
         }
     }
 
@@ -959,13 +959,13 @@ class fileManagerDB {
         let _addPermission = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -983,13 +983,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1024,7 +1024,7 @@ class fileManagerDB {
                 const groups = file.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name);
 
                 if (groups.filter(_group => _group.permissions.filter(permission => permissions.includes(permission)).length > 0).length > 0)
-                    throw new TypeError(`Grupo(${group.name}) já tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) já tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
 
                 permissions.forEach(permission => {
                     if (!file.accessGroupId)
@@ -1045,10 +1045,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar as permissões do grupo(${group.name}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar as permissões do grupo(${group.name}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar as permissões do grupo(${group.name}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar as permissões do grupo(${group.name}) na whitelist no momento.`);
         }
     }
 
@@ -1065,13 +1065,13 @@ class fileManagerDB {
         let _addPermission = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1089,13 +1089,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1130,7 +1130,7 @@ class fileManagerDB {
                 const users = file.accessUsersId.filter((userId: UserId) => userId.email === user.email);
 
                 if (users.filter(_user => _user.permissions.filter(permission => permissions.includes(permission)).length > 0).length > 0)
-                    throw new TypeError(`Usuário(${user.email}) já tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Usuário(${user.email}) já tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
 
                 permissions.forEach(permission => {
                     if (!file.accessUsersId)
@@ -1151,10 +1151,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar as permissões do usuário(${user.email}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar as permissões do usuário(${user.email}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar as permissões do usuário(${user.email}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar as permissões do usuário(${user.email}) na whitelist no momento.`);
         }
     }
 
@@ -1171,13 +1171,13 @@ class fileManagerDB {
         let _removePermission = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1195,13 +1195,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1236,7 +1236,7 @@ class fileManagerDB {
                 const users = file.accessUsersId.filter((userId: UserId) => userId.email === user.email);
 
                 if (users.filter(_user => _user.permissions.filter(permission => permissions.includes(permission)).length > 0).length <= 0)
-                    throw new TypeError(`Usuário(${user.email}) não tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Usuário(${user.email}) não tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
 
                 permissions.forEach(permission => {
                     if (!file.accessUsersId)
@@ -1259,10 +1259,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover as permissões do usuário(${user.email}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover as permissões do usuário(${user.email}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover as permissões do usuário(${user.email}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover as permissões do usuário(${user.email}) na whitelist no momento.`);
         }
     }
 
@@ -1279,13 +1279,13 @@ class fileManagerDB {
         let _removePermission = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1303,13 +1303,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar a permissão ao grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1344,7 +1344,7 @@ class fileManagerDB {
                 const groups = file.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name);
 
                 if (groups.filter(_group => _group.permissions.filter(permission => permissions.includes(permission)).length > 0).length <= 0)
-                    throw new TypeError(`Grupo(${group.name}) não tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) não tem as permissões(${permissions.join(', ')}) na whitelist do arquivo com cid(${cid})`);
 
                 permissions.forEach(permission => {
                     if (!file.accessGroupId)
@@ -1367,10 +1367,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover as permissões do grupo(${group.name}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover as permissões do grupo(${group.name}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover as permissões do grupo(${group.name}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover as permissões do grupo(${group.name}) na whitelist no momento.`);
         }
     }
 
@@ -1386,13 +1386,13 @@ class fileManagerDB {
         let _removeGroupId = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1410,13 +1410,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o grupo na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o grupo na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1448,7 +1448,7 @@ class fileManagerDB {
                 const index = file.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name).length > 0;
 
                 if (!index)
-                    throw new TypeError(`Grupo(${group.name}) não está na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) não está na whitelist do arquivo com cid(${cid})`);
 
                 file.accessGroupId = file.accessGroupId.filter((groupId: GroupId) => groupId.name !== group.name);
 
@@ -1464,10 +1464,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover o grupo(${group.name}) da whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível remover o grupo(${group.name}) da whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
         }
     }
 
@@ -1483,13 +1483,13 @@ class fileManagerDB {
         let _addUserId = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1507,13 +1507,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o usuário na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar o usuário na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1545,7 +1545,7 @@ class fileManagerDB {
                 const index = file.accessUsersId.filter((userId: UserId) => userId.email === user.email).length > 0;
 
                 if (index)
-                    throw new TypeError(`Email(${user.email}) já está adicionado na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Email(${user.email}) já está adicionado na whitelist do arquivo com cid(${cid})`);
 
                 file.accessUsersId.push(user);
 
@@ -1561,10 +1561,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
         }
     }
 
@@ -1580,13 +1580,13 @@ class fileManagerDB {
         let _removeUserId = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1604,13 +1604,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o usuário na whitelist do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o usuário na whitelist do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1642,7 +1642,7 @@ class fileManagerDB {
                 const index = file.accessUsersId.filter((userId: UserId) => userId.email === user.email).length > 0;
 
                 if (!index)
-                    throw new TypeError(`Email(${user.email}) não está na whitelist do arquivo com cid(${cid})`);
+                    throw new Error(`Email(${user.email}) não está na whitelist do arquivo com cid(${cid})`);
 
                 file.accessUsersId = file.accessUsersId.filter((userId: UserId) => userId.email !== user.email);
 
@@ -1658,10 +1658,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
         }
     }
 
@@ -1678,13 +1678,13 @@ class fileManagerDB {
         let _addAssignee = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1702,13 +1702,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar um procurador ao arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar um procurador ao arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1740,7 +1740,7 @@ class fileManagerDB {
                 const index = file.assignees.filter((_assignee: Assignee) => _assignee.email === assignee.email).length > 0;
 
                 if (index)
-                    throw new TypeError(`Procurador(${assignee.email}) já está associado ao arquivo com cid(${cid})`);
+                    throw new Error(`Procurador(${assignee.email}) já está associado ao arquivo com cid(${cid})`);
 
                 file.assignees.push(assignee);
 
@@ -1756,10 +1756,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o procurador(${assignee.email}).`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso e/ou não será possível adicionar o procurador(${assignee.email}).`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o procurador(${assignee.email}) no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível adicionar o procurador(${assignee.email}) no momento.`);
         }
     }
 
@@ -1776,13 +1776,13 @@ class fileManagerDB {
         let _removeAssignee = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -1800,13 +1800,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
           * ? Verifica o acesso ao arquivo
           */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover um procurador do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover um procurador do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -1838,7 +1838,7 @@ class fileManagerDB {
                 const index = file.assignees.filter((_assignee: Assignee) => _assignee.email === assignee.email).length > 0;
 
                 if (!index)
-                    throw new TypeError(`Procurador(${assignee.email}) não está associado ao arquivo com cid(${cid})`);
+                    throw new Error(`Procurador(${assignee.email}) não está associado ao arquivo com cid(${cid})`);
 
                 file.assignees = file.assignees.filter((_assignee: Assignee) => _assignee.email !== assignee.email);
 
@@ -1854,10 +1854,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
+                throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
+            throw new Error(`O arquivo com cid(${cid}) está em uso. Não é possível remover o procurador(${assignee.email}) no momento.`);
         }
     }
 
@@ -1870,13 +1870,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está em modo escrita.
@@ -1906,7 +1906,7 @@ class fileManagerDB {
 
             return file.history.length;
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não está em modo de escrita, o historico da versão não pode ser armazenado.`);
+            throw new Error(`O arquivo com cid(${cid}) não está em modo de escrita, o historico da versão não pode ser armazenado.`);
         }
     }
 
@@ -1920,13 +1920,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está disponível para há remoção.
@@ -1968,7 +1968,7 @@ class fileManagerDB {
                             file.version = 0;
                         }
                     } else {
-                        throw new TypeError(`Versão(${version}) do arquivo com o cid(${cid}) não está registrada.`);
+                        throw new Error(`Versão(${version}) do arquivo com o cid(${cid}) não está registrada.`);
                     }
                 }
             } else {
@@ -1993,7 +1993,7 @@ class fileManagerDB {
 
             return fileIds;
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não pode ter versões removidas.`);
+            throw new Error(`O arquivo com cid(${cid}) não pode ter versões removidas.`);
         }
     }
 
@@ -2009,13 +2009,13 @@ class fileManagerDB {
         let _write = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2033,13 +2033,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para escrever no arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -2078,7 +2078,7 @@ class fileManagerDB {
                 status: 'Active'
             };
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não está disponível no momento, para há escrita.`);
+            throw new Error(`O arquivo com cid(${cid}) não está disponível no momento, para há escrita.`);
         }
     }
 
@@ -2096,13 +2096,13 @@ class fileManagerDB {
         let _read = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2120,13 +2120,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para ler o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para ler o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2168,7 +2168,7 @@ class fileManagerDB {
             }
 
             if (!fileId)
-                throw new TypeError(`A versão(${version}) para o arquivo com cid(${cid}) não está registrada.`);
+                throw new Error(`A versão(${version}) para o arquivo com cid(${cid}) não está registrada.`);
 
             file.status = 'Reading';
 
@@ -2183,7 +2183,7 @@ class fileManagerDB {
 
             return { fileId, filename: `${file.name}${file.type}.gz` };
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não está disponível no momento, para há leitura.`);
+            throw new Error(`O arquivo com cid(${cid}) não está disponível no momento, para há leitura.`);
         }
     }
 
@@ -2199,7 +2199,7 @@ class fileManagerDB {
         let _rename = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se existe outro arquivo com o novo nome
@@ -2207,13 +2207,13 @@ class fileManagerDB {
         const _exist = await fileDB.findOne({ name, type: file.type });
 
         if (_exist && _exist.cid !== cid)
-            throw new TypeError(`Já existe um arquivo com o mesmo nome: ${name}${file.type}`);
+            throw new Error(`Já existe um arquivo com o mesmo nome: ${name}${file.type}`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2231,7 +2231,7 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -2271,7 +2271,7 @@ class fileManagerDB {
                 return { filesID: file.getHistoryFilesId, type: file.type };
             }
         } else {
-            throw new TypeError(`O arquivo com cid(${cid}) não está disponível no momento, para há renomeação.`);
+            throw new Error(`O arquivo com cid(${cid}) não está disponível no momento, para há renomeação.`);
         }
     }
 
@@ -2286,13 +2286,13 @@ class fileManagerDB {
         let _close = false;
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2310,7 +2310,7 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o arquivo não está protegido/bloqueado.
@@ -2363,13 +2363,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2387,19 +2387,19 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está em modo escrita/leitura/remoção/atualização.
          */
         if (this._isWritingOrReadingOrRemovingOrUpdating(file)) {
-            throw new TypeError(`Arquivo com cid(${cid}) está em uso no momento, não será possível protege-lo agora.`);
+            throw new Error(`Arquivo com cid(${cid}) está em uso no momento, não será possível protege-lo agora.`);
         } else {
             /**
              * ? Verifica se o arquivo está disponível para a proteção.
@@ -2426,7 +2426,7 @@ class fileManagerDB {
 
                 return uuid;
             } else {
-                throw new TypeError(`Arquivo com cid(${cid}) está em uso e/ou não será possível protege-lo.`);
+                throw new Error(`Arquivo com cid(${cid}) está em uso e/ou não será possível protege-lo.`);
             }
         }
     }
@@ -2441,19 +2441,19 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está protegido.
@@ -2479,10 +2479,10 @@ class fileManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`Chave e/ou Texto Secreto está invalido(a).`);
+                throw new Error(`Chave e/ou Texto Secreto está invalido(a).`);
             }
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) está não está protegido.`);
+            throw new Error(`Arquivo com cid(${cid}) está não está protegido.`);
         }
     }
 
@@ -2496,13 +2496,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2520,19 +2520,19 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o arquivo está compartilhado.
          */
         if (this._isShared(file))
-            throw new TypeError(`Arquivo com cid(${cid}) já está compartilhado.`);
+            throw new Error(`Arquivo com cid(${cid}) já está compartilhado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está disponível para o compartilhamento.
@@ -2542,7 +2542,7 @@ class fileManagerDB {
              * ? Verifica se o arquivo está em modo escrita/leitura/remoção/atualização.
              */
             if (this._isWritingOrReadingOrRemovingOrUpdating(file)) {
-                throw new TypeError(`Arquivo com cid(${cid}) está em uso no momento, não será possível compartilhá-lo agora.`);
+                throw new Error(`Arquivo com cid(${cid}) está em uso no momento, não será possível compartilhá-lo agora.`);
             } else {
                 const
                     link = Random.HASH(8, 'hex'),
@@ -2567,7 +2567,7 @@ class fileManagerDB {
                 return { link, secret };
             }
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não pode ser compartilhado.`);
+            throw new Error(`Arquivo com cid(${cid}) não pode ser compartilhado.`);
         }
     }
 
@@ -2581,13 +2581,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2605,13 +2605,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está compartilhado.
@@ -2621,7 +2621,7 @@ class fileManagerDB {
              * ? Verifica se o arquivo está em modo escrita/leitura/remoção/atualização.
              */
             if (this._isWritingOrReadingOrRemovingOrUpdating(file)) {
-                throw new TypeError(`Arquivo com cid(${cid}) está em uso no momento, não será possível remover o compartilhamento agora.`);
+                throw new Error(`Arquivo com cid(${cid}) está em uso no momento, não será possível remover o compartilhamento agora.`);
             } else {
                 if (this._verifyShared(file, share)) {
                     file.updated = Moment.format();
@@ -2637,11 +2637,11 @@ class fileManagerDB {
 
                     return true;
                 } else {
-                    throw new TypeError(`Link e/ou Texto Secreto está invalido.`);
+                    throw new Error(`Link e/ou Texto Secreto está invalido.`);
                 }
             }
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não está compartilhado.`);
+            throw new Error(`Arquivo com cid(${cid}) não está compartilhado.`);
         }
     }
 
@@ -2655,13 +2655,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2679,13 +2679,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && blocked)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está disponível para o bloqueio.
@@ -2707,7 +2707,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) está em uso e/ou não será possível bloqueá-lo.`);
+            throw new Error(`Arquivo com cid(${cid}) está em uso e/ou não será possível bloqueá-lo.`);
         }
     }
 
@@ -2720,25 +2720,25 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido.
          */
         if (this._isProtected(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear o arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear o arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo está bloqueado.
@@ -2760,7 +2760,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não está bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) não está bloqueado.`);
         }
     }
 
@@ -2773,13 +2773,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2797,13 +2797,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para colocar o arquivo com cid(${cid}) na lixeira.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para colocar o arquivo com cid(${cid}) na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está disponível.
@@ -2817,7 +2817,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) está em uso no momento, não será possível coloca-lo na lixeira agora.`);
+            throw new Error(`Arquivo com cid(${cid}) está em uso no momento, não será possível coloca-lo na lixeira agora.`);
         }
     }
 
@@ -2830,13 +2830,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access)) {
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da lixeira.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar o arquivo com cid(${cid}) da lixeira.`);
         }
 
         /**
@@ -2860,7 +2860,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) não está na lixeira.`);
         }
     }
 
@@ -2874,13 +2874,13 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está na lixeira.
          */
         if (this._isGarbage(file))
-            throw new TypeError(`Arquivo com cid(${cid}) está na lixeira.`);
+            throw new Error(`Arquivo com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2898,19 +2898,19 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para gerar um pedido para mover o arquivo com cid(${cid}) para a lixeira.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para gerar um pedido para mover o arquivo com cid(${cid}) para a lixeira.`);
 
         /**
          * ? Verifica se o arquivo tem procuradores associados
          */
         if (!this._isContainsAssignees(file))
-            throw new TypeError(`Arquivo com cid(${cid}) não possui procuradores.`);
+            throw new Error(`Arquivo com cid(${cid}) não possui procuradores.`);
 
         /**
          * ? Verifica se o arquivo está disponível.
@@ -2929,32 +2929,24 @@ class fileManagerDB {
                 file.assignees = [];
 
             for (const assignee of file.assignees) {
-                // Cria um job para o envio de email com o pedido aos procuradores do arquivo
-                await Jobs.append({
-                    name: `sending an e-mail with the request to move the file(${file.name}) to the Recycle Bin`,
-                    type: 'mailsend',
-                    priority: 'High',
-                    args: {
-                        email: assignee.email,
-                        username: assignee.name,
-                        title: `Procurador(a) ${order.assignee.name} quer mover o arquivo(${file.name}) para a lixeira`,
-                        description: [
-                            `Um pedido para mover o arquivo(${file.name}) para a lixeira foi emitido por ${order.assignee.name}`,
-                            `Você concorda ou discorda disso?`
-                        ].join('\n'),
-                        link: order.link,
-                        order: true,
-                        clientAddress: 'System'
-                    },
-                    status: 'Available'
-                });
+                // ! Cria um job para o envio de email com o pedido aos procuradores do arquivo
+                await Queue.addHerculesOrders({
+                    email: assignee.email,
+                    username: assignee.name,
+                    title: `Procurador(a) ${order.assignee.name} quer mover o arquivo(${file.name}) para a lixeira`,
+                    description: [
+                        `Um pedido para mover o arquivo(${file.name}) para a lixeira foi emitido por ${order.assignee.name}`,
+                        `Você concorda ou discorda disso?`
+                    ].join('\n'),
+                    link: order.link
+                })
             }
 
             await file.updateOne({ $set: { order, updated: Moment.format() } });
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) está em uso no momento, não será possível criar um pedido para coloca-lo na lixeira agora.`);
+            throw new Error(`Arquivo com cid(${cid}) está em uso no momento, não será possível criar um pedido para coloca-lo na lixeira agora.`);
         }
     }
 
@@ -2967,7 +2959,7 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -2985,21 +2977,19 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo tem um pedido definido
          */
         if (file.order) {
             file.updated = Moment.format();
-
-            await Jobs.removeJobByName(`sending an e-mail with the request to move the file(${file.name}) to the Recycle Bin`);
 
             await fileDB.updateOne({ cid: file.cid }, {
                 $set: {
@@ -3013,7 +3003,7 @@ class fileManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não tem um pedido definido.`);
+            throw new Error(`Arquivo com cid(${cid}) não tem um pedido definido.`);
         }
     }
 
@@ -3027,7 +3017,7 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -3045,13 +3035,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo tem um pedido definido
@@ -3064,13 +3054,13 @@ class fileManagerDB {
              * ? Verifica se o procurador está autorizado a responder o pedido
              */
             if (file.assignees?.filter(assignee => assignee.email === answer.assignee.email).length <= 0)
-                throw new TypeError(`O procurador(${answer.assignee.email}) não está associado com o arquivo com cid(${cid}).`);
+                throw new Error(`O procurador(${answer.assignee.email}) não está associado com o arquivo com cid(${cid}).`);
 
             /**
              * ? Verifica se o tempo para responder o pedido expirou
              */
             if (file.orderTimelapseExpired()) {
-                throw new TypeError(`O prazo para responder a solicitação ${file.order.title} do arquivo com cid(${cid}) expirou.`);
+                throw new Error(`O prazo para responder a solicitação ${file.order.title} do arquivo com cid(${cid}) expirou.`);
             } else {
                 if (!file.order.answers) {
                     file.order.answers = [answer];
@@ -3097,7 +3087,7 @@ class fileManagerDB {
                 return true;
             }
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não tem um pedido definido.`);
+            throw new Error(`Arquivo com cid(${cid}) não tem um pedido definido.`);
         }
     }
 
@@ -3110,7 +3100,7 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -3128,13 +3118,13 @@ class fileManagerDB {
         });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(file, access)) {
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para processar o pedido enviado aos procuradores do arquivo com cid(${cid}).`);
         }
 
         /**
@@ -3163,7 +3153,7 @@ class fileManagerDB {
                 */
 
                 if (file.order.answers?.length !== file.assignees?.length)
-                    throw new TypeError(`O pedido ${file.order.title} do arquivo com cid(${cid}) ainda não foi respondido por todos os procuradores.`);
+                    throw new Error(`O pedido ${file.order.title} do arquivo com cid(${cid}) ainda não foi respondido por todos os procuradores.`);
 
                 /**
                  * ? Verifica se todos os procuradores aprovaram a solicitação
@@ -3195,7 +3185,7 @@ class fileManagerDB {
                 return orderAllAssigneesApproved;
             }
         } else {
-            throw new TypeError(`Arquivo com cid(${cid}) não tem um pedido definido.`);
+            throw new Error(`Arquivo com cid(${cid}) não tem um pedido definido.`);
         }
     }
 
@@ -3209,7 +3199,7 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -3217,7 +3207,7 @@ class fileManagerDB {
         const { block } = await this.verifyBlocked(cid, { group: { name: group.name, permission: 'Block' } });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o grupo tem permissão para acessar o arquivo
@@ -3225,7 +3215,7 @@ class fileManagerDB {
         try {
             return file.checkGroupAccess(group, permission);
         } catch (error) {
-            throw new TypeError(`Ocorreu um erro ao tentar verificar o acesso do grupo no arquivo (${cid}). ${JSON.stringify(error)}`);
+            throw new Error(`Ocorreu um erro ao tentar verificar o acesso do grupo no arquivo (${cid}). ${JSON.stringify(error)}`);
         }
     }
 
@@ -3239,7 +3229,7 @@ class fileManagerDB {
         const file = await fileDB.findOne({ cid });
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se o arquivo está protegido/bloqueado.
@@ -3247,7 +3237,7 @@ class fileManagerDB {
         const { block } = await this.verifyBlocked(cid, { user: { email: user.email, permission: 'Block' } });
 
         if (this._isProtectedOrBlocked(file) && block)
-            throw new TypeError(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
+            throw new Error(`Arquivo com cid(${cid}) está indisponível, o mesmo está protegido ou bloqueado.`);
 
         /**
          * ? Verifica se o usuário tem permissão para acessar o arquivo
@@ -3255,7 +3245,7 @@ class fileManagerDB {
         try {
             return file.checkUserAccess(user, permission);
         } catch (error) {
-            throw new TypeError(`Ocorreu um erro ao tentar verificar o acesso do usuário no arquivo (${cid}). ${JSON.stringify(error)}`);
+            throw new Error(`Ocorreu um erro ao tentar verificar o acesso do usuário no arquivo (${cid}). ${JSON.stringify(error)}`);
         }
     }
 }

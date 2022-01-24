@@ -1,10 +1,23 @@
 /**
  * @description Websocket Router -> Payback -> All
  * @author GuilhermeSantos001
- * @update 12/01/2022
+ * @update 24/01/2022
  */
 
 import { Server, Socket } from "socket.io";
+
+import { PaybackSocketEvents } from '@/constants/socketEvents';
+
+import {
+  TYPEOF_EMITTER_PAYBACK_UPLOAD_MIRROR,
+  TYPEOF_LISTENER_PAYBACK_UPLOAD_MIRROR,
+  TYPEOF_EMITTER_PAYBACK_CHANGE_TYPE_MIRROR,
+  TYPEOF_LISTENER_PAYBACK_CHANGE_TYPE_MIRROR,
+  TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR,
+  TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR
+} from "@/constants/SocketTypes";
+
+import { decompressFromBase64, compressToBase64 } from "lz-string";
 
 import { matches } from "@/mongo/files-manager-mongo";
 
@@ -14,18 +27,21 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
   /**
    * ? Evento emitido quando o espelho de ponto do funcionario que está sendo coberto e o funcionario que está cobrindo é anexado
    */
-  socket.on('PAYBACK-UPLOAD-MIRROR', async (
-    authorId: string,
-    name: string,
-    description: string,
-    size: number,
-    compressedSize: number,
-    fileId: string,
-    version: number,
-    type: 'COVERAGE' | 'COVERING'
-  ) => {
-    const
-      channel = `PAYBACK-UPLOAD-${type}-MIRROR`,
+  socket.on(PaybackSocketEvents.PAYBACK_UPLOAD_MIRROR, async (data: string) => {
+    const {
+      authorId,
+      name,
+      description,
+      size,
+      compressedSize,
+      fileId,
+      version,
+      type,
+    }: TYPEOF_EMITTER_PAYBACK_UPLOAD_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
+      channel =
+        type === 'COVERAGE' ?
+          PaybackSocketEvents.PAYBACK_UPLOAD_COVERAGE_MIRROR :
+          PaybackSocketEvents.PAYBACK_UPLOAD_COVERING_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -49,9 +65,9 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
         });
 
       if (!upload)
-        throw new TypeError('Não foi possível armazenar o arquivo.');
+        throw new Error('Não foi possível armazenar o arquivo.');
 
-      return socket.emit(channelSuccess,
+      const reply: TYPEOF_LISTENER_PAYBACK_UPLOAD_MIRROR = {
         fileId,
         authorId,
         filename,
@@ -63,22 +79,26 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
         temporary,
         expiredAt,
         createdAt,
-      );
+      };
+
+      return socket.emit(
+        channelSuccess,
+        compressToBase64(JSON.stringify(reply)));
     } catch (error) {
       socket
-        .emit(channelError, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
   /**
    * ? Evento emitido quando o espelho de ponto do funcionario muda de tipo
    */
-  socket.on('PAYBACK-CHANGE-TYPE-MIRROR', async (
-    filesId: string[],
-    type: 'TEMPORARY' | 'PERMANENT'
-  ) => {
-    const
-      channel = `PAYBACK-CHANGE-TYPE-MIRROR`,
+  socket.on(PaybackSocketEvents.PAYBACK_CHANGE_TYPE_MIRROR, async (data: string) => {
+    const {
+      filesId,
+      type,
+    }: TYPEOF_EMITTER_PAYBACK_CHANGE_TYPE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
+      channel = PaybackSocketEvents.PAYBACK_CHANGE_TYPE_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -86,47 +106,58 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
       if (type === 'TEMPORARY') {
         for (const fileId of filesId.filter(fileId => fileId.length > 0)) {
           if (!await Upload.makeTemporary(fileId))
-            throw new TypeError('Não foi possível mudar o arquivo para temporario.');
+            throw new Error('Não foi possível mudar o arquivo para temporario.');
         }
       } else if (type === 'PERMANENT') {
         for (const fileId of filesId.filter(fileId => fileId.length > 0)) {
           if (!await Upload.makePermanent(fileId))
-            throw new TypeError('Não foi possível mudar o arquivo para permanente.');
+            throw new Error('Não foi possível mudar o arquivo para permanente.');
         }
       }
 
-      return socket.emit(channelSuccess,
+      const reply: TYPEOF_LISTENER_PAYBACK_CHANGE_TYPE_MIRROR = {
         filesId,
         type,
-      );
+      }
+
+      return socket.emit(
+        channelSuccess,
+        compressToBase64(JSON.stringify(reply)));
     } catch (error) {
       socket
-        .emit(channelError, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
   /**
    * ? Evento emitido quando o espelho de ponto do funcionario é excluído
    */
-  socket.on('PAYBACK-DELETE-MIRROR', async (
-    filesId: string[],
-    types: string[]
-  ) => {
-    const
-      channel = `PAYBACK-DELETE-MIRROR`,
+  socket.on(PaybackSocketEvents.PAYBACK_DELETE_MIRROR, async (data: string) => {
+    const {
+      filesId,
+      types,
+    }: TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
+      channel = PaybackSocketEvents.PAYBACK_DELETE_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
     try {
       for (const fileId of filesId) {
         if (!await Upload.remove(fileId))
-          throw new TypeError('Não foi possível excluir o arquivo.');
+          throw new Error('Não foi possível excluir o arquivo.');
       }
 
-      return socket.emit(channelSuccess, filesId, types);
+      const reply: TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR = {
+        filesId,
+        types
+      }
+
+      return socket.emit(
+        channelSuccess,
+        compressToBase64(JSON.stringify(reply)));
     } catch (error) {
       socket
-        .emit(channelError, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 }

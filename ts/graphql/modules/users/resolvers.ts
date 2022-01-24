@@ -9,7 +9,7 @@ import activityManagerDB from '@/db/activities-db';
 import userManagerDB from '@/db/user-db';
 import JsonWebToken from '@/core/jsonWebToken';
 import { Encrypt } from '@/utils/bcrypt';
-import Jobs from '@/core/jobs';
+import Queue from '@/core/Queue';
 import Debug from '@/core/log4';
 import generatePassword from '@/utils/generatePassword';
 import { PrivilegesSystem } from '@/mongo/user-manager-mongo';
@@ -100,7 +100,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de conectar o usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authLogin`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authLogout: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext }) => {
@@ -130,7 +130,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${args.auth}) desconectado`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authLogout`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authValidate: async (parent: unknown, args: {
@@ -173,7 +173,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão(${args.token}) está autorizada`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authValidate`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authForgotPassword: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
@@ -199,20 +199,12 @@ export default {
                 });
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de e-mail para alteração de senha da conta
-                    await Jobs.append({
-                        name: 'Send mail to change account password',
-                        type: 'mailsend',
-                        priority: 'High',
-                        args: {
-                            email,
-                            username,
-                            signature,
-                            token: jwt,
-                            forgotPassword: true,
-                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
-                        },
-                        status: 'Available'
+                    // ! Cria um job para o envio de e-mail para alteração de senha da conta
+                    await Queue.addAccountForgotPassword({
+                        email,
+                        username,
+                        signature,
+                        token: jwt
                     });
 
                     return true;
@@ -226,7 +218,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de alteração de senha da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authForgotPassword`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         emailResendConfirm: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
@@ -261,20 +253,12 @@ export default {
                 });
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de e-mail para confirmação da conta
-                    await Jobs.append({
-                        name: 'Send the account confirmation mail again',
-                        type: 'mailsend',
-                        priority: 'High',
-                        args: {
-                            email,
-                            username,
-                            auth: args.auth,
-                            token: jwt,
-                            temporarypass: temporarypass ? newpassword || '' : null,
-                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
-                        },
-                        status: 'Available'
+                    // ! Cria um job para o envio de e-mail para confirmação da conta
+                    await Queue.addConfirmMail({
+                        email,
+                        username,
+                        token: jwt,
+                        temporarypass: temporarypass ? newpassword || '' : null,
                     });
 
                     return true;
@@ -288,7 +272,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: emailResendConfirm`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         mailConfirm: async (parent: unknown, args: { token: string }, context: { express: ExpressContext }) => {
@@ -307,7 +291,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de confirmar a conta do usuário.`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: mailConfirm`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         processOrderForgotPassword: async (parent: unknown, args: { signature: string, token: string, pwd: string }, context: { express: ExpressContext }) => {
@@ -341,7 +325,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de alterar a senha da conta do usuário.`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: processOrderForgotPassword`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         getUserInfo: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -377,7 +361,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de retornar as informações do usuário(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: getUserInfo`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         }
     },
@@ -442,20 +426,12 @@ export default {
 
                     // Envia o email de confirmação da conta
                     if (typeof jwt === 'string') {
-                        // Cria um job para o envio de e-mail para confirmação da conta
-                        await Jobs.append({
-                            name: 'Sends the account confirmation mail after user registration',
-                            type: 'mailsend',
-                            priority: 'High',
-                            args: {
-                                email: args.email,
-                                username: args.username,
-                                auth: args.authorization,
-                                token: jwt,
-                                temporarypass: temporarypass ? args.password : null,
-                                clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
-                            },
-                            status: 'Available'
+                        // ! Cria um job para o envio de e-mail para confirmação da conta
+                        await Queue.addConfirmMail({
+                            email: args.email,
+                            username: args.username,
+                            token: jwt,
+                            temporarypass: temporarypass ? args.password : null
                         });
 
                         return `Usuário foi criado com sucesso!`;
@@ -469,7 +445,7 @@ export default {
 
                     Debug.fatal('user', `Erro ocorrido na hora de enviar o e-mail de confirmação da conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: registerUser`);
 
-                    throw new TypeError(String(error));
+                    throw new Error(String(error));
                 }
             } catch (error) {
                 const
@@ -478,7 +454,7 @@ export default {
 
                 Debug.fatal('user', `Erro ocorrido na hora de registrar a conta do usuário(${args.authorization})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: registerUser`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         updateData: async (parent: unknown, args: {
@@ -518,7 +494,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de atualizar as informações da conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: updateData`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         updatePhotoProfile: async (parent: unknown, args: {
@@ -538,7 +514,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de atualizar a foto de perfil da conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: updatephotoProfile`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         changePassword: async (parent: unknown, args: { auth: string, pwd: string, new_pwd: string }, context: { express: ExpressContext }) => {
@@ -556,7 +532,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de alterar a senha para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: changePassword`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authSignTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -572,7 +548,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         hasConfiguredTwoFactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -588,7 +564,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de gerar o QRCode para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authSignTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authVerifyTwofactor: async (parent: unknown, args: { auth: string, qrcode: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -604,7 +580,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de verificar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authVerifyTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authEnabledTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -620,7 +596,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de ativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authEnabledTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authDisableTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
@@ -636,7 +612,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de desativar a autenticação de duas etapas para a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authDisableTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         authRetrieveTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
@@ -659,20 +635,12 @@ export default {
                     clientIP = geoIP(req);
 
                 if (typeof jwt === 'string') {
-                    // Cria um job para o envio de e-mail para recuperação da conta
-                    await Jobs.append({
-                        name: 'Send the account recovery mail',
-                        type: 'mailsend',
-                        priority: 'High',
-                        args: {
-                            email,
-                            username,
-                            token: jwt,
-                            twofactor: true,
-                            clientAddress: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))
-                        },
-                        status: 'Available'
-                    });
+                    // ! Cria um job para o envio de e-mail para recuperação da conta
+                    await Queue.addAccountRetrieveTwofactor({
+                        email,
+                        username,
+                        token: jwt
+                    })
 
                     return `${args.auth}, você irá receber um e-mail com as instruções para recuperar sua conta.`;
                 } else {
@@ -685,7 +653,7 @@ export default {
 
                 Debug.fatal('user', `Erro na hora de recuperar a conta(${args.auth})`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Mutation`, `Method: authRetrieveTwofactor`);
 
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         }
     }

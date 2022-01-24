@@ -255,19 +255,19 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio da pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para verificar o bloqueio da pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está bloqueada
@@ -395,7 +395,7 @@ class folderManagerDB {
         const _folders = await folderDB.find(filter, null, { skip, limit }).exec();
 
         if (_folders.length < 0)
-            throw new TypeError(`Nenhuma pastas foi encontrada.`);
+            throw new Error(`Nenhuma pastas foi encontrada.`);
 
         return _folders;
     }
@@ -408,7 +408,7 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não foi encontrada.`);
+            throw new Error(`Pasta com cid(${cid}) não foi encontrada.`);
 
         return folder.name;
     }
@@ -423,7 +423,7 @@ class folderManagerDB {
         const _folder = await folderDB.findOne({ name: folder.name, type: folder.type });
 
         if (_folder)
-            throw new TypeError(`Pasta(${folder.name}) com o tipo (${folder.type}) já está registrada.`);
+            throw new Error(`Pasta(${folder.name}) com o tipo (${folder.type}) já está registrada.`);
 
         const
             now = Moment.format(),
@@ -454,13 +454,13 @@ class folderManagerDB {
         let _delete = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -478,7 +478,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -520,7 +520,7 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível remover a pasta no momento.`);
+                    throw new Error(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível remover a pasta no momento.`);
             }
 
             /**
@@ -536,14 +536,14 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível remover a pasta no momento.`);
+                    throw new Error(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível remover a pasta no momento.`);
             }
 
             await folderDB.findOneAndRemove({ cid: folder.cid });
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ser deletada no momento.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ser deletada no momento.`);
         }
     }
 
@@ -560,13 +560,13 @@ class folderManagerDB {
         let _update = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -584,7 +584,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -630,10 +630,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`A pasta com cid(${cid}) está em uso e/ou não é possível atualizar as propriedades.`);
+                throw new Error(`A pasta com cid(${cid}) está em uso e/ou não é possível atualizar as propriedades.`);
             }
         } else {
-            throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível atualizar as propriedades no momento.`);
+            throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível atualizar as propriedades no momento.`);
         }
     }
 
@@ -650,13 +650,13 @@ class folderManagerDB {
         let _addGroupId = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -674,7 +674,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -706,7 +706,7 @@ class folderManagerDB {
                 const index = folder.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name).length > 0;
 
                 if (index)
-                    throw new TypeError(`Grupo(${group.name}) já está adicionado a whitelist da pasta com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) já está adicionado a whitelist da pasta com cid(${cid})`);
 
                 folder.accessGroupId.push(group);
 
@@ -722,10 +722,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`A pasta com cid(${cid}) está em uso e/ou não é possível adicionar o grupo(${group.name}) na whitelist.`);
+                throw new Error(`A pasta com cid(${cid}) está em uso e/ou não é possível adicionar o grupo(${group.name}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
+            throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o grupo(${group.name}) na whitelist no momento.`);
         }
     }
 
@@ -742,13 +742,13 @@ class folderManagerDB {
         let _removeGroupId = false;
 
         if (!folder)
-            throw new TypeError(`Pata com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pata com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -766,7 +766,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -798,7 +798,7 @@ class folderManagerDB {
                 const index = folder.accessGroupId.filter((groupId: GroupId) => groupId.name === group.name).length > 0;
 
                 if (!index)
-                    throw new TypeError(`Grupo(${group.name}) não está na whitelist da pasta com cid(${cid})`);
+                    throw new Error(`Grupo(${group.name}) não está na whitelist da pasta com cid(${cid})`);
 
                 folder.accessGroupId = folder.accessGroupId.filter((groupId: GroupId) => groupId.name !== group.name);
 
@@ -814,10 +814,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
+                throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
             }
         } else {
-            throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
+            throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível remover o grupo(${group.name}) da whitelist no momento.`);
         }
     }
 
@@ -834,13 +834,13 @@ class folderManagerDB {
         let _addUserId = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -858,7 +858,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -890,7 +890,7 @@ class folderManagerDB {
                 const index = folder.accessUsersId.filter((userId: UserId) => userId.email === user.email).length > 0;
 
                 if (index)
-                    throw new TypeError(`Email(${user.email}) já está adicionado a whitelist da pasta com cid(${cid})`);
+                    throw new Error(`Email(${user.email}) já está adicionado a whitelist da pasta com cid(${cid})`);
 
                 folder.accessUsersId.push(user);
 
@@ -906,10 +906,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`A pasta com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
+                throw new Error(`A pasta com cid(${cid}) está em uso e/ou não será possível adicionar o email(${user.email}) na whitelist.`);
             }
         } else {
-            throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
+            throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível adicionar o email(${user.email}) na whitelist no momento.`);
         }
     }
 
@@ -925,13 +925,13 @@ class folderManagerDB {
         let _removeUserId = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -949,7 +949,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -981,7 +981,7 @@ class folderManagerDB {
                 const index = folder.accessUsersId.filter((userId: UserId) => userId.email === user.email).length > 0;
 
                 if (!index)
-                    throw new TypeError(`Email(${user.email}) não está na whitelist da pasta com cid(${cid})`);
+                    throw new Error(`Email(${user.email}) não está na whitelist da pasta com cid(${cid})`);
 
                 folder.accessUsersId = folder.accessUsersId.filter((userId: UserId) => userId.email !== user.email);
 
@@ -997,10 +997,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`A pasta com cid(${cid}) está em uso e/ou não será possível remover o email(${user.email}) da whitelist.`);
+                throw new Error(`A pasta com cid(${cid}) está em uso e/ou não será possível remover o email(${user.email}) da whitelist.`);
             }
         } else {
-            throw new TypeError(`A pasta com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
+            throw new Error(`A pasta com cid(${cid}) está em uso. Não é possível remover o email(${user.email}) da whitelist no momento.`);
         }
     }
 
@@ -1019,16 +1019,16 @@ class folderManagerDB {
         let _append = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         if (!file)
-            throw new TypeError(`Arquivo com cid(${fileId}) não existe no banco de dados.`);
+            throw new Error(`Arquivo com cid(${fileId}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1046,13 +1046,13 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar arquivos na pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para adicionar arquivos na pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -1080,7 +1080,7 @@ class folderManagerDB {
             const index = folder.filesId.filter(_fileId => _fileId === fileId).length > 0;
 
             if (index)
-                throw new TypeError(`Arquivo com cid(${fileId}) já está na pasta.`);
+                throw new Error(`Arquivo com cid(${fileId}) já está na pasta.`);
 
             try {
                 // ? Verifica se o arquivo já está associado a outra pasta.
@@ -1110,7 +1110,7 @@ class folderManagerDB {
                 await fileManagerDB.joinFolder(fileId, accessFile, cid);
                 await fileManagerDB.close(fileId, accessFile);
             } catch (error) {
-                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+                throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
             }
 
             folder.filesId.push(fileId);
@@ -1127,7 +1127,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ter arquivos adicionados no momento.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ter arquivos adicionados no momento.`);
         }
     }
 
@@ -1144,13 +1144,13 @@ class folderManagerDB {
         let _remove = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1168,13 +1168,13 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover os arquivos da pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover os arquivos da pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -1202,7 +1202,7 @@ class folderManagerDB {
             const index = folder.filesId.filter(_fileId => _fileId === fileId).length > 0;
 
             if (!index)
-                throw new TypeError(`Arquivo com cid(${fileId}) não está na pasta.`);
+                throw new Error(`Arquivo com cid(${fileId}) não está na pasta.`);
 
             folder.filesId = folder.filesId.filter(_fileId => _fileId !== fileId);
 
@@ -1234,7 +1234,7 @@ class folderManagerDB {
                     }
                 }
             } catch (error) {
-                throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+                throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
             }
 
             folder.updated = Moment.format();
@@ -1249,7 +1249,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ter os arquivos removidos no momento.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ter os arquivos removidos no momento.`);
         }
     }
 
@@ -1267,17 +1267,17 @@ class folderManagerDB {
         let _push = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         if (!folder2)
-            throw new TypeError(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
+            throw new Error(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixera
          * ou a pasta a ser associada está na lixeira.
          */
         if (this._isGarbage(folder) || this._isGarbage(folder2))
-            throw new TypeError(`Uma das pastas está na lixeira.`);
+            throw new Error(`Uma das pastas está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada
@@ -1311,7 +1311,7 @@ class folderManagerDB {
             this._isProtectedOrBlocked(folder) && block1 ||
             this._isProtectedOrBlocked(folder2) && block2
         )
-            throw new TypeError(`Uma das pastas está protegida/bloqueada.`);
+            throw new Error(`Uma das pastas está protegida/bloqueada.`);
 
         /**
          * ? Verifica se a pasta está associada a uma pasta.
@@ -1320,16 +1320,16 @@ class folderManagerDB {
             folder.folderId !== folder2.folderId ||
             !folder.folderId && this._isAssociatedFolder(folder2)
         )
-            throw new TypeError(`Pasta com cid(${folderId}) já está associada a uma pasta.`);
+            throw new Error(`Pasta com cid(${folderId}) já está associada a uma pasta.`);
 
         /**
          * ? Verifica o acesso a pasta e a pasta a ser associada
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover pastas para essa pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover pastas para essa pasta com cid(${cid}).`);
 
         if (!this.verifyAccessByGroupAndUser(folder2, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover a pasta com cid(${folderId}) para essa pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para mover a pasta com cid(${folderId}) para essa pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo/pasta não estão protegidos/bloqueados.
@@ -1365,7 +1365,7 @@ class folderManagerDB {
             const index = folder.foldersId.filter(_folderId => _folderId === folderId).length > 0;
 
             if (index)
-                throw new TypeError(`Pasta com cid(${folderId}) já está na pasta.`);
+                throw new Error(`Pasta com cid(${folderId}) já está na pasta.`);
 
             /**
              * ? Retira a pasta da matriz
@@ -1380,7 +1380,7 @@ class folderManagerDB {
                         group: { name: "administrador", permission: "Delete" }
                     });
                 } catch (error) {
-                    throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+                    throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
                 }
             }
 
@@ -1407,7 +1407,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ter pastas adicionadas no momento.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ter pastas adicionadas no momento.`);
         }
     }
 
@@ -1425,17 +1425,17 @@ class folderManagerDB {
         let _splice = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         if (!folder2)
-            throw new TypeError(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
+            throw new Error(`Pasta a ser associada com cid(${folderId}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixera
          * ou a pasta a ser associada está na lixeira.
          */
         if (this._isGarbage(folder) || this._isGarbage(folder2))
-            throw new TypeError(`Uma das pastas está na lixeira.`);
+            throw new Error(`Uma das pastas está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada
@@ -1469,22 +1469,22 @@ class folderManagerDB {
             this._isProtectedOrBlocked(folder) && block1 ||
             this._isProtectedOrBlocked(folder2) && block2
         )
-            throw new TypeError(`Uma das pastas está protegida/bloqueada.`);
+            throw new Error(`Uma das pastas está protegida/bloqueada.`);
 
         /**
          * ? Verifica se a pasta está associada há a pasta.
          */
         if (!this._isAssociatedFolder(folder2, cid))
-            throw new TypeError(`Pasta com cid(${folderId}) não está associada há pasta.`);
+            throw new Error(`Pasta com cid(${folderId}) não está associada há pasta.`);
 
         /**
          * ? Verifica o acesso a pasta e a pasta a ser associada
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover pastas dessa pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover pastas dessa pasta com cid(${cid}).`);
 
         if (!this.verifyAccessByGroupAndUser(folder2, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover a pasta com cid(${folderId}) dessa pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover a pasta com cid(${folderId}) dessa pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se o arquivo/pasta não estão protegidos/bloqueados.
@@ -1520,7 +1520,7 @@ class folderManagerDB {
             const index = folder.foldersId.filter(_folderId => _folderId === folderId).length > 0;
 
             if (!index)
-                throw new TypeError(`Pasta com cid(${folderId}) não está na pasta.`);
+                throw new Error(`Pasta com cid(${folderId}) não está na pasta.`);
 
             folder.foldersId = folder.foldersId.filter(_folderId => _folderId !== folderId);
 
@@ -1575,7 +1575,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ter pastas removidas no momento.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ter pastas removidas no momento.`);
         }
     }
 
@@ -1589,13 +1589,13 @@ class folderManagerDB {
             folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1613,13 +1613,13 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta está em modo appending/removing.
          */
         if (this._isAppendingOrRemoving(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está em uso no momento, não será possível acessar seu conteúdo agora.`);
+            throw new Error(`Pasta com cid(${cid}) está em uso no momento, não será possível acessar seu conteúdo agora.`);
 
         /**
          * ? Verifica o acesso caso a pasta esteja protegida/bloqueada.
@@ -1633,7 +1633,7 @@ class folderManagerDB {
                 folder.filesId = [];
 
             if (folder.filesId.length <= 0)
-                throw new TypeError(`Pasta com cid(${cid}) está vazia.`);
+                throw new Error(`Pasta com cid(${cid}) está vazia.`);
 
             folder.lastAccess = Moment.format();
 
@@ -1647,7 +1647,7 @@ class folderManagerDB {
 
             return folder.filesId;
         } else {
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para abrir a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para abrir a pasta com cid(${cid}).`);
         }
     }
 
@@ -1662,13 +1662,13 @@ class folderManagerDB {
         let _close = false;
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1686,7 +1686,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta não está protegida/bloqueada.
@@ -1738,13 +1738,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1762,19 +1762,19 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para proteger a pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está em modo appending/removing.
          */
         if (this._isAppendingOrRemoving(folder)) {
-            throw new TypeError(`Pasta com cid(${cid}) está em uso no momento, não será possível protegê-la agora.`);
+            throw new Error(`Pasta com cid(${cid}) está em uso no momento, não será possível protegê-la agora.`);
         } else {
             /**
              * ? Verifica se a pasta está disponível para a proteção.
@@ -1801,7 +1801,7 @@ class folderManagerDB {
 
                 return uuid;
             } else {
-                throw new TypeError(`Pasta com cid(${cid}) está em uso e/ou não será possível protegê-la.`);
+                throw new Error(`Pasta com cid(${cid}) está em uso e/ou não será possível protegê-la.`);
             }
         }
     }
@@ -1816,19 +1816,19 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desproteger a pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está protegida.
@@ -1854,10 +1854,10 @@ class folderManagerDB {
 
                 return true;
             } else {
-                throw new TypeError(`Chave e/ou Texto Secreto está invalido(a).`);
+                throw new Error(`Chave e/ou Texto Secreto está invalido(a).`);
             }
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) está não está protegida.`);
+            throw new Error(`Pasta com cid(${cid}) está não está protegida.`);
         }
     }
 
@@ -1871,13 +1871,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1895,19 +1895,19 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta está compartilhada.
          */
         if (this._isShared(folder))
-            throw new TypeError(`Pasta com cid(${cid}) já está compartilhada.`);
+            throw new Error(`Pasta com cid(${cid}) já está compartilhada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para compartilhar a pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está disponível para o compartilhamento.
@@ -1917,7 +1917,7 @@ class folderManagerDB {
              * ? Verifica se a pasta está em modo appending/removing.
              */
             if (this._isAppendingOrRemoving(folder)) {
-                throw new TypeError(`Pasta com cid(${cid}) está em uso no momento, não será possível compartilhá-la agora.`);
+                throw new Error(`Pasta com cid(${cid}) está em uso no momento, não será possível compartilhá-la agora.`);
             } else {
                 const
                     link = Random.HASH(8, 'hex'),
@@ -1941,7 +1941,7 @@ class folderManagerDB {
                 return { link, secret: uuid };
             }
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não pode ser compartilhada.`);
+            throw new Error(`Pasta com cid(${cid}) não pode ser compartilhada.`);
         }
     }
 
@@ -1955,13 +1955,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegida/bloqueada.
@@ -1979,13 +1979,13 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento da pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para remover o compartilhamento da pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está compartilhada.
@@ -1995,7 +1995,7 @@ class folderManagerDB {
              * ? Verifica se a pasta está em modo appending/removing.
              */
             if (this._isAppendingOrRemoving(folder)) {
-                throw new TypeError(`Pasta com cid(${cid}) está em uso no momento, não será possível remover o compartilhamento agora.`);
+                throw new Error(`Pasta com cid(${cid}) está em uso no momento, não será possível remover o compartilhamento agora.`);
             } else {
                 if (this._verifyShared(folder, share)) {
                     folder.updated = Moment.format();
@@ -2011,11 +2011,11 @@ class folderManagerDB {
 
                     return true;
                 } else {
-                    throw new TypeError(`Link e/ou Texto Secreto está invalido.`);
+                    throw new Error(`Link e/ou Texto Secreto está invalido.`);
                 }
             }
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não está compartilhada.`);
+            throw new Error(`Pasta com cid(${cid}) não está compartilhada.`);
         }
     }
 
@@ -2029,13 +2029,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegido/bloqueado.
@@ -2053,13 +2053,13 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && blocked)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para bloquear a pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está disponível para o bloqueio.
@@ -2081,7 +2081,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) está em uso e/ou não será possível bloqueá-la.`);
+            throw new Error(`Pasta com cid(${cid}) está em uso e/ou não será possível bloqueá-la.`);
         }
     }
 
@@ -2094,25 +2094,25 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegido.
          */
         if (this._isProtected(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida.`);
 
         /**
          * ? Verifica o acesso a pasta
          */
         if (!this.verifyAccessByGroupAndUser(folder, access))
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear a pasta com cid(${cid}).`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para desbloquear a pasta com cid(${cid}).`);
 
         /**
          * ? Verifica se a pasta está bloqueada.
@@ -2134,7 +2134,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não está bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) não está bloqueada.`);
         }
     }
 
@@ -2148,13 +2148,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está na lixeira.
          */
         if (this._isGarbage(folder))
-            throw new TypeError(`Pasta com cid(${cid}) está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) está na lixeira.`);
 
         /**
          * ? Verifica se a pasta está protegido/bloqueado.
@@ -2172,7 +2172,7 @@ class folderManagerDB {
         });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se a pasta está disponível.
@@ -2197,7 +2197,7 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível colocar a pasta na lixeira no momento.`);
+                    throw new Error(`Um ou mais arquivos estão na lixeira ou em uso e/ou protegidos/bloqueados, não é possível colocar a pasta na lixeira no momento.`);
             }
 
             /**
@@ -2213,12 +2213,12 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível colocar a pasta na lixeira no momento.`);
+                    throw new Error(`Uma ou mais pastas estão na lixeira ou em uso e/ou protegidas/bloqueadas, não é possível colocar a pasta na lixeira no momento.`);
             }
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) está em uso no momento, não será possível coloca-la na lixeira agora.`);
+            throw new Error(`Pasta com cid(${cid}) está em uso no momento, não será possível coloca-la na lixeira agora.`);
         }
     }
 
@@ -2232,13 +2232,13 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica o acesso ao arquivo
          */
         if (!this.verifyAccessByGroupAndUser(folder, access)) {
-            throw new TypeError(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar a pasta com cid(${cid}) da lixeira.`);
+            throw new Error(`Grupo/Usuário(${JSON.stringify(access)}) não tem permissão para retirar a pasta com cid(${cid}) da lixeira.`);
         }
 
         /**
@@ -2262,7 +2262,7 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Um ou mais arquivos protegidos/bloqueados, não é possível remover a pasta da lixeira no momento.`);
+                    throw new Error(`Um ou mais arquivos protegidos/bloqueados, não é possível remover a pasta da lixeira no momento.`);
             }
 
             /**
@@ -2278,7 +2278,7 @@ class folderManagerDB {
                 }
 
                 if (errors > 0)
-                    throw new TypeError(`Uma ou mais pastas estão protegidas/bloqueadas, não é possível remover a pasta da lixeira no momento.`);
+                    throw new Error(`Uma ou mais pastas estão protegidas/bloqueadas, não é possível remover a pasta da lixeira no momento.`);
             }
 
             await folderDB.updateOne({ cid: folder.cid }, {
@@ -2294,7 +2294,7 @@ class folderManagerDB {
 
             return true;
         } else {
-            throw new TypeError(`Pasta com cid(${cid}) não está na lixeira.`);
+            throw new Error(`Pasta com cid(${cid}) não está na lixeira.`);
         }
     }
 
@@ -2308,7 +2308,7 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está protegido/bloqueado.
@@ -2316,7 +2316,7 @@ class folderManagerDB {
         const { block } = await this.verifyBlocked(cid, { group: { name: group.name, permission: 'Block' } });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se o grupo tem permissão para acessar a pasta
@@ -2324,7 +2324,7 @@ class folderManagerDB {
         try {
             return folder.checkGroupAccess(group, permission);
         } catch (error) {
-            throw new TypeError(`Ocorreu um erro ao tentar verificar o acesso do grupo na pasta (${cid}). ${JSON.stringify(error)}`);
+            throw new Error(`Ocorreu um erro ao tentar verificar o acesso do grupo na pasta (${cid}). ${JSON.stringify(error)}`);
         }
     }
 
@@ -2338,7 +2338,7 @@ class folderManagerDB {
         const folder = await folderDB.findOne({ cid });
 
         if (!folder)
-            throw new TypeError(`Pasta com cid(${cid}) não existe no banco de dados.`);
+            throw new Error(`Pasta com cid(${cid}) não existe no banco de dados.`);
 
         /**
          * ? Verifica se a pasta está protegido/bloqueado.
@@ -2346,7 +2346,7 @@ class folderManagerDB {
         const { block } = await this.verifyBlocked(cid, { user: { email: user.email, permission: 'Block' } });
 
         if (this._isProtectedOrBlocked(folder) && block)
-            throw new TypeError(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
+            throw new Error(`Pasta com cid(${cid}) está indisponível, a mesma está protegida ou bloqueada.`);
 
         /**
          * ? Verifica se o usuário tem permissão para acessar a pasta
@@ -2354,7 +2354,7 @@ class folderManagerDB {
         try {
             return folder.checkUserAccess(user, permission);
         } catch (error) {
-            throw new TypeError(`Ocorreu um erro ao tentar verificar o acesso do usuário na pasta (${cid}). ${JSON.stringify(error)}`);
+            throw new Error(`Ocorreu um erro ao tentar verificar o acesso do usuário na pasta (${cid}). ${JSON.stringify(error)}`);
         }
     }
 }

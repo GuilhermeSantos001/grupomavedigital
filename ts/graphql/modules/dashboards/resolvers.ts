@@ -145,7 +145,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         },
         dashboardReceive: async (parent: unknown, args: { filial: string, client: string, store: string, type: string, bankingNature: string, period: string[], cache: boolean }) => {
@@ -220,7 +220,7 @@ module.exports = {
 
                 return await exec();
             } catch (error) {
-                throw new TypeError(String(error));
+                throw new Error(String(error));
             }
         }
     }

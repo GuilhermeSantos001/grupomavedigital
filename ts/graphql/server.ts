@@ -1,7 +1,7 @@
 /**
  * @description Configurações do servidor
  * @author GuilhermeSantos001
- * @update 18/11/2021
+ * @update 24/01/2022
  */
 
 import { createServer } from "http";
@@ -11,6 +11,11 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers } from "@graphql-tools/utils";
 import { ApolloServer } from "apollo-server-express";
 import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { ExpressAdapter } from '@bull-board/express';
+import { Server, Socket, ServerOptions } from "socket.io";
+import { Server as HTTPServer } from 'http';
 import path from "path";
 import express from "express";
 import cors from 'cors';
@@ -29,9 +34,9 @@ const numCPUs = cpus().length;
  */
 import Debug from '@/core/log4';
 import hls from '@/core/hls-server';
-import socketIO from '@/core/socket-io';
-import Jobs from '@/core/jobs';
+import {SocketIO} from '@/core/socket-io';
 import mongoDB from '@/controllers/mongodb';
+import Queue from '@/core/Queue';
 
 /**
  * @description Directives
@@ -49,39 +54,9 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     const app = express();
 
-    const
-        origin = process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
-        allowedHeaders = [
-            'host',
-            'origin',
-            'x-requested-with',
-            'x-real-ip',
-            'x-access-token',
-            'content-type',
-            'accept',
-            'referer',
-            'accept-encoding',
-            'accept-language',
-            'connection',
-            'authorization',
-            'auth',
-            'token',
-            'refreshToken',
-            'signature',
-            'encodeuri',
-            'temporarypass'
-        ];
-
     app.use(device.capture({
         parseUserAgent: true
     })), useragent(true);
-
-    app.use(function (req, res, next) {
-        res.header("Access-Control-Allow-Origin", origin);
-        res.header("Access-Control-Allow-Headers", allowedHeaders.join(','));
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        next();
-    });
 
     app.use(graphqlUploadExpress({
         maxFileSize: 100000000, // 100 MB
@@ -93,18 +68,13 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     if (process.env.NODE_ENV === 'development') {
         corsOptions = {
-            origin,
-            methods: 'GET, POST',
-            allowedHeaders,
-            credentials: false,
+            origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
+            methods: ['GET', 'POST']
         };
     } else {
         corsOptions = {
-            origin,
-            methods: 'GET, POST',
-            allowedHeaders,
-            credentials: true,
-            preflightContinue: false,
+            origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
+            methods: ['GET', 'POST']
         };
     }
 
@@ -118,6 +88,17 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     //use routers
     app.use('/files', routerFiles);
     app.use('/utils', routerUtils);
+
+    //use Bull Board
+    const serverAdapter = new ExpressAdapter();
+
+    const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
+        queues: Queue.queues.map(queue => new BullMQAdapter(queue.bull)),
+        serverAdapter: serverAdapter
+    })
+
+    app.use('/admin/queues', serverAdapter.getRouter());
+    serverAdapter.setBasePath('/admin/queues');
 
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
@@ -197,23 +178,24 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
         /**
          * @description HTTP Live Streaming
-         */
+        */
         hls(httpServer);
 
         /**
-         * @description Web Socket Server
+          * @description Web Socket Server
          */
-        socketIO();
+        const io = new Server(5000, {
+            cors: {
+                origin: '*',
+                methods: ['GET', 'POST']
+            }
+        });
+
+        SocketIO(io);
     }
 
     if (!cluster.isWorker) {
         Debug.console('default', `Master ${process.pid} is running`);
-
-        /**
-         * @description Jobs started
-         */
-        Jobs.reset();
-        Jobs.start();
 
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.

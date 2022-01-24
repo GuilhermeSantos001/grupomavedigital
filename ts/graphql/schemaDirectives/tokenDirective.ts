@@ -11,7 +11,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 
 import JsonWebToken from '@/core/jsonWebToken';
 import userManagerDB from '@/db/user-db';
-import geoIP, {clearIPAddress} from '@/utils/geoIP';
+import geoIP, { clearIPAddress } from '@/utils/geoIP';
 
 export default function TokenDirective(directiveName: string) {
     return {
@@ -40,18 +40,15 @@ export default function TokenDirective(directiveName: string) {
                             try {
                                 await JsonWebToken.verify(token);
                                 await userManagerDB.verifytoken(auth, token, signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
-
                                 return await resolve(source, args, context, info);
                             } catch {
                                 if (refreshToken) {
                                     await userManagerDB.verifyRefreshToken(auth, refreshToken.signature, refreshToken.value);
-
                                     const updateHistory = await userManagerDB.updateTokenHistory(auth, token);
-
                                     return await resolve(source, { ...args, updatedToken: { signature: updateHistory[0], token: updateHistory[1] } }, context, info);
                                 }
 
-                                throw new TypeError(`Token informado está invalido!`);
+                                throw new Error(`Token informado está invalido!`);
                             }
                         };
 

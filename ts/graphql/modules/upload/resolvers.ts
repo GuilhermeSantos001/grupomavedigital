@@ -74,13 +74,13 @@ module.exports = {
             };
           } else {
             await FileGridFS.deleteFile(result.fileId);
-            throw new TypeError('File is corrupted.');
+            throw new Error('File is corrupted.');
           }
         } else {
-          throw new TypeError(`Your token is invalid!`);
+          throw new Error(`Your token is invalid!`);
         }
       } catch (error) {
-        throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
       }
     },
     multipleUpload: async (parent: unknown, args: { files: any[], sizes: string[], signedUrl: string, auth: string, randomName: boolean }) => {
@@ -114,10 +114,10 @@ module.exports = {
 
           return results;
         } else {
-          throw new TypeError(`Your token is invalid!`);
+          throw new Error(`Your token is invalid!`);
         }
       } catch (error) {
-        throw new TypeError(error instanceof TypeError ? error.message : JSON.stringify(error));
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
       }
     }
   }

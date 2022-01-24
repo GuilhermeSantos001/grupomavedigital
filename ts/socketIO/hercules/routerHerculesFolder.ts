@@ -169,11 +169,11 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
             folder.trash
           );
       } else {
-        throw new TypeError(`A pasta já existe!`);
+        throw new Error(`A pasta já existe!`);
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -229,7 +229,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -284,7 +284,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -309,10 +309,10 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       if (exist.filter(folder => folder.cid !== cid).length > 0)
-        throw new TypeError(`Já tem uma pasta com o mesmo nome!`);
+        throw new Error(`Já tem uma pasta com o mesmo nome!`);
 
       const folder = folders[0];
 
@@ -339,7 +339,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -363,7 +363,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       const folder = folders[0];
 
@@ -391,7 +391,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -415,7 +415,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       const folder = folders[0];
 
@@ -442,7 +442,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -466,7 +466,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       const folder = folders[0];
 
@@ -493,7 +493,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -516,7 +516,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       const folder = folders[0];
 
@@ -527,7 +527,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         const items: { cid: string, whichIs: 'folder' | 'file' }[] = JSON.parse(decompressFromEncodedURIComponent(data || "") || "");
 
         if (items.length <= 0)
-          throw new TypeError(`Não há pastas/arquivos a serem adicionados.`);
+          throw new Error(`Não há pastas/arquivos a serem adicionados.`);
 
         for (const item of items) {
           if (item.whichIs === 'folder') {
@@ -540,7 +540,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               }
             });
           } else {
-            throw new TypeError(`Não foi possível adicionar os itens.`);
+            throw new Error(`Não foi possível adicionar os itens.`);
           }
         }
 
@@ -554,7 +554,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 
@@ -577,7 +577,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         { email } = await Users.getInfo(userAuth);
 
       if (folders.length <= 0)
-        throw new TypeError(`A pasta não existe!`);
+        throw new Error(`A pasta não existe!`);
 
       const folder = folders[0];
 
@@ -588,7 +588,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
         const items: { cid: string, whichIs: 'folder' | 'file' }[] = JSON.parse(decompressFromEncodedURIComponent(data || "") || "");
 
         if (items.length <= 0)
-          throw new TypeError(`Não há pastas/arquivos a serem removidos.`);
+          throw new Error(`Não há pastas/arquivos a serem removidos.`);
 
         for (const item of items) {
           if (item.whichIs === 'folder') {
@@ -601,7 +601,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
               }
             });
           } else {
-            throw new TypeError(`Não foi possível remover os itens.`);
+            throw new Error(`Não foi possível remover os itens.`);
           }
         }
 
@@ -615,7 +615,7 @@ export default function routerHerculesFile(io: Server, socket: Socket): void {
       }
     } catch (error) {
       socket
-        .emit(channelError, room, error instanceof TypeError ? error.message : JSON.stringify(error));
+        .emit(channelError, room, error instanceof Error ? error.message : JSON.stringify(error));
     }
   });
 }
