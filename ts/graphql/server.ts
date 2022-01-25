@@ -14,8 +14,7 @@ import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
-import { Server, Socket, ServerOptions } from "socket.io";
-import { Server as HTTPServer } from 'http';
+import { Server } from "socket.io";
 import path from "path";
 import express from "express";
 import cors from 'cors';
@@ -99,6 +98,13 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     app.use('/admin/queues', serverAdapter.getRouter());
     serverAdapter.setBasePath('/admin/queues');
+
+    Queue.addConfirmMail({
+        email: 'spgamesoficial@gmail.com',
+        username: "GuilhermeSantos001",
+        temporarypass: "123456",
+        token: "1234567891011121314151617181920"
+    });
 
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
