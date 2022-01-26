@@ -1,7 +1,7 @@
 /**
  * @description Controle dos uploads de arquivos
  * @author GuilhermeSantos001
- * @update 11/01/2022
+ * @update 26/01/2022
  */
 
 import FileGridFS from '@/drivers/file-gridfs';

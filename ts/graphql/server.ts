@@ -18,6 +18,7 @@ import { Server } from "socket.io";
 import path from "path";
 import express from "express";
 import cors from 'cors';
+import APIMiddleware from '@/middlewares/api-middleware';
 import routerFiles from "@/router/files";
 import routerUtils from "@/router/utils";
 
@@ -33,7 +34,7 @@ const numCPUs = cpus().length;
  */
 import Debug from '@/core/log4';
 import hls from '@/core/hls-server';
-import {SocketIO} from '@/core/socket-io';
+import { SocketIO } from '@/core/socket-io';
 import mongoDB from '@/controllers/mongodb';
 import Queue from '@/core/Queue';
 
@@ -96,7 +97,11 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         serverAdapter: serverAdapter
     })
 
-    app.use('/admin/queues', serverAdapter.getRouter());
+    if (process.env.NODE_ENV === 'development')
+        app.use('/admin/queues', serverAdapter.getRouter());
+    else
+        app.use('/admin/queues', APIMiddleware, serverAdapter.getRouter());
+
     serverAdapter.setBasePath('/admin/queues');
 
     const

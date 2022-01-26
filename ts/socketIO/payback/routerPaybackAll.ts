@@ -1,7 +1,7 @@
 /**
  * @description Websocket Router -> Payback -> All
  * @author GuilhermeSantos001
- * @update 24/01/2022
+ * @update 26/01/2022
  */
 
 import { Server, Socket } from "socket.io";
