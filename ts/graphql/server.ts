@@ -99,13 +99,6 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     app.use('/admin/queues', serverAdapter.getRouter());
     serverAdapter.setBasePath('/admin/queues');
 
-    Queue.addConfirmMail({
-        email: 'spgamesoficial@gmail.com',
-        username: "GuilhermeSantos001",
-        temporarypass: "123456",
-        token: "1234567891011121314151617181920"
-    });
-
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
         { TokenDirectiveTransformer } = TokenDirective('token'),

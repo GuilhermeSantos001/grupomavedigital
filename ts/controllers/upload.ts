@@ -36,7 +36,7 @@ class Upload implements IUploadContract {
   }
 
   public getTimeToExpire(): number {
-    return Date.now() + (1000 * 60 * 5); // ! 5 minutos
+    return Date.now() + (1000 * 60 * 60 * 24); // ! 1 Dia
   }
 
   public async cleanTemporaryFiles(): Promise<any> {

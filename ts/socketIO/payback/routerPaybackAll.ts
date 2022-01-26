@@ -38,10 +38,10 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
       version,
       type,
     }: TYPEOF_EMITTER_PAYBACK_UPLOAD_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
-      channel =
-        type === 'COVERAGE' ?
-          PaybackSocketEvents.PAYBACK_UPLOAD_COVERAGE_MIRROR :
-          PaybackSocketEvents.PAYBACK_UPLOAD_COVERING_MIRROR,
+    channel =
+      type === 'COVERAGE' ?
+        PaybackSocketEvents.PAYBACK_UPLOAD_COVERAGE_MIRROR :
+        PaybackSocketEvents.PAYBACK_UPLOAD_COVERING_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -135,7 +135,6 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
   socket.on(PaybackSocketEvents.PAYBACK_DELETE_MIRROR, async (data: string) => {
     const {
       filesId,
-      types,
     }: TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
       channel = PaybackSocketEvents.PAYBACK_DELETE_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
@@ -148,8 +147,7 @@ export default function routerPaybackAll(io: Server, socket: Socket): void {
       }
 
       const reply: TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR = {
-        filesId,
-        types
+        filesId
       }
 
       return socket.emit(
