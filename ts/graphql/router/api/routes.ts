@@ -19,6 +19,12 @@ import { FindScaleController } from '@/graphql/controllers/FindScaleController';
 import { findAllScalesController } from '@/graphql/controllers/findAllScalesController';
 import { DeleteScaleController } from '@/graphql/controllers/DeleteScaleController';
 
+import { CreateServiceController } from '@/graphql/controllers/CreateServiceController';
+import { UpdateServiceController } from '@/graphql/controllers/UpdateServiceController';
+import { FindServiceController } from '@/graphql/controllers/FindServiceController';
+import { FindAllServicesController } from '@/graphql/controllers/FindAllServicesController';
+import {DeleteServiceController} from '@/graphql/controllers/DeleteServiceController';
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -33,6 +39,12 @@ const findScale = new FindScaleController();
 const findAllScales = new findAllScalesController();
 const deleteScale = new DeleteScaleController();
 
+const createService = new CreateServiceController();
+const updateService = new UpdateServiceController();
+const findService = new FindServiceController();
+const findAllServices = new FindAllServicesController();
+const deleteService =new DeleteServiceController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -44,6 +56,12 @@ router.put('/scale/:id', updateScale.handle);
 router.get('/scale/:id', findScale.handle);
 router.get(['/scales', '/scales/:limit', '/scales/:skip/:limit'], findAllScales.handle);
 router.delete('/scale/:id', deleteScale.handle);
+
+router.post('/service', createService.handle);
+router.put('/service/:id', updateService.handle);
+router.get('/service/:id', findService.handle);
+router.get(['/services', '/services/:limit', '/services/:skip/:limit'], findAllServices.handle);
+router.delete('/service/:id', deleteService.handle);
 
 router.use(router404Controller.handle);
 

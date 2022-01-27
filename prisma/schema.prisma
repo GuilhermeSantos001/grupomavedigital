@@ -127,6 +127,7 @@ model Address {
   updatedAt      DateTime     @default(now()) @updatedAt
 
   @@map("address")
+  Workplace Workplace[]
 }
 
 // ? Dados do lote de Cartões Beneficio
@@ -179,6 +180,8 @@ model Workplace {
   services  Service[]
   entryTime DateTime
   exitTime  DateTime
+  addressId String
+  address   Address   @relation(fields: [addressId], references: [id])
   status    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
