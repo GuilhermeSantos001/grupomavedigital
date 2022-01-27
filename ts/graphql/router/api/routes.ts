@@ -16,7 +16,7 @@ import { DeleteCostCenterController } from '@/graphql/controllers/DeleteCostCent
 import { CreateScaleController } from '@/graphql/controllers/CreateScaleController';
 import { UpdateScaleController } from '@/graphql/controllers/UpdateScaleController';
 import { FindScaleController } from '@/graphql/controllers/FindScaleController';
-import { findAllScalesController } from '@/graphql/controllers/findAllScalesController';
+import { findAllScalesController } from '@/app/graphql/controllers/FindAllScalesController';
 import { DeleteScaleController } from '@/graphql/controllers/DeleteScaleController';
 
 import { CreateServiceController } from '@/graphql/controllers/CreateServiceController';
@@ -27,9 +27,21 @@ import { DeleteServiceController } from '@/graphql/controllers/DeleteServiceCont
 
 import { CreateReasonForAbsenceController } from '@/graphql/controllers/CreateReasonForAbsenceController';
 import { UpdateReasonForAbsenceController } from '@/graphql/controllers/UpdateReasonForAbsenceController';
-import { findAllReasonForAbsenceController } from '@/graphql/controllers/findAllReasonForAbsenceController';
+import { FindAllReasonForAbsenceController } from '@/graphql/controllers/FindAllReasonForAbsenceController';
 import { FindReasonForAbsenceController } from '@/graphql/controllers/FindReasonForAbsenceController';
 import { DeleteReasonForAbsenceController } from '@/graphql/controllers/DeleteReasonForAbsenceController';
+
+import { CreateStreetController } from '@/graphql/controllers/CreateStreetController';
+import { UpdateStreetController } from '@/graphql/controllers/UpdateStreetController';
+import { FindStreetController } from '@/graphql/controllers/FindStreetController';
+import { FindAllStreetsController } from '@/graphql/controllers/FindAllStreetsController';
+import { DeleteStreetController } from '@/graphql/controllers/DeleteStreetController';
+
+import { CreateNeighborhoodController } from '@/graphql/controllers/CreateNeighborhoodController';
+import { UpdateNeighborhoodController } from '@/graphql/controllers/UpdateNeighborhoodController';
+import {FindNeighborhoodController} from '@/graphql/controllers/FindNeighborhoodController';
+import { FindAllNeighborhoodsController } from '@/graphql/controllers/FindAllNeighborhoodsController';
+import { DeleteNeighborhoodController } from '@/graphql/controllers/DeleteNeighborhoodController';
 
 const router404Controller = new Router404Controller();
 
@@ -54,8 +66,20 @@ const deleteService = new DeleteServiceController();
 const createReasonForAbsence = new CreateReasonForAbsenceController();
 const updateReasonForAbsence = new UpdateReasonForAbsenceController();
 const findReasonForAbsence = new FindReasonForAbsenceController();
-const findAllReasonForAbsence = new findAllReasonForAbsenceController();
+const findAllReasonForAbsence = new FindAllReasonForAbsenceController();
 const DeleteReasonForAbsence = new DeleteReasonForAbsenceController();
+
+const createStreet = new CreateStreetController();
+const updateStreet = new UpdateStreetController();
+const findStreet =new FindStreetController();
+const findAllStreets = new FindAllStreetsController();
+const deleteStreet = new DeleteStreetController();
+
+const createNeighborhood = new CreateNeighborhoodController();
+const updateNeighborhood = new UpdateNeighborhoodController();
+const findNeighborhood = new FindNeighborhoodController();
+const findAllNeighborhoods = new FindAllNeighborhoodsController();
+const deleteNeighborhood = new DeleteNeighborhoodController();
 
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
@@ -80,6 +104,18 @@ router.put('/reasonforabsence/:id', updateReasonForAbsence.handle);
 router.get('/reasonforabsence/:id', findReasonForAbsence.handle);
 router.get(['/reasonforabsences', '/reasonforabsences/:limit', '/reasonforabsences/:skip/:limit'], findAllReasonForAbsence.handle);
 router.delete('/reasonforabsence/:id', DeleteReasonForAbsence.handle);
+
+router.post('/street', createStreet.handle);
+router.put('/street/:id', updateStreet.handle);
+router.get('/street/:id', findStreet.handle);
+router.get(['/streets', '/streets/:limit', '/streets/:skip/:limit'], findAllStreets.handle);
+router.delete('/street/:id', deleteStreet.handle);
+
+router.post('/neighborhood', createNeighborhood.handle);
+router.put('/neighborhood/:id', updateNeighborhood.handle);
+router.get('/neighborhood/:id', findNeighborhood.handle);
+router.get(['/neighborhoods', '/neighborhoods/:limit', '/neighborhoods/:skip/:limit'], findAllNeighborhoods.handle);
+router.delete('/neighborhood/:id', deleteNeighborhood.handle);
 
 router.use(router404Controller.handle);
 

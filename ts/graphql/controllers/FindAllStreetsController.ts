@@ -1,10 +1,10 @@
-import { ReasonForAbsence } from '@prisma/client';
+import { Street } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/db/prismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class findAllReasonForAbsenceController {
+export class FindAllStreetsController {
   async handle(request: Request, response: Response) {
     const {
       skip,
@@ -13,12 +13,12 @@ export class findAllReasonForAbsenceController {
 
     const findThrowErrorController = new FindThrowErrorController();
 
-    return response.json(await findThrowErrorController.handle<ReasonForAbsence[] | null>(
-      prismaClient.reasonForAbsence.findMany({
+    return response.json(await findThrowErrorController.handle<Street[] | null>(
+      prismaClient.street.findMany({
         skip: skip ? Number(skip) : undefined,
         take: limit ? Number(limit) : undefined
       }),
-      'Não foi possível retornar os motivos de falta.'
+      'Não foi possível retornar as ruas.'
     ));
   }
 }
