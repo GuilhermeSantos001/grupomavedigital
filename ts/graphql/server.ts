@@ -70,12 +70,12 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     if (process.env.NODE_ENV === 'development') {
         corsOptions = {
             origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
-            methods: ['GET', 'POST']
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
         };
     } else {
         corsOptions = {
             origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
-            methods: ['GET', 'POST']
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
         };
     }
 

@@ -23,7 +23,13 @@ import { CreateServiceController } from '@/graphql/controllers/CreateServiceCont
 import { UpdateServiceController } from '@/graphql/controllers/UpdateServiceController';
 import { FindServiceController } from '@/graphql/controllers/FindServiceController';
 import { FindAllServicesController } from '@/graphql/controllers/FindAllServicesController';
-import {DeleteServiceController} from '@/graphql/controllers/DeleteServiceController';
+import { DeleteServiceController } from '@/graphql/controllers/DeleteServiceController';
+
+import { CreateReasonForAbsenceController } from '@/graphql/controllers/CreateReasonForAbsenceController';
+import { UpdateReasonForAbsenceController } from '@/graphql/controllers/UpdateReasonForAbsenceController';
+import { findAllReasonForAbsenceController } from '@/graphql/controllers/findAllReasonForAbsenceController';
+import { FindReasonForAbsenceController } from '@/graphql/controllers/FindReasonForAbsenceController';
+import { DeleteReasonForAbsenceController } from '@/graphql/controllers/DeleteReasonForAbsenceController';
 
 const router404Controller = new Router404Controller();
 
@@ -43,7 +49,13 @@ const createService = new CreateServiceController();
 const updateService = new UpdateServiceController();
 const findService = new FindServiceController();
 const findAllServices = new FindAllServicesController();
-const deleteService =new DeleteServiceController();
+const deleteService = new DeleteServiceController();
+
+const createReasonForAbsence = new CreateReasonForAbsenceController();
+const updateReasonForAbsence = new UpdateReasonForAbsenceController();
+const findReasonForAbsence = new FindReasonForAbsenceController();
+const findAllReasonForAbsence = new findAllReasonForAbsenceController();
+const DeleteReasonForAbsence = new DeleteReasonForAbsenceController();
 
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
@@ -62,6 +74,12 @@ router.put('/service/:id', updateService.handle);
 router.get('/service/:id', findService.handle);
 router.get(['/services', '/services/:limit', '/services/:skip/:limit'], findAllServices.handle);
 router.delete('/service/:id', deleteService.handle);
+
+router.post('/reasonforabsence', createReasonForAbsence.handle);
+router.put('/reasonforabsence/:id', updateReasonForAbsence.handle);
+router.get('/reasonforabsence/:id', findReasonForAbsence.handle);
+router.get(['/reasonforabsences', '/reasonforabsences/:limit', '/reasonforabsences/:skip/:limit'], findAllReasonForAbsence.handle);
+router.delete('/reasonforabsence/:id', DeleteReasonForAbsence.handle);
 
 router.use(router404Controller.handle);
 
