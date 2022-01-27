@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ? Dados do Centro de Custo
+model CostCenter {
+  id      String    @id @default(uuid())
+  title   String    @unique
+  Card    Card[]
+  Posting Posting[]
+
+  @@map("cost_centers")
+}
+
+// ? Dados das Escalas de Trabalho
+model Scale {
+  id        String      @id @default(uuid())
+  value     String      @unique
+  Person    Person[]
+  Workplace Workplace[]
+
+  @@map("scales")
+}
+
+// ? Dados dos Serviços
+model Service {
+  id          String     @id @default(uuid())
+  value       String     @unique
+  Person      Person[]
+  WorkplaceId String?
+  Workplace   Workplace? @relation(fields: [WorkplaceId], references: [id])
+
+  @@map("services")
+}
+
+// ? Dados dos motivos de falta
+model ReasonForAbsence {
+  id             String           @id @default(uuid())
+  value          String           @unique
+  Posting        Posting[]
+  PersonCovering PersonCovering[]
+
+  @@map("reason_for_absences")
+}
+
+// ? Dados das Ruas
+model Street {
+  id      String    @id @default(uuid())
+  value   String    @unique
+  Address Address[]
+
+  @@map("streets")
+}
+
+// ? Dados dos Bairros
+model Neighborhood {
+  id      String    @id @default(uuid())
+  value   String    @unique
+  Address Address[]
+
+  @@map("neighborhoods")
+}
+
+// ? Dados das Cidades
+model City {
+  id      String    @id @default(uuid())
+  value   String    @unique
+  Address Address[]
+
+  @@map("cities")
+}
+
+// ? Dados dos Distritos (Estados)
+model District {
+  id      String    @id @default(uuid())
+  value   String    @unique
+  Address Address[]
+
+  @@map("districts")
+}
+
+// ? Dados dos Endereços
+model Address {
+  id             String       @id @default(uuid())
+  streetId       String
+  street         Street       @relation(fields: [streetId], references: [id])
+  number         Int
+  complement     String
+  neighborhoodId String
+  neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+  cityId         String
+  city           City         @relation(fields: [cityId], references: [id])
+  districtId     String
+  district       District     @relation(fields: [districtId], references: [id])
+  zipCode        Int
+  Person         Person[]
+
+  @@map("address")
+}
+
+// ? Dados do lote de Cartões Beneficio
+model Card {
+  id             String     @id @default(uuid())
+  costCenterId   String
+  costCenter     CostCenter @relation(fields: [costCenterId], references: [id])
+  serialNumber   Int        @unique
+  lastCardNumber Int
+  personId       String?
+  person         Person?    @relation(fields: [personId], references: [id])
+  status         String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now()) @updatedAt
+
+  @@map("cards")
+}
+
+// ? Dados das Pessoas
+model Person {
+  id         String   @id @default(uuid())
+  matricule  Int
+  name       String
+  cpf        Int
+  rg         Int
+  motherName String
+  birthDate  DateTime
+  phone      Int
+  mail       String
+  addressId  String
+  address    Address  @relation(fields: [addressId], references: [id])
+  scaleId    String
+  scale      Scale    @relation(fields: [scaleId], references: [id])
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  cards      Card[]
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("people")
+}
+
+// ? Dados dos Locais de Trabalho
+model Workplace {
+  id                String    @id @default(uuid())
+  name              String
+  scaleId           String
+  scale             Scale     @relation(fields: [scaleId], references: [id])
+  services          Service[]
+  entryTime         DateTime
+  exitTime          DateTime
+  status            String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+  CoverageWorkplace Posting[] @relation("CoveringWorkplaceId")
+  CoveringWorkplace Posting[] @relation("CoverageWorkplaceId")
+
+  @@map("workplaces")
+}
+
+// ? Dados dos Uploads
+model Upload {
+  id             String           @id @default(uuid())
+  fileId         String           @unique
+  authorId       String
+  filename       String
+  filetype       String
+  description    String
+  size           Int
+  compressedSize Int
+  version        Int
+  temporary      Boolean
+  expiredAt      DateTime
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  PersonCovering PersonCovering[]
+  PersonCoverage PersonCoverage[]
+
+  @@map("uploads")
+}
+
+// ? Dados da pessoa sendo substituida no lançamento operacional
+model PersonCovering {
+  id                 String            @id @default(uuid())
+  mirrorId           String
+  mirror             Upload            @relation(fields: [mirrorId], references: [id])
+  reasonForAbsenceId String?
+  reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  Posting            Posting[]
+
+  @@map("person_covering")
+}
+
+// ? Dados da pessoa que está cobrindo no lançamento operacional
+model PersonCoverage {
+  id                 String    @id @default(uuid())
+  mirrorId           String?
+  mirror             Upload?   @relation(fields: [mirrorId], references: [id])
+  modalityOfCoverage String
+  Posting            Posting[]
+
+  @@map("person_coverage")
+}
+
+// ? Dados dos Lançamentos Operacionais
+model Posting {
+  id                   String            @id @default(uuid())
+  author               String
+  costCenterId         String
+  costCenter           CostCenter        @relation(fields: [costCenterId], references: [id])
+  periodStart          DateTime
+  periodEnd            DateTime
+  originDate           DateTime
+  description          String?
+  coveringId           String?
+  covering             PersonCovering?   @relation(fields: [coveringId], references: [id])
+  coverageId           String
+  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id])
+  reasonForAbsenceId   String?
+  ReasonForAbsence     ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  coveringWorkplaceId  String
+  coveringWorkplace    Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
+  coverageWorkplaceId  String?
+  coverageWorkplace    Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
+  paymentMethod        String
+  paymentValue         Int
+  paymentDatePayable   DateTime
+  paymentStatus        String
+  paymentDatePaid      DateTime?
+  paymentDateCancelled DateTime?
+  foremanApproval      Boolean?
+  managerApproval      Boolean?
+  status               String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @default(now()) @updatedAt
+
+  @@map("postings")
+}

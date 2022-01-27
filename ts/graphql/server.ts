@@ -21,6 +21,7 @@ import cors from 'cors';
 import APIMiddleware from '@/middlewares/api-middleware';
 import routerFiles from "@/router/files";
 import routerUtils from "@/router/utils";
+import { routerAPI } from '@/app/graphql/router/api/routes';
 
 /**
  * @description Cluster
@@ -88,6 +89,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     //use routers
     app.use('/files', routerFiles);
     app.use('/utils', routerUtils);
+
+    //use API
+    app.use(express.json());
+    app.use('/api', routerAPI);
 
     //use Bull Board
     const serverAdapter = new ExpressAdapter();

@@ -1,5 +1,5 @@
 /**
- * @description Rotas utilitarias do sistema
+ * @description Rotas utilitárias do sistema
  * @author GuilhermeSantos001
  * @update 16/12/2021
  */
