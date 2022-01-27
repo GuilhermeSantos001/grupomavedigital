@@ -9,8 +9,11 @@ datasource db {
 
 // ? Dados do Centro de Custo
 model CostCenter {
-  id      String    @id @default(uuid())
-  title   String    @unique
+  id        String   @id @default(uuid())
+  title     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Card    Card[]
   Posting Posting[]
 
@@ -19,8 +22,11 @@ model CostCenter {
 
 // ? Dados das Escalas de Trabalho
 model Scale {
-  id        String      @id @default(uuid())
-  value     String      @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Person    Person[]
   Workplace Workplace[]
 
@@ -29,8 +35,11 @@ model Scale {
 
 // ? Dados dos Serviços
 model Service {
-  id          String     @id @default(uuid())
-  value       String     @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Person      Person[]
   WorkplaceId String?
   Workplace   Workplace? @relation(fields: [WorkplaceId], references: [id])
@@ -40,8 +49,11 @@ model Service {
 
 // ? Dados dos motivos de falta
 model ReasonForAbsence {
-  id             String           @id @default(uuid())
-  value          String           @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Posting        Posting[]
   PersonCovering PersonCovering[]
 
@@ -50,8 +62,11 @@ model ReasonForAbsence {
 
 // ? Dados das Ruas
 model Street {
-  id      String    @id @default(uuid())
-  value   String    @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Address Address[]
 
   @@map("streets")
@@ -59,8 +74,11 @@ model Street {
 
 // ? Dados dos Bairros
 model Neighborhood {
-  id      String    @id @default(uuid())
-  value   String    @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Address Address[]
 
   @@map("neighborhoods")
@@ -68,8 +86,11 @@ model Neighborhood {
 
 // ? Dados das Cidades
 model City {
-  id      String    @id @default(uuid())
-  value   String    @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Address Address[]
 
   @@map("cities")
@@ -77,8 +98,11 @@ model City {
 
 // ? Dados dos Distritos (Estados)
 model District {
-  id      String    @id @default(uuid())
-  value   String    @unique
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Address Address[]
 
   @@map("districts")
@@ -99,6 +123,8 @@ model Address {
   district       District     @relation(fields: [districtId], references: [id])
   zipCode        Int
   Person         Person[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
 
   @@map("address")
 }
@@ -146,16 +172,17 @@ model Person {
 
 // ? Dados dos Locais de Trabalho
 model Workplace {
-  id                String    @id @default(uuid())
-  name              String
-  scaleId           String
-  scale             Scale     @relation(fields: [scaleId], references: [id])
-  services          Service[]
-  entryTime         DateTime
-  exitTime          DateTime
-  status            String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now()) @updatedAt
+  id        String    @id @default(uuid())
+  name      String
+  scaleId   String
+  scale     Scale     @relation(fields: [scaleId], references: [id])
+  services  Service[]
+  entryTime DateTime
+  exitTime  DateTime
+  status    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+
   CoverageWorkplace Posting[] @relation("CoveringWorkplaceId")
   CoveringWorkplace Posting[] @relation("CoverageWorkplaceId")
 
@@ -164,8 +191,8 @@ model Workplace {
 
 // ? Dados dos Uploads
 model Upload {
-  id             String           @id @default(uuid())
-  fileId         String           @unique
+  id             String   @id @default(uuid())
+  fileId         String   @unique
   authorId       String
   filename       String
   filetype       String
@@ -175,8 +202,9 @@ model Upload {
   version        Int
   temporary      Boolean
   expiredAt      DateTime
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now()) @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
   PersonCovering PersonCovering[]
   PersonCoverage PersonCoverage[]
 
@@ -190,18 +218,24 @@ model PersonCovering {
   mirror             Upload            @relation(fields: [mirrorId], references: [id])
   reasonForAbsenceId String?
   reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
-  Posting            Posting[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
+
+  Posting Posting[]
 
   @@map("person_covering")
 }
 
 // ? Dados da pessoa que está cobrindo no lançamento operacional
 model PersonCoverage {
-  id                 String    @id @default(uuid())
+  id                 String   @id @default(uuid())
   mirrorId           String?
-  mirror             Upload?   @relation(fields: [mirrorId], references: [id])
+  mirror             Upload?  @relation(fields: [mirrorId], references: [id])
   modalityOfCoverage String
-  Posting            Posting[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  Posting Posting[]
 
   @@map("person_coverage")
 }

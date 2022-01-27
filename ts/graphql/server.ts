@@ -92,7 +92,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     //use API
     app.use(express.json());
-    app.use('/api', routerAPI);
+    app.use('/api/v1/', routerAPI);
 
     //use Bull Board
     const serverAdapter = new ExpressAdapter();

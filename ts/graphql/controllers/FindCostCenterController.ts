@@ -16,15 +16,6 @@ export class FindCostCenterController {
             prismaClient.costCenter.findFirst({
                 where: {
                     id
-                },
-                include: {
-                    Card: {
-                        select: {
-                            id: true,
-                            serialNumber: true,
-                            lastCardNumber: true,
-                        }
-                    }
                 }
             }),
             'Não foi possível retornar o centro de custo.'
