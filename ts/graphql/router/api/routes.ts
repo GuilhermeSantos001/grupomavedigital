@@ -43,6 +43,12 @@ import {FindNeighborhoodController} from '@/graphql/controllers/FindNeighborhood
 import { FindAllNeighborhoodsController } from '@/graphql/controllers/FindAllNeighborhoodsController';
 import { DeleteNeighborhoodController } from '@/graphql/controllers/DeleteNeighborhoodController';
 
+import { CreateCityController } from '@/graphql/controllers/CreateCityController';
+import {UpdateCityController} from '@/graphql/controllers/UpdateCityController';
+import { FindCityController} from '@/graphql/controllers/FindCityController';
+import { FindAllCitiesController } from '@/graphql/controllers/FindAllCitiesController';
+import { DeleteCityController } from '@/graphql/controllers/DeleteCityController';
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -81,6 +87,12 @@ const findNeighborhood = new FindNeighborhoodController();
 const findAllNeighborhoods = new FindAllNeighborhoodsController();
 const deleteNeighborhood = new DeleteNeighborhoodController();
 
+const createCity = new CreateCityController();
+const updateCity = new UpdateCityController();
+const findCity = new FindCityController();
+const findAllCities = new FindAllCitiesController();
+const deleteCity = new DeleteCityController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -116,6 +128,12 @@ router.put('/neighborhood/:id', updateNeighborhood.handle);
 router.get('/neighborhood/:id', findNeighborhood.handle);
 router.get(['/neighborhoods', '/neighborhoods/:limit', '/neighborhoods/:skip/:limit'], findAllNeighborhoods.handle);
 router.delete('/neighborhood/:id', deleteNeighborhood.handle);
+
+router.post('/city', createCity.handle);
+router.put('/city/:id', updateCity.handle);
+router.get('/city/:id', findCity.handle);
+router.get([ '/cities', '/cities/:limit', '/cities/:skip/:limit'], findAllCities.handle);
+router.delete('/city/:id', deleteCity.handle);
 
 router.use(router404Controller.handle);
 
