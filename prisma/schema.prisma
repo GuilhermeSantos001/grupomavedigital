@@ -130,14 +130,14 @@ model Card {
 
 model Person {
   id         String   @id @default(uuid())
-  matricule  String
+  matricule  String   @unique
   name       String
-  cpf        String
-  rg         String
+  cpf        String   @unique
+  rg         String   @unique
   motherName String
   birthDate  DateTime
-  phone      String
-  mail       String
+  phone      String   @unique
+  mail       String   @unique
   addressId  String
   scaleId    String
   serviceId  String

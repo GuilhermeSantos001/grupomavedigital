@@ -36,7 +36,7 @@ export class UpdateCardController {
         'Propriedade lastCardNumber inválida.',
       ));
 
-    if (databaseStatusConstants.notValidation(status))
+    if (databaseStatusConstants.notValid(status))
       return response.json(await responseThrowErrorController.handle(
         new Error(`O status deve está entre [${databaseStatusConstants.status().join(', ')}].`),
         'Propriedade status inválida.',

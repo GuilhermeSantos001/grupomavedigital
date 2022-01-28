@@ -11,11 +11,11 @@ export class DatabaseStatusConstants {
     ];
   }
 
-  isValidation(status: string) {
+  isValid(status: string) {
     return this.status().filter(s => s === status).length > 0;
   }
 
-  notValidation(status: string) {
+  notValid(status: string) {
     return this.status().filter(s => s === status).length <= 0;
   }
 }

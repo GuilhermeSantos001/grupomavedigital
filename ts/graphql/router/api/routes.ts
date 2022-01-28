@@ -69,6 +69,12 @@ import { FindCardController } from '@/graphql/controllers/FindCardController';
 import { FindAllCardsController } from '@/graphql/controllers/FindAllCardsController';
 import { DeleteCardController } from '@/graphql/controllers/DeleteCardController';
 
+import { CreatePersonController } from '../../controllers/CreatePersonController';
+import { UpdatePersonController } from '../../controllers/UpdatePersonController';
+import {FindPersonController} from '@/graphql/controllers/FindPersonController';
+import { FindAllPeopleController } from '../../controllers/FindAllPeopleController';
+import {DeletePersonController} from '@/graphql/controllers/DeletePersonController';
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -133,6 +139,12 @@ const findCard = new FindCardController();
 const findAllCards = new FindAllCardsController();
 const deleteCard = new DeleteCardController();
 
+const createPerson = new CreatePersonController();
+const updatePerson = new UpdatePersonController();
+const findPerson = new FindPersonController();
+const findAllPerson = new FindAllPeopleController();
+const deletePerson = new DeletePersonController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -194,6 +206,12 @@ router.put('/card/unassign/:id', unassignPersonCard.handle);
 router.get('/card/:id', findCard.handle);
 router.get(['/cards', '/cards/:limit', '/cards/:skip/:limit'], findAllCards.handle);
 router.delete('/card/:id', deleteCard.handle);
+
+router.post('/person', createPerson.handle);
+router.put('/person/:id', updatePerson.handle);
+router.get('/person/:id', findPerson.handle);
+router.get(['/people', '/people/:limit', '/people/:skip/:limit'], findAllPerson.handle);
+router.delete('/person/:id', deletePerson.handle);
 
 router.use(router404Controller.handle);
 
