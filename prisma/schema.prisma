@@ -7,146 +7,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ? Dados do Centro de Custo
 model CostCenter {
-  id        String   @id @default(uuid())
-  title     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Card    Card[]
-  Posting Posting[]
+  id        String    @id @default(uuid())
+  title     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Card      Card[]
+  Posting   Posting[]
 
   @@map("cost_centers")
 }
 
-// ? Dados das Escalas de Trabalho
 model Scale {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  id        String      @id @default(uuid())
+  value     String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
   Person    Person[]
   Workplace Workplace[]
 
   @@map("scales")
 }
 
-// ? Dados dos Serviços
 model Service {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Person      Person[]
+  id          String     @id @default(uuid())
+  value       String     @unique
   WorkplaceId String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
   Workplace   Workplace? @relation(fields: [WorkplaceId], references: [id])
+  Person      Person[]
 
   @@map("services")
 }
 
-// ? Dados dos motivos de falta
 model ReasonForAbsence {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Posting        Posting[]
+  id             String           @id @default(uuid())
+  value          String           @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
   PersonCovering PersonCovering[]
+  Posting        Posting[]
 
   @@map("reason_for_absences")
 }
 
-// ? Dados das Ruas
 model Street {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Address Address[]
+  id        String    @id @default(uuid())
+  value     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Address   Address[]
 
   @@map("streets")
 }
 
-// ? Dados dos Bairros
 model Neighborhood {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Address Address[]
+  id        String    @id @default(uuid())
+  value     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Address   Address[]
 
   @@map("neighborhoods")
 }
 
-// ? Dados das Cidades
 model City {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Address Address[]
+  id        String    @id @default(uuid())
+  value     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Address   Address[]
 
   @@map("cities")
 }
 
-// ? Dados dos Distritos (Estados)
 model District {
-  id        String   @id @default(uuid())
-  value     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  Address Address[]
+  id        String    @id @default(uuid())
+  value     String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Address   Address[]
 
   @@map("districts")
 }
 
-// ? Dados dos Endereços
 model Address {
   id             String       @id @default(uuid())
   streetId       String
-  street         Street       @relation(fields: [streetId], references: [id])
   number         Int
-  complement     String
+  complement     String?
   neighborhoodId String
-  neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
   cityId         String
-  city           City         @relation(fields: [cityId], references: [id])
   districtId     String
-  district       District     @relation(fields: [districtId], references: [id])
-  zipCode        Int
-  Person         Person[]
+  zipCode        String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt
+  city           City         @relation(fields: [cityId], references: [id])
+  district       District     @relation(fields: [districtId], references: [id])
+  neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+  street         Street       @relation(fields: [streetId], references: [id])
+  Person         Person[]
+  Workplace      Workplace[]
 
-  @@map("address")
-  Workplace Workplace[]
+  @@map("addresses")
 }
 
-// ? Dados do lote de Cartões Beneficio
 model Card {
   id             String     @id @default(uuid())
   costCenterId   String
-  costCenter     CostCenter @relation(fields: [costCenterId], references: [id])
   serialNumber   Int        @unique
   lastCardNumber Int
   personId       String?
-  person         Person?    @relation(fields: [personId], references: [id])
   status         String
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @default(now()) @updatedAt
+  costCenter     CostCenter @relation(fields: [costCenterId], references: [id])
+  person         Person?    @relation(fields: [personId], references: [id])
 
   @@map("cards")
 }
 
-// ? Dados das Pessoas
 model Person {
   id         String   @id @default(uuid())
   matricule  Int
@@ -158,44 +139,41 @@ model Person {
   phone      Int
   mail       String
   addressId  String
-  address    Address  @relation(fields: [addressId], references: [id])
   scaleId    String
-  scale      Scale    @relation(fields: [scaleId], references: [id])
   serviceId  String
-  service    Service  @relation(fields: [serviceId], references: [id])
-  cards      Card[]
   status     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
+  address    Address  @relation(fields: [addressId], references: [id])
+  scale      Scale    @relation(fields: [scaleId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
+  cards      Card[]
 
   @@map("people")
 }
 
-// ? Dados dos Locais de Trabalho
 model Workplace {
-  id        String    @id @default(uuid())
-  name      String
-  scaleId   String
-  scale     Scale     @relation(fields: [scaleId], references: [id])
-  services  Service[]
-  entryTime DateTime
-  exitTime  DateTime
-  addressId String
-  address   Address   @relation(fields: [addressId], references: [id])
-  status    String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-
-  CoverageWorkplace Posting[] @relation("CoveringWorkplaceId")
+  id                String    @id @default(uuid())
+  name              String
+  scaleId           String
+  entryTime         DateTime
+  exitTime          DateTime
+  status            String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+  addressId         String
+  address           Address   @relation(fields: [addressId], references: [id])
+  scale             Scale     @relation(fields: [scaleId], references: [id])
   CoveringWorkplace Posting[] @relation("CoverageWorkplaceId")
+  CoverageWorkplace Posting[] @relation("CoveringWorkplaceId")
+  services          Service[]
 
   @@map("workplaces")
 }
 
-// ? Dados dos Uploads
 model Upload {
-  id             String   @id @default(uuid())
-  fileId         String   @unique
+  id             String           @id @default(uuid())
+  fileId         String           @unique
   authorId       String
   filename       String
   filetype       String
@@ -205,64 +183,52 @@ model Upload {
   version        Int
   temporary      Boolean
   expiredAt      DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-
-  PersonCovering PersonCovering[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
   PersonCoverage PersonCoverage[]
+  PersonCovering PersonCovering[]
 
   @@map("uploads")
 }
 
-// ? Dados da pessoa sendo substituida no lançamento operacional
 model PersonCovering {
   id                 String            @id @default(uuid())
   mirrorId           String
-  mirror             Upload            @relation(fields: [mirrorId], references: [id])
   reasonForAbsenceId String?
-  reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
-
-  Posting Posting[]
+  mirror             Upload            @relation(fields: [mirrorId], references: [id])
+  reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  Posting            Posting[]
 
   @@map("person_covering")
 }
 
-// ? Dados da pessoa que está cobrindo no lançamento operacional
 model PersonCoverage {
-  id                 String   @id @default(uuid())
+  id                 String    @id @default(uuid())
   mirrorId           String?
-  mirror             Upload?  @relation(fields: [mirrorId], references: [id])
   modalityOfCoverage String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @default(now()) @updatedAt
-
-  Posting Posting[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now()) @updatedAt
+  mirror             Upload?   @relation(fields: [mirrorId], references: [id])
+  Posting            Posting[]
 
   @@map("person_coverage")
 }
 
-// ? Dados dos Lançamentos Operacionais
 model Posting {
   id                   String            @id @default(uuid())
   author               String
   costCenterId         String
-  costCenter           CostCenter        @relation(fields: [costCenterId], references: [id])
   periodStart          DateTime
   periodEnd            DateTime
   originDate           DateTime
   description          String?
   coveringId           String?
-  covering             PersonCovering?   @relation(fields: [coveringId], references: [id])
   coverageId           String
-  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id])
   reasonForAbsenceId   String?
-  ReasonForAbsence     ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
   coveringWorkplaceId  String
-  coveringWorkplace    Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
   coverageWorkplaceId  String?
-  coverageWorkplace    Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
   paymentMethod        String
   paymentValue         Int
   paymentDatePayable   DateTime
@@ -274,6 +240,12 @@ model Posting {
   status               String
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @default(now()) @updatedAt
+  costCenter           CostCenter        @relation(fields: [costCenterId], references: [id])
+  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id])
+  coverageWorkplace    Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
+  covering             PersonCovering?   @relation(fields: [coveringId], references: [id])
+  coveringWorkplace    Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
+  ReasonForAbsence     ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
 
   @@map("postings")
 }

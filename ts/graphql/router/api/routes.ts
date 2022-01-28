@@ -39,21 +39,27 @@ import { DeleteStreetController } from '@/graphql/controllers/DeleteStreetContro
 
 import { CreateNeighborhoodController } from '@/graphql/controllers/CreateNeighborhoodController';
 import { UpdateNeighborhoodController } from '@/graphql/controllers/UpdateNeighborhoodController';
-import {FindNeighborhoodController} from '@/graphql/controllers/FindNeighborhoodController';
+import { FindNeighborhoodController } from '@/graphql/controllers/FindNeighborhoodController';
 import { FindAllNeighborhoodsController } from '@/graphql/controllers/FindAllNeighborhoodsController';
 import { DeleteNeighborhoodController } from '@/graphql/controllers/DeleteNeighborhoodController';
 
 import { CreateCityController } from '@/graphql/controllers/CreateCityController';
-import {UpdateCityController} from '@/graphql/controllers/UpdateCityController';
-import { FindCityController} from '@/graphql/controllers/FindCityController';
+import { UpdateCityController } from '@/graphql/controllers/UpdateCityController';
+import { FindCityController } from '@/graphql/controllers/FindCityController';
 import { FindAllCitiesController } from '@/graphql/controllers/FindAllCitiesController';
 import { DeleteCityController } from '@/graphql/controllers/DeleteCityController';
 
-import { CreateDistrictController } from '../../controllers/CreateDistrictController';
-import { UpdateDistrictController } from '../../controllers/UpdateDistrictController';
-import {FindDistrictController} from '../../controllers/FindDistrictController';
-import { FindAllDistrictsController } from '../../controllers/FindAllDistrictsController';
-import {DeleteDistrictController} from '../../controllers/DeleteDistrictController';
+import { CreateDistrictController } from '@/graphql/controllers/CreateDistrictController';
+import { UpdateDistrictController } from '@/graphql/controllers/UpdateDistrictController';
+import { FindDistrictController } from '@/graphql/controllers/FindDistrictController';
+import { FindAllDistrictsController } from '@/graphql/controllers/FindAllDistrictsController';
+import { DeleteDistrictController } from '@/graphql/controllers/DeleteDistrictController';
+
+import { CreateAddressController } from '@/graphql/controllers/CreateAddressController';
+import { UpdateAddressController } from '../../controllers/UpdateAddressController';
+import { FindAddressController } from '../../controllers/FindAddressController';
+import { FindAllAddressesController } from '../../controllers/FindAllAddressesController';
+import { DeleteAddressController } from '../../controllers/DeleteAddressController';
 
 const router404Controller = new Router404Controller();
 
@@ -83,7 +89,7 @@ const DeleteReasonForAbsence = new DeleteReasonForAbsenceController();
 
 const createStreet = new CreateStreetController();
 const updateStreet = new UpdateStreetController();
-const findStreet =new FindStreetController();
+const findStreet = new FindStreetController();
 const findAllStreets = new FindAllStreetsController();
 const deleteStreet = new DeleteStreetController();
 
@@ -104,6 +110,12 @@ const updateDistrict = new UpdateDistrictController();
 const findDistrict = new FindDistrictController();
 const findAllDistricts = new FindAllDistrictsController();
 const deleteDistrict = new DeleteDistrictController();
+
+const createAddress = new CreateAddressController();
+const updateAddress = new UpdateAddressController();
+const findAddress = new FindAddressController();
+const findAllAddresses = new FindAllAddressesController();
+const deleteAddress = new DeleteAddressController();
 
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
@@ -144,14 +156,20 @@ router.delete('/neighborhood/:id', deleteNeighborhood.handle);
 router.post('/city', createCity.handle);
 router.put('/city/:id', updateCity.handle);
 router.get('/city/:id', findCity.handle);
-router.get([ '/cities', '/cities/:limit', '/cities/:skip/:limit'], findAllCities.handle);
+router.get(['/cities', '/cities/:limit', '/cities/:skip/:limit'], findAllCities.handle);
 router.delete('/city/:id', deleteCity.handle);
 
 router.post('/district', createDistrict.handle);
 router.put('/district/:id', updateDistrict.handle);
 router.get('/district/:id', findDistrict.handle);
-router.get([ '/districts', '/districts/:limit', '/districts/:skip/:limit'], findAllDistricts.handle);
+router.get(['/districts', '/districts/:limit', '/districts/:skip/:limit'], findAllDistricts.handle);
 router.delete('/district/:id', deleteDistrict.handle);
+
+router.post('/address', createAddress.handle);
+router.put('/address/:id', updateAddress.handle);
+router.get('/address/:id', findAddress.handle);
+router.get(['/addresses', '/addresses/:limit', '/addresses/:skip/:limit'], findAllAddresses.handle);
+router.delete('/address/:id', deleteAddress.handle);
 
 router.use(router404Controller.handle);
 
