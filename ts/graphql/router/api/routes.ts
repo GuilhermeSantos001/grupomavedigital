@@ -56,10 +56,18 @@ import { FindAllDistrictsController } from '@/graphql/controllers/FindAllDistric
 import { DeleteDistrictController } from '@/graphql/controllers/DeleteDistrictController';
 
 import { CreateAddressController } from '@/graphql/controllers/CreateAddressController';
-import { UpdateAddressController } from '../../controllers/UpdateAddressController';
-import { FindAddressController } from '../../controllers/FindAddressController';
-import { FindAllAddressesController } from '../../controllers/FindAllAddressesController';
-import { DeleteAddressController } from '../../controllers/DeleteAddressController';
+import { UpdateAddressController } from '@/graphql/controllers/UpdateAddressController';
+import { FindAddressController } from '@/graphql/controllers/FindAddressController';
+import { FindAllAddressesController } from '@/graphql/controllers/FindAllAddressesController';
+import { DeleteAddressController } from '@/graphql/controllers/DeleteAddressController';
+
+import { CreateCardController } from '@/graphql/controllers/CreateCardController';
+import { UpdateCardController } from '@/graphql/controllers/UpdateCardController';
+import { AssignPersonCardController } from '@/graphql/controllers/AssignPersonCardController';
+import {UnassignPersonCardController} from '@/graphql/controllers/UnassignPersonCardController';
+import { FindCardController } from '@/graphql/controllers/FindCardController';
+import { FindAllCardsController } from '@/graphql/controllers/FindAllCardsController';
+import { DeleteCardController } from '@/graphql/controllers/DeleteCardController';
 
 const router404Controller = new Router404Controller();
 
@@ -117,6 +125,14 @@ const findAddress = new FindAddressController();
 const findAllAddresses = new FindAllAddressesController();
 const deleteAddress = new DeleteAddressController();
 
+const createCard = new CreateCardController();
+const updateCard = new UpdateCardController();
+const assignPersonCard = new AssignPersonCardController();
+const unassignPersonCard = new UnassignPersonCardController();
+const findCard = new FindCardController();
+const findAllCards = new FindAllCardsController();
+const deleteCard = new DeleteCardController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -170,6 +186,14 @@ router.put('/address/:id', updateAddress.handle);
 router.get('/address/:id', findAddress.handle);
 router.get(['/addresses', '/addresses/:limit', '/addresses/:skip/:limit'], findAllAddresses.handle);
 router.delete('/address/:id', deleteAddress.handle);
+
+router.post('/card', createCard.handle);
+router.put('/card/:id', updateCard.handle);
+router.put('/card/assign/:id', assignPersonCard.handle);
+router.put('/card/unassign/:id', unassignPersonCard.handle);
+router.get('/card/:id', findCard.handle);
+router.get(['/cards', '/cards/:limit', '/cards/:skip/:limit'], findAllCards.handle);
+router.delete('/card/:id', deleteCard.handle);
 
 router.use(router404Controller.handle);
 

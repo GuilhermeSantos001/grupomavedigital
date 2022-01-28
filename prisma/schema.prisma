@@ -116,8 +116,8 @@ model Address {
 model Card {
   id             String     @id @default(uuid())
   costCenterId   String
-  serialNumber   Int        @unique
-  lastCardNumber Int
+  serialNumber   String     @unique
+  lastCardNumber String
   personId       String?
   status         String
   createdAt      DateTime   @default(now())
