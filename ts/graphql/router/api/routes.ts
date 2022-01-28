@@ -64,7 +64,7 @@ import { DeleteAddressController } from '@/graphql/controllers/DeleteAddressCont
 import { CreateCardController } from '@/graphql/controllers/CreateCardController';
 import { UpdateCardController } from '@/graphql/controllers/UpdateCardController';
 import { AssignPersonCardController } from '@/graphql/controllers/AssignPersonCardController';
-import {UnassignPersonCardController} from '@/graphql/controllers/UnassignPersonCardController';
+import { UnassignPersonCardController } from '@/graphql/controllers/UnassignPersonCardController';
 import { FindCardController } from '@/graphql/controllers/FindCardController';
 import { FindAllCardsController } from '@/graphql/controllers/FindAllCardsController';
 import { DeleteCardController } from '@/graphql/controllers/DeleteCardController';

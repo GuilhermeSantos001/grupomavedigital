@@ -9,7 +9,7 @@ datasource db {
 
 model CostCenter {
   id        String    @id @default(uuid())
-  title     String    @unique
+  value     String    @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
   Card      Card[]
@@ -95,7 +95,7 @@ model District {
 model Address {
   id             String       @id @default(uuid())
   streetId       String
-  number         Int
+  number         String
   complement     String?
   neighborhoodId String
   cityId         String
@@ -130,13 +130,13 @@ model Card {
 
 model Person {
   id         String   @id @default(uuid())
-  matricule  Int
+  matricule  String
   name       String
-  cpf        Int
-  rg         Int
+  cpf        String
+  rg         String
   motherName String
   birthDate  DateTime
-  phone      Int
+  phone      String
   mail       String
   addressId  String
   scaleId    String
@@ -156,8 +156,8 @@ model Workplace {
   id                String    @id @default(uuid())
   name              String
   scaleId           String
-  entryTime         DateTime
-  exitTime          DateTime
+  entryTime         String
+  exitTime          String
   status            String
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @default(now()) @updatedAt
@@ -178,8 +178,8 @@ model Upload {
   filename       String
   filetype       String
   description    String
-  size           Int
-  compressedSize Int
+  size           BigInt
+  compressedSize BigInt
   version        Int
   temporary      Boolean
   expiredAt      DateTime
@@ -197,7 +197,7 @@ model PersonCovering {
   reasonForAbsenceId String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
-  mirror             Upload            @relation(fields: [mirrorId], references: [id])
+  mirror             Upload            @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
   reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
   Posting            Posting[]
 
@@ -210,7 +210,7 @@ model PersonCoverage {
   modalityOfCoverage String
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @default(now()) @updatedAt
-  mirror             Upload?   @relation(fields: [mirrorId], references: [id])
+  mirror             Upload?   @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
   Posting            Posting[]
 
   @@map("person_coverage")
@@ -241,9 +241,9 @@ model Posting {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @default(now()) @updatedAt
   costCenter           CostCenter        @relation(fields: [costCenterId], references: [id])
-  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id])
+  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id], onDelete: Cascade)
   coverageWorkplace    Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
-  covering             PersonCovering?   @relation(fields: [coveringId], references: [id])
+  covering             PersonCovering?   @relation(fields: [coveringId], references: [id], onDelete: Cascade)
   coveringWorkplace    Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
   ReasonForAbsence     ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
 

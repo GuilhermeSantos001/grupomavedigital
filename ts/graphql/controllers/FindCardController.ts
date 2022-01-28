@@ -20,7 +20,7 @@ export class FindCardController {
                 include: {
                     costCenter: {
                         select: {
-                            title: true
+                            value: true
                         }
                     },
                     person: {

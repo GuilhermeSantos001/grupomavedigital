@@ -9,8 +9,8 @@ export class UpdateCostCenterController {
     const
       { id } = request.params,
       {
-        title
-      }: Pick<CostCenter, 'title'> = request.body;
+        value
+      }: Pick<CostCenter, 'value'> = request.body;
 
     const updateThrowErrorController = new UpdateThrowErrorController();
 
@@ -20,7 +20,7 @@ export class UpdateCostCenterController {
           id
         },
         data: {
-          title
+          value
         }
       }),
       'Não foi possível atualizar o centro de custo.'

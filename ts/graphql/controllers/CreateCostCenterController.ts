@@ -7,15 +7,15 @@ import { CreateThrowErrorController } from '@/graphql/controllers/CreateThrowErr
 export class CreateCostCenterController {
     async handle(request: Request, response: Response) {
         const {
-            title
-        }: Pick<CostCenter, 'title'> = request.body;
+            value
+        }: Pick<CostCenter, 'value'> = request.body;
 
         const createThrowErrorController = new CreateThrowErrorController();
 
         return response.json(await createThrowErrorController.handle<CostCenter>(
             prismaClient.costCenter.create({
                 data: {
-                    title
+                    value
                 }
             }),
             'Não foi possível criar o centro de custo.'
