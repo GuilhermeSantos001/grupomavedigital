@@ -49,6 +49,12 @@ import { FindCityController} from '@/graphql/controllers/FindCityController';
 import { FindAllCitiesController } from '@/graphql/controllers/FindAllCitiesController';
 import { DeleteCityController } from '@/graphql/controllers/DeleteCityController';
 
+import { CreateDistrictController } from '../../controllers/CreateDistrictController';
+import { UpdateDistrictController } from '../../controllers/UpdateDistrictController';
+import {FindDistrictController} from '../../controllers/FindDistrictController';
+import { FindAllDistrictsController } from '../../controllers/FindAllDistrictsController';
+import {DeleteDistrictController} from '../../controllers/DeleteDistrictController';
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -93,6 +99,12 @@ const findCity = new FindCityController();
 const findAllCities = new FindAllCitiesController();
 const deleteCity = new DeleteCityController();
 
+const createDistrict = new CreateDistrictController();
+const updateDistrict = new UpdateDistrictController();
+const findDistrict = new FindDistrictController();
+const findAllDistricts = new FindAllDistrictsController();
+const deleteDistrict = new DeleteDistrictController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -134,6 +146,12 @@ router.put('/city/:id', updateCity.handle);
 router.get('/city/:id', findCity.handle);
 router.get([ '/cities', '/cities/:limit', '/cities/:skip/:limit'], findAllCities.handle);
 router.delete('/city/:id', deleteCity.handle);
+
+router.post('/district', createDistrict.handle);
+router.put('/district/:id', updateDistrict.handle);
+router.get('/district/:id', findDistrict.handle);
+router.get([ '/districts', '/districts/:limit', '/districts/:skip/:limit'], findAllDistricts.handle);
+router.delete('/district/:id', deleteDistrict.handle);
 
 router.use(router404Controller.handle);
 
