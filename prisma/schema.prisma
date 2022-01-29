@@ -8,92 +8,119 @@ datasource db {
 }
 
 model CostCenter {
-  id        String    @id @default(uuid())
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  Card      Card[]
-  Posting   Posting[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  card    Card[]
+  posting Posting[]
 
   @@map("cost_centers")
 }
 
 model Scale {
-  id        String      @id @default(uuid())
-  value     String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
-  Person    Person[]
-  Workplace Workplace[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person    Person[]
+  workplace Workplace[]
 
   @@map("scales")
 }
 
 model Service {
-  id          String     @id @default(uuid())
-  value       String     @unique
-  WorkplaceId String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
-  Workplace   Workplace? @relation(fields: [WorkplaceId], references: [id])
-  Person      Person[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  personService    PersonService[]
+  workplaceService WorkplaceService[]
 
   @@map("services")
 }
 
+model PersonService {
+  id        String  @id @default(uuid())
+  personId  String
+  person    Person  @relation(fields: [personId], references: [id])
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  @@map("people_service")
+}
+
+model WorkplaceService {
+  id          String    @id @default(uuid())
+  workplaceId String
+  workplace   Workplace @relation(fields: [workplaceId], references: [id])
+  serviceId   String
+  service     Service   @relation(fields: [serviceId], references: [id])
+
+  @@map("workplaces_service")
+}
+
 model ReasonForAbsence {
-  id             String           @id @default(uuid())
-  value          String           @unique
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now()) @updatedAt
-  PersonCovering PersonCovering[]
-  Posting        Posting[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  personCovering PersonCovering[]
+  posting        Posting[]
 
   @@map("reason_for_absences")
 }
 
 model Street {
-  id        String    @id @default(uuid())
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  Address   Address[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
 
   @@map("streets")
 }
 
 model Neighborhood {
-  id        String    @id @default(uuid())
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  Address   Address[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
 
   @@map("neighborhoods")
 }
 
 model City {
-  id        String    @id @default(uuid())
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  Address   Address[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
 
   @@map("cities")
 }
 
 model District {
-  id        String    @id @default(uuid())
-  value     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  Address   Address[]
+  id        String   @id @default(uuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
 
   @@map("districts")
 }
 
 model Address {
-  id             String       @id @default(uuid())
+  id             String   @id @default(uuid())
   streetId       String
   number         String
   complement     String?
@@ -101,29 +128,31 @@ model Address {
   cityId         String
   districtId     String
   zipCode        String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now()) @updatedAt
-  city           City         @relation(fields: [cityId], references: [id])
-  district       District     @relation(fields: [districtId], references: [id])
-  neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
-  street         Street       @relation(fields: [streetId], references: [id])
-  Person         Person[]
-  Workplace      Workplace[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  city         City         @relation(fields: [cityId], references: [id])
+  district     District     @relation(fields: [districtId], references: [id])
+  neighborhood Neighborhood @relation(fields: [neighborhoodId], references: [id])
+  street       Street       @relation(fields: [streetId], references: [id])
+  person       Person[]
+  workplace    Workplace[]
 
   @@map("addresses")
 }
 
 model Card {
-  id             String     @id @default(uuid())
+  id             String   @id @default(uuid())
   costCenterId   String
-  serialNumber   String     @unique
+  serialNumber   String   @unique
   lastCardNumber String
   personId       String?
   status         String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @default(now()) @updatedAt
-  costCenter     CostCenter @relation(fields: [costCenterId], references: [id])
-  person         Person?    @relation(fields: [personId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  costCenter CostCenter @relation(fields: [costCenterId], references: [id])
+  person     Person?    @relation(fields: [personId], references: [id])
 
   @@map("cards")
 }
@@ -140,40 +169,41 @@ model Person {
   mail       String   @unique
   addressId  String
   scaleId    String
-  serviceId  String
   status     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
-  address    Address  @relation(fields: [addressId], references: [id])
-  scale      Scale    @relation(fields: [scaleId], references: [id])
-  service    Service  @relation(fields: [serviceId], references: [id])
-  cards      Card[]
+
+  address       Address         @relation(fields: [addressId], references: [id])
+  scale         Scale           @relation(fields: [scaleId], references: [id])
+  cards         Card[]
+  personService PersonService[]
 
   @@map("people")
 }
 
 model Workplace {
-  id                String    @id @default(uuid())
-  name              String
-  scaleId           String
-  entryTime         String
-  exitTime          String
-  status            String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now()) @updatedAt
-  addressId         String
-  address           Address   @relation(fields: [addressId], references: [id])
-  scale             Scale     @relation(fields: [scaleId], references: [id])
-  CoveringWorkplace Posting[] @relation("CoverageWorkplaceId")
-  CoverageWorkplace Posting[] @relation("CoveringWorkplaceId")
-  services          Service[]
+  id        String   @id @default(uuid())
+  name      String
+  scaleId   String
+  entryTime DateTime
+  exitTime  DateTime
+  addressId String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address           Address            @relation(fields: [addressId], references: [id])
+  scale             Scale              @relation(fields: [scaleId], references: [id])
+  coveringWorkplaceId Posting[]          @relation("CoverageWorkplaceId")
+  coverageWorkplaceId Posting[]          @relation("CoveringWorkplaceId")
+  workplaceService  WorkplaceService[]
 
   @@map("workplaces")
 }
 
 model Upload {
-  id             String           @id @default(uuid())
-  fileId         String           @unique
+  id             String   @id @default(uuid())
+  fileId         String   @unique
   authorId       String
   filename       String
   filetype       String
@@ -183,41 +213,44 @@ model Upload {
   version        Int
   temporary      Boolean
   expiredAt      DateTime
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now()) @updatedAt
-  PersonCoverage PersonCoverage[]
-  PersonCovering PersonCovering[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  personCoverage PersonCoverage[]
+  personCovering PersonCovering[]
 
   @@map("uploads")
 }
 
 model PersonCovering {
-  id                 String            @id @default(uuid())
+  id                 String   @id @default(uuid())
   mirrorId           String
   reasonForAbsenceId String?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @default(now()) @updatedAt
-  mirror             Upload            @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
-  reasonForAbsence   ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
-  Posting            Posting[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  mirror           Upload            @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
+  reasonForAbsence ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  posting          Posting[]
 
   @@map("person_covering")
 }
 
 model PersonCoverage {
-  id                 String    @id @default(uuid())
+  id                 String   @id @default(uuid())
   mirrorId           String?
   modalityOfCoverage String
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @default(now()) @updatedAt
-  mirror             Upload?   @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
-  Posting            Posting[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  mirror  Upload?   @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
+  posting Posting[]
 
   @@map("person_coverage")
 }
 
 model Posting {
-  id                   String            @id @default(uuid())
+  id                   String    @id @default(uuid())
   author               String
   costCenterId         String
   periodStart          DateTime
@@ -238,14 +271,15 @@ model Posting {
   foremanApproval      Boolean?
   managerApproval      Boolean?
   status               String
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @default(now()) @updatedAt
-  costCenter           CostCenter        @relation(fields: [costCenterId], references: [id])
-  coverage             PersonCoverage    @relation(fields: [coverageId], references: [id], onDelete: Cascade)
-  coverageWorkplace    Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
-  covering             PersonCovering?   @relation(fields: [coveringId], references: [id], onDelete: Cascade)
-  coveringWorkplace    Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
-  ReasonForAbsence     ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt
+
+  costCenter        CostCenter        @relation(fields: [costCenterId], references: [id])
+  coverage          PersonCoverage    @relation(fields: [coverageId], references: [id], onDelete: Cascade)
+  coverageWorkplace Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
+  covering          PersonCovering?   @relation(fields: [coveringId], references: [id], onDelete: Cascade)
+  coveringWorkplace Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
+  reasonForAbsence  ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
 
   @@map("postings")
 }

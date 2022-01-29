@@ -23,7 +23,6 @@ export class UpdatePersonController {
         phone,
         addressId,
         scaleId,
-        serviceId,
         status,
       }: Pick<Person,
         | 'matricule'
@@ -36,7 +35,6 @@ export class UpdatePersonController {
         | 'phone'
         | 'addressId'
         | 'scaleId'
-        | 'serviceId'
         | 'status'
       > = request.body;
 
@@ -90,7 +88,6 @@ export class UpdatePersonController {
           phone,
           addressId,
           scaleId,
-          serviceId,
           status,
         }
       }),

@@ -1,10 +1,10 @@
-import { Person } from '@prisma/client';
+import { Workplace } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/db/prismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindPersonController {
+export class FindWorkplaceController {
     async handle(request: Request, response: Response) {
         const {
             id
@@ -12,8 +12,8 @@ export class FindPersonController {
 
         const findThrowErrorController = new FindThrowErrorController();
 
-        return response.json(await findThrowErrorController.handle<Person | null>(
-            prismaClient.person.findFirst({
+        return response.json(await findThrowErrorController.handle<Workplace | null>(
+            prismaClient.workplace.findFirst({
                 where: {
                     id
                 },
@@ -50,7 +50,7 @@ export class FindPersonController {
                             value: true
                         }
                     },
-                    personService: {
+                    workplaceService: {
                         select: {
                             id: true,
                             service: {
@@ -59,19 +59,10 @@ export class FindPersonController {
                                 }
                             }
                         }
-                    },
-                    cards: {
-                        select: {
-                            serialNumber: true,
-                            lastCardNumber: true,
-                            costCenter: {
-                                select: { value: true }
-                            }
-                        }
                     }
                 }
             }),
-            'Não foi possível retornar a pessoa.'
+            'Não foi possível retornar o local de trabalho.'
         ));
     }
 }

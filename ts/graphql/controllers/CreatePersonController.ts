@@ -21,7 +21,6 @@ export class CreatePersonController {
             phone,
             addressId,
             scaleId,
-            serviceId,
             status,
         }: Pick<Person,
             | 'matricule'
@@ -34,7 +33,6 @@ export class CreatePersonController {
             | 'phone'
             | 'addressId'
             | 'scaleId'
-            | 'serviceId'
             | 'status'
         > = request.body;
 
@@ -87,7 +85,6 @@ export class CreatePersonController {
                     phone,
                     addressId,
                     scaleId,
-                    serviceId,
                     status,
                 }
             }),

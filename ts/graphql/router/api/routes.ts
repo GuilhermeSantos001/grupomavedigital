@@ -21,6 +21,9 @@ import { DeleteScaleController } from '@/graphql/controllers/DeleteScaleControll
 
 import { CreateServiceController } from '@/graphql/controllers/CreateServiceController';
 import { UpdateServiceController } from '@/graphql/controllers/UpdateServiceController';
+import { AssignPersonServiceController } from '@/graphql/controllers/AssignPersonServiceController';
+import { AssignWorkplaceServiceController } from '@/graphql/controllers/AssignWorkplaceServiceController';
+import {UnassignPersonServiceController} from '@/graphql/controllers/UnassignPersonServiceController';
 import { FindServiceController } from '@/graphql/controllers/FindServiceController';
 import { FindAllServicesController } from '@/graphql/controllers/FindAllServicesController';
 import { DeleteServiceController } from '@/graphql/controllers/DeleteServiceController';
@@ -65,15 +68,22 @@ import { CreateCardController } from '@/graphql/controllers/CreateCardController
 import { UpdateCardController } from '@/graphql/controllers/UpdateCardController';
 import { AssignPersonCardController } from '@/graphql/controllers/AssignPersonCardController';
 import { UnassignPersonCardController } from '@/graphql/controllers/UnassignPersonCardController';
+import { UnassignWorkplaceServiceController } from '@/graphql/controllers/UnassignWorkplaceServiceController';
 import { FindCardController } from '@/graphql/controllers/FindCardController';
 import { FindAllCardsController } from '@/graphql/controllers/FindAllCardsController';
 import { DeleteCardController } from '@/graphql/controllers/DeleteCardController';
 
-import { CreatePersonController } from '../../controllers/CreatePersonController';
-import { UpdatePersonController } from '../../controllers/UpdatePersonController';
-import {FindPersonController} from '@/graphql/controllers/FindPersonController';
-import { FindAllPeopleController } from '../../controllers/FindAllPeopleController';
-import {DeletePersonController} from '@/graphql/controllers/DeletePersonController';
+import { CreatePersonController } from '@/graphql/controllers/CreatePersonController';
+import { UpdatePersonController } from '@/graphql/controllers/UpdatePersonController';
+import { FindPersonController } from '@/graphql/controllers/FindPersonController';
+import { FindAllPeopleController } from '@/graphql/controllers/FindAllPeopleController';
+import { DeletePersonController } from '@/graphql/controllers/DeletePersonController';
+
+import { CreateWorkplaceController } from '@/graphql/controllers/CreateWorkplaceController';
+import { UpdateWorkplaceController } from '@/graphql/controllers/UpdateWorkplaceController';
+import { FindWorkplaceController } from '@/graphql/controllers/FindWorkplaceController';
+import { FindAllWorkplacesController } from '@/graphql/controllers/FindAllWorkplacesController';
+import { DeleteWorkplaceController } from '@/graphql/controllers/DeleteWorkplaceController';
 
 const router404Controller = new Router404Controller();
 
@@ -91,6 +101,10 @@ const deleteScale = new DeleteScaleController();
 
 const createService = new CreateServiceController();
 const updateService = new UpdateServiceController();
+const assignPersonService = new AssignPersonServiceController();
+const assignWorkplaceService = new AssignWorkplaceServiceController();
+const unassignPersonService = new UnassignPersonServiceController();
+const unassignWorkplaceService = new UnassignWorkplaceServiceController();
 const findService = new FindServiceController();
 const findAllServices = new FindAllServicesController();
 const deleteService = new DeleteServiceController();
@@ -145,6 +159,12 @@ const findPerson = new FindPersonController();
 const findAllPerson = new FindAllPeopleController();
 const deletePerson = new DeletePersonController();
 
+const createWorkplace = new CreateWorkplaceController();
+const updateWorkplace = new UpdateWorkplaceController();
+const findWorkplace = new FindWorkplaceController();
+const findAllWorkplaces = new FindAllWorkplacesController();
+const deleteWorkplace = new DeleteWorkplaceController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -159,6 +179,10 @@ router.delete('/scale/:id', deleteScale.handle);
 
 router.post('/service', createService.handle);
 router.put('/service/:id', updateService.handle);
+router.post('/service/assign/person', assignPersonService.handle);
+router.post('/service/assign/workplace', assignWorkplaceService.handle);
+router.delete('/service/unassign/person/:id', unassignPersonService.handle);
+router.delete('/service/unassign/workplace/:id', unassignWorkplaceService.handle);
 router.get('/service/:id', findService.handle);
 router.get(['/services', '/services/:limit', '/services/:skip/:limit'], findAllServices.handle);
 router.delete('/service/:id', deleteService.handle);
@@ -212,6 +236,12 @@ router.put('/person/:id', updatePerson.handle);
 router.get('/person/:id', findPerson.handle);
 router.get(['/people', '/people/:limit', '/people/:skip/:limit'], findAllPerson.handle);
 router.delete('/person/:id', deletePerson.handle);
+
+router.post('/workplace', createWorkplace.handle);
+router.put('/workplace/:id', updateWorkplace.handle);
+router.get('/workplace/:id', findWorkplace.handle);
+router.get(['/workplaces', '/workplaces/:limit', '/workplaces/:skip/:limit'], findAllWorkplaces.handle);
+router.delete('/workplace/:id', deleteWorkplace.handle);
 
 router.use(router404Controller.handle);
 
