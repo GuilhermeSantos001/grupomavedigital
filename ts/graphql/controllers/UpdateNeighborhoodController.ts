@@ -1,7 +1,7 @@
 import { Neighborhood } from '@prisma/client';
 import { Request, Response } from 'express';
 
-import { prismaClient } from '@/db/prismaClient';
+import { prismaClient } from '@/database/PrismaClient';
 import { UpdateThrowErrorController } from '@/graphql/controllers/UpdateThrowErrorController';
 
 export class UpdateNeighborhoodController {

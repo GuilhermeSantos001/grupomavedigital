@@ -4,7 +4,7 @@
  * @update 07/12/2021
  */
 
-import { PrivilegesSystem } from '@/mongo/user-manager-mongo';
+import { PrivilegesSystem } from '@/schemas/UsersSchema';
 
 export default class Privilege {
 

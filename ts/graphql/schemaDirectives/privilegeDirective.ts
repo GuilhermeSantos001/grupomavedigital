@@ -1,8 +1,7 @@
 /**
  * @description Diretivas para verificar o privilegio do usuário através do token da rota
  * @author GuilhermeSantos001
- * @update 01/08/2021
- * @version 3.0.0
+ * @update 31/01/2022
  */
 
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
@@ -10,7 +9,7 @@ import { GraphQLSchema } from 'graphql';
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import JsonWebToken from '@/core/jsonWebToken';
+import {JsonWebToken} from '@/lib/JsonWebToken';
 
 export default function PrivilegeDirective(directiveName: string) {
     return {

@@ -1,7 +1,7 @@
 import { City } from '@prisma/client';
 import { Request, Response } from 'express';
 
-import { prismaClient } from '@/db/prismaClient';
+import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
 export class FindCityController {

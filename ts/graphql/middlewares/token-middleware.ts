@@ -6,9 +6,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import JsonWebToken from '@/core/jsonWebToken';
+import {JsonWebToken} from '@/lib/JsonWebToken';
 import getReqProps from '@/utils/getReqProps';
-import userManagerDB from '@/db/user-db';
+import {UsersManagerDB} from '@/database/UsersManagerDB';
 import geoIP, { clearIPAddress } from '@/utils/geoIP';
 
 export default async function TokenMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -44,6 +44,7 @@ export default async function TokenMiddleware(req: Request, res: Response, next:
         }
 
         const
+            userManagerDB = new UsersManagerDB(),
             { ip } = geoIP(req),
             internetadress = ip;
 

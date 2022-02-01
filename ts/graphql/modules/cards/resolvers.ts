@@ -1,12 +1,12 @@
 /**
  * @description Rotas dos cartões
  * @author GuilhermeSantos001
- * @update 28/09/2021
+ * @update 31/01/2022
  */
 
-import vcard from '@/core/vcard';
-import cardsDB from '@/db/cards-db';
-import { SocialmediaName } from '@/mongo/cards-manager-mongo';
+import {VCardGenerate} from '@/lib/VCardGenerate';
+import {CardsManagerDB} from '@/database/CardsManagerDB';
+import { SocialmediaName } from '@/schemas/CardsSchema';
 import random from '@/utils/random';
 import { compressToEncodedURIComponent } from 'lz-string';
 
@@ -88,7 +88,9 @@ module.exports = {
     Query: {
         cardGet: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
             try {
-                const cards = await cardsDB.get(0, 1, args.limit, {
+                const
+                cardsManagerDB = new CardsManagerDB(),
+                cards = await cardsManagerDB.get(0, 1, args.limit, {
                     _id: { $gt: args.lastIndex }
                 });
 
@@ -101,7 +103,7 @@ module.exports = {
     Mutation: {
         vcardCreate: async (parent: unknown, args: { data: Vcard }) => {
             try {
-                return await vcard(args.data);
+                return await VCardGenerate(args.data);
             } catch (error) {
                 throw new Error(String(error));
             }
@@ -109,6 +111,7 @@ module.exports = {
         cardCreate: async (parent: unknown, args: { data: Card }) => {
             try {
                 const
+                    cardsManagerDB = new CardsManagerDB(),
                     id = args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
                     {
                         version,
@@ -121,7 +124,7 @@ module.exports = {
                         footer
                     } = args.data;
 
-                await cardsDB.register({
+                await cardsManagerDB.register({
                     cid: id,
                     version,
                     photo,
@@ -140,7 +143,9 @@ module.exports = {
         },
         cardUpdate: async (parent: unknown, args: { data: Card }) => {
             try {
-                const {
+                const
+                cardsManagerDB = new CardsManagerDB(),
+                {
                     id,
                     version,
                     photo,
@@ -152,7 +157,7 @@ module.exports = {
                     footer
                 } = args.data;
 
-                await cardsDB.update(id, {
+                await cardsManagerDB.update(id, {
                     cid: id,
                     version,
                     photo,
@@ -171,7 +176,9 @@ module.exports = {
         },
         cardRemove: async (parent: unknown, args: { id: string }) => {
             try {
-                await cardsDB.remove(args.id);
+                const cardsManagerDB = new CardsManagerDB();
+
+                await cardsManagerDB.remove(args.id);
 
                 return true
             } catch (error) {

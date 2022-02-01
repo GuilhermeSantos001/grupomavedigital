@@ -70,7 +70,6 @@ model ReasonForAbsence {
   updatedAt DateTime @default(now()) @updatedAt
 
   personCovering PersonCovering[]
-  posting        Posting[]
 
   @@map("reason_for_absences")
 }
@@ -192,24 +191,24 @@ model Workplace {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  address           Address            @relation(fields: [addressId], references: [id])
-  scale             Scale              @relation(fields: [scaleId], references: [id])
+  address             Address            @relation(fields: [addressId], references: [id])
+  scale               Scale              @relation(fields: [scaleId], references: [id])
   coveringWorkplaceId Posting[]          @relation("CoverageWorkplaceId")
   coverageWorkplaceId Posting[]          @relation("CoveringWorkplaceId")
-  workplaceService  WorkplaceService[]
+  workplaceService    WorkplaceService[]
 
   @@map("workplaces")
 }
 
 model Upload {
   id             String   @id @default(uuid())
-  fileId         String   @unique
+  fileId         String
   authorId       String
   filename       String
   filetype       String
   description    String
-  size           BigInt
-  compressedSize BigInt
+  size           Int
+  compressedSize Int
   version        Int
   temporary      Boolean
   expiredAt      DateTime
@@ -259,7 +258,6 @@ model Posting {
   description          String?
   coveringId           String?
   coverageId           String
-  reasonForAbsenceId   String?
   coveringWorkplaceId  String
   coverageWorkplaceId  String?
   paymentMethod        String
@@ -274,12 +272,11 @@ model Posting {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @default(now()) @updatedAt
 
-  costCenter        CostCenter        @relation(fields: [costCenterId], references: [id])
-  coverage          PersonCoverage    @relation(fields: [coverageId], references: [id], onDelete: Cascade)
-  coverageWorkplace Workplace?        @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
-  covering          PersonCovering?   @relation(fields: [coveringId], references: [id], onDelete: Cascade)
-  coveringWorkplace Workplace         @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
-  reasonForAbsence  ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  costCenter        CostCenter      @relation(fields: [costCenterId], references: [id])
+  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id], onDelete: Cascade)
+  coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
+  covering          PersonCovering? @relation(fields: [coveringId], references: [id], onDelete: Cascade)
+  coveringWorkplace Workplace       @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
 
   @@map("postings")
 }

@@ -2,14 +2,14 @@
 /**
  * @description Leitor de CSV
  * @author GuilhermeSantos001
- * @update 26/11/2021
+ * @update 31/01/2022
  */
 
 import csv from 'csv-parser';
 import { createReadStream } from 'fs';
 import { compressToBase64 } from 'lz-string'
 
-import Redis from '@/core/redis';
+import { RedisClient } from '@/lib/RedisClient';
 import { localPath } from '@/utils/localpath'
 
 import Moment from '@/utils/moment';
@@ -17,13 +17,14 @@ import Moment from '@/utils/moment';
 export default class CSVParser {
   static readonly db: number = 6;
   static readonly expiry: number = 7; // Cache expira em 7 dias
+  static readonly redis: RedisClient = new RedisClient(CSVParser.db);
 
   /**
    * @description Efetua a limpeza do cache
    */
   static async flush(): Promise<void> {
     try {
-      return await Redis(this.db).flush();
+      return await this.redis.flush();
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
     }
@@ -35,7 +36,7 @@ export default class CSVParser {
   static isExpiry(filename: string): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
       try {
-        const value = await Redis(this.db).get(`db_${filename}_expiry`);
+        const value = await this.redis.get(`db_${filename}_expiry`);
 
         if (typeof value === 'string') {
           const
@@ -43,7 +44,7 @@ export default class CSVParser {
             expiry = new Date(JSON.parse(value));
 
           if (now > expiry) {
-            await Redis(this.db).delete(`db_${filename}_expiry`);
+            await this.redis.delete(`db_${filename}_expiry`);
 
             return resolve(true);
           }
@@ -67,7 +68,7 @@ export default class CSVParser {
 
         now.setDate(now.getDate() + this.expiry);
 
-        await Redis(this.db).set(`db_${filename}_expiry`, JSON.stringify(now));
+        await this.redis.set(`db_${filename}_expiry`, JSON.stringify(now));
 
         resolve();
       } catch (error) {
@@ -82,7 +83,7 @@ export default class CSVParser {
   static get<Type>(filename: string): Promise<Type[]> {
     return new Promise(async (resolve, reject) => {
       try {
-        const values = await Redis(this.db).get(`db_${filename}`);
+        const values = await this.redis.get(`db_${filename}`);
 
         if (typeof values === 'string') {
           return resolve(JSON.parse(values));
@@ -101,7 +102,7 @@ export default class CSVParser {
   static save(filename: string, data: string) {
     return new Promise<void>(async (resolve, reject) => {
       try {
-        await Redis(this.db).set(`db_${filename}`, data);
+        await this.redis.set(`db_${filename}`, data);
 
         resolve();
       } catch (error) {

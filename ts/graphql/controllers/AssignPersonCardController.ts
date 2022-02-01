@@ -1,7 +1,7 @@
 import { Card } from '@prisma/client';
 import { Request, Response } from 'express';
 
-import { prismaClient } from '@/db/prismaClient';
+import { prismaClient } from '@/database/PrismaClient';
 import { UpdateThrowErrorController } from '@/graphql/controllers/UpdateThrowErrorController';
 import { ResponseThrowErrorController } from '@/graphql/controllers/ResponseThrowErrorController';
 

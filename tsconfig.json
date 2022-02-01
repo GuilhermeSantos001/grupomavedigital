@@ -7,72 +7,23 @@
     "lib": ["esnext"],
     "esModuleInterop": true,
     "baseUrl": ".",
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": ["node", "jest"],
     "paths": {
-      "@/app/*": [
-        "ts/*"
-      ],
-      "@/constants/*": [
-        "ts/constants/*"
-      ],
-      "@/config/*": [
-        "ts/config/*"
-      ],
-      "@/database/*": [
-        "ts/database/*"
-      ],
-      "@/contracts/*": [
-        "ts/contracts/*"
-      ],
-      "@/controllers/*": [
-        "ts/controllers/*"
-      ],
-      "@/graphql/*": [
-        "ts/graphql/*"
-      ],
-      "@/router/*": [
-        "ts/graphql/router/*"
-      ],
-      "@/middlewares/*": [
-        "ts/graphql/middlewares/*"
-      ],
-      "@/bin/*": [
-        "ts/bin/*"
-      ],
-      "@/jobs/*": [
-        "ts/jobs/*"
-      ],
-      "@/models/*": [
-        "ts/models/*"
-      ],
-      "@/core/*": [
-        "ts/core/*"
-      ],
-      "@/db/*": [
-        "ts/db/*"
-      ],
-      "@/drivers/*": [
-        "ts/drivers/*"
-      ],
-      "@/mongo/*": [
-        "ts/mongo/*"
-      ],
-      "@/utils/*": [
-        "ts/utils/*"
-      ],
-      "@/socketIO/*": [
-        "ts/socketIO/*"
-      ],
-      "@/providers/*": [
-        "ts/providers/*"
-      ]
+      "@/config/*": ["ts/config/*"],
+      "@/constants/*": ["ts/constants/*"],
+      "@/contracts/*": ["ts/contracts/*"],
+      "@/controllers/*": ["ts/controllers/*"],
+      "@/database/*": ["ts/database/*"],
+      "@/drivers/*": ["ts/drivers/*"],
+      "@/graphql/*": ["ts/graphql/*"],
+      "@/jobs/*": ["ts/jobs/*"],
+      "@/lib/*": ["ts/lib/*"],
+      "@/schemas/*": ["ts/schemas/*"],
+      "@/socket.io/*": ["ts/socket.io/*"],
+      "@/templates/*": ["ts/templates/*"],
+      "@/test/*": ["ts/test/*"],
+      "@/utils/*": ["ts/utils/*"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "*.spec.ts"
-  ]
+  "exclude": ["node_modules", "*.spec.ts"]
 }

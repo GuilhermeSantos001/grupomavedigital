@@ -16,14 +16,14 @@ import { DeleteCostCenterController } from '@/graphql/controllers/DeleteCostCent
 import { CreateScaleController } from '@/graphql/controllers/CreateScaleController';
 import { UpdateScaleController } from '@/graphql/controllers/UpdateScaleController';
 import { FindScaleController } from '@/graphql/controllers/FindScaleController';
-import { findAllScalesController } from '@/app/graphql/controllers/FindAllScalesController';
+import { findAllScalesController } from '@/graphql/controllers/FindAllScalesController';
 import { DeleteScaleController } from '@/graphql/controllers/DeleteScaleController';
 
 import { CreateServiceController } from '@/graphql/controllers/CreateServiceController';
 import { UpdateServiceController } from '@/graphql/controllers/UpdateServiceController';
 import { AssignPersonServiceController } from '@/graphql/controllers/AssignPersonServiceController';
 import { AssignWorkplaceServiceController } from '@/graphql/controllers/AssignWorkplaceServiceController';
-import {UnassignPersonServiceController} from '@/graphql/controllers/UnassignPersonServiceController';
+import { UnassignPersonServiceController } from '@/graphql/controllers/UnassignPersonServiceController';
 import { FindServiceController } from '@/graphql/controllers/FindServiceController';
 import { FindAllServicesController } from '@/graphql/controllers/FindAllServicesController';
 import { DeleteServiceController } from '@/graphql/controllers/DeleteServiceController';
@@ -84,6 +84,12 @@ import { UpdateWorkplaceController } from '@/graphql/controllers/UpdateWorkplace
 import { FindWorkplaceController } from '@/graphql/controllers/FindWorkplaceController';
 import { FindAllWorkplacesController } from '@/graphql/controllers/FindAllWorkplacesController';
 import { DeleteWorkplaceController } from '@/graphql/controllers/DeleteWorkplaceController';
+
+import { CreateUploadController } from '../../controllers/CreateUploadController';
+import { UpdateUploadController } from '../../controllers/UpdateUploadController';
+import { FindUploadController } from '@/graphql/controllers/FindUploadController';
+import { FindAllUploadsController } from '@/graphql/controllers/FindAllUploadsController';
+import { DeleteUploadController } from '@/graphql/controllers/DeleteUploadController';
 
 const router404Controller = new Router404Controller();
 
@@ -165,6 +171,12 @@ const findWorkplace = new FindWorkplaceController();
 const findAllWorkplaces = new FindAllWorkplacesController();
 const deleteWorkplace = new DeleteWorkplaceController();
 
+const createUpload = new CreateUploadController();
+const updateUpload = new UpdateUploadController();
+const findUpload = new FindUploadController();
+const findAllUploads = new FindAllUploadsController();
+const deleteUpload = new DeleteUploadController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -242,6 +254,12 @@ router.put('/workplace/:id', updateWorkplace.handle);
 router.get('/workplace/:id', findWorkplace.handle);
 router.get(['/workplaces', '/workplaces/:limit', '/workplaces/:skip/:limit'], findAllWorkplaces.handle);
 router.delete('/workplace/:id', deleteWorkplace.handle);
+
+router.post('/upload', createUpload.handle);
+router.put('/upload/:id', updateUpload.handle);
+router.get('/upload/:id', findUpload.handle);
+router.get(['/uploads', '/uploads/:limit', '/uploads/:skip/:limit'], findAllUploads.handle);
+router.delete('/upload/:id', deleteUpload.handle);
 
 router.use(router404Controller.handle);
 

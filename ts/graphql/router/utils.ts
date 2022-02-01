@@ -1,7 +1,7 @@
 /**
  * @description Rotas utilitárias do sistema
  * @author GuilhermeSantos001
- * @update 16/12/2021
+ * @update 31/01/2022
  */
 
 import { Router, Request, Response } from 'express';
@@ -13,8 +13,8 @@ const router = Router({
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import APIMiddleware from '@/middlewares/api-middleware';
-import TokenMiddleware from '@/middlewares/token-middleware';
+import APIMiddleware from '@/graphql/middlewares/api-middleware';
+import TokenMiddleware from '@/graphql/middlewares/token-middleware';
 import getReqProps from '@/utils/getReqProps';
 import Privilege from '@/utils/privilege';
 

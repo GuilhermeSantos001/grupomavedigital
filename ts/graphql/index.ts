@@ -4,9 +4,8 @@
 import { config } from 'dotenv';
 config();
 
-import mongoDB from '@/controllers/mongodb';
-import startedServer from '@/app/graphql/server';
-import typeDefs from '@/app/graphql/typeDefs';
-import resolvers from '@/app/graphql/resolvers';
+import startedServer from '@/graphql/server';
+import typeDefs from '@/graphql/typeDefs';
+import resolvers from '@/graphql/resolvers';
 
-startedServer({ typeDefs, resolvers, context: { mongoDB } });
+startedServer({ typeDefs, resolvers, context: {  } });

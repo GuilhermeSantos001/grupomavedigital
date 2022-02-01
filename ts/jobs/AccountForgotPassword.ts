@@ -1,10 +1,10 @@
 /**
  * @description Job -> Envia o e-mail para confirmar a troca da senha do usuário
  * @author GuilhermeSantos001
- * @update 22/01/2022
+ * @update 31/01/2022
  */
 
-import JobContract from '@/contracts/jobs.contracts';
+import { JobContract } from '@/contracts/JobsContract';
 
 import MailSend from '@/utils/mailsend';
 

@@ -1,17 +1,17 @@
 /**
  * @description Rotas de upload
  * @author GuilhermeSantos001
- * @update 15/11/2021
+ * @update 31/01/2022
  */
 
 import { decompressFromBase64 } from "lz-string";
 
 import { ObjectId } from 'mongodb';
-import FileGridFS, { FileType } from '@/drivers/file-gridfs';
-import { matches } from '@/mongo/files-manager-mongo';
+import { FileGridFS, FileType } from '@/drivers/FileGridFS';
+import { matches } from '@/schemas/FilesSchema';
 
 import verifySignedURL from '@/utils/verifySignedURL';
-import userManagerDB from '@/db/user-db';
+import { UsersManagerDB } from '@/database/UsersManagerDB';
 
 import Sugar from 'sugar';
 import Random from '@/utils/random';
@@ -23,16 +23,18 @@ const
     compressedSize: number
     status: FileType
   }>((resolve, reject) => {
-    const parseFilename = String(filename).substring(0, String(filename).lastIndexOf('.')).replace(matches.specialCharacters, ' ').replace(/\s{2,}/g, ' '),
+    const
+      fileGridFS = new FileGridFS(),
+      parseFilename = String(filename).substring(0, String(filename).lastIndexOf('.')).replace(matches.specialCharacters, ' ').replace(/\s{2,}/g, ' '),
       filetype = String(filename).substring(String(filename).lastIndexOf('.'));
 
-    return FileGridFS.get(
+    return fileGridFS.get(
       authorId,
       parseFilename,
       filetype
     )
       .then(version => {
-        return FileGridFS.openUploadStream(stream, {
+        return fileGridFS.openUploadStream(stream, {
           authorId,
           filename: parseFilename,
           filetype: filetype,
@@ -56,9 +58,12 @@ module.exports = {
     singleUpload: async (parent: unknown, args: { file: any, size: string, signedUrl: string, auth: string, randomName: boolean }) => {
       try {
         if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
-          const {
-            authorization
-          } = await userManagerDB.getInfo(args.auth);
+          const
+            usersManagerDB = new UsersManagerDB(),
+            fileGridFS = new FileGridFS(),
+            {
+              authorization
+            } = await usersManagerDB.getInfo(args.auth);
 
           const
             { createReadStream, filename } = await args.file,
@@ -73,7 +78,7 @@ module.exports = {
               ...result
             };
           } else {
-            await FileGridFS.deleteFile(result.fileId);
+            await fileGridFS.deleteFile(result.fileId);
             throw new Error('File is corrupted.');
           }
         } else {
@@ -86,9 +91,12 @@ module.exports = {
     multipleUpload: async (parent: unknown, args: { files: any[], sizes: string[], signedUrl: string, auth: string, randomName: boolean }) => {
       try {
         if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
-          const {
-            authorization
-          } = await userManagerDB.getInfo(args.auth);
+          const
+            usersManagerDB = new UsersManagerDB(),
+            fileGridFS = new FileGridFS(),
+            {
+              authorization
+            } = await usersManagerDB.getInfo(args.auth);
 
           const results: any[] = [];
 
@@ -102,7 +110,7 @@ module.exports = {
               result = await finished(authorization, randomName, createReadStream(), size);
 
             if (result.status !== 'Active')
-              await FileGridFS.deleteFile(result.fileId)
+              await fileGridFS.deleteFile(result.fileId)
 
             results.push({
               authorId: authorization,

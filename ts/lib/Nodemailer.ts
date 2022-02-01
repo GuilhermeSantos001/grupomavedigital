@@ -1,0 +1,100 @@
+/**
+ * @description Envio de Emails
+ * @author GuilhermeSantos001
+ * @update 31/01/2022
+ */
+
+import * as nodemailer from "nodemailer";
+import { pugEngine } from "nodemailer-pug-engine";
+
+import path from 'path';
+import SMTPTransport from "nodemailer/lib/smtp-transport";
+
+export type Priority = 'high' | 'normal' | 'low';
+
+declare type Recipient = {
+    to: string[],
+    subject: string,
+    cc?: string[],
+    cco?: string[],
+    priority?: Priority;
+};
+
+declare type CTX = {
+    title: string;
+    variables: object;
+};
+
+export enum Templates {
+    DEFAULT = "default",
+    TESTING = "testMail",
+    ECONFIRM = "econfirm",
+    ACCOUNT_RETRIEVE = "accountRetrieve",
+    SESSION_NEW_ACCESS = "sessionNewAccess",
+    FORGOT_PASSWORD = "forgotPassword",
+    HERCULES_ORDERS = "herculesOrders",
+}
+
+export class Nodemailer {
+
+    constructor() {
+        throw new Error('this is static class');
+    }
+
+    static test(recipient: Recipient) {
+        return Nodemailer.send(recipient,
+            Templates.TESTING,
+            {
+                title: 'Testando o envio de e-mails',
+                variables: {}
+            });
+    }
+
+    static send(recipient: Recipient, template: Templates, variables: CTX): Promise<SMTPTransport.SentMessageInfo> {
+        return new Promise(async (resolve, reject) => {
+            const mailOptions = {
+                from: '"Grupo Mave Digital(✉)" <grupomavedigital@grupomave.com.br>',
+                to: String(recipient.to),
+                cc: recipient.cc || [],
+                bcc: recipient.cco || [],
+                priority: recipient.priority || 'normal',
+                subject: String(recipient.subject),
+                template: String(template),
+                ctx: variables
+            };
+
+            const transporter = nodemailer.createTransport({
+                host: String(process.env.SMTP_HOST || "smtp.grupomave.com.br"),
+                port: Number(process.env.SMTP_PORT || 587),
+                secure: eval(String(process.env.SMTP_SECURE).toLowerCase() || "false"),
+                auth: {
+                    user: String(process.env.SMTP_USERNAME),
+                    pass: String(process.env.SMTP_PASSWORD)
+                }
+            });
+
+            transporter
+                .verify((err, success) => {
+                    if (err) return reject(err);
+
+                    if (success) {
+                        transporter
+                            .use('compile', pugEngine({
+                                templateDir: path.resolve(__dirname, '../templates'),
+                                pretty: true
+                            }));
+
+                        transporter
+                            .sendMail(mailOptions)
+                            .then(info => {
+                                resolve(info);
+                            }).catch(err => {
+                                reject(err);
+                            });
+                    } else {
+                        return reject(success);
+                    }
+                });
+        });
+    }
+}

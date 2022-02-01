@@ -1,8 +1,7 @@
 /**
  * @description Rotas do Hercules Storage -> Files
- * @extends {Upload}
  * @author GuilhermeSantos001
- * @update 12/01/2022
+ * @update 31/01/2022
  */
 
 import { Router, Request, Response } from 'express';
@@ -14,11 +13,12 @@ const router = Router({
 
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
 
-import APIMiddleware from '@/middlewares/api-middleware';
-import TokenMiddleware from '@/middlewares/token-middleware';
-import getReqProps from '@/utils/getReqProps';
-import FileController from '@/controllers/files';
-import Upload from '@/controllers/upload';
+import { FilesController } from '@/controllers/FilesController';
+import { UploadsController } from '@/controllers/UploadsController';
+
+import APIMiddleware from '@/graphql/middlewares/api-middleware';
+import TokenMiddleware from '@/graphql/middlewares/token-middleware';
+import getReqProps from '@/utils/getReqProps'
 
 /**
  * @description Baixa todos os arquivos hospedados
@@ -34,7 +34,8 @@ router.get(['/uploads/all'], APIMiddleware, TokenMiddleware, async function (req
         res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
 
     try {
-        return res.status(200).send(compressToEncodedURIComponent(JSON.stringify(await Upload.getAll())));
+        const uploadsController = new UploadsController();
+        return res.status(200).send(compressToEncodedURIComponent(JSON.stringify(await uploadsController.getAll())));
     } catch (error) {
         return res.status(400).send({
             success: false,
@@ -67,7 +68,9 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
         });
 
     try {
-        await Upload.raw(res, fileId);
+        const uploadsController = new UploadsController();
+
+        await uploadsController.raw(res, fileId);
     } catch (error) {
         return res.status(400).send({
             success: false,
@@ -108,7 +111,9 @@ router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware,
         version = typeof parseInt(String(version)) !== 'number' ? undefined : parseInt(String(version));
 
     try {
-        await FileController.read(String(cid), {
+        const filesController = new FilesController();
+
+        await filesController.read(String(cid), {
             group: {
                 name: 'administrador',
                 permission: 'Read'
@@ -155,7 +160,9 @@ router.get(['/versions/download/:filename'], APIMiddleware, TokenMiddleware, asy
     const _versions: any = String(versions).split(',');
 
     try {
-        await FileController.readCompile(String(cid), {
+        const filesController = new FilesController();
+
+        await filesController.readCompile(String(cid), {
             group: {
                 name: 'administrador',
                 permission: 'Read'

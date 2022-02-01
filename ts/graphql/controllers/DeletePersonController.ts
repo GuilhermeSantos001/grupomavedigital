@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { prismaClient } from '@/db/prismaClient';
+import { prismaClient } from '@/database/PrismaClient';
 import { DeleteThrowErrorController } from '@/graphql/controllers/DeleteThrowErrorController';
 
 export class DeletePersonController {

@@ -1,7 +1,7 @@
 /**
  * @description Configurações do servidor
  * @author GuilhermeSantos001
- * @update 24/01/2022
+ * @update 31/01/2022
  */
 
 import { createServer } from "http";
@@ -18,10 +18,10 @@ import { Server } from "socket.io";
 import path from "path";
 import express from "express";
 import cors from 'cors';
-import APIMiddleware from '@/middlewares/api-middleware';
-import routerFiles from "@/router/files";
-import routerUtils from "@/router/utils";
-import { routerAPI } from '@/app/graphql/router/api/routes';
+import APIMiddleware from '@/graphql/middlewares/api-middleware';
+import routerFiles from "@/graphql/router/files";
+import routerUtils from "@/graphql/router/utils";
+import { routerAPI } from '@/graphql/router/api/routes';
 
 /**
  * @description Cluster
@@ -33,11 +33,11 @@ const numCPUs = cpus().length;
 /**
  * @description Dependencies
  */
-import Debug from '@/core/log4';
-import hls from '@/core/hls-server';
-import { SocketIO } from '@/core/socket-io';
-import mongoDB from '@/controllers/mongodb';
-import Queue from '@/core/Queue';
+import { Debug } from '@/lib/Log4';
+import { CreateHLSServer } from '@/lib/HLSServer';
+import { SocketIO } from '@/lib/Socket-io';
+import { MongoDBClient } from '@/database/MongoDBClient';
+import Queue from '@/lib/Queue';
 
 /**
  * @description Directives
@@ -116,6 +116,8 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         { EncodeUriDirectiveTransformer } = EncodeUriDirective('encodeuri');
 
     const startServer = async () => {
+        const mongoDBClient = new MongoDBClient();
+
         Debug.console('default', `Worker ${process.pid} started`);
 
         let
@@ -130,7 +132,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
          */
         function onError(error: any) {
             if (error.syscall !== 'listen') {
-                mongoDB.shutdown();
+                mongoDBClient.shutdown();
                 throw error;
             }
 
@@ -138,15 +140,15 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             switch (error.code) {
                 case 'EACCES':
                     Debug.fatal('default', `Port ${PORT} requires elevated privileges`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     return process.exit(1);
                 case 'EADDRINUSE':
                     Debug.fatal('default', `Port ${PORT} is already in use`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     return process.exit(1);
                 default:
                     Debug.fatal('default', `Fatal error: ${error}`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     throw error;
             }
         }
@@ -188,7 +190,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         /**
          * @description HTTP Live Streaming
         */
-        hls(httpServer);
+        CreateHLSServer(httpServer);
 
         /**
           * @description Web Socket Server

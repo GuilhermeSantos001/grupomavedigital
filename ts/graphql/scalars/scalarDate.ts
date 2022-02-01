@@ -6,10 +6,12 @@ const resolverMap = {
     name: 'Date',
     description: 'Date custom scalar type',
     parseValue(value) {
-      return new Date(value); // Convert outgoing Date to integer for JSON
+      return new Date(String(value)).getTime(); // Convert outgoing Date to integer for JSON
     },
     serialize(value) {
-      return value.getTime(); // Convert incoming integer to Date
+      const date = new Date(String(value));
+
+      return date.getTime(); // Convert incoming integer to Date
     },
     parseLiteral(ast) {
       if (ast.kind === Kind.INT) {

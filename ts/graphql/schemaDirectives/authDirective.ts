@@ -1,8 +1,7 @@
 /**
  * @description Diretivas para autorização das rotas
  * @author GuilhermeSantos001
- * @update 01/08/2021
- * @version 3.0.0
+ * @update 31/01/2022
  */
 
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';

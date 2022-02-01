@@ -1,7 +1,7 @@
 import { Workplace } from '@prisma/client';
 import { Request, Response } from 'express';
 
-import { prismaClient } from '@/db/prismaClient';
+import { prismaClient } from '@/database/PrismaClient';
 import { CreateThrowErrorController } from '@/graphql/controllers/CreateThrowErrorController';
 import { ResponseThrowErrorController } from '@/graphql/controllers/ResponseThrowErrorController';
 

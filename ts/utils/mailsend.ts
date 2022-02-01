@@ -4,7 +4,7 @@
  * @update 14/01/2022
  */
 
-import Mail, { Templates, Priority } from "@/core/nodemailer";
+import { Nodemailer, Templates, Priority } from "@/lib/Nodemailer";
 import BASE_URL from "@/utils/getBaseURL";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { clearIPAddress } from "@/utils/geoIP";
@@ -80,7 +80,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -110,7 +110,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -139,7 +139,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -171,7 +171,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -202,7 +202,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
