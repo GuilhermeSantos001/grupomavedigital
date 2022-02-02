@@ -31,6 +31,14 @@ export class FindAllPeopleCoverageController {
               temporary: true,
               expiredAt: true,
             }
+          },
+          person: {
+            select: {
+              matricule: true,
+              name: true,
+              mail: true,
+              cards: true,
+            }
           }
         }
       }),

@@ -31,7 +31,15 @@ export class FindPersonCoverageController {
                             temporary: true,
                             expiredAt: true,
                         }
-                    }
+                    },
+                    person: {
+                        select: {
+                            matricule: true,
+                            name: true,
+                            mail: true,
+                            cards: true,
+                        }
+                    },
                 }
             }),
             'Não foi possível retornar a pessoa que está cobrindo.'

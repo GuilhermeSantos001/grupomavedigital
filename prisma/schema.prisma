@@ -172,10 +172,12 @@ model Person {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  address       Address         @relation(fields: [addressId], references: [id])
-  scale         Scale           @relation(fields: [scaleId], references: [id])
-  cards         Card[]
-  personService PersonService[]
+  address        Address          @relation(fields: [addressId], references: [id])
+  scale          Scale            @relation(fields: [scaleId], references: [id])
+  cards          Card[]
+  personService  PersonService[]
+  PersonCovering PersonCovering[]
+  PersonCoverage PersonCoverage[]
 
   @@map("people")
 }
@@ -224,11 +226,13 @@ model Upload {
 model PersonCovering {
   id                 String   @id @default(uuid())
   mirrorId           String   @unique
+  personId           String
   reasonForAbsenceId String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now()) @updatedAt
 
   mirror           Upload           @relation(fields: [mirrorId], references: [id])
+  person           Person           @relation(fields: [personId], references: [id])
   reasonForAbsence ReasonForAbsence @relation(fields: [reasonForAbsenceId], references: [id])
   posting          Posting[]
 
@@ -238,11 +242,13 @@ model PersonCovering {
 model PersonCoverage {
   id                 String   @id @default(uuid())
   mirrorId           String?  @unique
+  personId           String
   modalityOfCoverage String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now()) @updatedAt
 
   mirror  Upload?   @relation(fields: [mirrorId], references: [id])
+  person  Person   @relation(fields: [personId], references: [id])
   posting Posting[]
 
   @@map("person_coverage")
@@ -273,10 +279,10 @@ model Posting {
   updatedAt            DateTime  @default(now()) @updatedAt
 
   costCenter        CostCenter      @relation(fields: [costCenterId], references: [id])
-  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id])
-  coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
   covering          PersonCovering? @relation(fields: [coveringId], references: [id])
+  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id])
   coveringWorkplace Workplace       @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
+  coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
 
   @@map("postings")
 }

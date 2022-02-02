@@ -8,8 +8,9 @@ export class CreatePersonCoverageController {
     async handle(request: Request, response: Response) {
         const {
             mirrorId,
+            personId,
             modalityOfCoverage
-        }: Pick<PersonCoverage, 'mirrorId' | 'modalityOfCoverage'> = request.body;
+        }: Pick<PersonCoverage, 'mirrorId' | 'personId'|'modalityOfCoverage'> = request.body;
 
         const createThrowErrorController = new CreateThrowErrorController();
 
@@ -17,6 +18,7 @@ export class CreatePersonCoverageController {
             prismaClient.personCoverage.create({
                 data: {
                     mirrorId,
+                    personId,
                     modalityOfCoverage
                 }
             }),

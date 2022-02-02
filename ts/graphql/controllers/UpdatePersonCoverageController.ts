@@ -10,8 +10,9 @@ export class UpdatePersonCoverageController {
       { id } = request.params,
       {
         mirrorId,
+        personId,
         modalityOfCoverage
-      }: Pick<PersonCoverage, 'mirrorId' | 'modalityOfCoverage'> = request.body;
+      }: Pick<PersonCoverage, 'mirrorId' | 'personId' | 'modalityOfCoverage'> = request.body;
 
     const updateThrowErrorController = new UpdateThrowErrorController();
 
@@ -22,6 +23,7 @@ export class UpdatePersonCoverageController {
         },
         data: {
           mirrorId,
+          personId,
           modalityOfCoverage
         }
       }),

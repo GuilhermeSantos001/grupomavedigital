@@ -32,6 +32,14 @@ export class FindPersonCoveringController {
                             expiredAt: true,
                         }
                     },
+                    person: {
+                        select: {
+                            matricule: true,
+                            name: true,
+                            mail: true,
+                            cards: true,
+                        }
+                    },
                     reasonForAbsence: {
                         select: {
                             value: true
