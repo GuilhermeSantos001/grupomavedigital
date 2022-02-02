@@ -91,6 +91,18 @@ import { FindUploadController } from '@/graphql/controllers/FindUploadController
 import { FindAllUploadsController } from '@/graphql/controllers/FindAllUploadsController';
 import { DeleteUploadController } from '@/graphql/controllers/DeleteUploadController';
 
+import { CreatePersonCoveringController } from '@/graphql/controllers/CreatePersonCoveringController';
+import {UpdatePersonCoveringController} from '@/graphql/controllers/UpdatePersonCoveringController';
+import { FindPersonCoveringController } from '@/graphql/controllers/FindPersonCoveringController';
+import { FindAllPeopleCoveringController } from '@/graphql/controllers/FindAllPeopleCoveringController';
+import {DeletePersonCoveringController} from '@/graphql/controllers/DeletePersonCoveringController';
+
+import {CreatePersonCoverageController} from '@/graphql/controllers/CreatePersonCoverageController';
+import { UpdatePersonCoverageController } from '@/graphql/controllers/UpdatePersonCoverageController';
+import { FindPersonCoverageController } from '@/graphql/controllers/FindPersonCoverageController';
+import { FindAllPeopleCoverageController } from '@/graphql/controllers/FindAllPeopleCoverageController';
+import { DeletePersonCoverageController } from '@/graphql/controllers/DeletePersonCoverageController';
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -177,6 +189,18 @@ const findUpload = new FindUploadController();
 const findAllUploads = new FindAllUploadsController();
 const deleteUpload = new DeleteUploadController();
 
+const createPersonCovering = new CreatePersonCoveringController();
+const updatePersonCovering = new UpdatePersonCoveringController();
+const findPersonCovering = new FindPersonCoveringController();
+const findAllPeopleCovering =new FindAllPeopleCoveringController();
+const deletePersonCovering = new DeletePersonCoveringController();
+
+const createPersonCoverage = new CreatePersonCoverageController();
+const updatePersonCoverage = new UpdatePersonCoverageController();
+const findPersonCoverage = new FindPersonCoverageController();
+const findAllPeopleCoverage = new FindAllPeopleCoverageController();
+const deletePersonCoverage = new DeletePersonCoverageController();
+
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
@@ -260,6 +284,18 @@ router.put('/upload/:id', updateUpload.handle);
 router.get('/upload/:id', findUpload.handle);
 router.get(['/uploads', '/uploads/:limit', '/uploads/:skip/:limit'], findAllUploads.handle);
 router.delete('/upload/:id', deleteUpload.handle);
+
+router.post('/person_covering', createPersonCovering.handle);
+router.put('/person_covering/:id', updatePersonCovering.handle);
+router.get('/person_covering/:id', findPersonCovering.handle);
+router.get(['/people_covering', '/people_covering/:limit', '/people_covering/:skip/:limit'], findAllPeopleCovering.handle);
+router.delete('/person_covering/:id', deletePersonCovering.handle);
+
+router.post('/person_coverage', createPersonCoverage.handle);
+router.put('/person_coverage/:id', updatePersonCoverage.handle);
+router.get('/person_coverage/:id', findPersonCoverage.handle);
+router.get(['/people_coverage', '/people_coverage/:limit', '/people_coverage/:skip/:limit'], findAllPeopleCoverage.handle);
+router.delete('/person_coverage/:id', deletePersonCoverage.handle);
 
 router.use(router404Controller.handle);
 

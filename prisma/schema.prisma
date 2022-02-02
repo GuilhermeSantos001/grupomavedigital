@@ -223,13 +223,13 @@ model Upload {
 
 model PersonCovering {
   id                 String   @id @default(uuid())
-  mirrorId           String
-  reasonForAbsenceId String?
+  mirrorId           String   @unique
+  reasonForAbsenceId String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now()) @updatedAt
 
-  mirror           Upload            @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
-  reasonForAbsence ReasonForAbsence? @relation(fields: [reasonForAbsenceId], references: [id])
+  mirror           Upload           @relation(fields: [mirrorId], references: [id])
+  reasonForAbsence ReasonForAbsence @relation(fields: [reasonForAbsenceId], references: [id])
   posting          Posting[]
 
   @@map("person_covering")
@@ -237,12 +237,12 @@ model PersonCovering {
 
 model PersonCoverage {
   id                 String   @id @default(uuid())
-  mirrorId           String?
+  mirrorId           String?  @unique
   modalityOfCoverage String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now()) @updatedAt
 
-  mirror  Upload?   @relation(fields: [mirrorId], references: [id], onDelete: Cascade)
+  mirror  Upload?   @relation(fields: [mirrorId], references: [id])
   posting Posting[]
 
   @@map("person_coverage")
@@ -273,9 +273,9 @@ model Posting {
   updatedAt            DateTime  @default(now()) @updatedAt
 
   costCenter        CostCenter      @relation(fields: [costCenterId], references: [id])
-  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id], onDelete: Cascade)
+  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id])
   coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
-  covering          PersonCovering? @relation(fields: [coveringId], references: [id], onDelete: Cascade)
+  covering          PersonCovering? @relation(fields: [coveringId], references: [id])
   coveringWorkplace Workplace       @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
 
   @@map("postings")
