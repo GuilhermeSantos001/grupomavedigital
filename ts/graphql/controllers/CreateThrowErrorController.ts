@@ -6,7 +6,7 @@ export class CreateThrowErrorController {
         data: await handle
       }
     } catch (error) {
-      return { success: false, message: msgError, error };
+      return { success: false, message: msgError, error: error instanceof Error ? error.message : JSON.stringify(error) };
     }
   }
 }

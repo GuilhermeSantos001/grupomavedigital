@@ -5,6 +5,13 @@ const router = Router({
   caseSensitive: true
 });
 
+import APIMiddleware from '@/graphql/middlewares/api-middleware';
+
+import { CreateAPIKeyController } from '@/graphql/controllers/CreateAPIKeyController';
+import { FindAPIKeyController } from '@/graphql/controllers/FindAPIKeyController';
+import { FindAllAPIKeysController } from '@/graphql/controllers/FindAllAPIKeysController';
+import { DeleteAPIKeyController } from '@/graphql/controllers/DeleteAPIKeyController';
+
 import { Router404Controller } from '@/graphql/controllers/Router404Controller';
 
 import { CreateCostCenterController } from '@/graphql/controllers/CreateCostCenterController';
@@ -109,6 +116,11 @@ import { FindPostingController } from '@/graphql/controllers/FindPostingControll
 import { FindAllPostingsController } from '@/graphql/controllers/FindAllPostingsController';
 import { DeletePostingController } from '@/graphql/controllers/DeletePostingController';
 
+const createAPIKeyController = new CreateAPIKeyController();
+const findAPIKeyController = new FindAPIKeyController();
+const findAllAPIKeysController = new FindAllAPIKeysController();
+const deleteAPIKeyController = new DeleteAPIKeyController();
+
 const router404Controller = new Router404Controller();
 
 const createCostCenter = new CreateCostCenterController();
@@ -211,12 +223,19 @@ const createPosting = new CreatePostingController();
 const updatePosting = new UpdatePostingController();
 const findPosting = new FindPostingController();
 const findAllPostings = new FindAllPostingsController();
-const deletePosting =new DeletePostingController();
+const deletePosting = new DeletePostingController();
+
+router.use(APIMiddleware);
+
+router.post('/security/key', createAPIKeyController.handle);
+router.get('/security/key/:passphrase', findAPIKeyController.handle);
+router.get('/security/keys', findAllAPIKeysController.handle);
+router.delete('/security/key/:passphrase', deleteAPIKeyController.handle);
 
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
-router.get(['/costcenters', '/costcenters/:limit', '/costcenters/:skip/:limit'], findAllCostCenters.handle);
+router.get('/costcenters', findAllCostCenters.handle);
 router.delete('/costcenter/:id', deleteCostCenter.handle);
 
 router.post('/scale', createScale.handle);

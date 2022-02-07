@@ -1,10 +1,10 @@
-import { CostCenter } from '@prisma/client';
+import { APIKey } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindAllCostCenterController {
+export class FindAllAPIKeysController {
   async handle(request: Request, response: Response) {
     const {
       cursorId,
@@ -24,8 +24,8 @@ export class FindAllCostCenterController {
       }
     }
 
-    return response.json(await findThrowErrorController.handle<CostCenter[] | null>(
-      prismaClient.costCenter.findMany({
+    return response.json(await findThrowErrorController.handle<APIKey[] | null>(
+      prismaClient.aPIKey.findMany({
         skip: skip ? Number(skip) : undefined,
         take: take ? Number(take) : undefined,
         orderBy: {
@@ -33,7 +33,7 @@ export class FindAllCostCenterController {
         },
         ...cursor
       }),
-      'Não foi possível retornar os centros de custo.'
+      'Não foi possível retornar as chaves de API.'
     ));
   }
 }

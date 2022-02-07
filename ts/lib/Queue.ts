@@ -1,7 +1,7 @@
 /**
  * @description Configuração das jobs
  * @author GuilhermeSantos001
- * @update 22/01/2022
+ * @update 07/02/2022
  */
 
 import { Queue, Worker } from 'bullmq';
@@ -35,38 +35,38 @@ const queues = Object.values(jobs).map(job => ({
 
 export default {
   queues,
-  addConfirmMail(data: ConfirmMailData) {
+  async addConfirmMail(data: ConfirmMailData) {
     const
       name: JobKeys = 'CONFIRM_MAIL',
-      queue = queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name);
 
     return queue?.bull.add(name, data, queue.options);
   },
-  addAccountForgotPassword(data: AccountForgotPasswordData) {
+  async addAccountForgotPassword(data: AccountForgotPasswordData) {
     const
       name: JobKeys = 'ACCOUNT_FORGOT_PASSWORD',
-      queue = queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name);
 
     return queue?.bull.add(name, data, queue.options);
   },
-  addAccountRetrieveTwofactor(data: AccountRetrieveData) {
+  async addAccountRetrieveTwofactor(data: AccountRetrieveData) {
     const
       name: JobKeys = 'ACCOUNT_RETRIEVE',
-      queue = queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name);
 
     return queue?.bull.add(name, data, queue.options);
   },
-  addSessionNewAccess(data: SessionNewAccessData) {
+  async addSessionNewAccess(data: SessionNewAccessData) {
     const
       name: JobKeys = 'SESSION_NEW_ACCESS',
-      queue = queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name);
 
     return queue?.bull.add(name, data, queue.options);
   },
-  addHerculesOrders(data: HerculesOrdersData) {
+  async addHerculesOrders(data: HerculesOrdersData) {
     const
       name: JobKeys = 'HERCULES_ORDERS',
-      queue = queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name);
 
     return queue?.bull.add(name, data, queue.options);
   },

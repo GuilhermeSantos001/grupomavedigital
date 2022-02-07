@@ -7,8 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model APIKey {
+  id         String   @id @default(uuid())
+  cursorId   Int      @unique @default(autoincrement())
+  title      String   @unique
+  key        String   @unique
+  passphrase String   @unique
+  username   String
+  userMail   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("api_keys")
+}
+
 model CostCenter {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -248,7 +263,7 @@ model PersonCoverage {
   updatedAt          DateTime @default(now()) @updatedAt
 
   mirror  Upload?   @relation(fields: [mirrorId], references: [id])
-  person  Person   @relation(fields: [personId], references: [id])
+  person  Person    @relation(fields: [personId], references: [id])
   posting Posting[]
 
   @@map("person_coverage")
