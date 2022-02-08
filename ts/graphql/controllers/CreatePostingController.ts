@@ -124,19 +124,19 @@ export class CreatePostingController {
 
         if (databasePaymentStatusConstants.notValid(paymentStatus))
             return response.json(await responseThrowErrorController.handle(
-                new Error(`O status de pagamento deve está entre [${databasePaymentStatusConstants.status().join(', ')}].`),
+                new Error(`O status de pagamento deve está entre [${databasePaymentStatusConstants.values().join(', ')}].`),
                 'Propriedade paymentStatus inválida.',
             ));
 
         if (databasePaymentMethodConstants.notValid(paymentMethod))
             return response.json(await responseThrowErrorController.handle(
-                new Error(`O metodo de pagamento deve está entre [${databasePaymentMethodConstants.status().join(', ')}].`),
+                new Error(`O método de pagamento deve está entre [${databasePaymentMethodConstants.values().join(', ')}].`),
                 'Propriedade paymentMethod inválida.',
             ));
 
         if (databaseStatusConstants.notValid(status))
             return response.json(await responseThrowErrorController.handle(
-                new Error(`O status deve está entre [${databaseStatusConstants.status().join(', ')}].`),
+                new Error(`O status deve está entre [${databaseStatusConstants.values().join(', ')}].`),
                 'Propriedade status inválida.',
             ));
 

@@ -3,7 +3,7 @@ export class DatabaseStatusConstants {
   private readonly INACTIVE = 'unavailable';
   private readonly DELETED = 'blocked';
 
-  status() {
+  values() {
     return [
       this.ACTIVE,
       this.INACTIVE,
@@ -11,11 +11,11 @@ export class DatabaseStatusConstants {
     ];
   }
 
-  isValid(status: string) {
-    return this.status().filter(s => s === status).length > 0;
+  isValid(value: string) {
+    return this.values().filter(s => s === value).length > 0;
   }
 
-  notValid(status: string) {
-    return this.status().filter(s => s === status).length <= 0;
+  notValid(value: string) {
+    return this.values().filter(s => s === value).length <= 0;
   }
 }

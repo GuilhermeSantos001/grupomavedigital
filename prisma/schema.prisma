@@ -36,6 +36,7 @@ model CostCenter {
 
 model Scale {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -48,6 +49,7 @@ model Scale {
 
 model Service {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -80,6 +82,7 @@ model WorkplaceService {
 
 model ReasonForAbsence {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -91,6 +94,7 @@ model ReasonForAbsence {
 
 model Street {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -102,6 +106,7 @@ model Street {
 
 model Neighborhood {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -113,6 +118,7 @@ model Neighborhood {
 
 model City {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -124,6 +130,7 @@ model City {
 
 model District {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -135,6 +142,7 @@ model District {
 
 model Address {
   id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
   streetId       String
   number         String
   complement     String?
@@ -157,6 +165,7 @@ model Address {
 
 model Card {
   id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
   costCenterId   String
   serialNumber   String   @unique
   lastCardNumber String
@@ -173,6 +182,7 @@ model Card {
 
 model Person {
   id         String   @id @default(uuid())
+  cursorId   Int      @unique @default(autoincrement())
   matricule  String   @unique
   name       String
   cpf        String   @unique
@@ -199,6 +209,7 @@ model Person {
 
 model Workplace {
   id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
   name      String
   scaleId   String
   entryTime DateTime
@@ -219,6 +230,7 @@ model Workplace {
 
 model Upload {
   id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
   fileId         String
   authorId       String
   filename       String
@@ -240,6 +252,7 @@ model Upload {
 
 model PersonCovering {
   id                 String   @id @default(uuid())
+  cursorId           Int      @unique @default(autoincrement())
   mirrorId           String   @unique
   personId           String
   reasonForAbsenceId String
@@ -256,6 +269,7 @@ model PersonCovering {
 
 model PersonCoverage {
   id                 String   @id @default(uuid())
+  cursorId           Int      @unique @default(autoincrement())
   mirrorId           String?  @unique
   personId           String
   modalityOfCoverage String
@@ -271,6 +285,7 @@ model PersonCoverage {
 
 model Posting {
   id                   String    @id @default(uuid())
+  cursorId             Int       @unique @default(autoincrement())
   author               String
   costCenterId         String
   periodStart          DateTime

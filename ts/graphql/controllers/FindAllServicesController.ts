@@ -7,16 +7,31 @@ import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorCo
 export class FindAllServicesController {
   async handle(request: Request, response: Response) {
     const {
+      cursorId,
       skip,
-      limit
-    } = request.params;
+      take
+    } = request.query;
 
     const findThrowErrorController = new FindThrowErrorController();
+
+    let cursor = {};
+
+    if (cursorId) {
+      cursor = {
+        cursor: {
+          cursorId: Number(cursorId)
+        }
+      }
+    }
 
     return response.json(await findThrowErrorController.handle<Service[] | null>(
       prismaClient.service.findMany({
         skip: skip ? Number(skip) : undefined,
-        take: limit ? Number(limit) : undefined
+        take: take ? Number(take) : undefined,
+        orderBy: {
+          cursorId: 'asc'
+        },
+        ...cursor
       }),
       'Não foi possível retornar os serviços.'
     ));

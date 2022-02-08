@@ -39,7 +39,7 @@ export class FindPersonCoverageController {
                             mail: true,
                             cards: true,
                         }
-                    },
+                    }
                 }
             }),
             'Não foi possível retornar a pessoa que está cobrindo.'

@@ -1,11 +1,13 @@
-export class DatabasePaymentMethodConstants {
-  private readonly MONEY = 'money';
-  private readonly CARD = 'card';
+export class DatabaseModalityOfCoverageConstants {
+  private readonly FT = 'freelancer';
+  private readonly B2 = 'b2';
+  private readonly PACKAGE_HOURS = 'pacote_de_horas';
 
   values() {
     return [
-      this.MONEY,
-      this.CARD,
+      this.FT,
+      this.B2,
+      this.PACKAGE_HOURS,
     ];
   }
 

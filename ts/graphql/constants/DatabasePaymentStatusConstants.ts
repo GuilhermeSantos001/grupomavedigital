@@ -3,7 +3,7 @@ export class DatabasePaymentStatusConstants {
   private readonly PAID = 'paid';
   private readonly UNPAID = 'unpaid';
 
-  status() {
+  values() {
     return [
       this.PENDING,
       this.PAID,
@@ -11,11 +11,11 @@ export class DatabasePaymentStatusConstants {
     ];
   }
 
-  isValid(status: string) {
-    return this.status().filter(s => s === status).length > 0;
+  isValid(value: string) {
+    return this.values().filter(s => s === value).length > 0;
   }
 
-  notValid(status: string) {
-    return this.status().filter(s => s === status).length <= 0;
+  notValid(value: string) {
+    return this.values().filter(s => s === value).length <= 0;
   }
 }

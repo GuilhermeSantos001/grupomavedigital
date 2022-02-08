@@ -42,7 +42,13 @@ export class CreatePersonController {
 
         const databaseStatusConstants = new DatabaseStatusConstants();
 
-        if (cpf.length !== 11)
+        if (name.length < 8)
+            return response.json(await responseThrowErrorController.handle(
+                new Error('Nome deve ter no mínimo 8 caracteres'),
+                'Propriedade name inválida.',
+            ));
+
+            if (cpf.length !== 11)
             return response.json(await responseThrowErrorController.handle(
                 new Error('CPF deve ter 11 caracteres'),
                 'Propriedade cpf inválida.',
