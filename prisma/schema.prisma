@@ -167,6 +167,7 @@ model Card {
   id             String   @id @default(uuid())
   cursorId       Int      @unique @default(autoincrement())
   costCenterId   String
+  lotNum         String
   serialNumber   String   @unique
   lastCardNumber String
   personId       String?

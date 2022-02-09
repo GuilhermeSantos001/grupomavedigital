@@ -62,6 +62,7 @@ export class FindPersonController {
                     },
                     cards: {
                         select: {
+                            lotNum: true,
                             serialNumber: true,
                             lastCardNumber: true,
                             costCenter: {

@@ -13,16 +13,23 @@ export class UpdateCardController {
       { id } = request.params,
       {
         costCenterId,
+        lotNum,
         serialNumber,
         lastCardNumber,
         personId,
         status
-      }: Pick<Card, 'costCenterId' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'status'> = request.body;
+      }: Pick<Card, 'costCenterId' | 'lotNum' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'status'> = request.body;
 
     const updateThrowErrorController = new UpdateThrowErrorController();
     const responseThrowErrorController = new ResponseThrowErrorController();
 
     const databaseStatusConstants = new DatabaseStatusConstants();
+
+    if (lotNum.length !== 9)
+      return response.json(await responseThrowErrorController.handle(
+        new Error('O número de lote deve ter 9 dígitos.'),
+        'Propriedade lotNum inválida.',
+      ));
 
     if (serialNumber.length !== 15)
       return response.json(await responseThrowErrorController.handle(
@@ -38,7 +45,7 @@ export class UpdateCardController {
 
     if (databaseStatusConstants.notValid(status))
       return response.json(await responseThrowErrorController.handle(
-        new Error(`O status deve está entre [${databaseStatusConstants.status().join(', ')}].`),
+        new Error(`O status deve está entre [${databaseStatusConstants.values().join(', ')}].`),
         'Propriedade status inválida.',
       ));
 
@@ -49,6 +56,7 @@ export class UpdateCardController {
         },
         data: {
           costCenterId,
+          lotNum,
           serialNumber,
           lastCardNumber,
           personId,

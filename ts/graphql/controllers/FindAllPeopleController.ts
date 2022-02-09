@@ -77,6 +77,7 @@ export class FindAllPeopleController {
           },
           cards: {
             select: {
+              lotNum: true,
               serialNumber: true,
               lastCardNumber: true,
               costCenter: {

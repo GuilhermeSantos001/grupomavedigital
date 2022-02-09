@@ -76,7 +76,7 @@ export class UpdatePersonController {
 
     if (databaseStatusConstants.notValid(status))
       return response.json(await responseThrowErrorController.handle(
-        new Error(`O status deve está entre [${databaseStatusConstants.status().join(', ')}].`),
+        new Error(`O status deve está entre [${databaseStatusConstants.values().join(', ')}].`),
         'Propriedade status inválida.',
       ));
 

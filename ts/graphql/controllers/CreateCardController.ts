@@ -11,16 +11,23 @@ export class CreateCardController {
     async handle(request: Request, response: Response) {
         const {
             costCenterId,
+            lotNum,
             serialNumber,
             lastCardNumber,
             personId,
             status
-        }: Pick<Card, 'costCenterId' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'status'> = request.body;
+        }: Pick<Card, 'costCenterId' | 'lotNum' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'status'> = request.body;
 
         const createThrowErrorController = new CreateThrowErrorController();
         const responseThrowErrorController = new ResponseThrowErrorController();
 
         const databaseStatusConstants = new DatabaseStatusConstants();
+
+        if (lotNum.length !== 9)
+            return response.json(await responseThrowErrorController.handle(
+                new Error('O número de lote deve ter 9 dígitos.'),
+                'Propriedade lotNum inválida.',
+            ));
 
         if (serialNumber.length !== 15)
             return response.json(await responseThrowErrorController.handle(
@@ -36,7 +43,7 @@ export class CreateCardController {
 
         if (databaseStatusConstants.notValid(status))
             return response.json(await responseThrowErrorController.handle(
-                new Error(`O status deve está entre [${databaseStatusConstants.status().join(', ')}].`),
+                new Error(`O status deve está entre [${databaseStatusConstants.values().join(', ')}].`),
                 'Propriedade status inválida.',
             ));
 
@@ -44,6 +51,7 @@ export class CreateCardController {
             prismaClient.card.create({
                 data: {
                     costCenterId,
+                    lotNum,
                     serialNumber,
                     lastCardNumber,
                     personId,
