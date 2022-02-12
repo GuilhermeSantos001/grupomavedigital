@@ -41,7 +41,7 @@ interface FilialResponse {
 }
 
 /**
- * @description Schema da tabela: "Tipos de Titulos"
+ * @description Schema da tabela: "Tipos de Títulos"
  */
 interface BillsType {
     filial: string

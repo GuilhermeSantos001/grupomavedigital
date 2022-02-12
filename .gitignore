@@ -4,7 +4,7 @@
 **/log/**
 **/coverage/**
 **/test/database/**
-**/database/**
+**/data/**
 
 # Developer
 *.env

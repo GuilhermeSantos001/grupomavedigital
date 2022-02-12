@@ -1,4 +1,3 @@
-/* eslint-disable no-async-promise-executor */
 /**
  * @description Leitor de CSV
  * @author GuilhermeSantos001
@@ -119,7 +118,7 @@ export default class CSVParser {
       results: any = [];
 
     return new Promise((resolve, reject) => {
-      createReadStream(localPath(`database/${filename}.csv`))
+      createReadStream(localPath(`data/${filename}.csv`))
         .setEncoding('utf8')
         .pipe(csv({
           separator: ";",
