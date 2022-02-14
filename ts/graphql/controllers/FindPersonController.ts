@@ -20,6 +20,7 @@ export class FindPersonController {
                 include: {
                     address: {
                         select: {
+                            id: true,
                             street: {
                                 select: {
                                     value: true
@@ -47,6 +48,7 @@ export class FindPersonController {
                     },
                     scale: {
                         select: {
+                            id: true,
                             value: true
                         }
                     },
@@ -62,11 +64,15 @@ export class FindPersonController {
                     },
                     cards: {
                         select: {
+                            id: true,
                             lotNum: true,
                             serialNumber: true,
                             lastCardNumber: true,
                             costCenter: {
-                                select: { value: true }
+                                select: {
+                                    id: true,
+                                    value: true
+                                }
                             }
                         }
                     }

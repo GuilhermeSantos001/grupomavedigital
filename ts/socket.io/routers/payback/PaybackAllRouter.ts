@@ -52,7 +52,6 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
         filetype = name.substring(name.lastIndexOf('.')),
         temporary = true,
         expiredAt = new Date(uploadsController.getTimeToExpire()).toISOString(),
-        createdAt = new Date().toISOString(),
         upload = await uploadsController.register({
           fileId,
           authorId,
@@ -78,8 +77,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
         compressedSize,
         version,
         temporary,
-        expiredAt,
-        createdAt,
+        expiredAt
       };
 
       return socket.emit(

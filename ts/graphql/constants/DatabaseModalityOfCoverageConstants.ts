@@ -1,11 +1,13 @@
 export class DatabaseModalityOfCoverageConstants {
-  private readonly FT = 'freelancer';
   private readonly B2 = 'b2';
+  private readonly FREE = 'freelancer';
+  private readonly FT = 'ft';
   private readonly PACKAGE_HOURS = 'pacote_de_horas';
 
   values() {
     return [
       this.FT,
+      this.FREE,
       this.B2,
       this.PACKAGE_HOURS,
     ];
