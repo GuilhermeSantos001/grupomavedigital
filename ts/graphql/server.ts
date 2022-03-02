@@ -39,7 +39,6 @@ import Queue from '@/lib/Queue';
  */
 import AuthDirective from '@/graphql/schemaDirectives/authDirective';
 import TokenDirective from '@/graphql/schemaDirectives/tokenDirective';
-import PrivilegeDirective from '@/graphql/schemaDirectives/privilegeDirective';
 import EncodeUriDirective from '@/graphql/schemaDirectives/encodeuriDirective';
 
 const device = require('express-device');
@@ -107,7 +106,6 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
         { TokenDirectiveTransformer } = TokenDirective('token'),
-        { PrivilegeDirectiveTransformer } = PrivilegeDirective('privilege'),
         { EncodeUriDirectiveTransformer } = EncodeUriDirective('encodeuri');
 
     const startServer = async () => {
@@ -157,7 +155,6 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
         schema = AuthDirectiveTransformer(schema);
         schema = TokenDirectiveTransformer(schema);
-        schema = PrivilegeDirectiveTransformer(schema);
         schema = EncodeUriDirectiveTransformer(schema);
 
         const server = new ApolloServer({

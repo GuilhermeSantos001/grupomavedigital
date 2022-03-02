@@ -785,6 +785,7 @@ export class UsersManagerDB {
             if (!_user.session)
                 _user.session = sessionDefault;
 
+
             const
                 _usrToken = _user.session.cache.tokens.filter(_token => _token.signature === signature && _token.value === token)[0];
 

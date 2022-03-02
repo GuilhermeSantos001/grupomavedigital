@@ -253,7 +253,7 @@ router.delete('/security/key/:passphrase', deleteAPIKey.handle);
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
-router.get(['/costcenters', '/costcenters/:limit', '/costcenters/:skip/:limit'], findAllScales.handle);
+router.get(['/costcenters', '/costcenters/:limit', '/costcenters/:skip/:limit'], findAllCostCenters.handle);
 router.delete('/costcenter/:id', deleteCostCenter.handle);
 
 router.post('/scale', createScale.handle);

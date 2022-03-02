@@ -46,12 +46,10 @@ type UserInfo {
   surname: String!
   cnpj: String!
   location: Location!
-  success: Boolean
 }
 
 type AuthSignTwoFactor {
   qrcode: String!
-  success: Boolean
 }
 
 type Query {
@@ -138,7 +136,7 @@ type Query {
     auth: String!
   ): UserInfo!
     @auth(
-      keys: ["HwutnNlPut6uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"]
+      keys: ["NoZjIRxH*miT4xs!896&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -157,7 +155,7 @@ type Query {
     )
     @encodeuri(method: "lz-string")
   """
-  Processa o pedido de alteração de senha da conta do usuario
+  Processa o pedido de alteração de senha da conta do usuário
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=processorderforgotpassword
   """
   processOrderForgotPassword(
@@ -170,7 +168,7 @@ type Query {
     """
     token: String!
     """
-    Nova senha do usuario
+    Nova senha do usuário
     """
     pwd: String!
   ): Boolean!
@@ -344,7 +342,7 @@ type Mutation {
     """
     auth: String!
   ): Boolean!
-    @auth(keys: ["0bvNnE1JZN0d9hFVWgVpCrWa8ZhvgE8w"])
+    @auth(keys: ["Hg45FUC3phicraR10Tuq5-6Sto20sp4swa7I1As5uChEmUhExuvATrovic5lfic"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -377,7 +375,7 @@ type Mutation {
     auth: String!
   ): Boolean!
     @auth(
-      keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
+      keys: ["TH6021Mufr&087&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
