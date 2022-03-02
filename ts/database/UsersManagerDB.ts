@@ -1,8 +1,7 @@
-/* eslint-disable no-async-promise-executor */
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author GuilhermeSantos001
- * @update 31/01/2022
+ * @update 28/02/2022
  */
 
 import { FilterQuery } from 'mongoose';
@@ -90,7 +89,7 @@ function getTime(unit: Unit, tmp: number): Date {
 
 export class UsersManagerDB {
     /**
-      * @description Retorna uma lista de usuarios
+      * @description Retorna uma lista de usuários
       * @param filter {Object} - Filtro Aplicado na busca
       * @param skip {Number} - Pular x itens iniciais no banco de dados
       * @param limit {Number} - Limite de itens a serem retornados
@@ -124,7 +123,8 @@ export class UsersManagerDB {
                     cache: user.session.cache
                 },
                 signature: user.signature,
-                authentication: user.authentication
+                authentication: user.authentication,
+                status: user.status
             };
         });
     }
@@ -147,6 +147,18 @@ export class UsersManagerDB {
 
         await model.validate();
         await model.save();
+
+        return true;
+    }
+
+    /**
+     * * @description Registra um novo usuário
+     */
+    public async delete(authorization: string): Promise<boolean> {
+        const _user = await UsersSchema.deleteOne({ authorization });
+
+        if (_user.deletedCount <= 0)
+            throw new Error(`Usuário(${authorization}) não está registrado.`);
 
         return true;
     }
@@ -386,7 +398,7 @@ export class UsersManagerDB {
     }
 
     /**
-     * @description Recupera as informações do usuario para UI/UX.
+     * @description Recupera as informações do usuário para UI/UX.
      */
     public async getInfo(auth: string): Promise<Omit<IUserInfo, "token">> {
         const _user = await UsersSchema.findOne({ authorization: auth });
@@ -499,6 +511,7 @@ export class UsersManagerDB {
                 _user.session.cache.tokens.push({ signature: options.signature, value: options.token, expiry: timeForExpirySession.toJSON(), status: true });
 
                 _user.session.cache.history.push({
+                    signature: options.signature,
                     device: options.device,
                     token: options.token,
                     tmp: timeForExpirySession.toJSON(),
@@ -540,7 +553,7 @@ export class UsersManagerDB {
     /**
      * @description Desconecta o usuário
      */
-    public async disconnected(auth: string, token: string): Promise<boolean> {
+    public async disconnected(auth: string, signature: string): Promise<boolean> {
         const _user = await UsersSchema.findOne({ authorization: auth });
 
         if (_user) {
@@ -553,7 +566,7 @@ export class UsersManagerDB {
 
             for (const _history of _user.session.cache.history) {
                 // ? Verifica se o token armazenado é o mesmo que será desconectado
-                if (_history.token === token) {
+                if (_history.signature === signature) {
                     clearIds.push(index); // ? Adiciona o índice da sessão a ser removida
 
                     _user.session.device.connected.splice(_user.session.device.connected.indexOf(_history.device), 1);
@@ -562,7 +575,7 @@ export class UsersManagerDB {
                         _user.session.connected -= 1;
 
                     _user.session.cache.tokens = _user.session.cache.tokens.map((_token: Token): Token => {
-                        if (_token.value === _history.token)
+                        if (_token.signature === _history.signature)
                             _token.status = false;
 
                         return _token;
@@ -717,7 +730,7 @@ export class UsersManagerDB {
     /**
      * @description Atualiza o token de segurança da sessão armazenada
      */
-    public async updateTokenHistory(auth: string, token: string): Promise<string[]> {
+    public async updateTokenHistory(auth: string, signature: string): Promise<string[]> {
         const
             _user = await UsersSchema.findOne({ authorization: auth });
 
@@ -735,14 +748,15 @@ export class UsersManagerDB {
                 time = getTime(unit, tmp);
 
             for (const _history of _user.session.cache.history) {
-                if (_history.token == token) {
+                if (_history.signature == signature) {
+                    _history.signature = newSignature;
                     _history.token = newToken;
                     _history.tmp = time.toJSON();
                 }
             }
 
             for (const _token of _user.session.cache.tokens) {
-                if (_token.value == token) {
+                if (_token.signature == signature) {
                     _token.signature = newSignature;
                     _token.value = newToken;
                     _token.expiry = time.toJSON();

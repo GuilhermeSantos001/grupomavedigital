@@ -1,7 +1,7 @@
 # Schema de uploads
 scalar Upload
 
-type File {
+type UploadFIle {
   authorId: String!
   name: String!
   size: Int!
@@ -18,12 +18,12 @@ type Mutation {
     signedUrl: String!
     auth: String!
     randomName: Boolean!
-  ): File!
+  ): UploadFIle!
   multipleUpload(
     files: [Upload!]!
     sizes: [String!]!
     signedUrl: String!
     auth: String!
     randomName: Boolean!
-  ): [File!]!
+  ): [UploadFIle!]!
 }

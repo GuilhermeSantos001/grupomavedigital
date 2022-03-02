@@ -1,9 +1,3 @@
-/**
- * @description Rotas do Hercules Storage -> Files
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Router, Request, Response } from 'express';
 
 const router = Router({
@@ -12,6 +6,8 @@ const router = Router({
 });
 
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+import { setSessionCookies } from '@/lib/Cookies';
+import { cookieOptions } from '@/graphql/index';
 
 import { FilesController } from '@/controllers/FilesController';
 import { UploadsController } from '@/controllers/UploadsController';
@@ -30,8 +26,22 @@ router.get(['/uploads/all'], APIMiddleware, TokenMiddleware, async function (req
         'updatedToken'
     ]);
 
-    if (updatedToken)
-        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.authorization,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
 
     try {
         const uploadsController = new UploadsController();
@@ -56,8 +66,22 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
         'updatedToken'
     ]);
 
-    if (updatedToken)
-        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.authorization,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
 
     fileId = decompressFromEncodedURIComponent(String(fileId));
 
@@ -93,8 +117,22 @@ router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware,
         'updatedToken'
     ]);
 
-    if (updatedToken)
-        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.authorization,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
 
     cid = decompressFromEncodedURIComponent(String(cid));
     version = decompressFromEncodedURIComponent(String(version));
@@ -145,8 +183,22 @@ router.get(['/versions/download/:filename'], APIMiddleware, TokenMiddleware, asy
         'updatedToken'
     ]);
 
-    if (updatedToken)
-        res.cookie('updatedToken', compressToEncodedURIComponent(JSON.stringify(updatedToken)));
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.authorization,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
 
     cid = decompressFromEncodedURIComponent(String(cid));
     versions = decompressFromEncodedURIComponent(String(versions));

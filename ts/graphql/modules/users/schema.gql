@@ -1,15 +1,5 @@
 # Schema de informações passadas dos usuários logados
 
-interface CommonResponse {
-  success: Boolean
-  updatedToken: UpdatedToken
-}
-
-type UpdatedToken {
-  signature: String!
-  token: String!
-}
-
 type AuthInfo {
   authorization: ID!
   privileges: [String!]!
@@ -46,7 +36,7 @@ type Location {
   zipcode: String!
 }
 
-type UserInfo implements CommonResponse {
+type UserInfo {
   privileges: [String!]!
   privilege: String!
   photoProfile: String!
@@ -57,19 +47,11 @@ type UserInfo implements CommonResponse {
   cnpj: String!
   location: Location!
   success: Boolean
-  updatedToken: UpdatedToken
 }
 
-type AuthValidate {
-  success: Boolean!
-  signature: String
-  token: String
-}
-
-type AuthSignTwoFactor implements CommonResponse {
+type AuthSignTwoFactor {
   qrcode: String!
   success: Boolean
-  updatedToken: UpdatedToken
 }
 
 type Query {
@@ -118,50 +100,6 @@ type Query {
     )
     @encodeuri(method: "lz-string")
   """
-  Verifica se o token de segurança do usuário está expirado
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authexpired
-  """
-  authExpired(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-    """
-    Token exclusivo de segurança da solicitação
-    """
-    token: String!
-  ): Boolean!
-    @auth(
-      keys: ["5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip"]
-    )
-    @encodeuri(method: "lz-string")
-  """
-  Verifica se o token de segurança do usuário está valido
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authvalidate
-  """
-  authValidate(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-    """
-    Token exclusivo de segurança da solicitação
-    """
-    token: String!
-    """
-    Assinatura do token
-    """
-    signature: String!
-    """
-    Refresh token para renovação de segurança da solicitação
-    """
-    refreshToken: InputRefreshToken
-  ): AuthValidate!
-    @auth(
-      keys: ["4VMYcqF77yRfA9dmzVcD9JPZFycmN5dZdtDZww49ENHW4H97nY7RuzWa6jTkAMY3"]
-    )
-    @encodeuri(method: "lz-string")
-  """
   Envia o e-mail para recuperar a conta do usuário caso ele esqueca a senha
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authforgotpassword
   """
@@ -200,12 +138,12 @@ type Query {
     auth: String!
   ): UserInfo!
     @auth(
-      keys: ["NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
+      keys: ["HwutnNlPut6uqlBiwIchiXafe1ld1bRICriBra7iPRazOs0ItRAtiwriyoyuyo-u"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
-  Processa o pedido de confirmação da conta do usuario
+  Processa o pedido de confirmação da conta do usuário
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=mailconfirm
   """
   mailConfirm(
@@ -332,7 +270,7 @@ type Mutation {
     Padrão: ["street", "number", "complement", "district", "state", "city", "zipcode"]
     """
     location: [String!]!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["OGh!pb@lX*fnElqYo8%#VO63KihIr$F1nhf!a@SFOB7$VeQ0*R+s!Sd8wqewq4eq"]
     )
@@ -352,7 +290,7 @@ type Mutation {
     Padrão: [filename].[extension]
     """
     photo: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["GHbqjX-RMmbKMbCfGZBV*xF48Lzqg74vq8G6eM3KTekCdaV3JZ+MYDz=RyGeWJ8N"]
     )
@@ -375,7 +313,7 @@ type Mutation {
     Nova senha do usuário
     """
     new_pwd: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["Re94FUC3phicraR94Tuq5@0Sto16sp4swa7I1As5uChEmUhExuvATrovic5lfic"]
     )
@@ -405,7 +343,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(keys: ["0bvNnE1JZN0d9hFVWgVpCrWa8ZhvgE8w"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -422,7 +360,7 @@ type Mutation {
     Código da verificação de duas etapas
     """
     qrcode: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["duhoHU4o#3!oCHogLw*6WUbrE2radr2CrlpLD+P7Ka*R-veSEB75lsT6PeblPuko"]
     )
@@ -437,7 +375,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
     )
@@ -452,7 +390,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): CommonResponse!
+  ): Boolean!
     @auth(
       keys: ["ciy16pAfawUfe5riwro1lth7barucOgavlprIbrlcrLVikekiPhapr*proDatrOr"]
     )
@@ -477,7 +415,5 @@ type Mutation {
 directive @auth(keys: [String!]!) on FIELD_DEFINITION
 
 directive @token(ignore: Boolean!) on FIELD_DEFINITION
-
-directive @privilege(keys: [String!]!) on FIELD_DEFINITION
 
 directive @encodeuri(method: String!) on FIELD_DEFINITION

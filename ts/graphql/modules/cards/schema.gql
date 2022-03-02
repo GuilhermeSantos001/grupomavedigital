@@ -103,7 +103,6 @@ type Mutation {
     @auth(
       keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"]
     )
-    @privilege(keys: ["administrador", "moderador"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -119,7 +118,6 @@ type Mutation {
     @auth(
       keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC"]
     )
-    @privilege(keys: ["administrador", "moderador"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -135,7 +133,6 @@ type Mutation {
     @auth(
       keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"]
     )
-    @privilege(keys: ["administrador", "moderador"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -151,7 +148,6 @@ type Mutation {
     @auth(
       keys: ["fRiphl8pus!uspEdr-zisepip1Uv63pucradisTeswEfru5LthIbr5rlv3dRosuv"]
     )
-    @privilege(keys: ["administrador", "moderador"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
 }
@@ -159,7 +155,5 @@ type Mutation {
 directive @auth(keys: [String!]!) on FIELD_DEFINITION
 
 directive @token(ignore: Boolean!) on FIELD_DEFINITION
-
-directive @privilege(keys: [String!]!) on FIELD_DEFINITION
 
 directive @encodeuri(method: String!) on FIELD_DEFINITION

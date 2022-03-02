@@ -1,9 +1,3 @@
-/**
- * @description Diretivas para verificar se a rota tem dados criptografados
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
 

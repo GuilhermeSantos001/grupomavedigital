@@ -7,6 +7,12 @@ const router = Router({
 
 import APIMiddleware from '@/graphql/middlewares/api-middleware';
 
+import { CreateUserController } from '@/graphql/controllers/CreateUserController';
+import { UpdateUserController } from '@/graphql/controllers/UpdateUserController';
+import { FindUserController } from '@/graphql/controllers/FindUserController';
+import { FindAllUsersController } from '@/graphql/controllers/FindAllUsersController';
+import { DeleteUserController } from '@/graphql/controllers/DeleteUserController';
+
 import { CreateAPIKeyController } from '@/graphql/controllers/CreateAPIKeyController';
 import { FindAPIKeyController } from '@/graphql/controllers/FindAPIKeyController';
 import { FindAllAPIKeysController } from '@/graphql/controllers/FindAllAPIKeysController';
@@ -116,10 +122,16 @@ import { FindPostingController } from '@/graphql/controllers/FindPostingControll
 import { FindAllPostingsController } from '@/graphql/controllers/FindAllPostingsController';
 import { DeletePostingController } from '@/graphql/controllers/DeletePostingController';
 
-const createAPIKeyController = new CreateAPIKeyController();
-const findAPIKeyController = new FindAPIKeyController();
-const findAllAPIKeysController = new FindAllAPIKeysController();
-const deleteAPIKeyController = new DeleteAPIKeyController();
+const createUser = new CreateUserController();
+const updateUser = new UpdateUserController();
+const findUser = new FindUserController();
+const findAllUsers= new FindAllUsersController();
+const deleteUser = new DeleteUserController();
+
+const createAPIKey = new CreateAPIKeyController();
+const findAPIKey = new FindAPIKeyController();
+const findAllAPIKeys = new FindAllAPIKeysController();
+const deleteAPIKey = new DeleteAPIKeyController();
 
 const router404Controller = new Router404Controller();
 
@@ -227,15 +239,21 @@ const deletePosting = new DeletePostingController();
 
 router.use(APIMiddleware);
 
-router.post('/security/key', createAPIKeyController.handle);
-router.get('/security/key/:passphrase', findAPIKeyController.handle);
-router.get('/security/keys', findAllAPIKeysController.handle);
-router.delete('/security/key/:passphrase', deleteAPIKeyController.handle);
+router.post('/user', createUser.handle);
+router.put('/user/:auth', updateUser.handle);
+router.get('/user/:auth', findUser.handle);
+router.get(['/users', '/users/:limit', '/users/:skip/:limit'], findAllUsers.handle);
+router.delete('/user/:auth', deleteUser.handle);
+
+router.post('/security/key', createAPIKey.handle);
+router.get('/security/key/:passphrase', findAPIKey.handle);
+router.get('/security/keys', findAllAPIKeys.handle);
+router.delete('/security/key/:passphrase', deleteAPIKey.handle);
 
 router.post('/costcenter', createCostCenter.handle);
 router.put('/costcenter/:id', updateCostCenter.handle);
 router.get('/costcenter/:id', findCostCenter.handle);
-router.get('/costcenters', findAllCostCenters.handle);
+router.get(['/costcenters', '/costcenters/:limit', '/costcenters/:skip/:limit'], findAllScales.handle);
 router.delete('/costcenter/:id', deleteCostCenter.handle);
 
 router.post('/scale', createScale.handle);

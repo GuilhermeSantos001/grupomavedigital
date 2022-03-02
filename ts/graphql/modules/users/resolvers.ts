@@ -1,9 +1,3 @@
-/**
- * @description Rotas dos usuários
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import getReqProps from '@/utils/getReqProps';
 import { ActivitiesManagerDB } from '@/database/ActivitiesManagerDB';
 import { UsersManagerDB } from '@/database/UsersManagerDB';
@@ -15,13 +9,13 @@ import generatePassword from '@/utils/generatePassword';
 import { PrivilegesSystem } from '@/schemas/UsersSchema';
 import geoIP, { clearIPAddress } from '@/utils/geoIP';
 import { ExpressContext } from 'apollo-server-express';
+import { CookieOptions } from 'express'
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
-
-export type UpdatedToken = { signature: string, token: string }
+import { setSessionCookies, clearSessionCookies } from '@/lib/Cookies';
 
 export default {
     Query: {
-        authLogin: async (parent: unknown, args: { auth: string, pwd: string, twofactortoken: string }, context: { express: ExpressContext }) => {
+        authLogin: async (parent: unknown, args: { auth: string, pwd: string, twofactortoken: string }, context: { express: ExpressContext, cookieOptions: CookieOptions }) => {
             try {
                 const
                     usersManagerDB = new UsersManagerDB(),
@@ -86,7 +80,17 @@ export default {
 
                 await usersManagerDB.clearExpiredRefreshToken(args.auth);
 
-                userInfo['refreshToken'] = await usersManagerDB.addRefreshToken(args.auth);
+                const refreshToken = await usersManagerDB.addRefreshToken(args.auth);
+
+                userInfo['refreshToken'] = refreshToken;
+
+                await setSessionCookies({
+                    authorization: userInfo.authorization,
+                    token: userInfo.token,
+                    signature: userInfo.signature,
+                    refreshTokenValue: refreshToken.value,
+                    refreshTokenSignature: refreshToken.signature,
+                }, context);
 
                 await activitiesManagerDB.register({
                     ipremote: clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1')),
@@ -106,20 +110,22 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authLogout: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext }) => {
+        authLogout: async (parent: unknown, args: { auth: string, token: string, signature: string }, context: { express: ExpressContext, cookieOptions: CookieOptions }) => {
             try {
                 const
                     usersManagerDB = new UsersManagerDB(),
                     activitiesManagerDB = new ActivitiesManagerDB(),
                     { ip } = geoIP(context.express.req),
-                    internetadress = ip,
                     { privileges } = await usersManagerDB.getInfo(args.auth);
 
-                await usersManagerDB.verifytoken(args.auth, args.token, args.signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
-                await usersManagerDB.disconnected(args.auth, args.token);
+                await usersManagerDB.disconnected(args.auth, args.signature);
                 await usersManagerDB.clearExpiredRefreshToken(args.auth);
 
-                await JsonWebToken.cancel(args.token);
+                if (args.token)
+                    await JsonWebToken.cancel(args.token);
+
+                await clearSessionCookies(context);
+
                 await activitiesManagerDB.register({
                     ipremote: ip,
                     auth: args.auth,
@@ -134,50 +140,6 @@ export default {
                     clientIP = geoIP(req);
 
                 Debug.fatal('user', `Erro ocorrido na hora de desconectar o usuário(${args.auth}) desconectado`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authLogout`);
-
-                throw new Error(String(error));
-            }
-        },
-        authValidate: async (parent: unknown, args: {
-            auth: string,
-            token: string,
-            signature: string,
-            refreshToken: {
-                signature: string,
-                value: string
-            }
-        }, context: { express: ExpressContext }) => {
-            try {
-                const
-                    usersManagerDB = new UsersManagerDB(),
-                    { ip } = geoIP(context.express.req),
-                    internetadress = ip;
-
-                try {
-                    await JsonWebToken.verify(args.token);
-                    await usersManagerDB.verifytoken(args.auth, args.token, args.signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
-
-                    return { success: true };
-                } catch {
-                    if (args.refreshToken) {
-                        try {
-                            await usersManagerDB.verifyRefreshToken(args.auth, args.refreshToken.signature, args.refreshToken.value);
-                            const updateHistory = await usersManagerDB.updateTokenHistory(args.auth, args.token);
-
-                            return { success: true, signature: updateHistory[0], token: updateHistory[1] };
-                        } catch {
-                            return { success: false };
-                        }
-                    }
-
-                    return { success: false };
-                }
-            } catch (error) {
-                const
-                    req = context.express.req,
-                    clientIP = geoIP(req);
-
-                Debug.fatal('user', `Erro ocorrido na hora de verificar se a sessão(${args.token}) está autorizada`, String(error), `IP-Request: ${clearIPAddress(String(clientIP.ip).replace('::1', '127.0.0.1'))}`, `GraphQL - Query`, `Method: authValidate`);
 
                 throw new Error(String(error));
             }
@@ -338,7 +300,7 @@ export default {
                 throw new Error(String(error));
             }
         },
-        getUserInfo: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        getUserInfo: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const
                     usersManagerDB = new UsersManagerDB(),
@@ -363,8 +325,7 @@ export default {
                     name,
                     surname,
                     cnpj,
-                    location,
-                    updatedToken: args.updatedToken,
+                    location
                 };
             } catch (error) {
                 const
@@ -478,7 +439,6 @@ export default {
             surname: string,
             cnpj: string,
             location: string[]
-            updatedToken?: UpdatedToken
         }, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
@@ -499,8 +459,7 @@ export default {
                             city: args.location[5],
                             zipcode: args.location[6]
                         }
-                    }),
-                    updatedToken: args.updatedToken
+                    })
                 };
             } catch (error) {
                 const
@@ -515,15 +474,11 @@ export default {
         updatePhotoProfile: async (parent: unknown, args: {
             auth: string,
             photo: string,
-            updatedToken?: UpdatedToken
         }, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
 
-                return {
-                    success: await usersManagerDB.updatePhotoProfile(args.auth, args.photo),
-                    updatedToken: args.updatedToken
-                };
+                return await usersManagerDB.updatePhotoProfile(args.auth, args.photo);
             } catch (error) {
                 const
                     req = context.express.req,
@@ -554,13 +509,13 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authSignTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        authSignTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const
                     usersManagerDB = new UsersManagerDB(),
                     { qrcode } = await usersManagerDB.signtwofactor(args.auth);
 
-                return { qrcode, updatedToken: args.updatedToken };
+                return { qrcode };
             } catch (error) {
                 const
                     req = context.express.req,
@@ -571,14 +526,11 @@ export default {
                 throw new Error(String(error));
             }
         },
-        hasConfiguredTwoFactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        hasConfiguredTwoFactor: async (parent: unknown, args: { auth: string}, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
 
-                return {
-                    success: await usersManagerDB.hasConfiguredTwoFactor(args.auth),
-                    updatedToken: args.updatedToken
-                };
+                return await usersManagerDB.hasConfiguredTwoFactor(args.auth);
             } catch (error) {
                 const
                     req = context.express.req,
@@ -589,14 +541,11 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authVerifyTwofactor: async (parent: unknown, args: { auth: string, qrcode: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        authVerifyTwofactor: async (parent: unknown, args: { auth: string, qrcode: string}, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
 
-                return {
-                    success: await usersManagerDB.verifytwofactor(args.auth, args.qrcode),
-                    updatedToken: args.updatedToken
-                }
+                return await usersManagerDB.verifytwofactor(args.auth, args.qrcode);
             } catch (error) {
                 const
                     req = context.express.req,
@@ -607,14 +556,11 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authEnabledTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        authEnabledTwofactor: async (parent: unknown, args: { auth: string}, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
 
-                return {
-                    success: await usersManagerDB.enabledtwofactor(args.auth),
-                    updatedToken: args.updatedToken
-                };
+                return await usersManagerDB.enabledtwofactor(args.auth);
             } catch (error) {
                 const
                     req = context.express.req,
@@ -625,14 +571,11 @@ export default {
                 throw new Error(String(error));
             }
         },
-        authDisableTwofactor: async (parent: unknown, args: { auth: string, updatedToken?: UpdatedToken }, context: { express: ExpressContext }) => {
+        authDisableTwofactor: async (parent: unknown, args: { auth: string }, context: { express: ExpressContext }) => {
             try {
                 const usersManagerDB = new UsersManagerDB();
 
-                return {
-                    success: await usersManagerDB.disabledtwofactor(args.auth),
-                    updatedToken: args.updatedToken
-                }
+                return await usersManagerDB.disabledtwofactor(args.auth);
             } catch (error) {
                 const
                     req = context.express.req,

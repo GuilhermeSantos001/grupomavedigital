@@ -1,9 +1,3 @@
-/**
- * @description Rotas utilitárias do sistema
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Router, Request, Response } from 'express';
 
 const router = Router({
@@ -11,41 +5,64 @@ const router = Router({
     caseSensitive: true
 });
 
-import { decompressFromEncodedURIComponent } from 'lz-string';
-
 import APIMiddleware from '@/graphql/middlewares/api-middleware';
-import TokenMiddleware from '@/graphql/middlewares/token-middleware';
 import getReqProps from '@/utils/getReqProps';
-import Privilege from '@/utils/privilege';
+
+import { JsonWebToken } from '@/lib/JsonWebToken';
+import { UsersManagerDB } from '@/database/UsersManagerDB';
+import geoIP, { clearIPAddress } from '@/utils/geoIP';
 
 /**
- * @description Baixa uma versão do arquivo
+ * @description Revalidação da sessão do usuário, utilizando o refresh token
  */
-router.get(['/privilege/alias/:privilege'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
-    const {
-        privilege,
-        updatedToken,
-    } = getReqProps(req, [
-        'privilege',
-        'updatedToken',
-    ]);
+router.post('/auth/revalidate', APIMiddleware, async (req: Request, res: Response) => {
+    let
+        {
+            auth,
+            token,
+            signature,
+            refreshTokenValue,
+            refreshTokenSignature,
+        } = getReqProps(req, [
+            'auth',
+            'token',
+            'signature',
+            'refreshTokenValue',
+            'refreshTokenSignature',
+        ]),
+        { ip } = geoIP(req),
+        internetadress = ip,
+        usersManagerDB = new UsersManagerDB();
 
-    const name: any = decompressFromEncodedURIComponent(String(privilege)) || "";
+    if (!auth || !signature || !refreshTokenValue || !refreshTokenSignature)
+        return res.status(200).json({ success: false });
 
-    if (name.length <= 0)
-        return res.status(400).send({
-            success: false,
-            data: `The route parameters are not valid.`
-        });
+    try {
+        await JsonWebToken.verify(token as string);
+        await usersManagerDB.verifytoken(auth, token as string, signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
 
-    if (name.length <= 0)
-        return res.status(404).send({
-            title: 'Grupo Mave Digital',
-            message: 'Nenhum privilegio informado.',
-            error: null
-        });
+        return res.status(200).json({ success: true });
+    } catch (error) {
+        try {
+            await usersManagerDB.verifyRefreshToken(auth, refreshTokenSignature, refreshTokenValue);
 
-    return res.status(200).send({ alias: Privilege.alias(name), updatedToken });
+            const updateHistory = await usersManagerDB.updateTokenHistory(auth, signature);
+
+            return res.status(200).json({
+                success: true,
+                auth: await JsonWebToken.signCookie(auth, '7d'),
+                token: await JsonWebToken.signCookie(updateHistory[1], '15m'),
+                signature: await JsonWebToken.signCookie(updateHistory[0], '7d'),
+                refreshTokenValue: await JsonWebToken.signCookie(refreshTokenValue, '7d'),
+                refreshTokenSignature: await JsonWebToken.signCookie(refreshTokenSignature, '7d'),
+            });
+        } catch {
+            return res.status(500).send({
+                success: false,
+                message: "Invalid Refresh Token. Try again!"
+            });
+        }
+    }
 });
 
 router.use(['*'], async (req: Request, res: Response) => {

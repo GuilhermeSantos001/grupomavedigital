@@ -102,6 +102,7 @@ export interface RefreshToken {
 }
 
 export interface History {
+    signature: string;
     token: string;
     device: Devices;
     tmp: string;

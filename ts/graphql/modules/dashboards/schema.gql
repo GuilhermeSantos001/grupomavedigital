@@ -71,7 +71,6 @@ type Query {
     @auth(
       keys: ["tfbCBnLCNhfdkWbvEvYWQYg2Ye9JnjP7J78mBwR95NHU6CTSFcKxgnkW2xYcpz2r"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
   """
@@ -111,7 +110,6 @@ type Query {
     @auth(
       keys: ["SsPaTUXVfLTjnNm3XGQeYRFPGLS9N2c53e3vxtRTVD2b9VZBRmYqaANcyRp54SQP"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
 }
@@ -119,7 +117,5 @@ type Query {
 directive @auth(keys: [String!]!) on FIELD_DEFINITION
 
 directive @token(ignore: Boolean!) on FIELD_DEFINITION
-
-directive @privilege(keys: [String!]!) on FIELD_DEFINITION
 
 directive @encodeuri(method: String!) on FIELD_DEFINITION

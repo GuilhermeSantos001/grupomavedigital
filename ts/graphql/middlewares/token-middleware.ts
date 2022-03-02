@@ -1,15 +1,10 @@
-/**
- * @description Verifica se o token do usuário está válido
- * @author GuilhermeSantos001
- * @update 14/01/2022
- */
 import { Request, Response, NextFunction } from 'express';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import {JsonWebToken} from '@/lib/JsonWebToken';
-import getReqProps from '@/utils/getReqProps';
-import {UsersManagerDB} from '@/database/UsersManagerDB';
+import { JsonWebToken } from '@/lib/JsonWebToken';
+import { UsersManagerDB } from '@/database/UsersManagerDB';
 import geoIP, { clearIPAddress } from '@/utils/geoIP';
+import getReqProps from '@/utils/getReqProps';
 
 export default async function TokenMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
@@ -17,25 +12,29 @@ export default async function TokenMiddleware(req: Request, res: Response, next:
             {
                 auth,
                 token,
-                refreshtoken,
-                signature
+                signature,
+                refreshTokenValue,
+                refreshTokenSignature,
             } = getReqProps(req, [
                 'auth',
                 'token',
-                'refreshtoken',
-                'signature'
+                'signature',
+                'refreshTokenValue',
+                'refreshTokenSignature',
             ]);
 
         auth = decompressFromEncodedURIComponent(String(auth)) || "";
         token = decompressFromEncodedURIComponent(String(token)) || "";
         signature = decompressFromEncodedURIComponent(String(signature)) || "";
-        refreshtoken = JSON.parse(decompressFromEncodedURIComponent(String(refreshtoken)) || "");
+        refreshTokenValue = decompressFromEncodedURIComponent(String(refreshTokenValue)) || "";
+        refreshTokenSignature = decompressFromEncodedURIComponent(String(refreshTokenSignature)) || "";
 
         if (
             !auth ||
             !token ||
-            !refreshtoken ||
-            !signature
+            !signature ||
+            !refreshTokenValue ||
+            !refreshTokenSignature
         ) {
             return res.status(500).send({
                 success: false,
@@ -54,24 +53,19 @@ export default async function TokenMiddleware(req: Request, res: Response, next:
 
             return next();
         } catch {
-            if (refreshtoken) {
-                await userManagerDB.verifyRefreshToken(auth, refreshtoken.signature, refreshtoken.value);
+            await userManagerDB.verifyRefreshToken(auth, refreshTokenSignature, refreshTokenValue);
 
-                const
-                    updateHistory = await userManagerDB.updateTokenHistory(auth, token),
-                    updatedToken: any = {
-                        signature: updateHistory[0], token: updateHistory[1]
-                    };
+            const updateHistory = await userManagerDB.updateTokenHistory(auth, token);
 
-                req.params['updatedToken'] = updatedToken
+            req.params['updatedToken'] = JSON.stringify({
+                auth,
+                token: updateHistory[1],
+                signature: updateHistory[0],
+                refreshTokenValue,
+                refreshTokenSignature,
+            });
 
-                return next();
-            }
-
-            return res.status(500).send({
-                success: false,
-                message: "Invalid token. Try again!"
-            })
+            return next();
         }
     } catch {
         return res.status(500).send({

@@ -1,9 +1,3 @@
-/**
- * @description Configurações do servidor
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { createServer } from "http";
 import { DocumentNode, execute, subscribe } from "graphql";
 import { SubscriptionServer } from "subscriptions-transport-ws";
@@ -17,6 +11,7 @@ import { ExpressAdapter } from '@bull-board/express';
 import { Server } from "socket.io";
 import path from "path";
 import express from "express";
+import cookieParser from "cookie-parser";
 import cors from 'cors';
 import APIMiddleware from '@/graphql/middlewares/api-middleware';
 import routerFiles from "@/graphql/router/files";
@@ -55,6 +50,8 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     const app = express();
 
+    app.use(cookieParser(process.env.APP_SECRET!));
+
     app.use(device.capture({
         parseUserAgent: true
     })), useragent(true);
@@ -86,12 +83,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
     app.set('view engine', 'pug');
     app.set('views', path.join(__dirname, 'views'));
 
-    //use routers
-    app.use('/files', routerFiles);
-    app.use('/utils', routerUtils);
-
     //use API
     app.use(express.json());
+    app.use('/files', routerFiles);
+    app.use('/utils', routerUtils);
     app.use('/api/v1/', routerAPI);
 
     //use Bull Board
