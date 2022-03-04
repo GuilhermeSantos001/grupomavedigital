@@ -150,7 +150,10 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
          * @description Event listener for HTTP server "listening" event.
          */
         function onListening() {
-            Debug.console('default', `Server is now running on http://localhost:${PORT}/graphql`);
+            Debug.console('default', `Server Apollo Graphql is now running...`);
+            Debug.console('default', `Server Express is now running...`);
+            Debug.console('default', `Server Socket.io is now running...`);
+            Debug.console('default', `Server HLS is now running...`);
         }
 
         schema = AuthDirectiveTransformer(schema);
