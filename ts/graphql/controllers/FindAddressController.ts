@@ -18,26 +18,10 @@ export class FindAddressController {
                     id
                 },
                 include: {
-                    street: {
-                        select: {
-                            value: true
-                        }
-                    },
-                    neighborhood: {
-                        select: {
-                            value: true
-                        }
-                    },
-                    city: {
-                        select: {
-                            value: true
-                        }
-                    },
-                    district: {
-                        select: {
-                            value: true
-                        }
-                    }
+                    street: true,
+                    neighborhood: true,
+                    city: true,
+                    district: true
                 }
             }),
             'Não foi possível retornar o endereço.'

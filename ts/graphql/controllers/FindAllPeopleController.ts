@@ -33,65 +33,10 @@ export class FindAllPeopleController {
         },
         ...cursor,
         include: {
-          address: {
-            select: {
-              id: true,
-              street: {
-                select: {
-                  value: true
-                }
-              },
-              number: true,
-              complement: true,
-              neighborhood: {
-                select: {
-                  value: true
-                }
-              },
-              city: {
-                select: {
-                  value: true
-                }
-              },
-              district: {
-                select: {
-                  value: true
-                }
-              },
-              zipCode: true
-            }
-          },
-          scale: {
-            select: {
-              id: true,
-              value: true
-            }
-          },
-          personService: {
-            select: {
-              id: true,
-              service: {
-                select: {
-                  id: true,
-                  value: true
-                }
-              }
-            }
-          },
-          cards: {
-            select: {
-              id: true,
-              lotNum: true,
-              serialNumber: true,
-              lastCardNumber: true,
-              costCenter: {
-                select: {
-                  id: true,
-                  value: true
-                }
-              }
-            }
-          }
+          address: true,
+          scale: true,
+          personService: true,
+          cards: true
         }
       }),
       'Não foi possível retornar as pessoas.'

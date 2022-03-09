@@ -18,48 +18,9 @@ export class FindWorkplaceController {
                     id
                 },
                 include: {
-                    address: {
-                        select: {
-                            street: {
-                                select: {
-                                    value: true
-                                }
-                            },
-                            number: true,
-                            complement: true,
-                            neighborhood: {
-                                select: {
-                                    value: true
-                                }
-                            },
-                            city: {
-                                select: {
-                                    value: true
-                                }
-                            },
-                            district: {
-                                select: {
-                                    value: true
-                                }
-                            },
-                            zipCode: true
-                        }
-                    },
-                    scale: {
-                        select: {
-                            value: true
-                        }
-                    },
-                    workplaceService: {
-                        select: {
-                            id: true,
-                            service: {
-                                select: {
-                                    value: true
-                                }
-                            }
-                        }
-                    }
+                    address: true,
+                    scale: true,
+                    workplaceService: true
                 }
             }),
             'Não foi possível retornar o local de trabalho.'

@@ -18,17 +18,8 @@ export class FindCardController {
                     id
                 },
                 include: {
-                    costCenter: {
-                        select: {
-                            value: true
-                        }
-                    },
-                    person: {
-                        select: {
-                            matricule: true,
-                            name: true
-                        }
-                    }
+                    costCenter: true,
+                    person: true
                 }
             }),
             'Não foi possível retornar o cartão benefício (Alelo).'

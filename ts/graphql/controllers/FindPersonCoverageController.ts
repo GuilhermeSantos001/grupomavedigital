@@ -18,28 +18,8 @@ export class FindPersonCoverageController {
                     id
                 },
                 include: {
-                    mirror: {
-                        select: {
-                            authorId: true,
-                            fileId: true,
-                            filename: true,
-                            filetype: true,
-                            description: true,
-                            version: true,
-                            size: true,
-                            compressedSize: true,
-                            temporary: true,
-                            expiredAt: true,
-                        }
-                    },
-                    person: {
-                        select: {
-                            matricule: true,
-                            name: true,
-                            mail: true,
-                            cards: true,
-                        }
-                    }
+                    mirror: true,
+                    person: true
                 }
             }),
             'Não foi possível retornar a pessoa que está cobrindo.'

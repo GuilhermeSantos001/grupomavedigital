@@ -33,17 +33,8 @@ export class FindAllCardsController {
         },
         ...cursor,
         include: {
-          costCenter: {
-            select: {
-              value: true
-            }
-          },
-          person: {
-            select: {
-              matricule: true,
-              name: true
-            }
-          }
+          costCenter: true,
+          person: true
         }
       }),
       'Não foi possível retornar os cartões benefícios (Alelo).'
