@@ -155,7 +155,7 @@ export interface fileModelInterface extends fileInterface, Model<fileInterface> 
 export const matches: Matches = {
     // eslint-disable-next-line no-useless-escape
     specialCharacters: /[\!\@\#\$\%\¨\`\´\&\*\(\)\-\_\+\=\§\}\º\{\}\[\]\'\"\/\.\,\;\<\>\^\~\?\|\\]/g,
-    mail: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/g
+    mail: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/g
 };
 
 export const groupIdSchema: Schema = new Schema({

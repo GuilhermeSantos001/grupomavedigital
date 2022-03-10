@@ -33,10 +33,25 @@ export class FindAllPeopleController {
         },
         ...cursor,
         include: {
-          address: true,
+          address: {
+            include: {
+              street: true,
+              neighborhood: true,
+              city: true,
+              district: true
+            }
+          },
           scale: true,
-          personService: true,
-          cards: true
+          cards: {
+            include: {
+              costCenter: true,
+            }
+          },
+          personService: {
+            include: {
+              service: true
+            }
+          }
         }
       }),
       'Não foi possível retornar as pessoas.'

@@ -18,10 +18,25 @@ export class FindPersonController {
                     id
                 },
                 include: {
-                    address: true,
-                    scale:true,
-                    personService:true,
-                    cards: true
+                    address: {
+                        include: {
+                            street: true,
+                            neighborhood: true,
+                            city: true,
+                            district: true
+                        }
+                    },
+                    scale: true,
+                    cards: {
+                        include: {
+                            costCenter: true,
+                        }
+                    },
+                    personService: {
+                        include: {
+                            service: true
+                        }
+                    }
                 }
             }),
             'Não foi possível retornar a pessoa.'

@@ -33,9 +33,20 @@ export class FindAllWorkplacesController {
         },
         ...cursor,
         include: {
-          address: true,
+          address: {
+            include: {
+              street: true,
+              neighborhood: true,
+              city: true,
+              district: true
+            }
+          },
           scale: true,
-          workplaceService: true
+          workplaceService: {
+            include: {
+              service: true
+            }
+          }
         }
       }),
       'Não foi possível retornar os locais de trabalho.'

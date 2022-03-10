@@ -19,10 +19,54 @@ export class FindPostingController {
                 },
                 include: {
                     costCenter: true,
-                    covering: true,
-                    coverage: true,
-                    coveringWorkplace: true,
-                    coverageWorkplace:true
+                    covering: {
+                      include: {
+                        person: true,
+                        mirror: true,
+                      }
+                    },
+                    coverage: {
+                      include: {
+                        person: true,
+                        mirror: true,
+                      }
+                    },
+                    coveringWorkplace: {
+                      include: {
+                        address: {
+                          include: {
+                            street: true,
+                            neighborhood: true,
+                            city: true,
+                            district: true
+                          }
+                        },
+                        scale: true,
+                        workplaceService: {
+                          include: {
+                            service: true
+                          }
+                        }
+                      }
+                    },
+                    coverageWorkplace: {
+                      include: {
+                        address: {
+                          include: {
+                            street: true,
+                            neighborhood: true,
+                            city: true,
+                            district: true
+                          }
+                        },
+                        scale: true,
+                        workplaceService: {
+                          include: {
+                            service: true
+                          }
+                        }
+                      }
+                    }
                 }
             }),
             'Não foi possível retornar o lançamento financeiro.'

@@ -198,7 +198,7 @@ export const emailSchema: Schema = new Schema({
         lowercase: true,
         trim: true,
         unique: true,
-        match: /^([\w-.]+@([\w-]+.)+[\w-]{2,4})?$/
+        match: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     },
     status: { // Se o e-mail está confirmado
         type: Boolean,
