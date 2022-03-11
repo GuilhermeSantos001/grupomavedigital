@@ -50,11 +50,11 @@ router.post('/auth/revalidate', APIMiddleware, async (req: Request, res: Respons
 
             return res.status(200).json({
                 success: true,
-                auth: await JsonWebToken.signCookie(auth, '7d'),
-                token: await JsonWebToken.signCookie(updateHistory[1], '15m'),
-                signature: await JsonWebToken.signCookie(updateHistory[0], '7d'),
-                refreshTokenValue: await JsonWebToken.signCookie(refreshTokenValue, '7d'),
-                refreshTokenSignature: await JsonWebToken.signCookie(refreshTokenSignature, '7d'),
+                auth,
+                token:updateHistory[1],
+                signature: updateHistory[0],
+                refreshTokenValue: refreshTokenValue,
+                refreshTokenSignature: refreshTokenSignature,
             });
         } catch {
             return res.status(500).send({

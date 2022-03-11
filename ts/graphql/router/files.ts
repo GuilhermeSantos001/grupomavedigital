@@ -69,7 +69,7 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
     if (updatedToken) {
         updatedToken = JSON.parse(updatedToken);
         await setSessionCookies({
-            authorization: updatedToken.authorization,
+            authorization: updatedToken.auth,
             token: updatedToken.token,
             signature: updatedToken.signature,
             refreshTokenValue: updatedToken.refreshTokenValue,
@@ -82,8 +82,6 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
             cookieOptions
         })
     }
-
-    fileId = decompressFromEncodedURIComponent(String(fileId));
 
     if (String(fileId).length <= 0)
         return res.status(400).send({

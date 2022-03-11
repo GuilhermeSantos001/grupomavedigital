@@ -136,6 +136,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
   socket.on(PaybackSocketEvents.PAYBACK_DELETE_MIRROR, async (data: string) => {
     const {
       filesId,
+      mirrorsId,
     }: TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
       channel = PaybackSocketEvents.PAYBACK_DELETE_MIRROR,
       channelSuccess = `${channel}-SUCCESS`,
@@ -150,12 +151,13 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
       }
 
       const reply: TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR = {
-        filesId
+        mirrorsId
       }
 
       return socket.emit(
         channelSuccess,
-        compressToBase64(JSON.stringify(reply)));
+        compressToBase64(JSON.stringify(reply))
+      );
     } catch (error) {
       socket
         .emit(channelError, error instanceof Error ? error.message : JSON.stringify(error));

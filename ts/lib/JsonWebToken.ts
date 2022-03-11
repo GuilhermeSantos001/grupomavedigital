@@ -1,13 +1,4 @@
-/**
- * @description Controle dos JSON Web Tokens
- * @author GuilhermeSantos001
- * @update 01/03/2022
- */
-
 import { sign, verify, Secret } from 'jsonwebtoken';
-import { nanoid } from 'nanoid';
-import { SignJWT } from 'jose';
-import { compressToUint8Array } from 'lz-string';
 
 import { RedisClient } from '@/lib/RedisClient';
 
@@ -63,17 +54,6 @@ export class JsonWebToken {
                 return resolve(typeof encoded === 'string' ? encoded : "");
             });
         });
-    }
-
-    static async signCookie(value: string, duration: `${number}${'m' | 'h' | 'd'}`) {
-        const token = await new SignJWT({ value })
-            .setProtectedHeader({ alg: 'HS256'  })
-            .setJti(nanoid())
-            .setIssuedAt()
-            .setExpirationTime(duration)
-            .sign(compressToUint8Array(process.env.APP_SECRET!));
-
-        return token;
     }
 
     static verify(token: string, secret?: Secret) {

@@ -23,6 +23,7 @@ export class FindPostingController {
                       include: {
                         person: true,
                         mirror: true,
+                        reasonForAbsence: true,
                       }
                     },
                     coverage: {

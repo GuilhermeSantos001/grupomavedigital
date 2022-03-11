@@ -1,7 +1,7 @@
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
 
-import { setSessionCookies, readyCookie } from '@/lib/Cookies';
+import { setSessionCookies } from '@/lib/Cookies';
 
 import { JsonWebToken } from '@/lib/JsonWebToken';
 import { UsersManagerDB } from '@/database/UsersManagerDB';
@@ -26,11 +26,11 @@ export default function TokenDirective(directiveName: string) {
                                 return await resolve(source, args, context, info);
 
                             const
-                                auth = await readyCookie(context.express.req.cookies.auth),
-                                token = await readyCookie(context.express.req.cookies.token),
-                                signature = await readyCookie(context.express.req.cookies.signature),
-                                refreshTokenValue = await readyCookie(context.express.req.cookies.refreshTokenValue),
-                                refreshTokenSignature = await readyCookie(context.express.req.cookies.refreshTokenSignature),
+                                auth = context.express.req.cookies.auth,
+                                token = context.express.req.cookies.token,
+                                signature = context.express.req.cookies.signature,
+                                refreshTokenValue = context.express.req.cookies.refreshTokenValue,
+                                refreshTokenSignature = context.express.req.cookies.refreshTokenSignature,
                                 { ip } = geoIP(context.express.req),
                                 internetadress = ip;
 
