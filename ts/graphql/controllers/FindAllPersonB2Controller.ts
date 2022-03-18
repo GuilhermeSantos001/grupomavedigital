@@ -1,41 +1,27 @@
-import { PersonCovering } from '@prisma/client';
+import { PersonB2 } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindAllPeopleCoveringController {
+export class FindAllPersonB2Controller {
   async handle(request: Request, response: Response) {
     const {
-      cursorId,
       skip,
-      take
-    } = request.query;
+      limit
+    } = request.params;
 
     const findThrowErrorController = new FindThrowErrorController();
 
-    let cursor = {};
-
-    if (cursorId) {
-      cursor = {
-        cursor: {
-          cursorId: Number(cursorId)
-        }
-      }
-    }
-
-    return response.json(await findThrowErrorController.handle<PersonCovering[] | null>(
-      prismaClient.personCovering.findMany({
+    return response.json(await findThrowErrorController.handle<PersonB2[] | null>(
+      prismaClient.personB2.findMany({
         skip: skip ? Number(skip) : undefined,
-        take: take ? Number(take) : undefined,
-        orderBy: {
-          cursorId: 'asc'
-        },
-        ...cursor,
+        take: limit ? Number(limit) : undefined,
         include: {
-          mirror: true,
           person: {
             include: {
+              cards: true,
+              scale: true,
               address: {
                 include: {
                   street: true,
@@ -44,23 +30,16 @@ export class FindAllPeopleCoveringController {
                   district: true
                 }
               },
-              scale: true,
-              cards: {
-                include: {
-                  costCenter: true,
-                }
-              },
               personService: {
                 include: {
                   service: true
                 }
               }
             }
-          },
-          reasonForAbsence: true
+          }
         }
       }),
-      'Não foi possível retornar as pessoas que estão sendo cobertas.'
+      'Não foi possível retornar as pessoas dos B2.'
     ));
   }
 }

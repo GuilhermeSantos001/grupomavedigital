@@ -21,14 +21,58 @@ export class FindPostingController {
                     costCenter: true,
                     covering: {
                       include: {
-                        person: true,
+                        person: {
+                          include: {
+                            address: {
+                              include: {
+                                street: true,
+                                neighborhood: true,
+                                city: true,
+                                district: true
+                              }
+                            },
+                            scale: true,
+                            cards: {
+                              include: {
+                                costCenter: true,
+                              }
+                            },
+                            personService: {
+                              include: {
+                                service: true
+                              }
+                            }
+                          }
+                        },
                         mirror: true,
                         reasonForAbsence: true,
                       }
                     },
                     coverage: {
                       include: {
-                        person: true,
+                        person: {
+                          include: {
+                            address: {
+                              include: {
+                                street: true,
+                                neighborhood: true,
+                                city: true,
+                                district: true
+                              }
+                            },
+                            scale: true,
+                            cards: {
+                              include: {
+                                costCenter: true,
+                              }
+                            },
+                            personService: {
+                              include: {
+                                service: true
+                              }
+                            }
+                          }
+                        },
                         mirror: true,
                       }
                     },

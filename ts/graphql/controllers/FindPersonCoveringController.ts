@@ -19,7 +19,29 @@ export class FindPersonCoveringController {
                 },
                 include: {
                     mirror: true,
-                    person: true,
+                    person: {
+                        include: {
+                            address: {
+                                include: {
+                                    street: true,
+                                    neighborhood: true,
+                                    city: true,
+                                    district: true
+                                }
+                            },
+                            scale: true,
+                            cards: {
+                                include: {
+                                    costCenter: true,
+                                }
+                            },
+                            personService: {
+                                include: {
+                                    service: true
+                                }
+                            }
+                        }
+                    },
                     reasonForAbsence: true
                 }
             }),

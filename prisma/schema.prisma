@@ -30,6 +30,7 @@ model CostCenter {
 
   card    Card[]
   posting Posting[]
+  B2      B2[]
 
   @@map("cost_centers")
 }
@@ -204,6 +205,7 @@ model Person {
   personService  PersonService[]
   PersonCovering PersonCovering[]
   PersonCoverage PersonCoverage[]
+  PersonB2       PersonB2[]
 
   @@map("people")
 }
@@ -220,11 +222,13 @@ model Workplace {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  address             Address            @relation(fields: [addressId], references: [id])
-  scale               Scale              @relation(fields: [scaleId], references: [id])
-  coveringWorkplaceId Posting[]          @relation("CoverageWorkplaceId")
-  coverageWorkplaceId Posting[]          @relation("CoveringWorkplaceId")
-  workplaceService    WorkplaceService[]
+  address                Address            @relation(fields: [addressId], references: [id])
+  scale                  Scale              @relation(fields: [scaleId], references: [id])
+  coveringWorkplaceId    Posting[]          @relation("CoverageWorkplaceId")
+  coverageWorkplaceId    Posting[]          @relation("CoveringWorkplaceId")
+  workplaceService       WorkplaceService[]
+  workplaceOriginId      B2[]               @relation("workplaceOriginId")
+  workplaceDestinationId B2[]               @relation("workplaceDestinationId")
 
   @@map("workplaces")
 }
@@ -284,6 +288,19 @@ model PersonCoverage {
   @@map("person_coverage")
 }
 
+model PersonB2 {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  personId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person Person @relation(fields: [personId], references: [id])
+  b2     B2[]
+
+  @@map("person_b2")
+}
+
 model Posting {
   id                   String    @id @default(uuid())
   cursorId             Int       @unique @default(autoincrement())
@@ -298,7 +315,7 @@ model Posting {
   coveringWorkplaceId  String
   coverageWorkplaceId  String?
   paymentMethod        String
-  paymentValue         Int
+  paymentValue         Float
   paymentDatePayable   DateTime
   paymentStatus        String
   paymentDatePaid      DateTime?
@@ -316,4 +333,43 @@ model Posting {
   coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
 
   @@map("postings")
+}
+
+model B2 {
+  id                     String    @id @default(uuid())
+  cursorId               Int       @unique @default(autoincrement())
+  author                 String
+  costCenterId           String
+  periodStart            DateTime
+  periodEnd              DateTime
+  description            String?
+  personId               String
+  workplaceOriginId      String
+  workplaceDestinationId String
+  coverageStartedAt      DateTime
+  entryTime              DateTime
+  exitTime               DateTime
+  valueClosed            Float
+  absences               Int
+  lawdays                Int
+  discountValue          Float
+  level                  Int
+  roleGratification      String
+  gratification          Float
+  paymentMethod          String
+  paymentValue           Float
+  paymentDatePayable     DateTime
+  paymentStatus          String
+  paymentDatePaid        DateTime?
+  paymentDateCancelled   DateTime?
+  status                 String
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @default(now()) @updatedAt
+
+  costCenter           CostCenter @relation(fields: [costCenterId], references: [id])
+  personB2             PersonB2   @relation(fields: [personId], references: [id])
+  workplaceOrigin      Workplace  @relation("workplaceOriginId", fields: [workplaceOriginId], references: [id])
+  workplaceDestination Workplace  @relation("workplaceDestinationId", fields: [workplaceDestinationId], references: [id])
+
+  @@map("b2")
 }

@@ -1,10 +1,10 @@
-import { PersonCoverage } from '@prisma/client';
+import { PersonB2 } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindPersonCoverageController {
+export class FindPersonB2Controller {
     async handle(request: Request, response: Response) {
         const {
             id
@@ -12,27 +12,22 @@ export class FindPersonCoverageController {
 
         const findThrowErrorController = new FindThrowErrorController();
 
-        return response.json(await findThrowErrorController.handle<PersonCoverage | null>(
-            prismaClient.personCoverage.findFirst({
+        return response.json(await findThrowErrorController.handle<PersonB2 | null>(
+            prismaClient.personB2.findFirst({
                 where: {
                     id
                 },
                 include: {
-                    mirror: true,
                     person: {
                         include: {
+                            cards: true,
+                            scale: true,
                             address: {
                                 include: {
                                     street: true,
                                     neighborhood: true,
                                     city: true,
                                     district: true
-                                }
-                            },
-                            scale: true,
-                            cards: {
-                                include: {
-                                    costCenter: true,
                                 }
                             },
                             personService: {

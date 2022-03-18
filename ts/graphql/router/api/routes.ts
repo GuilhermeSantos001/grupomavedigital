@@ -122,10 +122,22 @@ import { FindPostingController } from '@/graphql/controllers/FindPostingControll
 import { FindAllPostingsController } from '@/graphql/controllers/FindAllPostingsController';
 import { DeletePostingController } from '@/graphql/controllers/DeletePostingController';
 
+import { CreateB2Controller } from '@/graphql/controllers/CreateB2Controller';
+import { UpdateB2Controller } from '@/graphql/controllers/UpdateB2Controller';
+import { FindB2Controller } from '@/graphql/controllers/FindB2Controller';
+import { FindAllB2Controller } from '@/graphql/controllers/FindAllB2Controller';
+import { DeleteB2Controller } from '@/graphql/controllers/DeleteB2Controller';
+
+import { CreatePersonB2Controller } from '@/graphql/controllers/CreatePersonB2Controller';
+import { UpdatePersonB2Controller } from '@/graphql/controllers/UpdatePersonB2Controller';
+import { FindPersonB2Controller } from '@/graphql/controllers/FindPersonB2Controller';
+import { FindAllPersonB2Controller } from '@/graphql/controllers/FindAllPersonB2Controller';
+import { DeletePersonB2Controller } from '@/graphql/controllers/DeletePersonB2Controller';
+
 const createUser = new CreateUserController();
 const updateUser = new UpdateUserController();
 const findUser = new FindUserController();
-const findAllUsers= new FindAllUsersController();
+const findAllUsers = new FindAllUsersController();
 const deleteUser = new DeleteUserController();
 
 const createAPIKey = new CreateAPIKeyController();
@@ -236,6 +248,18 @@ const updatePosting = new UpdatePostingController();
 const findPosting = new FindPostingController();
 const findAllPostings = new FindAllPostingsController();
 const deletePosting = new DeletePostingController();
+
+const createB2 = new CreateB2Controller();
+const updateB2 = new UpdateB2Controller();
+const findB2 = new FindB2Controller();
+const findAllB2 = new FindAllB2Controller();
+const deleteB2 = new DeleteB2Controller();
+
+const createPersonB2 = new CreatePersonB2Controller();
+const updatePersonB2 = new UpdatePersonB2Controller();
+const findPersonB2 = new FindPersonB2Controller();
+const findAllPersonB2 = new FindAllPersonB2Controller();
+const deletePersonB2 = new DeletePersonB2Controller();
 
 router.use(APIMiddleware);
 
@@ -351,6 +375,18 @@ router.put('/posting/:id', updatePosting.handle);
 router.get('/posting/:id', findPosting.handle);
 router.get(['/postings', '/postings/:limit', '/postings/:skip/:limit'], findAllPostings.handle);
 router.delete('/posting/:id', deletePosting.handle);
+
+router.post('/b2', createB2.handle);
+router.put('/b2/:id', updateB2.handle);
+router.get('/b2/:id', findB2.handle);
+router.get(['/b2a', '/b2a/:limit', '/b2a/:skip/:limit'], findAllB2.handle);
+router.delete('/b2/:id', deleteB2.handle);
+
+router.post('/b2/person', createPersonB2.handle);
+router.put('/b2/person/:id', updatePersonB2.handle);
+router.get('/b2/person/:id', findPersonB2.handle);
+router.get(['/b2p', '/b2p/:limit', '/b2p/:skip/:limit'], findAllPersonB2.handle);
+router.delete('/b2/person/:id', deletePersonB2.handle);
 
 router.use(router404Controller.handle);
 
