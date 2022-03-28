@@ -131,8 +131,20 @@ import { DeleteB2Controller } from '@/graphql/controllers/DeleteB2Controller';
 import { CreatePersonB2Controller } from '@/graphql/controllers/CreatePersonB2Controller';
 import { UpdatePersonB2Controller } from '@/graphql/controllers/UpdatePersonB2Controller';
 import { FindPersonB2Controller } from '@/graphql/controllers/FindPersonB2Controller';
-import { FindAllPersonB2Controller } from '@/graphql/controllers/FindAllPersonB2Controller';
+import { FindAllPeopleB2Controller } from '@/graphql/controllers/FindAllPeopleB2Controller';
 import { DeletePersonB2Controller } from '@/graphql/controllers/DeletePersonB2Controller';
+
+import { CreatePackageHoursController } from '@/graphql/controllers/CreatePackageHoursController';
+import { UpdatePackageHoursController } from '@/graphql/controllers/UpdatePackageHoursController';
+import { FindPackageHoursController } from '@/graphql/controllers/FindPackageHoursController';
+import { FindAllPackageHoursController } from '@/graphql/controllers/FindAllPackageHoursController';
+import { DeletePackageHoursController } from '@/graphql/controllers/DeletePackageHoursController';
+
+import { CreatePersonPHController } from '@/graphql/controllers/CreatePersonPHController';
+import { UpdatePersonPHController } from '@/graphql/controllers/UpdatePersonPHController';
+import { FindPersonPHController } from '@/graphql/controllers/FindPersonPHController';
+import { FindAllPeoplePHController } from '@/graphql/controllers/FindAllPeoplePHController';
+import { DeletePersonPHController } from '@/graphql/controllers/DeletePersonPHController';
 
 const createUser = new CreateUserController();
 const updateUser = new UpdateUserController();
@@ -258,8 +270,20 @@ const deleteB2 = new DeleteB2Controller();
 const createPersonB2 = new CreatePersonB2Controller();
 const updatePersonB2 = new UpdatePersonB2Controller();
 const findPersonB2 = new FindPersonB2Controller();
-const findAllPersonB2 = new FindAllPersonB2Controller();
+const findAllPeopleB2 = new FindAllPeopleB2Controller();
 const deletePersonB2 = new DeletePersonB2Controller();
+
+const createPackageHours = new CreatePackageHoursController();
+const updatePackageHours = new UpdatePackageHoursController();
+const findPackageHours = new FindPackageHoursController();
+const findAllPackageHours = new FindAllPackageHoursController();
+const deletePackageHours = new DeletePackageHoursController();
+
+const createPersonPH = new CreatePersonPHController();
+const updatePersonPH = new UpdatePersonPHController();
+const findPersonPH = new FindPersonPHController();
+const findAllPeoplePH = new FindAllPeoplePHController();
+const deletePersonPH = new DeletePersonPHController();
 
 router.use(APIMiddleware);
 
@@ -382,11 +406,23 @@ router.get('/b2/:id', findB2.handle);
 router.get(['/b2a', '/b2a/:limit', '/b2a/:skip/:limit'], findAllB2.handle);
 router.delete('/b2/:id', deleteB2.handle);
 
-router.post('/b2/person', createPersonB2.handle);
-router.put('/b2/person/:id', updatePersonB2.handle);
-router.get('/b2/person/:id', findPersonB2.handle);
-router.get(['/b2p', '/b2p/:limit', '/b2p/:skip/:limit'], findAllPersonB2.handle);
-router.delete('/b2/person/:id', deletePersonB2.handle);
+router.post('/b2/people', createPersonB2.handle);
+router.put('/b2/people/:id', updatePersonB2.handle);
+router.get('/b2/people/:id', findPersonB2.handle);
+router.get(['/b2p', '/b2p/:limit', '/b2p/:skip/:limit'], findAllPeopleB2.handle);
+router.delete('/b2/people/:id', deletePersonB2.handle);
+
+router.post('/ph', createPackageHours.handle);
+router.put('/ph/:id', updatePackageHours.handle);
+router.get('/ph/:id', findPackageHours.handle);
+router.get(['/pha', '/pha/:limit', '/pha/:skip/:limit'], findAllPackageHours.handle);
+router.delete('/ph/:id', deletePackageHours.handle);
+
+router.post('/ph/people', createPersonPH.handle);
+router.put('/ph/people/:id', updatePersonPH.handle);
+router.get('/ph/people/:id', findPersonPH.handle);
+router.get(['/php', '/php/:limit', '/php/:skip/:limit'], findAllPeoplePH.handle);
+router.delete('/ph/people/:id', deletePersonPH.handle);
 
 router.use(router404Controller.handle);
 

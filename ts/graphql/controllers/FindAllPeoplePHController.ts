@@ -1,10 +1,10 @@
-import { PersonB2 } from '@prisma/client';
+import { PersonPH } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindAllPersonB2Controller {
+export class FindAllPeoplePHController {
   async handle(request: Request, response: Response) {
     const {
       skip,
@@ -13,8 +13,8 @@ export class FindAllPersonB2Controller {
 
     const findThrowErrorController = new FindThrowErrorController();
 
-    return response.json(await findThrowErrorController.handle<PersonB2[] | null>(
-      prismaClient.personB2.findMany({
+    return response.json(await findThrowErrorController.handle<PersonPH[] | null>(
+      prismaClient.personPH.findMany({
         skip: skip ? Number(skip) : undefined,
         take: limit ? Number(limit) : undefined,
         include: {
@@ -39,7 +39,7 @@ export class FindAllPersonB2Controller {
           }
         }
       }),
-      'Não foi possível retornar as pessoas dos B2.'
+      'Não foi possível retornar as pessoas nos Pacote de Horas.'
     ));
   }
 }

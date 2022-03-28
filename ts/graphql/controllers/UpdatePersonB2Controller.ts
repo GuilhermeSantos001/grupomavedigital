@@ -27,7 +27,21 @@ export class UpdatePersonB2Controller {
             }
         }))
             return response.json(await responseThrowErrorController.handle(
-                new Error(`Não foi possível criar o B2. A pessoa informada já pertence a um B2.`),
+                new Error(`Não foi possível atualizar a pessoa do B2. A pessoa informada já pertence a um B2.`),
+                'Tente novamente!',
+            ));
+        else if (await prismaClient.personPH.findFirst({
+            where: {
+                OR: [
+                    // ? Verifica se já existe a mesma pessoa no Pacote de Horas
+                    {
+                        personId
+                    }
+                ]
+            }
+        }))
+            return response.json(await responseThrowErrorController.handle(
+                new Error(`Não foi possível atualizar a pessoa do B2. A pessoa informada já pertence a um Pacote de Horas.`),
                 'Tente novamente!',
             ));
 

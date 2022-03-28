@@ -1,4 +1,4 @@
-import { B2 } from '@prisma/client';
+import { PackageHours } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
@@ -9,63 +9,57 @@ import { DatabaseStatusConstants } from '../constants/DatabaseStatusConstants';
 import { DatabasePaymentStatusConstants } from '../constants/DatabasePaymentStatusConstants';
 import { DatabasePaymentMethodConstants } from '../constants/DatabasePaymentMethodConstants';
 
-export class CreateB2Controller {
+export class UpdatePackageHoursController {
     async handle(request: Request, response: Response) {
-        const {
-            author,
-            costCenterId,
-            periodStart,
-            periodEnd,
-            description,
-            personId,
-            workplaceOriginId,
-            workplaceDestinationId,
-            coverageStartedAt,
-            entryTime,
-            exitTime,
-            valueClosed,
-            absences,
-            lawdays,
-            discountValue,
-            level,
-            roleGratification,
-            gratification,
-            onlyHistory,
-            paymentMethod,
-            paymentValue,
-            paymentDatePayable,
-            paymentStatus,
-            paymentDatePaid,
-            paymentDateCancelled,
-            status
-        }: Pick<B2,
-            | 'author'
-            | 'costCenterId'
-            | 'periodStart'
-            | 'periodEnd'
-            | 'description'
-            | 'personId'
-            | 'workplaceOriginId'
-            | 'workplaceDestinationId'
-            | 'coverageStartedAt'
-            | 'entryTime'
-            | 'exitTime'
-            | 'valueClosed'
-            | 'absences'
-            | 'lawdays'
-            | 'discountValue'
-            | 'level'
-            | 'roleGratification'
-            | 'gratification'
-            | 'onlyHistory'
-            | 'paymentMethod'
-            | 'paymentValue'
-            | 'paymentDatePayable'
-            | 'paymentStatus'
-            | 'paymentDatePaid'
-            | 'paymentDateCancelled'
-            | 'status'
-        > = request.body;
+        const
+            { id } = request.params,
+            {
+                author,
+                costCenterId,
+                periodStart,
+                periodEnd,
+                description,
+                personId,
+                workplacePHDestinationId,
+                contractStartedAt,
+                contractFinishAt,
+                entryTime,
+                exitTime,
+                valueClosed,
+                lawdays,
+                jobTitle,
+                onlyHistory,
+                paymentMethod,
+                paymentValue,
+                paymentDatePayable,
+                paymentStatus,
+                paymentDatePaid,
+                paymentDateCancelled,
+                status
+            }: Pick<PackageHours,
+                | 'author'
+                | 'costCenterId'
+                | 'periodStart'
+                | 'periodEnd'
+                | 'description'
+                | 'personId'
+                | 'workplacePHDestinationId'
+                | 'contractStartedAt'
+                | 'contractFinishAt'
+                | 'entryTime'
+                | 'exitTime'
+                | 'valueClosed'
+                | 'lawdays'
+                | 'jobTitle'
+                | 'onlyHistory'
+                | 'paymentMethod'
+                | 'paymentValue'
+                | 'paymentDatePayable'
+                | 'paymentStatus'
+                | 'paymentDatePaid'
+                | 'paymentDateCancelled'
+                | 'status'
+            > = request.body;
 
         const createThrowErrorController = new CreateThrowErrorController();
         const responseThrowErrorController = new ResponseThrowErrorController();
@@ -92,8 +86,9 @@ export class CreateB2Controller {
                 'Propriedade status inválida.',
             ));
 
-        return response.json(await createThrowErrorController.handle<B2>(
-            prismaClient.b2.create({
+        return response.json(await createThrowErrorController.handle<PackageHours>(
+            prismaClient.packageHours.update({
+                where: { id },
                 data: {
                     author,
                     costCenterId,
@@ -101,18 +96,14 @@ export class CreateB2Controller {
                     periodEnd,
                     description,
                     personId,
-                    workplaceOriginId,
-                    workplaceDestinationId,
-                    coverageStartedAt,
+                    workplacePHDestinationId,
+                    contractStartedAt,
+                    contractFinishAt,
                     entryTime,
                     exitTime,
                     valueClosed,
-                    absences,
                     lawdays,
-                    discountValue,
-                    level,
-                    roleGratification,
-                    gratification,
+                    jobTitle,
                     onlyHistory,
                     paymentMethod,
                     paymentValue,
@@ -123,7 +114,7 @@ export class CreateB2Controller {
                     status
                 }
             }),
-            'Não foi possível criar o B2.'
+            'Não foi possível atualizar o Pacote de Horas.'
         ));
     }
 }

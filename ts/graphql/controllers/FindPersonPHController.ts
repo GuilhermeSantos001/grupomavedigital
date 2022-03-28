@@ -1,10 +1,10 @@
-import { PersonB2 } from '@prisma/client';
+import { PersonPH } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
 import { FindThrowErrorController } from '@/graphql/controllers/FindThrowErrorController';
 
-export class FindPersonB2Controller {
+export class FindPersonPHController {
     async handle(request: Request, response: Response) {
         const {
             id
@@ -12,8 +12,8 @@ export class FindPersonB2Controller {
 
         const findThrowErrorController = new FindThrowErrorController();
 
-        return response.json(await findThrowErrorController.handle<PersonB2 | null>(
-            prismaClient.personB2.findFirst({
+        return response.json(await findThrowErrorController.handle<PersonPH | null>(
+            prismaClient.personPH.findFirst({
                 where: {
                     id
                 },
@@ -39,7 +39,7 @@ export class FindPersonB2Controller {
                     }
                 }
             }),
-            'Não foi possível retornar a pessoa que está no B2.'
+            'Não foi possível retornar a pessoa que está no pacote de horas.'
         ));
     }
 }

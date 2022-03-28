@@ -28,9 +28,10 @@ model CostCenter {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  card    Card[]
-  posting Posting[]
-  B2      B2[]
+  card         Card[]
+  posting      Posting[]
+  B2           B2[]
+  PackageHours PackageHours[]
 
   @@map("cost_centers")
 }
@@ -207,6 +208,7 @@ model Person {
   PersonCoverage PersonCoverage[]
   PersonB2       PersonB2[]
 
+  PersonPH PersonPH[]
   @@map("people")
 }
 
@@ -222,13 +224,14 @@ model Workplace {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  address                Address            @relation(fields: [addressId], references: [id])
-  scale                  Scale              @relation(fields: [scaleId], references: [id])
-  coveringWorkplaceId    Posting[]          @relation("CoverageWorkplaceId")
-  coverageWorkplaceId    Posting[]          @relation("CoveringWorkplaceId")
-  workplaceService       WorkplaceService[]
-  workplaceOriginId      B2[]               @relation("workplaceOriginId")
-  workplaceDestinationId B2[]               @relation("workplaceDestinationId")
+  address                  Address            @relation(fields: [addressId], references: [id])
+  scale                    Scale              @relation(fields: [scaleId], references: [id])
+  coveringWorkplaceId      Posting[]          @relation("CoverageWorkplaceId")
+  coverageWorkplaceId      Posting[]          @relation("CoveringWorkplaceId")
+  workplaceService         WorkplaceService[]
+  workplaceOriginId        B2[]               @relation("workplaceOriginId")
+  workplaceDestinationId   B2[]               @relation("workplaceDestinationId")
+  workplacePHDestinationId PackageHours[]     @relation("workplacePHDestinationId")
 
   @@map("workplaces")
 }
@@ -301,6 +304,19 @@ model PersonB2 {
   @@map("person_b2")
 }
 
+model PersonPH {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  personId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person       Person         @relation(fields: [personId], references: [id])
+  packageHours PackageHours[]
+
+  @@map("person_ph")
+}
+
 model Posting {
   id                   String    @id @default(uuid())
   cursorId             Int       @unique @default(autoincrement())
@@ -356,6 +372,7 @@ model B2 {
   level                  Int
   roleGratification      String
   gratification          Float
+  onlyHistory            Boolean
   paymentMethod          String
   paymentValue           Float
   paymentDatePayable     DateTime
@@ -372,4 +389,39 @@ model B2 {
   workplaceDestination Workplace  @relation("workplaceDestinationId", fields: [workplaceDestinationId], references: [id])
 
   @@map("b2")
+}
+
+model PackageHours {
+  id                       String    @id @default(uuid())
+  cursorId                 Int       @unique @default(autoincrement())
+  author                   String
+  costCenterId             String
+  periodStart              DateTime
+  periodEnd                DateTime
+  description              String?
+  personId                 String
+  workplacePHDestinationId String
+  contractStartedAt        DateTime
+  contractFinishAt         DateTime
+  entryTime                DateTime
+  exitTime                 DateTime
+  valueClosed              Float
+  jobTitle                 String
+  lawdays                  Int
+  onlyHistory              Boolean
+  paymentMethod            String
+  paymentValue             Float
+  paymentDatePayable       DateTime
+  paymentStatus            String
+  paymentDatePaid          DateTime?
+  paymentDateCancelled     DateTime?
+  status                   String
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @default(now()) @updatedAt
+
+  costCenter           CostCenter @relation(fields: [costCenterId], references: [id])
+  personPH             PersonPH   @relation(fields: [personId], references: [id])
+  workplaceDestination Workplace  @relation("workplacePHDestinationId", fields: [workplacePHDestinationId], references: [id])
+
+  @@map("package_hours")
 }

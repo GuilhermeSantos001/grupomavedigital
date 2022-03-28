@@ -1,4 +1,4 @@
-import { B2 } from '@prisma/client';
+import { PackageHours } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import { prismaClient } from '@/database/PrismaClient';
@@ -9,7 +9,7 @@ import { DatabaseStatusConstants } from '../constants/DatabaseStatusConstants';
 import { DatabasePaymentStatusConstants } from '../constants/DatabasePaymentStatusConstants';
 import { DatabasePaymentMethodConstants } from '../constants/DatabasePaymentMethodConstants';
 
-export class CreateB2Controller {
+export class CreatePackageHoursController {
     async handle(request: Request, response: Response) {
         const {
             author,
@@ -18,18 +18,14 @@ export class CreateB2Controller {
             periodEnd,
             description,
             personId,
-            workplaceOriginId,
-            workplaceDestinationId,
-            coverageStartedAt,
+            workplacePHDestinationId,
+            contractStartedAt,
+            contractFinishAt,
             entryTime,
             exitTime,
             valueClosed,
-            absences,
             lawdays,
-            discountValue,
-            level,
-            roleGratification,
-            gratification,
+            jobTitle,
             onlyHistory,
             paymentMethod,
             paymentValue,
@@ -38,25 +34,21 @@ export class CreateB2Controller {
             paymentDatePaid,
             paymentDateCancelled,
             status
-        }: Pick<B2,
+        }: Pick<PackageHours,
             | 'author'
             | 'costCenterId'
             | 'periodStart'
             | 'periodEnd'
             | 'description'
             | 'personId'
-            | 'workplaceOriginId'
-            | 'workplaceDestinationId'
-            | 'coverageStartedAt'
+            | 'workplacePHDestinationId'
+            | 'contractStartedAt'
+            | 'contractFinishAt'
             | 'entryTime'
             | 'exitTime'
             | 'valueClosed'
-            | 'absences'
             | 'lawdays'
-            | 'discountValue'
-            | 'level'
-            | 'roleGratification'
-            | 'gratification'
+            | 'jobTitle'
             | 'onlyHistory'
             | 'paymentMethod'
             | 'paymentValue'
@@ -92,8 +84,8 @@ export class CreateB2Controller {
                 'Propriedade status inválida.',
             ));
 
-        return response.json(await createThrowErrorController.handle<B2>(
-            prismaClient.b2.create({
+        return response.json(await createThrowErrorController.handle<PackageHours>(
+            prismaClient.packageHours.create({
                 data: {
                     author,
                     costCenterId,
@@ -101,18 +93,14 @@ export class CreateB2Controller {
                     periodEnd,
                     description,
                     personId,
-                    workplaceOriginId,
-                    workplaceDestinationId,
-                    coverageStartedAt,
+                    workplacePHDestinationId,
+                    contractStartedAt,
+                    contractFinishAt,
                     entryTime,
                     exitTime,
                     valueClosed,
-                    absences,
                     lawdays,
-                    discountValue,
-                    level,
-                    roleGratification,
-                    gratification,
+                    jobTitle,
                     onlyHistory,
                     paymentMethod,
                     paymentValue,
@@ -123,7 +111,7 @@ export class CreateB2Controller {
                     status
                 }
             }),
-            'Não foi possível criar o B2.'
+            'Não foi possível criar o Pacote de Horas.'
         ));
     }
 }

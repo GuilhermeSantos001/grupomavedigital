@@ -32,6 +32,7 @@ export class UpdateB2Controller {
                 level,
                 roleGratification,
                 gratification,
+                onlyHistory,
                 paymentMethod,
                 paymentValue,
                 paymentDatePayable,
@@ -58,6 +59,7 @@ export class UpdateB2Controller {
                 | 'level'
                 | 'roleGratification'
                 | 'gratification'
+                | 'onlyHistory'
                 | 'paymentMethod'
                 | 'paymentValue'
                 | 'paymentDatePayable'
@@ -114,6 +116,7 @@ export class UpdateB2Controller {
                     level,
                     roleGratification,
                     gratification,
+                    onlyHistory,
                     paymentMethod,
                     paymentValue,
                     paymentDatePayable,
