@@ -5,6 +5,7 @@
 **/coverage/**
 **/test/database/**
 **/data/**
+**/temp/**
 
 # Developer
 *.env

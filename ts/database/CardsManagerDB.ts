@@ -1,12 +1,12 @@
 /**
  * @description Gerenciador de informações com o banco de dados
  * @author GuilhermeSantos001
- * @update 31/01/2022
+ * @update 29/03/2022
  */
 
 import { FilterQuery } from 'mongoose';
 
-import {CardsSchema, cardsInterface, cardsModelInterface } from '@/schemas/CardsSchema';
+import { CardsSchema, cardsInterface, cardsModelInterface } from '@/schemas/CardsSchema';
 import Moment from '@/utils/moment';
 
 export interface cardsInfo extends cardsInterface {
@@ -16,6 +16,40 @@ export interface cardsInfo extends cardsInterface {
 export type Sort = 1 | -1;
 
 export class CardsManagerDB {
+    /**
+     * @description Retorna os cartões digitais com limite de itens a serem retornados
+     * @param skip Pula a leitura de uma quantidade X de itens iniciais
+     * @param sort Define a ordem de leitura, crescente ou decrescente
+     * @param limit Limite de itens a serem retornados
+     * @param filter Filtro de pesquisa
+     */
+    public async get(skip: number, sort: Sort, limit: number, filter: FilterQuery<cardsModelInterface>): Promise<cardsInfo[]> {
+        let cards: cardsInfo[];
+
+        const _cards = await CardsSchema.find(filter, null).skip(skip).sort({ $natural: sort }).limit(limit);
+
+        if (_cards.length > 0) {
+            cards = _cards.map((card: cardsModelInterface) => {
+                return {
+                    cid: card.cid,
+                    index: card._id,
+                    name: card.name,
+                    jobtitle: card.jobtitle,
+                    photo: card.photo,
+                    phones: card.phones,
+                    footer: card.footer,
+                    vcard: card.vcard,
+                    whatsapp: card.whatsapp,
+                    version: card.version
+                }
+            })
+        } else {
+            cards = [];
+        }
+
+        return cards;
+    }
+
     /**
      * @description Registra o cartão digital
      */
@@ -85,39 +119,5 @@ export class CardsManagerDB {
         }
 
         return true;
-    }
-
-    /**
-     * @description Retorna os cartões digitais com limite de itens a serem retornados
-     * @param skip Pula a leitura de uma quantidade X de itens iniciais
-     * @param sort Define a ordem de leitura, crescente ou decrescente
-     * @param limit Limite de itens a serem retornados
-     * @param filter Filtro de pesquisa
-     */
-    public async get(skip: number, sort: Sort, limit: number, filter: FilterQuery<cardsModelInterface>): Promise<cardsInfo[]> {
-        let cards: cardsInfo[];
-
-        const _cards = await CardsSchema.find(filter, null).skip(skip).sort({ $natural: sort }).limit(limit);
-
-        if (_cards.length > 0) {
-            cards = _cards.map((card: cardsModelInterface) => {
-                return {
-                    cid: card.cid,
-                    index: card._id,
-                    name: card.name,
-                    jobtitle: card.jobtitle,
-                    photo: card.photo,
-                    phones: card.phones,
-                    footer: card.footer,
-                    vcard: card.vcard,
-                    whatsapp: card.whatsapp,
-                    version: card.version
-                }
-            })
-        } else {
-            cards = [];
-        }
-
-        return cards;
     }
 }

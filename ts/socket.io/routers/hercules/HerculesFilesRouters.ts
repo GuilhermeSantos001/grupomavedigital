@@ -14,7 +14,7 @@ import { PrivilegesSystem } from "@/schemas/UsersSchema";
 import { GroupId, UserId, matches } from "@/schemas/FilesSchema";
 import Privilege from "@/utils/privilege";
 
-export function HerculesFilesRouter(io: Server, socket: Socket): void {
+export function HerculesFilesRouters(io: Server, socket: Socket): void {
   /**
    * ? Evento emitido quando um arquivo é criado
    */

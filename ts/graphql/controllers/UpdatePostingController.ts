@@ -9,6 +9,8 @@ import { DatabaseStatusConstants } from '../constants/DatabaseStatusConstants';
 import { DatabasePaymentStatusConstants } from '../constants/DatabasePaymentStatusConstants';
 import { DatabasePaymentMethodConstants } from '../constants/DatabasePaymentMethodConstants';
 
+import DateEx from '@/utils/dateEx';
+
 export class UpdatePostingController {
   async handle(request: Request, response: Response) {
     const
@@ -62,67 +64,109 @@ export class UpdatePostingController {
     const databasePaymentStatusConstants = new DatabasePaymentStatusConstants();
     const databasePaymentMethodConstants = new DatabasePaymentMethodConstants();
 
-    const posting = await prismaClient.posting.findFirst({
-      where: {
-        OR: [
-          // ? Verifica se existe algum lançamento na mesma data de
-          // ? origem, dentro do mesmo período
-          {
-            periodStart,
-            periodEnd,
-            originDate,
-          },
-          // ? Verifica se existe algum lançamento em que o posto
-          // ? a pessoa já está sendo coberta
-          {
-            periodStart,
-            periodEnd,
-            originDate,
-            coveringId
-          },
-          // ? Verifica se existe algum lançamento em que o posto
-          // ? a pessoa já está cobrindo
-          {
-            periodStart,
-            periodEnd,
-            originDate,
-            coverageId
-          },
-          // ? Verifica se existe algum lançamento em que o posto
-          // ? já está sendo coberto na data de origem
-          {
-            periodStart,
-            periodEnd,
-            originDate,
-            coveringWorkplaceId
-          },
-          // ? Verifica se existe algum lançamento em que o posto
-          // ? já está sendo usado por alguma pessoa que está cobrindo
-          {
-            periodStart,
-            periodEnd,
-            originDate,
-            coverageWorkplaceId
-          }
-        ]
+    const postings = await prismaClient.posting.findMany({
+      include: {
+        coverageWorkplace: true
       }
     });
 
-    if (posting?.id !== id)
-      return response.json(await responseThrowErrorController.handle(
-        new Error(`Não foi possível criar o lançamento. Verifique os dados informados.`),
-        'Tente novamente!',
-      ));
+    let
+      newEntryTime = null,
+      newExitTime = null,
+      newWorkShift = null;
+
+    for (
+      const posting of postings
+        .filter(posting => DateEx.isEqual(new Date(originDate), new Date(posting.originDate)))
+        .reverse()
+    ) {
+      /**
+       * ? Verifique se a pessoa realizando a cobertura já está cobrindo
+       */
+      if (
+        posting.coverageId === coverageId &&
+        posting.coverageWorkplaceId !== coverageWorkplaceId
+      )
+        return response.json(await responseThrowErrorController.handle(
+          new Error(`
+                    A pessoa que iria realizar a cobertura já está em outro posto.`
+          ),
+          'Tente outra pessoa.',
+        ));
+
+      /**
+       * ? Verifique se o posto de cobertura já esta sendo coberto
+       */
+      if (
+        coverageWorkplaceId
+        && posting.coverageWorkplaceId === coverageWorkplaceId
+        && posting.coverageWorkplace
+      ) {
+        let
+          entryTime,
+          exitTime;
+
+        if (postings.length > 1) {
+          if (!posting.entryTime || !posting.exitTime) continue;
+
+          entryTime = new Date(posting.entryTime);
+          exitTime = new Date(posting.exitTime);
+        } else {
+          const
+            workplaceEntryTime = new Date(posting.coverageWorkplace.entryTime),
+            workplaceExitTime = new Date(posting.coverageWorkplace.exitTime);
+
+          entryTime = new Date(originDate);
+          exitTime = new Date(originDate);
+
+          entryTime.setHours(workplaceEntryTime.getHours());
+          entryTime.setMinutes(workplaceEntryTime.getMinutes());
+          exitTime.setHours(workplaceExitTime.getHours());
+          exitTime.setMinutes(workplaceExitTime.getMinutes());
+        }
+
+        // * Regras do posto no segundo turno
+        if (!posting.workShift || posting.workShift < 1) {
+          if (
+            DateEx.isAfter(new Date(), entryTime, true) &&
+            DateEx.isAfter(new Date(), exitTime, true)
+          ) {
+            newEntryTime = DateEx.addDays(entryTime, 1);
+            newExitTime = DateEx.addDays(exitTime, 1);
+
+            newWorkShift = 1;
+            break;
+          } else {
+            return response.json(await responseThrowErrorController.handle(
+              new Error(`O posto de cobertura já está ocupado. Por favor, tente novamente a partir das ${exitTime.toLocaleTimeString()} no dia ${exitTime.toLocaleDateString()}.`),
+              'Tente novamente mais tarde.',
+            ));
+          }
+        }
+        // * Regras do posto no primeiro turno
+        else {
+          if (
+            DateEx.isAfter(new Date(), entryTime, true) &&
+            DateEx.isBefore(new Date(), exitTime, true)
+          ) {
+            newEntryTime = DateEx.addDays(entryTime, 1);
+            newExitTime = DateEx.addDays(exitTime, 1);
+
+            newWorkShift = null;
+            break;
+          } else {
+            return response.json(await responseThrowErrorController.handle(
+              new Error(`O turno do posto ainda não está liberado. Por favor, tente novamente a partir das ${entryTime.toLocaleTimeString()} ás ${exitTime.toLocaleTimeString()} no dia ${entryTime.toLocaleDateString()}.`),
+              'Tente novamente mais tarde.',
+            ));
+          }
+        }
+      }
+    }
 
     if (coveringId === coverageId)
       return response.json(await responseThrowErrorController.handle(
         new Error(`A pessoa que está sendo coberta, não pode ser a mesma pessoa que está cobrindo.`),
-        'Tente com outra pessoa.',
-      ));
-
-    if (coveringWorkplaceId === coverageWorkplaceId)
-      return response.json(await responseThrowErrorController.handle(
-        new Error(`O posto que está sendo coberto, não pode ser o posto de cobertura.`),
         'Tente com outra pessoa.',
       ));
 
@@ -146,14 +190,15 @@ export class UpdatePostingController {
 
     return response.json(await updateThrowErrorController.handle<Posting>(
       prismaClient.posting.update({
-        where: {
-          id
-        },
+        where: { id },
         data: {
           author,
           costCenterId,
           periodStart,
           periodEnd,
+          entryTime: newEntryTime,
+          exitTime: newExitTime,
+          workShift: newWorkShift,
           originDate,
           description,
           coveringId,
@@ -171,7 +216,7 @@ export class UpdatePostingController {
           status
         }
       }),
-      'Não foi possível atualizar o lançamento financeiro.'
+      'Não foi possível atualizar o lançamento operacional.'
     ));
   }
 }

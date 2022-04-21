@@ -1,48 +1,61 @@
 # Schema de input para os vCards
-input file {
-  path: String!
+input input_file {
+  id: String!
   name: String!
+  type: String!
 }
 
-input birthday {
+input input_birthday {
   year: Int!
   month: Int!
   day: Int!
 }
 
-input socialURL {
+input input_socialURL {
   media: String!
   url: String!
 }
 
-input socialmedia {
+input input_socialmedia {
   name: String!
   value: String!
   enabled: Boolean!
 }
 
-input whatsapp {
+input input_whatsapp {
   phone: String!
   text: String!
   message: String!
 }
 
-input cardFooter {
+input input_cardFooter {
   email: String!
   location: String!
   website: String!
-  attachment: String!
-  socialmedia: [socialmedia!]!
+  attachment: input_file!
+  socialmedia: [input_socialmedia!]!
 }
 
-input vcard {
+input input_vcardmetadavalues {
+  path: String!
+  name: String!
+  type: String!
+}
+
+input input_vcardmetadata {
+  file: input_vcardmetadavalues!
+  logotipo: input_vcardmetadavalues!
+  photo: input_vcardmetadavalues!
+}
+
+input input_vcard {
   firstname: String!
   lastname: String!
   organization: String!
-  photo: file!
-  logo: file!
+  photo: input_file!
+  logo: input_file!
   workPhone: [String!]!
-  birthday: birthday!
+  birthday: input_birthday!
   title: String!
   url: String!
   workUrl: String!
@@ -53,28 +66,123 @@ input vcard {
   city: String!
   stateProvince: String!
   postalCode: String!
-  socialUrls: [socialURL!]!
-  file: file
+  socialUrls: [input_socialURL!]!
+  metadata: input_vcardmetadata
 }
 
-input card {
+input input_card {
   id: String
   version: String!
-  photo: file!
+  photo: input_file!
   name: String!
   jobtitle: String!
   phones: [String!]!
-  whatsapp: whatsapp!
-  vcard: vcard!
-  footer: cardFooter!
+  whatsapp: input_whatsapp!
+  vcard: input_vcard!
+  footer: input_cardFooter!
+}
+
+type CardInfo {
+  index: String
+  cid: String
+  version: String
+  photo: Photo
+  name: String
+  jobtitle: String
+  phones: [String]
+  whatsapp: Whatsapp
+  vcard: VCard
+  footer: Footer
+  createdAt: String
+}
+
+type Photo {
+  name: String
+  type: String
+  id: String
+}
+
+type Whatsapp {
+  phone: String
+  text: String
+  message: String
+}
+
+type VCard {
+  firstname: String
+  lastname: String
+  organization: String
+  photo: Photo
+  logo: Photo
+  workPhone: [String]
+  birthday: Birthday
+  title: String
+  url: String
+  workUrl: String
+  email: String
+  label: String
+  countryRegion: String
+  street: String
+  city: String
+  stateProvince: String
+  postalCode: String
+  socialUrls: [SocialUrls]
+  metadata: VCardMetadata
+}
+
+type Birthday {
+  year: Int
+  month: Int
+  day: Int
+}
+
+type SocialURL {
+  media: String
+  url: String
+}
+
+type File {
+  name: String
+  type: String
+  id: String
+}
+
+type SocialUrls {
+  media: String
+  url: String
+}
+
+type Footer {
+  email: String
+  location: String
+  website: String
+  attachment: Photo
+  socialmedia: [Socialmedia]
+}
+
+type Socialmedia {
+  name: String
+  value: String
+}
+
+type VCardMetadataValues {
+  path: String!
+  name: String!
+  type: String!
+}
+
+type VCardMetadata {
+  file: VCardMetadataValues!
+  logotipo: VCardMetadataValues!
+  photo: VCardMetadataValues!
 }
 
 type Query {
   """
-  Efetua o login do usuário
+  Retorna uma lista de cartões digitais
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-query?id=cardget
   """
-  cardGet(
+  getCards(
     """
     ID usado como base para que a lista retorne cartões com ID's mais recentes
     """
@@ -83,9 +191,22 @@ type Query {
     Limite de cartões a serem retornados na lista
     """
     limit: Int!
-  ): String!
+  ): [CardInfo!]!
     @auth(
-      keys: ["cnR{rrCHWtcB{/9tx^nG<sM6Km]Mc_RcE$-?.3}g;_N<T(]Grw97.jczDR?>gy&]"]
+      keys: ["H6uagjXejR8GcjFAxPtCNqtWShxXaEmXJ89c5ZrgczsD7VAaDZr5GydYKadHtUQc"]
+    )
+  """
+  Busca por um cartão digital
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-query?id=cardget
+  """
+  findCard(
+    """
+    ID do cartão digital a ser retornado
+    """
+    cid: String!
+  ): [CardInfo!]!
+    @auth(
+      keys: ["H6uagjXejR8GcjFAxPtCNqtWShxXaEmXJ89c5ZrgczsD7VAaDZr5GydYKadHtUQc"]
     )
 }
 
@@ -98,8 +219,8 @@ type Mutation {
     """
     Propriedades do vcard
     """
-    data: vcard!
-  ): String!
+    data: input_vcard!
+  ): VCardMetadata!
     @auth(
       keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"]
     )
@@ -113,10 +234,10 @@ type Mutation {
     """
     Propriedades do cartão digital
     """
-    data: card!
+    data: input_card!
   ): String!
     @auth(
-      keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld##*&E#==E*OBr2&h$wEC"]
+      keys: ["6T9YEPuTRu3e0aQevEdeVA8r1Dr&8RAFReSud0&Huhld54F*E#==E*OBr2&h1wEC"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -128,7 +249,7 @@ type Mutation {
     """
     Propriedades do cartão digital
     """
-    data: card!
+    data: input_card!
   ): String!
     @auth(
       keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"]

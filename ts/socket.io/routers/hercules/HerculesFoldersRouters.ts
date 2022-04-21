@@ -73,7 +73,7 @@ async function getFoldersId(folder: folderModelInterface | ResponseDataFolder) {
   return items;
 }
 
-export function HerculesFoldersRouter(io: Server, socket: Socket): void {
+export function HerculesFoldersRouters(io: Server, socket: Socket): void {
   /**
    * ? Evento emitido quando uma pasta é criada
    */

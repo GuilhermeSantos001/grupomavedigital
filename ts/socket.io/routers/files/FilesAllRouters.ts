@@ -1,21 +1,15 @@
-/**
- * @description Websocket Router -> Payback -> All
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Server, Socket } from "socket.io";
 
-import { PaybackSocketEvents } from '@/constants/socketEvents';
+import { FilesSocketEvents } from '@/constants/SocketEvents';
 
 import {
-  TYPEOF_EMITTER_PAYBACK_UPLOAD_MIRROR,
-  TYPEOF_LISTENER_PAYBACK_UPLOAD_MIRROR,
-  TYPEOF_EMITTER_PAYBACK_CHANGE_TYPE_MIRROR,
-  TYPEOF_LISTENER_PAYBACK_CHANGE_TYPE_MIRROR,
-  TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR,
-  TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR
-} from "@/constants/SocketTypes";
+  TYPEOF_EMITTER_FILE_UPLOAD_ATTACHMENT,
+  TYPEOF_LISTENER_FILE_UPLOAD_ATTACHMENT,
+  TYPEOF_EMITTER_FILE_CHANGE_TYPE_ATTACHMENT,
+  TYPEOF_LISTENER_FILE_CHANGE_TYPE_ATTACHMENT,
+  TYPEOF_EMITTER_FILE_DELETE_ATTACHMENT,
+  TYPEOF_LISTENER_FILE_DELETE_ATTACHMENT,
+} from "@/constants/SocketFileType";
 
 import { decompressFromBase64, compressToBase64 } from "lz-string";
 
@@ -23,12 +17,10 @@ import { matches } from "@/schemas/FilesSchema";
 
 import { UploadsController } from "@/controllers/UploadsController";
 
-export function PaybackAllRouter(io: Server, socket: Socket): void {
-  /**
-   * ? Evento emitido quando o espelho de ponto do funcionario que está sendo coberto e o funcionario que está cobrindo é anexado
-   */
-  socket.on(PaybackSocketEvents.PAYBACK_UPLOAD_MIRROR, async (data: string) => {
+export function FilesAllRouters(io: Server, socket: Socket): void {
+  socket.on(FilesSocketEvents.FILE_UPLOAD_ATTACHMENT, async (data: string) => {
     const {
+      channel,
       authorId,
       name,
       description,
@@ -36,12 +28,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
       compressedSize,
       fileId,
       version,
-      type,
-    }: TYPEOF_EMITTER_PAYBACK_UPLOAD_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
-      channel =
-        type === 'COVERAGE' ?
-          PaybackSocketEvents.PAYBACK_UPLOAD_COVERAGE_MIRROR :
-          PaybackSocketEvents.PAYBACK_UPLOAD_COVERING_MIRROR,
+    }: TYPEOF_EMITTER_FILE_UPLOAD_ATTACHMENT = JSON.parse(decompressFromBase64(data) || ""),
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -67,7 +54,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
       if (!upload)
         throw new Error('Não foi possível armazenar o arquivo.');
 
-      const reply: TYPEOF_LISTENER_PAYBACK_UPLOAD_MIRROR = {
+      const reply: TYPEOF_LISTENER_FILE_UPLOAD_ATTACHMENT = {
         fileId,
         authorId,
         filename,
@@ -77,7 +64,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
         compressedSize,
         version,
         temporary,
-        expiredAt
+        expiredAt,
       };
 
       return socket.emit(
@@ -89,15 +76,12 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
     }
   });
 
-  /**
-   * ? Evento emitido quando o espelho de ponto do funcionario muda de tipo
-   */
-  socket.on(PaybackSocketEvents.PAYBACK_CHANGE_TYPE_MIRROR, async (data: string) => {
+  socket.on(FilesSocketEvents.FILE_CHANGE_TYPE_ATTACHMENT, async (data: string) => {
     const {
       filesId,
       type,
-    }: TYPEOF_EMITTER_PAYBACK_CHANGE_TYPE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
-      channel = PaybackSocketEvents.PAYBACK_CHANGE_TYPE_MIRROR,
+    }: TYPEOF_EMITTER_FILE_CHANGE_TYPE_ATTACHMENT = JSON.parse(decompressFromBase64(data) || ""),
+      channel = FilesSocketEvents.FILE_CHANGE_TYPE_ATTACHMENT,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -116,7 +100,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
         }
       }
 
-      const reply: TYPEOF_LISTENER_PAYBACK_CHANGE_TYPE_MIRROR = {
+      const reply: TYPEOF_LISTENER_FILE_CHANGE_TYPE_ATTACHMENT = {
         filesId,
         type,
       }
@@ -130,15 +114,12 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
     }
   });
 
-  /**
-   * ? Evento emitido quando o espelho de ponto do funcionario é excluído
-   */
-  socket.on(PaybackSocketEvents.PAYBACK_DELETE_MIRROR, async (data: string) => {
+  socket.on(FilesSocketEvents.FILE_DELETE_ATTACHMENT, async (data: string) => {
     const {
       filesId,
       mirrorsId,
-    }: TYPEOF_EMITTER_PAYBACK_DELETE_MIRROR = JSON.parse(decompressFromBase64(data) || ""),
-      channel = PaybackSocketEvents.PAYBACK_DELETE_MIRROR,
+    }: TYPEOF_EMITTER_FILE_DELETE_ATTACHMENT = JSON.parse(decompressFromBase64(data) || ""),
+      channel = FilesSocketEvents.FILE_DELETE_ATTACHMENT,
       channelSuccess = `${channel}-SUCCESS`,
       channelError = `${channel}-FAILURE`;
 
@@ -150,7 +131,7 @@ export function PaybackAllRouter(io: Server, socket: Socket): void {
           throw new Error('Não foi possível excluir o arquivo.');
       }
 
-      const reply: TYPEOF_LISTENER_PAYBACK_DELETE_MIRROR = {
+      const reply: TYPEOF_LISTENER_FILE_DELETE_ATTACHMENT = {
         mirrorsId
       }
 

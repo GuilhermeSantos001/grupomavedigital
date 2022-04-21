@@ -1,75 +1,32 @@
-/**
- * @description Rotas dos cartões
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
-import {VCardGenerate} from '@/lib/VCardGenerate';
-import {CardsManagerDB} from '@/database/CardsManagerDB';
+import { ObjectId } from 'mongodb';
+import { VCardGenerate, VCard } from '@/lib/VCardGenerate';
+import { CardsManagerDB } from '@/database/CardsManagerDB';
 import { SocialmediaName } from '@/schemas/CardsSchema';
 import random from '@/utils/random';
-import { compressToEncodedURIComponent } from 'lz-string';
 
 type File = {
-    path: string,
     name: string
-};
-
-type Birthday = {
-    year: number,
-    month: number,
-    day: number,
-};
-
-type SocialURL = {
-    media: string,
-    url: string
+    type: string
+    id: string
 };
 
 type Socialmedia = {
-    name: SocialmediaName,
-    value: string,
-    enabled: boolean
+    name: SocialmediaName
+    value: string
 };
 
 type Whatsapp = {
-    phone: string,
-    text: string,
+    phone: string
+    text: string
     message: string
 };
 
 type CardFooter = {
-    email: string,
-    location: string,
-    website: string,
-    attachment: string,
+    email: string
+    location: string
+    website: string
+    attachment: File
     socialmedia: Socialmedia[]
-};
-
-type Label = 'Work Address' | 'Home Address';
-
-type CountryRegion = 'Brazil' | 'United States';
-
-type Vcard = {
-    firstname: string,
-    lastname: string,
-    organization: string,
-    photo: File,
-    logo: File,
-    workPhone: string[],
-    birthday: Birthday,
-    title: string,
-    url: string,
-    workUrl: string,
-    email: string,
-    label: Label,
-    countryRegion: CountryRegion,
-    street: string,
-    city: string,
-    stateProvince: string,
-    postalCode: string,
-    socialUrls: SocialURL[],
-    file: File
 };
 
 type Card = {
@@ -80,7 +37,7 @@ type Card = {
     jobtitle: string,
     phones: string[],
     whatsapp: Whatsapp,
-    vcard: Vcard,
+    vcard: VCard,
     footer: CardFooter
 };
 
@@ -88,20 +45,25 @@ module.exports = {
     Query: {
         cardGet: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
             try {
-                const
-                cardsManagerDB = new CardsManagerDB(),
-                cards = await cardsManagerDB.get(0, 1, args.limit, {
-                    _id: { $gt: args.lastIndex }
-                });
+                let filter = {};
 
-                return compressToEncodedURIComponent(JSON.stringify(cards));
+                if (args.lastIndex && args.lastIndex.length > 0)
+                    filter = {
+                        _id: { $gt: new ObjectId(args.lastIndex) }
+                    }
+
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    cards = await cardsManagerDB.get(0, 1, args.limit, filter);
+
+                return cards;
             } catch (error) {
                 throw new Error(String(error));
             }
         }
     },
     Mutation: {
-        vcardCreate: async (parent: unknown, args: { data: Vcard }) => {
+        vcardCreate: async (parent: unknown, args: { data: VCard }) => {
             try {
                 return await VCardGenerate(args.data);
             } catch (error) {
@@ -112,7 +74,7 @@ module.exports = {
             try {
                 const
                     cardsManagerDB = new CardsManagerDB(),
-                    id = args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
+                    id = args.data['id'] && args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
                     {
                         version,
                         photo,
@@ -144,18 +106,18 @@ module.exports = {
         cardUpdate: async (parent: unknown, args: { data: Card }) => {
             try {
                 const
-                cardsManagerDB = new CardsManagerDB(),
-                {
-                    id,
-                    version,
-                    photo,
-                    name,
-                    jobtitle,
-                    phones,
-                    whatsapp,
-                    vcard,
-                    footer
-                } = args.data;
+                    cardsManagerDB = new CardsManagerDB(),
+                    {
+                        id,
+                        version,
+                        photo,
+                        name,
+                        jobtitle,
+                        phones,
+                        whatsapp,
+                        vcard,
+                        footer
+                    } = args.data;
 
                 await cardsManagerDB.update(id, {
                     cid: id,

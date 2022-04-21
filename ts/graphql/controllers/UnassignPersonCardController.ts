@@ -9,6 +9,8 @@ export class UnassignPersonCardController {
     const
       { id } = request.params
 
+      console.log(id);
+
     const updateThrowErrorController = new UpdateThrowErrorController();
 
     return response.json(await updateThrowErrorController.handle<Card>(

@@ -1,15 +1,9 @@
-/**
- * @description Servidor Socket.io
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Server, Socket } from "socket.io";
 
 import Moment from '@/utils/moment';
 
-import { HerculesRouter } from '@/socket.io/routers/HerculesRouter';
-import { PaybackRouter } from '@/socket.io/routers/PaybackRouter';
+import { HerculesRouters } from '@/socket.io/routers/HerculesRouters';
+import { FilesRouters } from '@/socket.io/routers/FilesRouters';
 
 export function SocketIO(io: Server) {
     io.on('connection', (socket: Socket) => {
@@ -21,7 +15,7 @@ export function SocketIO(io: Server) {
             });
         }
 
-        HerculesRouter(io, socket);
-        PaybackRouter(io, socket);
+        HerculesRouters(io, socket);
+        FilesRouters(io, socket);
     });
 }

@@ -15,8 +15,9 @@ export class CreateCardController {
             serialNumber,
             lastCardNumber,
             personId,
+            unlocked,
             status
-        }: Pick<Card, 'costCenterId' | 'lotNum' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'status'> = request.body;
+        }: Pick<Card, 'costCenterId' | 'lotNum' | 'serialNumber' | 'lastCardNumber' | 'personId' | 'unlocked' | 'status'> = request.body;
 
         const createThrowErrorController = new CreateThrowErrorController();
         const responseThrowErrorController = new ResponseThrowErrorController();
@@ -55,6 +56,7 @@ export class CreateCardController {
                     serialNumber,
                     lastCardNumber,
                     personId,
+                    unlocked,
                     status
                 }
             }),

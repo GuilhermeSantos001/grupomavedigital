@@ -48,7 +48,7 @@ export class CreatePersonController {
                 'Propriedade name inválida.',
             ));
 
-            if (cpf.length !== 11)
+        if (cpf.length !== 11)
             return response.json(await responseThrowErrorController.handle(
                 new Error('CPF deve ter 11 caracteres'),
                 'Propriedade cpf inválida.',
@@ -66,7 +66,7 @@ export class CreatePersonController {
                 'Propriedade phone inválida.',
             ));
 
-        if (!await validationMailController.handle(mail))
+        if (mail && mail.length > 0 && !await validationMailController.handle(mail))
             return response.json(await responseThrowErrorController.handle(
                 new Error('Formato do e-mail informado não está válido'),
                 'Propriedade mail inválida.',

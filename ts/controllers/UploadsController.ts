@@ -75,7 +75,7 @@ export class UploadsController implements IUploadContract {
 
     files[indexOf] = {
       ...files[indexOf],
-      temporary: false,
+      temporary: true,
       expiredAt
     }
 

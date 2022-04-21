@@ -1,41 +1,24 @@
-/**
- * @description Gerador de vcard
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
-import { readFileSync } from 'fs';
 import vCardsJS from 'vcards-js';
-
-import { localPath } from '@/utils/localpath';
+import fs from 'fs-extra';
 import Random from '@/utils/random';
-
-export interface Photo {
-    name: string;
-    path: string;
-}
-
+import { UploadsController } from '@/controllers/UploadsController';
+import { localPath } from '@/utils/localpath';
+import { Photo } from '@/schemas/CardsSchema';
 export interface Birthday {
     year: number;
     month: number;
     day: number;
 }
-
 export interface SocialUrls {
     media: string;
     url: string;
-}
-
-export interface File {
-    name: string;
-    path: string;
 }
 
 export type Label = 'Work Address' | 'Home Address';
 
 export type CountryRegion = 'Brazil' | 'United States';
 
-export type SocialmediaName = 'Facebook' | 'Youtube' | 'Linkedin' | 'Instagram' | 'Twitter';
+export type SocialmediaName = 'facebook' | 'youtube' | 'linkedin' | 'instagram' | 'twitter';
 
 export interface VCard {
     firstname: string;
@@ -56,12 +39,31 @@ export interface VCard {
     stateProvince: string;
     postalCode: string;
     socialUrls: SocialUrls[];
-    file?: File;
+    metadata: Metadata;
 }
 
-export async function VCardGenerate(vcard: VCard): Promise<string> {
+export interface Metadata {
+    file: {
+        path: string
+        name: string;
+        type: string;
+    }
+    logotipo: {
+        path: string
+        name: string;
+        type: string;
+    }
+    photo: {
+        path: string
+        name: string;
+        type: string;
+    }
+}
+
+export async function VCardGenerate(vcard: VCard): Promise<Metadata> {
     try {
         const
+            uploadsController = new UploadsController(),
             vCard = vCardsJS(),
             formatterIMG = (filename: string) => {
                 if (String(filename).indexOf('.png') != -1)
@@ -84,12 +86,27 @@ export async function VCardGenerate(vcard: VCard): Promise<string> {
             logotipo = vcard.logo,
             photoProfile = vcard.photo;
 
+        if (!fs.existsSync('temp'))
+            fs.mkdirSync('temp');
+
         //set properties
         vCard.firstName = vcard.firstname;
         vCard.lastName = vcard.lastname;
         vCard.organization = vcard.organization;
-        vCard.photo.embedFromString(Buffer.from(readFileSync(localPath(`public/${photoProfile.path}${photoProfile.name}`))).toString('base64'), formatterIMG(photoProfile.name));
-        vCard.logo.embedFromString(Buffer.from(readFileSync(localPath(`public/${logotipo.path}${logotipo.name}`))).toString('base64'), formatterIMG(logotipo.name));
+
+        const
+            logotipoFileName = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${logotipo.name}`).length, 'hex'),
+            logotipoFilePath = `temp/${logotipoFileName}${logotipo.type}`,
+            logotipoWriteStream = fs.createWriteStream(logotipoFilePath),
+            photoFileName = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${photoProfile.name}`).length, 'hex'),
+            photoFilePath = `temp/${photoFileName}${photoProfile.type}`,
+            photoWriteStream = fs.createWriteStream(photoFilePath);
+
+        await uploadsController.raw(logotipoWriteStream, logotipo.id);
+        await uploadsController.raw(photoWriteStream, photoProfile.id);
+
+        vCard.photo.embedFromString(Buffer.from(fs.readFileSync(logotipoFilePath)).toString('base64'), formatterIMG(`${logotipo.name}${logotipo.type}`));
+        vCard.logo.embedFromString(Buffer.from(fs.readFileSync(photoFilePath)).toString('base64'), formatterIMG(`${photoProfile.name}${photoProfile.type}`));
         vCard.workPhone = vcard.workPhone;
         vCard.birthday = new Date(vcard.birthday.year, vcard.birthday.month, vcard.birthday.day);
         vCard.title = vcard.title;
@@ -104,24 +121,43 @@ export async function VCardGenerate(vcard: VCard): Promise<string> {
         vCard.workAddress.countryRegion = vcard.countryRegion;
         vCard.socialUrls = {
             facebook: "",
-            flickr: "",
+            youtube: "",
             linkedIn: "",
-            twitter: ""
+            instagram: "",
+            twitter: "",
+            tiktok: "",
+            flickr: "",
         };
 
-        vcard.socialUrls.forEach(social => vCard.socialUrls[social.media] = social.url);
+        vcard.socialUrls.forEach(social => vCard.socialUrls[String(social.media).toLowerCase()] = social.url);
 
-        //save to file
+        // ? Save to File in temp folder
         const
             filename = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${vcard['organization']}.vcf`).length, 'hex'),
-            filepath = localPath(`public/vcf/${filename}`);
+            filepath = localPath(`temp/${filename}.vcf`);
 
-        vCard.version = '3.0'; //can also support 2.1 and 4.0, certain versions only support certain fields
+        vCard.version = '3.0'; // * can also support 2.1 and 4.0, certain versions only support certain fields
 
         await vCard.saveToFile(filepath);
 
-        return filename;
+        return {
+            file: {
+                path: `temp/${filename}.vcf`,
+                name: filename,
+                type: '.vcf'
+            },
+            logotipo: {
+                path: logotipoFilePath,
+                name: vcard.logo.name,
+                type: vcard.logo.type
+            },
+            photo: {
+                path: photoFilePath,
+                name: vcard.photo.name,
+                type: vcard.photo.type,
+            }
+        };
     } catch (error) {
-        throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error))
     }
 }

@@ -55,7 +55,8 @@ export default function TokenDirective(directiveName: string) {
                                     }, context);
 
                                     return await resolve(source, args, context, info);
-                                } catch {
+                                } catch (error) {
+                                    console.log(error);
                                     throw new Error(`Refresh Token inválido!`);
                                 }
                             }

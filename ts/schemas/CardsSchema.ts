@@ -1,16 +1,11 @@
-/**
- * @description Schema das atividades
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Document, Schema, model } from "mongoose";
 
-import { VCard } from '@/lib/vcard';
+import { VCard } from '@/lib/VCardGenerate';
 
 export interface Photo {
-    path: string;
     name: string;
+    type: string;
+    id: string;
 }
 
 export interface Whatsapp {
@@ -22,16 +17,23 @@ export interface Whatsapp {
 export interface Socialmedia {
     name: SocialmediaName;
     value: string;
-    enabled: boolean;
 }
 
-export type SocialmediaName = 'Facebook' | 'Youtube' | 'Linkedin' | 'Instagram' | 'Twitter';
+export type SocialmediaName =
+    'facebook'
+    | 'youtube'
+    | 'linkedin'
+    | 'instagram'
+    | 'twitter'
+    | 'tiktok'
+    | 'flickr'
+    ;
 
 export interface Footer {
     email: string;
     location: string;
     website: string;
-    attachment: string;
+    attachment: Photo;
     socialmedia: Socialmedia[];
 }
 
@@ -54,12 +56,17 @@ export interface cardsModelInterface extends cardsInterface, Document {
 }
 
 export const photoSchema: Schema = new Schema({
-    path: {
+    id: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     name: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    type: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
@@ -104,15 +111,37 @@ export const birthdaySchema: Schema = new Schema({
     }
 });
 
-export const fileSchema: Schema = new Schema({
-    name: {
-        type: String,
-        trim: true
-    },
+export const vcardMetadataValuesSchema: Schema = new Schema({
     path: {
         type: String,
-        trim: true
-    }
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    name: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    type: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+});
+
+export const vcardMetadataSchema: Schema = new Schema({
+    file: {
+        type: vcardMetadataValuesSchema,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    logotipo: {
+        type: vcardMetadataValuesSchema,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    photo: {
+        type: vcardMetadataValuesSchema,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
 });
 
 export const vcardSchema: Schema = new Schema({
@@ -202,7 +231,8 @@ export const vcardSchema: Schema = new Schema({
         trim: true,
         default: 'Brazil',
         enum: [
-            'Brazil'
+            'Brazil',
+            'United States'
         ],
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
@@ -211,9 +241,9 @@ export const vcardSchema: Schema = new Schema({
         default: [],
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
-    file: {
-        type: fileSchema,
-        required: false
+    metadata: {
+        type: vcardMetadataSchema,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
     }
 });
 
@@ -222,21 +252,19 @@ export const socialmediaSchema: Schema = new Schema({
         type: String,
         trim: true,
         enum: [
-            'Facebook',
-            'Youtube',
-            'Linkedin',
-            'Instagram',
-            'Twitter'
+            'facebook',
+            'youtube',
+            'linkedin',
+            'instagram',
+            'twitter',
+            'tiktok',
+            'flickr'
         ],
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     value: {
         type: String,
         trim: true,
-        required: [true, '{PATH} este campo é obrigatório para sua segurança']
-    },
-    enabled: {
-        type: Boolean,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     }
 });
@@ -258,8 +286,7 @@ export const footerSchema: Schema = new Schema({
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     attachment: {
-        type: String,
-        trim: true,
+        type: photoSchema,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']
     },
     socialmedia: {

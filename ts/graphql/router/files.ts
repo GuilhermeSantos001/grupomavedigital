@@ -1,5 +1,8 @@
 import { Router, Request, Response } from 'express';
 
+import fs from 'fs-extra';
+import { localPath } from '@/utils/localpath';
+
 const router = Router({
     strict: true,
     caseSensitive: true
@@ -93,6 +96,65 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
         const uploadsController = new UploadsController();
 
         await uploadsController.raw(res, fileId);
+    } catch (error) {
+        return res.status(400).send({
+            success: false,
+            data: error
+        });
+    };
+});
+
+
+/**
+ * @description Baixa um arquivo hospedado
+ */
+router.get(['/temp/raw/:filename.:ext'], APIMiddleware, TokenMiddleware,async function (req: Request, res: Response) {
+    let {
+        filePath,
+        updatedToken,
+    } = getReqProps(req, [
+        'filePath',
+        'updatedToken'
+    ]);
+
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.auth,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
+
+    if (String(filePath).length <= 0)
+        return res.status(400).send({
+            success: false,
+            data: `The route parameters are not valid.`
+        });
+
+    try {
+        if (fs.existsSync(localPath(filePath))) {
+            const file = fs.createReadStream(localPath(filePath));
+
+            res.setHeader('filename', req.params['filename']);
+            res.setHeader('filetype', `.${req.params['ext']}`);
+
+            file.pipe(res);
+            file.on("finish", () => file.close());
+        } else {
+            return res.status(502).send({
+                success: false,
+                data: `The file path is not valid.`
+            })
+        }
     } catch (error) {
         return res.status(400).send({
             success: false,

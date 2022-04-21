@@ -173,6 +173,7 @@ model Card {
   serialNumber   String   @unique
   lastCardNumber String
   personId       String?
+  unlocked       Boolean? @default(false)
   status         String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
@@ -193,7 +194,7 @@ model Person {
   motherName String
   birthDate  DateTime
   phone      String   @unique
-  mail       String   @unique
+  mail       String?  @unique
   addressId  String
   scaleId    String
   status     String
@@ -207,8 +208,8 @@ model Person {
   PersonCovering PersonCovering[]
   PersonCoverage PersonCoverage[]
   PersonB2       PersonB2[]
+  PersonPH       PersonPH[]
 
-  PersonPH PersonPH[]
   @@map("people")
 }
 
@@ -324,6 +325,9 @@ model Posting {
   costCenterId         String
   periodStart          DateTime
   periodEnd            DateTime
+  entryTime            DateTime?
+  exitTime             DateTime?
+  workShift            Int?
   originDate           DateTime
   description          String?
   coveringId           String?

@@ -26,6 +26,23 @@ export class UploadManagerDB {
   }
 
   /**
+  * @description Torna um upload temporario
+  */
+  public async makeTemporary(fileId: string, expiredAt: string, version?: number): Promise<boolean> {
+    const upload = await UploadsSchema.findOne({ fileId, version: version ? version : 1 });
+
+    if (!upload)
+      return false;
+
+    upload.temporary = true;
+    upload.expiredAt = expiredAt;
+
+    await upload.save();
+
+    return true;
+  }
+
+  /**
    * @description Torna um upload permanente
    */
   public async makePermanent(fileId: string, version?: number): Promise<boolean> {
@@ -36,23 +53,6 @@ export class UploadManagerDB {
 
     upload.temporary = false;
     upload.expiredAt = undefined;
-
-    await upload.save();
-
-    return true;
-  }
-
-  /**
-   * @description Torna um upload temporario
-   */
-  public async makeTemporary(fileId: string, expiredAt: string, version?: number): Promise<boolean> {
-    const upload = await UploadsSchema.findOne({ fileId, version: version ? version : 1 });
-
-    if (!upload)
-      return false;
-
-    upload.temporary = true;
-    upload.expiredAt = expiredAt;
 
     await upload.save();
 
