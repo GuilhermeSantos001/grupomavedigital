@@ -1,4 +1,5 @@
 # Schema de informações passadas dos usuários logados
+
 type AuthInfo {
   authorization: ID!
   privileges: [String!]!
@@ -37,6 +38,7 @@ type Location {
 
 type UserInfo {
   privileges: [String!]!
+  privilege: String!
   photoProfile: String!
   username: String!
   email: String!
@@ -46,10 +48,8 @@ type UserInfo {
   location: Location!
 }
 
-type AuthValidate {
-  success: Boolean!
-  signature: String
-  token: String
+type AuthSignTwoFactor {
+  qrcode: String!
 }
 
 type Query {
@@ -98,50 +98,6 @@ type Query {
     )
     @encodeuri(method: "lz-string")
   """
-  Verifica se o token de segurança do usuário está expirado
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authexpired
-  """
-  authExpired(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-    """
-    Token exclusivo de segurança da solicitação
-    """
-    token: String!
-  ): Boolean!
-    @auth(
-      keys: ["5wEvlBR8TRuxePL42thecuv8sP3Pe4lB56EzLBra9Iph9WiPRId3ONL20uK7T#Ip"]
-    )
-    @encodeuri(method: "lz-string")
-  """
-  Verifica se o token de segurança do usuário está valido
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authvalidate
-  """
-  authValidate(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-    """
-    Token exclusivo de segurança da solicitação
-    """
-    token: String!
-    """
-    Assinatura do token
-    """
-    signature: String!
-    """
-    Refresh token para renovação de segurança da solicitação
-    """
-    refreshToken: InputRefreshToken
-  ): AuthValidate!
-    @auth(
-      keys: ["4VMYcqF77yRfA9dmzVcD9JPZFycmN5dZdtDZww49ENHW4H97nY7RuzWa6jTkAMY3"]
-    )
-    @encodeuri(method: "lz-string")
-  """
   Envia o e-mail para recuperar a conta do usuário caso ele esqueca a senha
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=authforgotpassword
   """
@@ -180,12 +136,12 @@ type Query {
     auth: String!
   ): UserInfo!
     @auth(
-      keys: ["NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
+      keys: ["NoZjIRxH*miT4xs!896&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
-  Processa o pedido de confirmação da conta do usuario
+  Processa o pedido de confirmação da conta do usuário
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=mailconfirm
   """
   mailConfirm(
@@ -199,7 +155,7 @@ type Query {
     )
     @encodeuri(method: "lz-string")
   """
-  Processa o pedido de alteração de senha da conta do usuario
+  Processa o pedido de alteração de senha da conta do usuário
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=processorderforgotpassword
   """
   processOrderForgotPassword(
@@ -212,28 +168,13 @@ type Query {
     """
     token: String!
     """
-    Nova senha do usuario
+    Nova senha do usuário
     """
     pwd: String!
   ): Boolean!
     @auth(
       keys: ["BkbcHMWNDyBqHn7GT8dzxB5KbAmhMSuKQFpPqtJmC6s94hrqqzRVdcSHf2uexRvm"]
     )
-    @encodeuri(method: "lz-string")
-  """
-  Retorna as informações do usuário
-  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/users-query?id=getuserinfo
-  """
-  getUserInfo(
-    """
-    Autorização exclusiva do usuário
-    """
-    auth: String!
-  ): UserInfo!
-    @auth(
-      keys: ["NoZjIRxH*miT4xs!$sR&oOdBxk6*1x!lcXDDwf#d!XuJ#hyHAVpIFrnAI@T9pIFr"]
-    )
-    @token(ignore: false)
     @encodeuri(method: "lz-string")
 }
 
@@ -385,7 +326,7 @@ type Mutation {
     Autorização exclusiva do usuário
     """
     auth: String!
-  ): String!
+  ): AuthSignTwoFactor!
     @auth(
       keys: ["bu9Tix&1amuqihiXeHa*ajucRav6b5p7frOTRan6BLn!R27Wo*rlNA?Huf38riKo"]
     )
@@ -401,7 +342,7 @@ type Mutation {
     """
     auth: String!
   ): Boolean!
-    @auth(keys: ["0bvNnE1JZN0d9hFVWgVpCrWa8ZhvgE8w"])
+    @auth(keys: ["Hg45FUC3phicraR10Tuq5-6Sto20sp4swa7I1As5uChEmUhExuvATrovic5lfic"])
     @token(ignore: false)
     @encodeuri(method: "lz-string")
   """
@@ -434,7 +375,7 @@ type Mutation {
     auth: String!
   ): Boolean!
     @auth(
-      keys: ["TH6021Mufr&0$B&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
+      keys: ["TH6021Mufr&087&?&-op&i-L-6p4ATH31h+?*m&dRACAc7e0Osw9$4E3oWRawE8h"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -472,7 +413,5 @@ type Mutation {
 directive @auth(keys: [String!]!) on FIELD_DEFINITION
 
 directive @token(ignore: Boolean!) on FIELD_DEFINITION
-
-directive @privilege(keys: [String!]!) on FIELD_DEFINITION
 
 directive @encodeuri(method: String!) on FIELD_DEFINITION

@@ -1,14 +1,14 @@
 /**
  * @description Leitor de CSV
  * @author GuilhermeSantos001
- * @update 12/10/2021
+ * @update 31/01/2022
  */
 
 import csv from 'csv-parser';
 import { createReadStream } from 'fs';
 import { compressToBase64 } from 'lz-string'
 
-import REDIS from '@/core/redis';
+import { RedisClient } from '@/lib/RedisClient';
 import { localPath } from '@/utils/localpath'
 
 import Moment from '@/utils/moment';
@@ -16,20 +16,16 @@ import Moment from '@/utils/moment';
 export default class CSVParser {
   static readonly db: number = 6;
   static readonly expiry: number = 7; // Cache expira em 7 dias
+  static readonly redis: RedisClient = new RedisClient(CSVParser.db);
 
   /**
    * @description Efetua a limpeza do cache
    */
   static async flush(): Promise<void> {
     try {
-      const client = new REDIS(this.db);
-
-      await client.connect();
-      await client.flush();
-
-      client.disconnect();
+      return await this.redis.flush();
     } catch (error) {
-      throw new Error(JSON.stringify(error));
+      throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
     }
   }
 
@@ -37,28 +33,26 @@ export default class CSVParser {
    * @description Verifica se o cache está expirado
    */
   static isExpiry(filename: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      const client = new REDIS(this.db);
+    return new Promise<boolean>(async (resolve, reject) => {
+      try {
+        const value = await this.redis.get(`db_${filename}_expiry`);
 
-      client.get(`db_${filename}_expiry`, async (response: boolean, values: any[]) => {
-        client.disconnect();
-
-        if (!response)
-          return reject();
-
-        if (values.filter(value => value !== '').length > 0) {
+        if (typeof value === 'string') {
           const
             now = new Date(),
-            expiry = new Date(values[0]);
+            expiry = new Date(JSON.parse(value));
 
           if (now > expiry) {
-            await this.flush();
-            resolve(true);
+            await this.redis.delete(`db_${filename}_expiry`);
+
+            return resolve(true);
           }
         }
 
         resolve(false);
-      });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -67,22 +61,18 @@ export default class CSVParser {
    * @description Defini a data de expiração do cache
    */
   static setExpiry(filename: string) {
-    return new Promise<void>((resolve, reject) => {
-      const
-        client = new REDIS(this.db),
-        now = new Date();
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        const now = new Date();
 
-      now.setDate(now.getDate() + this.expiry);
+        now.setDate(now.getDate() + this.expiry);
 
-      client.set(`db_${filename}_expiry`, now.toISOString(), (response: boolean) => {
-        client.disconnect();
+        await this.redis.set(`db_${filename}_expiry`, JSON.stringify(now));
 
-        if (!response) {
-          return reject();
-        }
-
-        return resolve();
-      });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -90,20 +80,18 @@ export default class CSVParser {
    * @description Retorna os valores em cache
    */
   static get<Type>(filename: string): Promise<Type[]> {
-    return new Promise((resolve, reject) => {
-      const client = new REDIS(this.db);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const values = await this.redis.get(`db_${filename}`);
 
-      client.get(`db_${filename}`, (response: boolean, values: any[]) => {
-        client.disconnect();
+        if (typeof values === 'string') {
+          return resolve(JSON.parse(values));
+        }
 
-        if (!response)
-          return reject();
-
-        if (values.filter(value => value !== '').length > 0)
-          resolve(JSON.parse(values[0]));
-
-        reject();
-      });
+        return resolve([]);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -111,18 +99,14 @@ export default class CSVParser {
    * @description Salva os valores do cache
    */
   static save(filename: string, data: string) {
-    return new Promise<void>((resolve, reject) => {
-      const client = new REDIS(this.db);
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        await this.redis.set(`db_${filename}`, data);
 
-      client.set(`db_${filename}`, data, (response: boolean) => {
-        client.disconnect();
-
-        if (!response) {
-          return reject();
-        }
-
-        return resolve();
-      });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -134,7 +118,7 @@ export default class CSVParser {
       results: any = [];
 
     return new Promise((resolve, reject) => {
-      createReadStream(localPath(`database/${filename}.csv`))
+      createReadStream(localPath(`data/${filename}.csv`))
         .setEncoding('utf8')
         .pipe(csv({
           separator: ";",
@@ -222,7 +206,6 @@ export default class CSVParser {
       } else {
         return await CSVParser._read<Type>(filename, headerPreffix, filter);
       }
-
     } catch {
       return await CSVParser._read<Type>(filename, headerPreffix, filter);
     }

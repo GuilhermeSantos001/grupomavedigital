@@ -1,12 +1,13 @@
 /**
  * @description Envio de emails padronizados
- * @author @GuilhermeSantos001
- * @update 29/09/2020
+ * @author GuilhermeSantos001
+ * @update 14/01/2022
  */
 
-import Mail, { Templates, Priority } from "@/core/nodemailer";
+import { Nodemailer, Templates, Priority } from "@/lib/Nodemailer";
 import BASE_URL from "@/utils/getBaseURL";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import { clearIPAddress } from "@/utils/geoIP";
 
 interface IVariablesEconfirm {
     username: string
@@ -79,7 +80,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -109,7 +110,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -125,7 +126,7 @@ export default class MailSend {
     /**
      * @description Envia o e-mail de recuperação da conta
      */
-    static async accountRetrieveTwofactor(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
+    static async accountRetrieve(email: string, username: string, token: string): Promise<SMTPTransport.SentMessageInfo> {
         try {
             const options: Options = {
                 email: email,
@@ -138,7 +139,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -166,11 +167,11 @@ export default class MailSend {
                     browser: navigator.browser,
                     os: navigator.os,
                     locationIP: navigator.locationIP,
-                    internetAdress: navigator.internetAdress.replace('::ffff:', '')
+                    internetAdress: clearIPAddress(String(navigator.internetAdress).replace('::1', '127.0.0.1'))
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority
@@ -201,7 +202,7 @@ export default class MailSend {
                 }
             };
 
-            return await Mail.send({
+            return await Nodemailer.send({
                 to: [options.email],
                 subject: options.subject,
                 priority: options.priority

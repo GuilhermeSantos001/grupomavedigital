@@ -14,7 +14,7 @@ const resolverMap = {
      * ? parseLiteralé chamado em seu lugar.)
      */
     parseValue(value) {
-      return parseFloat(value);
+      return parseFloat(String(value));
     },
     /**
      * ? Esse método converte a representação de back-end do escalar em um formato

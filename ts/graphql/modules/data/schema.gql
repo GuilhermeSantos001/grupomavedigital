@@ -59,7 +59,6 @@ type Query {
     @auth(
       keys: ["Z7qK6RpqqYKYKaMXnsurANrBF4X6adkj3v3LXtdL6PNn2dgd2AYChDsPJxPe2L7J"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
   """
@@ -75,7 +74,6 @@ type Query {
     @auth(
       keys: ["EEcDrRbDe6Vd2METYWWNuHpE7DbQt8S7nNzgFfyXkfFbZ2WgS9kvP2svxc7RXXFA"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
   """
@@ -91,7 +89,6 @@ type Query {
     @auth(
       keys: ["zf4M4cYmEYDzrWwLG6kgUUpS2CuQmDsDqPV9FQxth5KT3y3EdTrsargJvN3bpjHM"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
   """
@@ -107,7 +104,6 @@ type Query {
     @auth(
       keys: ["g8WyFaLqxv6xekH22QkNf4EH3qFrMTKWUaYSLU4ntLSjJxw7jmxycPtRs59fuM9f"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
   """
@@ -127,7 +123,6 @@ type Query {
     @auth(
       keys: ["HrqFw3EvjvrRQVkMGgKJYgTW9KY2ePDUbrzZaer9TRu5pQxyaUyakbgRUVtFXUvT"]
     )
-  # @privilege(keys: ["administrador"])
   # @token(ignore: false)
   # @encodeuri(method: "lz-string")
 }
@@ -135,7 +130,5 @@ type Query {
 directive @auth(keys: [String!]!) on FIELD_DEFINITION
 
 directive @token(ignore: Boolean!) on FIELD_DEFINITION
-
-directive @privilege(keys: [String!]!) on FIELD_DEFINITION
 
 directive @encodeuri(method: String!) on FIELD_DEFINITION

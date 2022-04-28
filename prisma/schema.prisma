@@ -1,0 +1,431 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model APIKey {
+  id         String   @id @default(uuid())
+  cursorId   Int      @unique @default(autoincrement())
+  title      String   @unique
+  key        String   @unique
+  passphrase String   @unique
+  username   String
+  userMail   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("api_keys")
+}
+
+model CostCenter {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  card         Card[]
+  posting      Posting[]
+  B2           B2[]
+  PackageHours PackageHours[]
+
+  @@map("cost_centers")
+}
+
+model Scale {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person    Person[]
+  workplace Workplace[]
+
+  @@map("scales")
+}
+
+model Service {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  personService    PersonService[]
+  workplaceService WorkplaceService[]
+
+  @@map("services")
+}
+
+model PersonService {
+  id        String  @id @default(uuid())
+  personId  String
+  person    Person  @relation(fields: [personId], references: [id])
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  @@map("people_service")
+}
+
+model WorkplaceService {
+  id          String    @id @default(uuid())
+  workplaceId String
+  workplace   Workplace @relation(fields: [workplaceId], references: [id])
+  serviceId   String
+  service     Service   @relation(fields: [serviceId], references: [id])
+
+  @@map("workplaces_service")
+}
+
+model ReasonForAbsence {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  personCovering PersonCovering[]
+
+  @@map("reason_for_absences")
+}
+
+model Street {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
+
+  @@map("streets")
+}
+
+model Neighborhood {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
+
+  @@map("neighborhoods")
+}
+
+model City {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
+
+  @@map("cities")
+}
+
+model District {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  value     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address Address[]
+
+  @@map("districts")
+}
+
+model Address {
+  id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
+  streetId       String
+  number         String
+  complement     String?
+  neighborhoodId String
+  cityId         String
+  districtId     String
+  zipCode        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  city         City         @relation(fields: [cityId], references: [id])
+  district     District     @relation(fields: [districtId], references: [id])
+  neighborhood Neighborhood @relation(fields: [neighborhoodId], references: [id])
+  street       Street       @relation(fields: [streetId], references: [id])
+  person       Person[]
+  workplace    Workplace[]
+
+  @@map("addresses")
+}
+
+model Card {
+  id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
+  costCenterId   String
+  lotNum         String
+  serialNumber   String   @unique
+  lastCardNumber String
+  personId       String?
+  unlocked       Boolean? @default(false)
+  status         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  costCenter CostCenter @relation(fields: [costCenterId], references: [id])
+  person     Person?    @relation(fields: [personId], references: [id])
+
+  @@map("cards")
+}
+
+model Person {
+  id         String   @id @default(uuid())
+  cursorId   Int      @unique @default(autoincrement())
+  matricule  String   @unique
+  name       String
+  cpf        String   @unique
+  rg         String   @unique
+  motherName String
+  birthDate  DateTime
+  phone      String   @unique
+  mail       String?  @unique
+  addressId  String
+  scaleId    String
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  address        Address          @relation(fields: [addressId], references: [id])
+  scale          Scale            @relation(fields: [scaleId], references: [id])
+  cards          Card[]
+  personService  PersonService[]
+  PersonCovering PersonCovering[]
+  PersonCoverage PersonCoverage[]
+  PersonB2       PersonB2[]
+  PersonPH       PersonPH[]
+
+  @@map("people")
+}
+
+model Workplace {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  name      String
+  scaleId   String
+  entryTime DateTime
+  exitTime  DateTime
+  addressId String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  address                  Address            @relation(fields: [addressId], references: [id])
+  scale                    Scale              @relation(fields: [scaleId], references: [id])
+  coveringWorkplaceId      Posting[]          @relation("CoverageWorkplaceId")
+  coverageWorkplaceId      Posting[]          @relation("CoveringWorkplaceId")
+  workplaceService         WorkplaceService[]
+  workplaceOriginId        B2[]               @relation("workplaceOriginId")
+  workplaceDestinationId   B2[]               @relation("workplaceDestinationId")
+  workplacePHDestinationId PackageHours[]     @relation("workplacePHDestinationId")
+
+  @@map("workplaces")
+}
+
+model Upload {
+  id             String   @id @default(uuid())
+  cursorId       Int      @unique @default(autoincrement())
+  fileId         String
+  authorId       String
+  filename       String
+  filetype       String
+  description    String
+  size           Int
+  compressedSize Int
+  version        Int
+  temporary      Boolean
+  expiredAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  personCoverage PersonCoverage[]
+  personCovering PersonCovering[]
+
+  @@map("uploads")
+}
+
+model PersonCovering {
+  id                 String   @id @default(uuid())
+  cursorId           Int      @unique @default(autoincrement())
+  mirrorId           String   @unique
+  personId           String
+  reasonForAbsenceId String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  mirror           Upload           @relation(fields: [mirrorId], references: [id])
+  person           Person           @relation(fields: [personId], references: [id])
+  reasonForAbsence ReasonForAbsence @relation(fields: [reasonForAbsenceId], references: [id])
+  posting          Posting[]
+
+  @@map("person_covering")
+}
+
+model PersonCoverage {
+  id                 String   @id @default(uuid())
+  cursorId           Int      @unique @default(autoincrement())
+  mirrorId           String?  @unique
+  personId           String
+  modalityOfCoverage String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+
+  mirror  Upload?   @relation(fields: [mirrorId], references: [id])
+  person  Person    @relation(fields: [personId], references: [id])
+  posting Posting[]
+
+  @@map("person_coverage")
+}
+
+model PersonB2 {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  personId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person Person @relation(fields: [personId], references: [id])
+  b2     B2[]
+
+  @@map("person_b2")
+}
+
+model PersonPH {
+  id        String   @id @default(uuid())
+  cursorId  Int      @unique @default(autoincrement())
+  personId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  person       Person         @relation(fields: [personId], references: [id])
+  packageHours PackageHours[]
+
+  @@map("person_ph")
+}
+
+model Posting {
+  id                   String    @id @default(uuid())
+  cursorId             Int       @unique @default(autoincrement())
+  author               String
+  costCenterId         String
+  periodStart          DateTime
+  periodEnd            DateTime
+  entryTime            DateTime?
+  exitTime             DateTime?
+  workShift            Int?
+  originDate           DateTime
+  description          String?
+  coveringId           String?
+  coverageId           String
+  coveringWorkplaceId  String
+  coverageWorkplaceId  String?
+  paymentMethod        String
+  paymentValue         Float
+  paymentDatePayable   DateTime
+  paymentStatus        String
+  paymentDatePaid      DateTime?
+  paymentDateCancelled DateTime?
+  foremanApproval      Boolean?
+  managerApproval      Boolean?
+  status               String
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt
+
+  costCenter        CostCenter      @relation(fields: [costCenterId], references: [id])
+  covering          PersonCovering? @relation(fields: [coveringId], references: [id])
+  coverage          PersonCoverage  @relation(fields: [coverageId], references: [id])
+  coveringWorkplace Workplace       @relation("CoveringWorkplaceId", fields: [coveringWorkplaceId], references: [id])
+  coverageWorkplace Workplace?      @relation("CoverageWorkplaceId", fields: [coverageWorkplaceId], references: [id])
+
+  @@map("postings")
+}
+
+model B2 {
+  id                     String    @id @default(uuid())
+  cursorId               Int       @unique @default(autoincrement())
+  author                 String
+  costCenterId           String
+  periodStart            DateTime
+  periodEnd              DateTime
+  description            String?
+  personId               String
+  workplaceOriginId      String
+  workplaceDestinationId String
+  coverageStartedAt      DateTime
+  entryTime              DateTime
+  exitTime               DateTime
+  valueClosed            Float
+  absences               Int
+  lawdays                Int
+  discountValue          Float
+  level                  Int
+  roleGratification      String
+  gratification          Float
+  onlyHistory            Boolean
+  paymentMethod          String
+  paymentValue           Float
+  paymentDatePayable     DateTime
+  paymentStatus          String
+  paymentDatePaid        DateTime?
+  paymentDateCancelled   DateTime?
+  status                 String
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @default(now()) @updatedAt
+
+  costCenter           CostCenter @relation(fields: [costCenterId], references: [id])
+  personB2             PersonB2   @relation(fields: [personId], references: [id])
+  workplaceOrigin      Workplace  @relation("workplaceOriginId", fields: [workplaceOriginId], references: [id])
+  workplaceDestination Workplace  @relation("workplaceDestinationId", fields: [workplaceDestinationId], references: [id])
+
+  @@map("b2")
+}
+
+model PackageHours {
+  id                       String    @id @default(uuid())
+  cursorId                 Int       @unique @default(autoincrement())
+  author                   String
+  costCenterId             String
+  periodStart              DateTime
+  periodEnd                DateTime
+  description              String?
+  personId                 String
+  workplacePHDestinationId String
+  contractStartedAt        DateTime
+  contractFinishAt         DateTime
+  entryTime                DateTime
+  exitTime                 DateTime
+  valueClosed              Float
+  jobTitle                 String
+  lawdays                  Int
+  onlyHistory              Boolean
+  paymentMethod            String
+  paymentValue             Float
+  paymentDatePayable       DateTime
+  paymentStatus            String
+  paymentDatePaid          DateTime?
+  paymentDateCancelled     DateTime?
+  status                   String
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @default(now()) @updatedAt
+
+  costCenter           CostCenter @relation(fields: [costCenterId], references: [id])
+  personPH             PersonPH   @relation(fields: [personId], references: [id])
+  workplaceDestination Workplace  @relation("workplacePHDestinationId", fields: [workplacePHDestinationId], references: [id])
+
+  @@map("package_hours")
+}

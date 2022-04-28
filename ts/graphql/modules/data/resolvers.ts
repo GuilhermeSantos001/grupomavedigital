@@ -1,6 +1,6 @@
 /**
  * @description Rotas dos dados
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 13/10/2021
  */
 
@@ -41,7 +41,7 @@ interface FilialResponse {
 }
 
 /**
- * @description Schema da tabela: "Tipos de Titulos"
+ * @description Schema da tabela: "Tipos de Títulos"
  */
 interface BillsType {
     filial: string

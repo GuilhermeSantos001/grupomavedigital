@@ -1,10 +1,19 @@
 /**
  * @description https://www.npmjs.com/package/bcrypt
  * @author GuilhermeSantos001
- * @update 29/09/2021
+ * @update 26/02/2022
  */
 
-import { genSalt, hash, compare } from 'bcrypt';
+import { genSaltSync, hashSync, compareSync, genSalt, hash, compare } from 'bcrypt';
+
+export function EncryptSync(password: string, saltRounds?: number): string {
+    const salt = genSaltSync(saltRounds || 10);
+    return hashSync(password, salt);
+}
+
+export function DecryptSync(password: string, hash: string): boolean {
+    return compareSync(password, hash);
+}
 
 export function Encrypt(password: string, saltRounds?: number): Promise<string> {
     return new Promise((resolve, reject) => {

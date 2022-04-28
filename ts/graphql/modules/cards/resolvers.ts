@@ -1,75 +1,36 @@
-/**
- * @description Rotas dos cartões
- * @author @GuilhermeSantos001
- * @update 28/09/2021
- */
-
-import vcard from '@/core/vcard';
-import cardsDB from '@/db/cards-db';
-import { SocialmediaName } from '@/mongo/cards-manager-mongo';
+import { ObjectId } from 'mongodb';
+import { VCardGenerate, VCardRemove, VCard, Metadata } from '@/lib/VCardGenerate';
+import { CardsManagerDB } from '@/database/CardsManagerDB';
+import { SocialmediaName } from '@/schemas/CardsSchema';
+import { UploadsController } from '@/controllers/UploadsController';
+import fs from 'fs-extra';
+import { localPath } from '@/utils/localpath';
 import random from '@/utils/random';
-import { compressToEncodedURIComponent } from 'lz-string';
 
 type File = {
-    path: string,
+    id: string
+    mirrorId: string
     name: string
-};
-
-type Birthday = {
-    year: number,
-    month: number,
-    day: number,
-};
-
-type SocialURL = {
-    media: string,
-    url: string
+    type: string
 };
 
 type Socialmedia = {
-    name: SocialmediaName,
-    value: string,
-    enabled: boolean
+    name: SocialmediaName
+    value: string
 };
 
 type Whatsapp = {
-    phone: string,
-    text: string,
+    phone: string
+    text: string
     message: string
 };
 
 type CardFooter = {
-    email: string,
-    location: string,
-    website: string,
-    attachment: string,
+    email: string
+    location: string
+    website: string
+    attachment: File
     socialmedia: Socialmedia[]
-};
-
-type Label = 'Work Address' | 'Home Address';
-
-type CountryRegion = 'Brazil' | 'United States';
-
-type Vcard = {
-    firstname: string,
-    lastname: string,
-    organization: string,
-    photo: File,
-    logo: File,
-    workPhone: string[],
-    birthday: Birthday,
-    title: string,
-    url: string,
-    workUrl: string,
-    email: string,
-    label: Label,
-    countryRegion: CountryRegion,
-    street: string,
-    city: string,
-    stateProvince: string,
-    postalCode: string,
-    socialUrls: SocialURL[],
-    file: File
 };
 
 type Card = {
@@ -80,28 +41,53 @@ type Card = {
     jobtitle: string,
     phones: string[],
     whatsapp: Whatsapp,
-    vcard: Vcard,
+    vcard: VCard,
     footer: CardFooter
 };
 
 module.exports = {
     Query: {
-        cardGet: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
+        getCards: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
             try {
-                const cards = await cardsDB.get(0, 1, args.limit, {
-                    _id: { $gt: args.lastIndex }
-                });
+                let filter = {};
 
-                return compressToEncodedURIComponent(JSON.stringify(cards));
+                if (args.lastIndex && args.lastIndex.length > 0)
+                    filter = {
+                        _id: { $gt: new ObjectId(args.lastIndex) }
+                    }
+
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    cards = await cardsManagerDB.get(0, 1, args.limit, filter);
+
+                return cards;
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        findCard: async (parent: unknown, args: { cid: string }) => {
+            try {
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    cards = await cardsManagerDB.findById(args.cid);
+
+                return cards;
             } catch (error) {
                 throw new Error(String(error));
             }
         }
     },
     Mutation: {
-        vcardCreate: async (parent: unknown, args: { data: Vcard }) => {
+        vcardCreate: async (parent: unknown, args: { data: VCard }) => {
             try {
-                return await vcard(args.data);
+                return await VCardGenerate(args.data);
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        vcardRemove: async (parent: unknown, args: { metadata: Metadata }) => {
+            try {
+                return await VCardRemove(args.metadata);
             } catch (error) {
                 throw new Error(String(error));
             }
@@ -109,7 +95,8 @@ module.exports = {
         cardCreate: async (parent: unknown, args: { data: Card }) => {
             try {
                 const
-                    id = args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
+                    cardsManagerDB = new CardsManagerDB(),
+                    id = args.data['id'] && args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
                     {
                         version,
                         photo,
@@ -121,38 +108,46 @@ module.exports = {
                         footer
                     } = args.data;
 
-                await cardsDB.register({
-                    cid: id,
-                    version,
-                    photo,
-                    name,
-                    jobtitle,
-                    phones,
-                    whatsapp,
-                    vcard,
-                    footer
-                });
+                try {
+                    await cardsManagerDB.findById(id)
 
-                return id;
+                    throw new Error(`Card with ID(${id}) already exists`);
+                } catch {
+                    await cardsManagerDB.register({
+                        cid: id,
+                        version,
+                        photo,
+                        name,
+                        jobtitle,
+                        phones,
+                        whatsapp,
+                        vcard,
+                        footer
+                    });
+
+                    return id;
+                }
             } catch (error) {
                 throw new Error(String(error));
             }
         },
-        cardUpdate: async (parent: unknown, args: { data: Card }) => {
+        cardUpdate: async (parent: unknown, args: { id: string, data: Card }) => {
             try {
-                const {
-                    id,
-                    version,
-                    photo,
-                    name,
-                    jobtitle,
-                    phones,
-                    whatsapp,
-                    vcard,
-                    footer
-                } = args.data;
+                const
+                    id = args.id,
+                    cardsManagerDB = new CardsManagerDB(),
+                    {
+                        version,
+                        photo,
+                        name,
+                        jobtitle,
+                        phones,
+                        whatsapp,
+                        vcard,
+                        footer
+                    } = args.data;
 
-                await cardsDB.update(id, {
+                await cardsManagerDB.update(id, {
                     cid: id,
                     version,
                     photo,
@@ -171,7 +166,31 @@ module.exports = {
         },
         cardRemove: async (parent: unknown, args: { id: string }) => {
             try {
-                await cardsDB.remove(args.id);
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    uploadsController = new UploadsController();
+
+                const
+                    card = await cardsManagerDB.findById(args.id),
+                    logotipoFilePath = `temp/${card.vcard.logo.name}${card.vcard.logo.type}`,
+                    photoFilePath = `temp/${card.photo.name}${card.photo.type}`,
+                    attachmentBusinessFilePath = `temp/${card.footer.attachment.name}${card.footer.attachment.type}`;
+
+                await uploadsController.remove(card.photo.id);
+                await uploadsController.remove(card.vcard.logo.id);
+                await uploadsController.remove(card.footer.attachment.id);
+
+                // ! Remove temp files
+                if (fs.existsSync(localPath(logotipoFilePath)))
+                    fs.unlinkSync(localPath(logotipoFilePath));
+
+                if (fs.existsSync(localPath(photoFilePath)))
+                    fs.unlinkSync(localPath(photoFilePath));
+
+                if (fs.existsSync(localPath(attachmentBusinessFilePath)))
+                    fs.unlinkSync(localPath(attachmentBusinessFilePath));
+
+                await cardsManagerDB.remove(args.id);
 
                 return true
             } catch (error) {

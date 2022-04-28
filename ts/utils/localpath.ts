@@ -1,7 +1,7 @@
 /**
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @description Controle de caminhos para pastas na aplicação
- * @update 29/09/2021
+ * @update 05/11/2021
  */
 
 import { dirname, join, } from 'path';
@@ -13,7 +13,7 @@ import { existsSync, mkdirSync } from 'fs';
 export function localPath(p: string): string {
   if (p.substring(0, 1) === '/') p = p.substring(1);
 
-  const base = dirname(String(__dirname).replace(/\\ts\\|\\dist\\/, "\\"));
+  const base = dirname(String(__dirname)).replace('/ts', '');
 
   return join(base, p);
 }
