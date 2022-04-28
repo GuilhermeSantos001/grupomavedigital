@@ -1,13 +1,17 @@
 import { ObjectId } from 'mongodb';
-import { VCardGenerate, VCard } from '@/lib/VCardGenerate';
+import { VCardGenerate, VCardRemove, VCard, Metadata } from '@/lib/VCardGenerate';
 import { CardsManagerDB } from '@/database/CardsManagerDB';
 import { SocialmediaName } from '@/schemas/CardsSchema';
+import { UploadsController } from '@/controllers/UploadsController';
+import fs from 'fs-extra';
+import { localPath } from '@/utils/localpath';
 import random from '@/utils/random';
 
 type File = {
+    id: string
+    mirrorId: string
     name: string
     type: string
-    id: string
 };
 
 type Socialmedia = {
@@ -43,7 +47,7 @@ type Card = {
 
 module.exports = {
     Query: {
-        cardGet: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
+        getCards: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
             try {
                 let filter = {};
 
@@ -60,12 +64,30 @@ module.exports = {
             } catch (error) {
                 throw new Error(String(error));
             }
+        },
+        findCard: async (parent: unknown, args: { cid: string }) => {
+            try {
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    cards = await cardsManagerDB.findById(args.cid);
+
+                return cards;
+            } catch (error) {
+                throw new Error(String(error));
+            }
         }
     },
     Mutation: {
         vcardCreate: async (parent: unknown, args: { data: VCard }) => {
             try {
                 return await VCardGenerate(args.data);
+            } catch (error) {
+                throw new Error(String(error));
+            }
+        },
+        vcardRemove: async (parent: unknown, args: { metadata: Metadata }) => {
+            try {
+                return await VCardRemove(args.metadata);
             } catch (error) {
                 throw new Error(String(error));
             }
@@ -86,29 +108,35 @@ module.exports = {
                         footer
                     } = args.data;
 
-                await cardsManagerDB.register({
-                    cid: id,
-                    version,
-                    photo,
-                    name,
-                    jobtitle,
-                    phones,
-                    whatsapp,
-                    vcard,
-                    footer
-                });
+                try {
+                    await cardsManagerDB.findById(id)
 
-                return id;
+                    throw new Error(`Card with ID(${id}) already exists`);
+                } catch {
+                    await cardsManagerDB.register({
+                        cid: id,
+                        version,
+                        photo,
+                        name,
+                        jobtitle,
+                        phones,
+                        whatsapp,
+                        vcard,
+                        footer
+                    });
+
+                    return id;
+                }
             } catch (error) {
                 throw new Error(String(error));
             }
         },
-        cardUpdate: async (parent: unknown, args: { data: Card }) => {
+        cardUpdate: async (parent: unknown, args: { id: string, data: Card }) => {
             try {
                 const
+                    id = args.id,
                     cardsManagerDB = new CardsManagerDB(),
                     {
-                        id,
                         version,
                         photo,
                         name,
@@ -138,7 +166,29 @@ module.exports = {
         },
         cardRemove: async (parent: unknown, args: { id: string }) => {
             try {
-                const cardsManagerDB = new CardsManagerDB();
+                const
+                    cardsManagerDB = new CardsManagerDB(),
+                    uploadsController = new UploadsController();
+
+                const
+                    card = await cardsManagerDB.findById(args.id),
+                    logotipoFilePath = `temp/${card.vcard.logo.name}${card.vcard.logo.type}`,
+                    photoFilePath = `temp/${card.photo.name}${card.photo.type}`,
+                    attachmentBusinessFilePath = `temp/${card.footer.attachment.name}${card.footer.attachment.type}`;
+
+                await uploadsController.remove(card.photo.id);
+                await uploadsController.remove(card.vcard.logo.id);
+                await uploadsController.remove(card.footer.attachment.id);
+
+                // ! Remove temp files
+                if (fs.existsSync(localPath(logotipoFilePath)))
+                    fs.unlinkSync(localPath(logotipoFilePath));
+
+                if (fs.existsSync(localPath(photoFilePath)))
+                    fs.unlinkSync(localPath(photoFilePath));
+
+                if (fs.existsSync(localPath(attachmentBusinessFilePath)))
+                    fs.unlinkSync(localPath(attachmentBusinessFilePath));
 
                 await cardsManagerDB.remove(args.id);
 

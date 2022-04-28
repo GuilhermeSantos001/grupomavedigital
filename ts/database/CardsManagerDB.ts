@@ -51,6 +51,31 @@ export class CardsManagerDB {
     }
 
     /**
+     * @description Retorna o cartão digital pelo ID
+     * @param cid ID do cartão digital
+     */
+    public async findById(cid: string): Promise<cardsInfo> {
+        const _card = await CardsSchema.findOne({ cid }).exec();
+
+        if (_card) {
+            return {
+                cid: _card.cid,
+                index: _card._id,
+                name: _card.name,
+                jobtitle: _card.jobtitle,
+                photo: _card.photo,
+                phones: _card.phones,
+                footer: _card.footer,
+                vcard: _card.vcard,
+                whatsapp: _card.whatsapp,
+                version: _card.version
+            }
+        } else {
+            throw new Error(`Cartão Digital com o ID(${cid}) não está registrado.`);
+        }
+    }
+
+    /**
      * @description Registra o cartão digital
      */
     public async register(card: cardsInterface): Promise<boolean> {

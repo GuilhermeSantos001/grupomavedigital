@@ -61,23 +61,25 @@ export interface Metadata {
 }
 
 export async function VCardGenerate(vcard: VCard): Promise<Metadata> {
+    const filename = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${vcard['organization']}.vcf`).length, 'hex');
+
     try {
         const
             uploadsController = new UploadsController(),
             vCard = vCardsJS(),
-            formatterIMG = (filename: string) => {
-                if (String(filename).indexOf('.png') != -1)
+            formatterIMG = (name: string) => {
+                if (String(name).indexOf('.png') != -1)
                     return 'image/png';
                 if (
-                    String(filename).indexOf('.pjpeg') != -1 ||
-                    String(filename).indexOf('.jpeg') != -1 ||
-                    String(filename).indexOf('.pjp') != -1 ||
-                    String(filename).indexOf('.jpg') != -1
+                    String(name).indexOf('.pjpeg') != -1 ||
+                    String(name).indexOf('.jpeg') != -1 ||
+                    String(name).indexOf('.pjp') != -1 ||
+                    String(name).indexOf('.jpg') != -1
                 )
                     return 'image/jpg';
                 if (
-                    String(filename).indexOf('.gif') != -1 ||
-                    String(filename).indexOf('.jfif') != -1
+                    String(name).indexOf('.gif') != -1 ||
+                    String(name).indexOf('.jfif') != -1
                 )
                     return 'image/gif';
 
@@ -95,18 +97,16 @@ export async function VCardGenerate(vcard: VCard): Promise<Metadata> {
         vCard.organization = vcard.organization;
 
         const
-            logotipoFileName = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${logotipo.name}`).length, 'hex'),
-            logotipoFilePath = `temp/${logotipoFileName}${logotipo.type}`,
+            logotipoFilePath = `temp/${logotipo.name}${logotipo.type}`,
             logotipoWriteStream = fs.createWriteStream(logotipoFilePath),
-            photoFileName = Random.HASH(String(`${vcard['firstname']}_${vcard['lastname']}_${photoProfile.name}`).length, 'hex'),
-            photoFilePath = `temp/${photoFileName}${photoProfile.type}`,
+            photoFilePath = `temp/${photoProfile.name}${photoProfile.type}`,
             photoWriteStream = fs.createWriteStream(photoFilePath);
 
         await uploadsController.raw(logotipoWriteStream, logotipo.id);
         await uploadsController.raw(photoWriteStream, photoProfile.id);
 
-        vCard.photo.embedFromString(Buffer.from(fs.readFileSync(logotipoFilePath)).toString('base64'), formatterIMG(`${logotipo.name}${logotipo.type}`));
-        vCard.logo.embedFromString(Buffer.from(fs.readFileSync(photoFilePath)).toString('base64'), formatterIMG(`${photoProfile.name}${photoProfile.type}`));
+        vCard.photo.embedFromString(Buffer.from(fs.readFileSync(localPath(logotipoFilePath))).toString('base64'), formatterIMG(`${logotipo.name}${logotipo.type}`));
+        vCard.logo.embedFromString(Buffer.from(fs.readFileSync(localPath(photoFilePath))).toString('base64'), formatterIMG(`${photoProfile.name}${photoProfile.type}`));
         vCard.workPhone = vcard.workPhone;
         vCard.birthday = new Date(vcard.birthday.year, vcard.birthday.month, vcard.birthday.day);
         vCard.title = vcard.title;
@@ -157,6 +157,45 @@ export async function VCardGenerate(vcard: VCard): Promise<Metadata> {
                 type: vcard.photo.type,
             }
         };
+    } catch (error) {
+        /**
+         * ? Remove temp files, if any error occurs during the process
+         * ? of generating the vcard.
+         */
+        const
+            logotipo = vcard.logo,
+            photoProfile = vcard.photo,
+            filepath = `temp/${filename}.vcf`,
+            logotipoFilePath = `temp/${logotipo.name}${logotipo.type}`,
+            photoFilePath = `temp/${photoProfile.name}${photoProfile.type}`;
+
+        if (fs.existsSync(localPath(filepath)))
+            fs.unlinkSync(localPath(filepath));
+
+        if (fs.existsSync(localPath(logotipoFilePath)))
+            fs.unlinkSync(localPath(logotipoFilePath));
+
+        if (fs.existsSync(localPath(photoFilePath)))
+            fs.unlinkSync(localPath(photoFilePath));
+
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error))
+    }
+}
+
+export async function VCardRemove(metadata: Metadata): Promise<boolean> {
+    try {
+        const { file, logotipo, photo } = metadata;
+
+        if (fs.existsSync(localPath(file.path)))
+            fs.unlinkSync(localPath(file.path));
+
+        if (fs.existsSync(localPath(logotipo.path)))
+            fs.unlinkSync(localPath(logotipo.path));
+
+        if (fs.existsSync(localPath(photo.path)))
+            fs.unlinkSync(localPath(photo.path));
+
+        return true;
     } catch (error) {
         throw new Error(error instanceof Error ? error.message : JSON.stringify(error))
     }

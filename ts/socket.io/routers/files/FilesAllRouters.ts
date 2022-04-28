@@ -127,8 +127,7 @@ export function FilesAllRouters(io: Server, socket: Socket): void {
       const uploadsController = new UploadsController();
 
       for (const fileId of filesId) {
-        if (!await uploadsController.remove(fileId))
-          throw new Error('Não foi possível excluir o arquivo.');
+        await uploadsController.remove(fileId);
       }
 
       const reply: TYPEOF_LISTENER_FILE_DELETE_ATTACHMENT = {

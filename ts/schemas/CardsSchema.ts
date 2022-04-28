@@ -3,9 +3,10 @@ import { Document, Schema, model } from "mongoose";
 import { VCard } from '@/lib/VCardGenerate';
 
 export interface Photo {
+    id: string;
+    mirrorId: string
     name: string;
     type: string;
-    id: string;
 }
 
 export interface Whatsapp {
@@ -57,6 +58,11 @@ export interface cardsModelInterface extends cardsInterface, Document {
 
 export const photoSchema: Schema = new Schema({
     id: {
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório para sua segurança']
+    },
+    mirrorId: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório para sua segurança']

@@ -20,7 +20,7 @@ import TokenMiddleware from '@/graphql/middlewares/token-middleware';
 import getReqProps from '@/utils/getReqProps'
 
 /**
- * @description Baixa todos os arquivos hospedados
+ * @description Retorna todos os arquivos hospedados no Hercules Storage
  */
 router.get(['/uploads/all'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
     let {
@@ -58,7 +58,65 @@ router.get(['/uploads/all'], APIMiddleware, TokenMiddleware, async function (req
 });
 
 /**
- * @description Baixa um arquivo hospedado
+ * @description Disponibiliza um arquivo do Hercules Storage na pasta TEMP,
+ * para ser servido como arquivo estático.
+ */
+router.get(['/uploads/static/raw/:filename.:ext'], async function (req: Request, res: Response) {
+    let {
+        fileId,
+        updatedToken,
+    } = getReqProps(req, [
+        'fileId',
+        'updatedToken'
+    ]);
+
+    if (updatedToken) {
+        updatedToken = JSON.parse(updatedToken);
+        await setSessionCookies({
+            authorization: updatedToken.auth,
+            token: updatedToken.token,
+            signature: updatedToken.signature,
+            refreshTokenValue: updatedToken.refreshTokenValue,
+            refreshTokenSignature: updatedToken.refreshTokenSignature,
+        }, {
+            express: {
+                req,
+                res
+            },
+            cookieOptions
+        })
+    }
+
+    if (String(fileId).length <= 0)
+        return res.status(400).send({
+            success: false,
+            data: `The route parameters are not valid.`
+        });
+
+    try {
+        const filePath = localPath('temp/' + req.params.filename + '.' + req.params.ext);
+
+        // ! Check if the file exists
+        if (fs.existsSync(filePath))
+            return res.status(200).send({ success: true });
+
+        const uploadsController = new UploadsController();
+
+        const writeStream = fs.createWriteStream(filePath);
+
+        await uploadsController.raw(writeStream, fileId);
+
+        return res.status(200).send({ success: true });
+    } catch (error) {
+        return res.status(400).send({
+            success: false,
+            data: error
+        });
+    };
+});
+
+/**
+ * @description Baixa um arquivo hospedado no Hercules Storage
  */
 router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
     let {
@@ -104,11 +162,10 @@ router.get(['/uploads/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, asyn
     };
 });
 
-
 /**
- * @description Baixa um arquivo hospedado
+ * @description Baixa um arquivo hospedado no HD
  */
-router.get(['/temp/raw/:filename.:ext'], APIMiddleware, TokenMiddleware,async function (req: Request, res: Response) {
+router.get(['/temp/raw/:filename.:ext'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
     let {
         filePath,
         updatedToken,
@@ -164,7 +221,7 @@ router.get(['/temp/raw/:filename.:ext'], APIMiddleware, TokenMiddleware,async fu
 });
 
 /**
- * @description Baixa uma versão do arquivo
+ * @description Baixa uma versão do arquivo hospedado no Hercules Storage
  */
 router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
     let {
@@ -230,7 +287,7 @@ router.get(['/version/download/:filename.:ext'], APIMiddleware, TokenMiddleware,
 });
 
 /**
- * @description Baixa um compilado de versões do arquivo
+ * @description Baixa um compilado de versões do arquivo hospedado no Hercules Storage
  */
 router.get(['/versions/download/:filename'], APIMiddleware, TokenMiddleware, async function (req: Request, res: Response) {
     let {

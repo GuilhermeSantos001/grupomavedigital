@@ -1,6 +1,7 @@
 # Schema de input para os vCards
 input input_file {
   id: String!
+  mirrorId: String!
   name: String!
   type: String!
 }
@@ -97,9 +98,10 @@ type CardInfo {
 }
 
 type Photo {
+  id: String
+  mirrorId: String
   name: String
   type: String
-  id: String
 }
 
 type Whatsapp {
@@ -204,9 +206,9 @@ type Query {
     ID do cartão digital a ser retornado
     """
     cid: String!
-  ): [CardInfo!]!
+  ): CardInfo!
     @auth(
-      keys: ["H6uagjXejR8GcjFAxPtCNqtWShxXaEmXJ89c5ZrgczsD7VAaDZr5GydYKadHtUQc"]
+      keys: ["XiZY15jEd#uk%8@t7&sCykz13djVKBMVOQU%qRgNBP8BBx#U4iJ89c5Zrgczs@45"]
     )
 }
 
@@ -223,6 +225,21 @@ type Mutation {
   ): VCardMetadata!
     @auth(
       keys: ["fA=ireb506d@lgAdA9&OfaSawro?a_11rajo_+dud@uph_k1gasweprut-owr+br"]
+    )
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  """
+  Remove um vcard
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-mutations?id=vcardcreate
+  """
+  vcardRemove(
+    """
+    Propriedades dos arquivos armazenados e vinculados ao vcard
+    """
+    metadata: input_vcardmetadata!
+  ): Boolean!
+    @auth(
+      keys: ["47VtASsWaEvrZD3BVkgztr3FStYXxEugqkdgC6JFFfadJHYzGWWEctLceZM4xxz2"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")
@@ -247,12 +264,16 @@ type Mutation {
   """
   cardUpdate(
     """
+    ID do cartão digital
+    """
+    id: String!
+    """
     Propriedades do cartão digital
     """
     data: input_card!
   ): String!
     @auth(
-      keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS$uFrAZomAs=ENi9I8oFasT"]
+      keys: ["ji4H@Dr8MU*R@CramlVuyEFR9YiSlP1=veZ_7aFrUS7uFrAZomAs=ENi9I8oFasT"]
     )
     @token(ignore: false)
     @encodeuri(method: "lz-string")

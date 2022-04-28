@@ -39,7 +39,7 @@ export interface IUploadContract {
   /**
    * @description Deleta um arquivo hospedado
    */
-  remove(fileId: string): Promise<boolean>
+  remove(fileId: string): Promise<void>
 
   /**
    * @description Retorna um stream do arquivo hospedado

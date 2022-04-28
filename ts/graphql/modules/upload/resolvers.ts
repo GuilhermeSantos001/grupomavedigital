@@ -12,6 +12,7 @@ import { matches } from '@/schemas/FilesSchema';
 
 import verifySignedURL from '@/utils/verifySignedURL';
 import { UsersManagerDB } from '@/database/UsersManagerDB';
+import { UploadsController } from '@/controllers/UploadsController';
 
 import Sugar from 'sugar';
 import Random from '@/utils/random';
@@ -127,6 +128,32 @@ module.exports = {
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
       }
-    }
+    },
+    makeTemporaryUpload: async (parent: unknown, args: { fileId: string, version?: number | undefined, signedUrl: string }) => {
+      try {
+        if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
+          const uploadsController = new UploadsController();
+
+          return await uploadsController.makeTemporary(args.fileId, args.version);
+        } else {
+          throw new Error(`Your token is invalid!`);
+        }
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
+      }
+    },
+    makePermanentUpload: async (parent: unknown, args: { fileId: string, version?: number | undefined, signedUrl: string }) => {
+      try {
+        if (verifySignedURL(decompressFromBase64(args.signedUrl) || "")) {
+          const uploadsController = new UploadsController();
+
+          return await uploadsController.makePermanent(args.fileId, args.version);
+        } else {
+          throw new Error(`Your token is invalid!`);
+        }
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : JSON.stringify(error));
+      }
+    },
   }
 }

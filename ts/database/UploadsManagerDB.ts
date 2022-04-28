@@ -76,6 +76,15 @@ export class UploadManagerDB {
   /**
    * @description Retorna todos os uploads
    */
+  public async exists(fileId: string): Promise<boolean> {
+    const file = await UploadsSchema.exists({ fileId });
+
+    return file ? true : false;
+  }
+
+  /**
+   * @description Retorna todos os uploads
+   */
   public async getAll(): Promise<IFileUpload[]> {
     const uploads = await UploadsSchema.find();
 

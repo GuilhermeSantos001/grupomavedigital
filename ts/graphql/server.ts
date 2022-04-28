@@ -10,7 +10,9 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { Server } from "socket.io";
 import path from "path";
-import express from "express";
+import { localPath } from "@/utils/localpath";
+import express, { Response } from "express";
+import logger from 'morgan';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
 import APIMiddleware from '@/graphql/middlewares/api-middleware';
@@ -80,10 +82,22 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     // View engine setup
     app.set('view engine', 'pug');
+    app.set('view options', { layout: false });
     app.set('views', path.join(__dirname, 'views'));
 
+    // settings for paths statics
+    const staticOptions = {
+        maxAge: '1d',
+        setHeaders: function (res: Response, path: string, stat: any) {
+            res.set('x-timestamp', Date.now().toString());
+        }
+    };
+
     //use API
+    app.use(logger('dev'));
     app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use('/temp', express.static(localPath('temp'), staticOptions));
     app.use('/files', routerFiles);
     app.use('/utils', routerUtils);
     app.use('/api/v1/', routerAPI);

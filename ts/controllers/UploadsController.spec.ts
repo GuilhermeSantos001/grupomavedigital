@@ -96,7 +96,7 @@ describe('Gerenciador de Uploads', () => {
     if (files[0]) {
       const result = await uploadsController.remove(files[0].fileId);
 
-      expect(result).toBe(true);
+      expect(result).toBeTruthy();
     }
   })
 })

@@ -1,9 +1,3 @@
-/**
- * @description Controle dos uploads de arquivos
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { FileGridFS } from '@/drivers/FileGridFS';
 import { ObjectId } from 'mongodb';
 
@@ -14,17 +8,49 @@ import { Response } from 'express';
 import { UploadManagerDB } from '@/database/UploadsManagerDB';
 
 export class UploadsController implements IUploadContract {
-  private uploadManagerDB: UploadManagerDB;
-  private fileGridFS: FileGridFS;
-  lastVerifyTemporaryFiles!: Date
+  private _uploadManagerDB: UploadManagerDB;
+  private _fileGridFS: FileGridFS;
+  private _lastVerifyTemporaryFiles!: Date
 
   constructor() {
-    this.uploadManagerDB = new UploadManagerDB();
-    this.fileGridFS = new FileGridFS();
+    this._uploadManagerDB = new UploadManagerDB();
+    this._fileGridFS = new FileGridFS();
+  }
+
+  private async _exists(fileId: string): Promise<boolean> {
+    return await this._uploadManagerDB.exists(fileId);
+  }
+
+  private async _gridFSExists(fileId: string): Promise<boolean> {
+    const file = await this._fileGridFS.findById(new ObjectId(fileId));
+
+    return file ? true : false;
+  }
+
+  private async _gridFSRemove(fileId: string): Promise<boolean> {
+    try {
+      if (await this._gridFSExists(fileId))
+        await this._fileGridFS.deleteFile(new ObjectId(fileId));
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async _remove(fileId: string): Promise<boolean> {
+    try {
+      if (await this._exists(fileId))
+        return await this._uploadManagerDB.remove(fileId);
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   public async getAll(): Promise<IFileUpload[]> {
-    return await this.uploadManagerDB.getAll();
+    return await this._uploadManagerDB.getAll();
   }
 
   public getTimeToExpire(): number {
@@ -42,14 +68,14 @@ export class UploadsController implements IUploadContract {
 
   public async register(file: IFileUpload): Promise<boolean> {
     if (
-      !this.lastVerifyTemporaryFiles ||
-      new Date() > this.lastVerifyTemporaryFiles
+      !this._lastVerifyTemporaryFiles ||
+      new Date() > this._lastVerifyTemporaryFiles
     ) {
-      this.lastVerifyTemporaryFiles = new Date();
+      this._lastVerifyTemporaryFiles = new Date();
 
       this
-        .lastVerifyTemporaryFiles
-        .setMinutes(this.lastVerifyTemporaryFiles.getMinutes() + 5);
+        ._lastVerifyTemporaryFiles
+        .setMinutes(this._lastVerifyTemporaryFiles.getMinutes() + 5);
 
       await this.cleanTemporaryFiles();
     }
@@ -60,61 +86,30 @@ export class UploadsController implements IUploadContract {
       createdAt: new Date().toISOString()
     }
 
-    return await this.uploadManagerDB.register(newFile);
+    return await this._uploadManagerDB.register(newFile);
   }
 
   public async makeTemporary(fileId: string, version?: number): Promise<boolean> {
-    const files = await this.getAll();
-
-    const indexOf = files.findIndex(file => file.fileId === fileId);
-
-    if (indexOf === -1)
-      return false;
-
     const expiredAt = new Date(this.getTimeToExpire()).toISOString();
 
-    files[indexOf] = {
-      ...files[indexOf],
-      temporary: true,
-      expiredAt
-    }
-
-    return await this.uploadManagerDB.makeTemporary(fileId, expiredAt, version);
+    return await this._uploadManagerDB.makeTemporary(fileId, expiredAt, version);
   }
 
   public async makePermanent(fileId: string, version?: number): Promise<boolean> {
-    const files = await this.getAll();
-
-    const indexOf = files.findIndex(file => file.fileId === fileId);
-
-    if (indexOf === -1)
-      return false;
-
-    files[indexOf] = {
-      ...files[indexOf],
-      temporary: false,
-      expiredAt: undefined,
-    }
-
-    return await this.uploadManagerDB.makePermanent(fileId, version);
+    return await this._uploadManagerDB.makePermanent(fileId, version);
   }
 
-  public async remove(fileId: string): Promise<boolean> {
-    let files = await this.getAll();
-
-    files = files.filter(file => file.fileId !== fileId);
-
-    await this.fileGridFS.deleteFile(new ObjectId(fileId));
-
-    return await this.uploadManagerDB.remove(fileId);
+  public async remove(fileId: string): Promise<void> {
+    await this._gridFSRemove(fileId);
+    await this._remove(fileId);
   }
 
   public async raw(stream: WriteStream | Response, fileId: string): Promise<void> {
-    const file = await this.fileGridFS.findById(new ObjectId(fileId));
+    const file = await this._fileGridFS.findById(new ObjectId(fileId));
 
     if (!file)
       throw new Error('Arquivo não encontrado');
 
-    await this.fileGridFS.openDownloadStream(stream, new ObjectId(fileId), true);
+    await this._fileGridFS.openDownloadStream(stream, new ObjectId(fileId), true);
   }
 }
