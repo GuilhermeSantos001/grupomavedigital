@@ -1,9 +1,3 @@
-/**
- * @description Servidor de Streaming.
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import { Server as HTTPServer } from 'http';
 import { access, constants, createReadStream } from 'fs';
 
@@ -20,12 +14,14 @@ export class HLSServer {
 
     private define() {
         const
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             hls = require('hls-server'),
             folderPath = this.folderPath;
 
         this.server =
             new hls(this.server, {
                 provider: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     exists: (req: any, callback: any) => {
                         const ext = req.url.split('.').pop(),
                             filePath = localPath(folderPath + '\\' + req.url);
@@ -44,7 +40,8 @@ export class HLSServer {
                             callback(null, true);
                         });
                     },
-                    getManifestStream: (req: any, callback: Function) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    getManifestStream: (req: any, callback: any) => {
                         const filePath = localPath(folderPath + '\\' + req.url);
 
                         access(filePath, constants.F_OK, function (err) {
@@ -56,8 +53,10 @@ export class HLSServer {
 
                             callback(null, createReadStream(filePath));
                         });
+
                     },
-                    getSegmentStream: (req: any, callback: Function) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    getSegmentStream: (req: any, callback: any) => {
                         const filePath = localPath(folderPath + '\\' + req.url);
 
                         access(filePath, constants.F_OK, function (err) {

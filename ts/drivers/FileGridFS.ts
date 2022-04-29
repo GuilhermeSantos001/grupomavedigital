@@ -34,7 +34,7 @@ export class FileGridFS {
         this.mongoDBClient = new MongoDBClient();
     }
 
-    private dbName(): any {
+    private dbName() {
         return this.mongoDBClient.getDB(process.env.DB_HERCULES_STORAGE || "");
     }
 

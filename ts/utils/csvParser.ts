@@ -33,6 +33,7 @@ export default class CSVParser {
    * @description Verifica se o cache está expirado
    */
   static isExpiry(filename: string): Promise<boolean> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<boolean>(async (resolve, reject) => {
       try {
         const value = await this.redis.get(`db_${filename}_expiry`);
@@ -61,6 +62,7 @@ export default class CSVParser {
    * @description Defini a data de expiração do cache
    */
   static setExpiry(filename: string) {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<void>(async (resolve, reject) => {
       try {
         const now = new Date();
@@ -80,6 +82,7 @@ export default class CSVParser {
    * @description Retorna os valores em cache
    */
   static get<Type>(filename: string): Promise<Type[]> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
         const values = await this.redis.get(`db_${filename}`);
@@ -99,6 +102,7 @@ export default class CSVParser {
    * @description Salva os valores do cache
    */
   static save(filename: string, data: string) {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<void>(async (resolve, reject) => {
       try {
         await this.redis.set(`db_${filename}`, data);
@@ -113,8 +117,10 @@ export default class CSVParser {
   /**
    * @description
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static _read<Type>(filename: string, headerPreffix: string, filter: any = {}): Promise<Type[]> {
     const
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       results: any = [];
 
     return new Promise((resolve, reject) => {
@@ -125,6 +131,7 @@ export default class CSVParser {
           mapHeaders: ({ header }) =>
             String(header).replace(String(`${headerPreffix}_`).toUpperCase(), '').trim().toLowerCase()
           ,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           mapValues: ({ header, index, value }) => {
             let
               filterSuccess = false,
@@ -191,6 +198,7 @@ export default class CSVParser {
   /**
    * @description Executa a leitura do arquivo CSV
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static async read<Type>(filename: string, headerPreffix: string, filter: any = {}, cache = true): Promise<Type[]> {
     try {
       if (cache) {
