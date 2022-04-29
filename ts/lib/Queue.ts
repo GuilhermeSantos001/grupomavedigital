@@ -1,10 +1,4 @@
-/**
- * @description Configuração das jobs
- * @author GuilhermeSantos001
- * @update 07/02/2022
- */
-
-import { Queue, Worker } from 'bullmq';
+import { Queue, Worker, QueueScheduler } from 'bullmq';
 import redisConfig from '@/config/jobs.redis.config';
 
 import * as jobs from '@/jobs/index';
@@ -17,19 +11,21 @@ import {
   HerculesOrdersData
 } from '@/jobs/index';
 
-const queues = Object.values(jobs).map(job => ({
-  bull: new Queue(job.key, { connection: redisConfig }),
-  name: job.key,
-  options: job.options,
-  handle: job.handle
-}));
+const
+  queues = Object.values(jobs).map(job => ({
+    bull: new Queue(job.key, { connection: redisConfig }),
+    scheduler: new QueueScheduler(job.key, { connection: redisConfig }),
+    name: job.key,
+    options: job.options,
+    handle: job.handle,
+  }));
 
 export default {
   queues,
   async addConfirmMail(data: ConfirmMailData) {
     const
       name: JobKeys = 'CONFIRM_MAIL',
-      queue = await queues.find(queue => queue.name === name);
+      queue = await queues.find(queue => queue.name === name)
 
     return queue?.bull.add(name, data, queue.options);
   },
@@ -71,6 +67,22 @@ export default {
         worker.resume();
       }
 
+      if (!queue.scheduler.isRunning()) {
+        await queue.scheduler.run();
+      }
+
+      queue.scheduler.on('stalled', (jobId, prev) => {
+        console.log(`[Scheduler Stalled for Job] ${jobId}`, prev);
+      });
+
+      queue.scheduler.on('failed', (jobId, err) => {
+        console.log(`[Scheduler Failed]: ${jobId}`, err);
+      });
+
+      queue.scheduler.on('error', (err) => {
+        console.log(`[Scheduler Error]`, err);
+      });
+
       worker.on('resumed', () => {
         console.log(`[Worker] ${process.pid} resumed!`);
       });
@@ -97,6 +109,10 @@ export default {
 
       worker.on('failed', (job, err) => {
         console.log(`[Job Failed]: ${job.name}(${job.id})`, err);
+      });
+
+      worker.on('error', (err) => {
+        console.log(`[Worker Error]`, err);
       });
     }
   }

@@ -15,7 +15,6 @@ import express, { Response } from "express";
 import logger from 'morgan';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
-import APIMiddleware from '@/graphql/middlewares/api-middleware';
 import routerFiles from "@/graphql/router/files";
 import routerUtils from "@/graphql/router/utils";
 import { routerAPI } from '@/graphql/router/api/routes';
@@ -112,8 +111,6 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     if (process.env.NODE_ENV === 'development')
         app.use('/admin/queues', serverAdapter.getRouter());
-    else
-        app.use('/admin/queues', APIMiddleware, serverAdapter.getRouter());
 
     serverAdapter.setBasePath('/admin/queues');
 
@@ -140,6 +137,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         function onError(error: any) {
             if (error.syscall !== 'listen') {
                 mongoDBClient.shutdown();
+
                 throw error;
             }
 
