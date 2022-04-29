@@ -18,16 +18,7 @@ import {
 } from '@/jobs/index';
 
 const queues = Object.values(jobs).map(job => ({
-  bull: new Queue(job.key, {
-    connection: redisConfig,
-    defaultJobOptions: {
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 1000
-      }
-    }
-  }),
+  bull: new Queue(job.key, { connection: redisConfig }),
   name: job.key,
   options: job.options,
   handle: job.handle
