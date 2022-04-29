@@ -1,28 +1,17 @@
-
-/**
- * @description Armazenamento de estrutura de dados em memória, usado como um banco de dados em memória distribuído de chave-valor.
- * @author GuilhermeSantos001
- * @update 26/11/2021
- */
-
 import LZString from 'lz-string';
-import Redis from 'ioredis';
-
-declare type Config = {
-    host: string;
-    port: number;
-};
+import Redis, { RedisOptions } from 'ioredis';
 
 export class RedisClient {
     private readonly db: number;
-    private config: Config;
-    private client?: Redis.Redis;
+    private config: RedisOptions;
+    private client?: Redis;
     private lzstring: LZString.LZStringStatic;
 
     constructor(db = 1) {
         this.config = {
             host: String(process.env.REDIS_HOST),
-            port: Number(process.env.REDIS_PORT)
+            port: Number(process.env.REDIS_PORT),
+            password: String(process.env.REDIS_PASSWORD),
         };
 
         this.db = db;
