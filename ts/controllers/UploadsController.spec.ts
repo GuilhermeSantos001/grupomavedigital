@@ -91,12 +91,10 @@ describe('Gerenciador de Uploads', () => {
       uploadsController = new UploadsController(),
       files = await uploadsController.getAll();
 
-    expect(files[0] && files[0].fileId).toBeTruthy();
+    expect(files[0]).toBeTruthy();
 
     if (files[0]) {
-      const result = await uploadsController.remove(files[0].fileId);
-
-      expect(result).toBeTruthy();
+      expect(await uploadsController.remove(files[0].fileId)).toBeUndefined();
     }
   })
 })
