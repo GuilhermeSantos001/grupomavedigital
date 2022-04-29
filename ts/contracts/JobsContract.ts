@@ -1,9 +1,3 @@
-/**
- * @description Contrato de implementação dos jobs
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
 import {
   Job,
   JobsOptions
@@ -22,6 +16,6 @@ export const JobOptionsDefault: JobsOptions = {
   attempts: 5
   , backoff: {
     type: "fixed",
-    delay: 100
+    delay: 5000
   }
 }
