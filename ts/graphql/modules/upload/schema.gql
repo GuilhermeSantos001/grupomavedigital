@@ -1,0 +1,55 @@
+# Schema de uploads
+scalar Upload
+
+type UploadFIle {
+  authorId: String!
+  name: String!
+  size: Int!
+  compressedSize: Int!
+  fileId: String!
+  version: Int!
+  status: String!
+}
+
+type Mutation {
+  singleUpload(
+    file: Upload!
+    size: String!
+    signedUrl: String!
+    auth: String!
+    randomName: Boolean!
+  ): UploadFIle!
+  multipleUpload(
+    files: [Upload!]!
+    sizes: [String!]!
+    signedUrl: String!
+    auth: String!
+    randomName: Boolean!
+  ): [UploadFIle!]!
+  makeTemporaryUpload(
+    fileId: String!
+    version: Int
+    signedUrl: String!
+  ): Boolean!
+    @auth(
+      keys: ["wF4fWtAX728xBfsjae2XSmWnJWWnLgQu33qtVKgjSVS5BRCYzF9VyvQx7t5vg38W"]
+    )
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+  makePermanentUpload(
+    fileId: String!
+    version: Int
+    signedUrl: String!
+  ): Boolean!
+    @auth(
+      keys: ["Gdgq5Q6EDmmK2ypMd2sxun3tAxEWs3tPZM2t3zX3Ug9jUj8FwFELwfH4yAK9CEFp"]
+    )
+    @token(ignore: false)
+    @encodeuri(method: "lz-string")
+}
+
+directive @auth(keys: [String!]!) on FIELD_DEFINITION
+
+directive @token(ignore: Boolean!) on FIELD_DEFINITION
+
+directive @encodeuri(method: String!) on FIELD_DEFINITION

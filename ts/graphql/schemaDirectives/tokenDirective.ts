@@ -1,18 +1,11 @@
-/**
- * @description Diretivas para verificar o token da rota
- * @author @GuilhermeSantos001
- * @update 01/08/2021
- * @version 3.0.0
- */
-
 import { mapSchema, getDirectives, MapperKind } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
 
-import { decompressFromEncodedURIComponent } from 'lz-string';
+import { setSessionCookies } from '@/lib/Cookies';
 
-import JsonWebToken from '@/core/jsonWebToken';
-import userManagerDB from '@/db/user-db';
-import geoIP from '@/utils/geoIP';
+import { JsonWebToken } from '@/lib/JsonWebToken';
+import { UsersManagerDB } from '@/database/UsersManagerDB';
+import geoIP, { clearIPAddress } from '@/utils/geoIP';
 
 export default function TokenDirective(directiveName: string) {
     return {
@@ -25,38 +18,47 @@ export default function TokenDirective(directiveName: string) {
 
                     if (resolve)
                         fieldConfig.resolve = async function (source, args, context, info) {
-                            const ignore = TokenDirective.args?.ignore;
+                            const
+                                usersManagerDB = new UsersManagerDB(),
+                                ignore = TokenDirective.args?.ignore;
 
                             if (ignore)
                                 return await resolve(source, args, context, info);
 
-                            const { ip } = geoIP(context.express.req);
-
                             const
-                                auth = decompressFromEncodedURIComponent(String(context.express.req.headers['auth'])) || String(context.express.req.headers['auth']),
-                                token = decompressFromEncodedURIComponent(String(context.express.req.headers['token'])) || String(context.express.req.headers['token']),
-                                signature = decompressFromEncodedURIComponent(String(context.express.req.headers['signature'])) || String(context.express.req.headers['signature']),
+                                auth = context.express.req.cookies.auth,
+                                token = context.express.req.cookies.token,
+                                signature = context.express.req.cookies.signature,
+                                refreshTokenValue = context.express.req.cookies.refreshTokenValue,
+                                refreshTokenSignature = context.express.req.cookies.refreshTokenSignature,
+                                { ip } = geoIP(context.express.req),
                                 internetadress = ip;
 
-                            const decoded = await JsonWebToken.verify(token);
-
-                            if (!decoded)
-                                throw new Error('Token informado está invalido!');
+                            if (!auth || !signature || !refreshTokenValue || !refreshTokenSignature)
+                                throw new Error(`Credenciais expiradas!`);
 
                             try {
-                                await userManagerDB.verifytoken(auth, token, signature, internetadress);
-
+                                await JsonWebToken.verify(token as string);
+                                await usersManagerDB.verifytoken(auth, token as string, signature, clearIPAddress(String(internetadress).replace('::1', '127.0.0.1')));
                                 return await resolve(source, args, context, info);
-                            } catch (err: any) {
-                                if (err['code'] === 1) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que foi finalizada anteriormente.');
-                                } else if (err['code'] === 2) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de internet.');
-                                } else if (err['code'] === 3) {
-                                    throw new Error('Você não pode utilizar um token de uma sessão que está em outro endereço de IP.');
-                                }
+                            } catch {
+                                try {
+                                    await usersManagerDB.verifyRefreshToken(auth, refreshTokenSignature, refreshTokenValue);
+                                    const updateHistory = await usersManagerDB.updateTokenHistory(auth, signature);
 
-                                throw new Error(err);
+                                    await setSessionCookies({
+                                        authorization: auth,
+                                        token: updateHistory[1],
+                                        signature: updateHistory[0],
+                                        refreshTokenValue,
+                                        refreshTokenSignature,
+                                    }, context);
+
+                                    return await resolve(source, args, context, info);
+                                } catch (error) {
+                                    console.log(error);
+                                    throw new Error(`Refresh Token inválido!`);
+                                }
                             }
                         };
 

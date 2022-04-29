@@ -1,18 +1,24 @@
-/**
- * @description Configurações do servidor
- * @author @GuilhermeSantos001
- * @update 28/09/2021
- * @version 1.0.0
- */
-
 import { createServer } from "http";
 import { DocumentNode, execute, subscribe } from "graphql";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers } from "@graphql-tools/utils";
 import { ApolloServer } from "apollo-server-express";
-import express from "express";
+import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { ExpressAdapter } from '@bull-board/express';
+import { Server } from "socket.io";
+import path from "path";
+import { localPath } from "@/utils/localpath";
+import express, { Response } from "express";
+import logger from 'morgan';
+import cookieParser from "cookie-parser";
 import cors from 'cors';
+import APIMiddleware from '@/graphql/middlewares/api-middleware';
+import routerFiles from "@/graphql/router/files";
+import routerUtils from "@/graphql/router/utils";
+import { routerAPI } from '@/graphql/router/api/routes';
 
 /**
  * @description Cluster
@@ -24,18 +30,17 @@ const numCPUs = cpus().length;
 /**
  * @description Dependencies
  */
-import Debug from '@/core/log4';
-import hls from '@/core/hls-server';
-import socketIO from '@/core/socket-io';
-import Jobs from '@/core/jobs';
-import mongoDB from '@/controllers/mongodb';
+import { Debug } from '@/lib/Log4';
+import { CreateHLSServer } from '@/lib/HLSServer';
+import { SocketIO } from '@/lib/Socket-io';
+import { MongoDBClient } from '@/database/MongoDBClient';
+import Queue from '@/lib/Queue';
 
 /**
- * @description Middlewares
+ * @description Directives
  */
 import AuthDirective from '@/graphql/schemaDirectives/authDirective';
 import TokenDirective from '@/graphql/schemaDirectives/tokenDirective';
-import PrivilegeDirective from '@/graphql/schemaDirectives/privilegeDirective';
 import EncodeUriDirective from '@/graphql/schemaDirectives/encodeuriDirective';
 
 const device = require('express-device');
@@ -46,82 +51,87 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
 
     const app = express();
 
-    const
-        origin = process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
-        allowedHeaders = [
-            'Origin',
-            'X-Requested-With',
-            'Content-Type',
-            'Accept',
-            'X-Access-Token',
-            'authorization',
-            'token',
-            'auth',
-            'signature',
-            'encodeuri',
-            'temporarypass'
-        ];
+    app.use(cookieParser(process.env.APP_SECRET!));
 
     app.use(device.capture({
         parseUserAgent: true
     })), useragent(true);
 
-    app.use(function (req, res, next) {
-        res.header("Access-Control-Allow-Origin", origin);
-        res.header("Access-Control-Allow-Headers", allowedHeaders.join(','));
-        next();
-    });
+    app.use(graphqlUploadExpress({
+        maxFileSize: 100000000, // 100 MB
+        maxFieldSize: 100000000 // 100 MB
+    }));
 
     //options for cors middlewares
     let corsOptions: cors.CorsOptions = {};
 
     if (process.env.NODE_ENV === 'development') {
         corsOptions = {
-            allowedHeaders,
-            credentials: true,
-            methods: 'POST',
-            origin,
-            preflightContinue: false,
+            origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
         };
     } else {
         corsOptions = {
-            allowedHeaders: [
-                'Origin',
-                'X-Requested-With',
-                'Content-Type',
-                'Accept',
-                'X-Access-Token',
-                'authorization',
-                'token',
-                'auth',
-                'signature',
-                'encodeuri',
-                'temporarypass'
-            ],
-            credentials: true,
-            methods: 'POST',
-            origin,
-            preflightContinue: false,
+            origin: process.env.NODE_ENV === 'development' ? "*" : "https://grupomavedigital.com.br",
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
         };
     }
 
     //use cors middleware
     app.use(cors(corsOptions));
 
+    // View engine setup
+    app.set('view engine', 'pug');
+    app.set('view options', { layout: false });
+    app.set('views', path.join(__dirname, 'views'));
+
+    // settings for paths statics
+    const staticOptions = {
+        maxAge: '1d',
+        setHeaders: function (res: Response, path: string, stat: any) {
+            res.set('x-timestamp', Date.now().toString());
+        }
+    };
+
+    //use API
+    app.use(logger('dev'));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use('/temp', express.static(localPath('temp'), staticOptions));
+    app.use('/files', routerFiles);
+    app.use('/utils', routerUtils);
+    app.use('/api/v1/', routerAPI);
+
+    //use Bull Board
+    const serverAdapter = new ExpressAdapter();
+
+    const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
+        queues: Queue.queues.map(queue => new BullMQAdapter(queue.bull)),
+        serverAdapter: serverAdapter
+    })
+
+    if (process.env.NODE_ENV === 'development')
+        app.use('/admin/queues', serverAdapter.getRouter());
+    else
+        app.use('/admin/queues', APIMiddleware, serverAdapter.getRouter());
+
+    serverAdapter.setBasePath('/admin/queues');
+
     const
         { AuthDirectiveTransformer } = AuthDirective('auth'),
         { TokenDirectiveTransformer } = TokenDirective('token'),
-        { PrivilegeDirectiveTransformer } = PrivilegeDirective('privilege'),
         { EncodeUriDirectiveTransformer } = EncodeUriDirective('encodeuri');
 
     const startServer = async () => {
+        const mongoDBClient = new MongoDBClient();
+
         Debug.console('default', `Worker ${process.pid} started`);
 
         let
             httpServer = createServer(app),
             schema = makeExecutableSchema({
                 typeDefs: options.typeDefs,
-                resolvers: options.resolvers
+                resolvers: { Upload: GraphQLUpload, ...options.resolvers }
             });
 
         /**
@@ -129,7 +139,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
          */
         function onError(error: any) {
             if (error.syscall !== 'listen') {
-                mongoDB.shutdown();
+                mongoDBClient.shutdown();
                 throw error;
             }
 
@@ -137,15 +147,15 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             switch (error.code) {
                 case 'EACCES':
                     Debug.fatal('default', `Port ${PORT} requires elevated privileges`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     return process.exit(1);
                 case 'EADDRINUSE':
                     Debug.fatal('default', `Port ${PORT} is already in use`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     return process.exit(1);
                 default:
                     Debug.fatal('default', `Fatal error: ${error}`);
-                    mongoDB.shutdown();
+                    mongoDBClient.shutdown();
                     throw error;
             }
         }
@@ -154,16 +164,19 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
          * @description Event listener for HTTP server "listening" event.
          */
         function onListening() {
-            Debug.console('default', `Server is now running on http://localhost:${PORT}/graphql`);
+            Debug.console('default', `Server Apollo Graphql is now running...`);
+            Debug.console('default', `Server Express is now running...`);
+            Debug.console('default', `Server Socket.io is now running...`);
+            Debug.console('default', `Server HLS is now running...`);
         }
 
         schema = AuthDirectiveTransformer(schema);
         schema = TokenDirectiveTransformer(schema);
-        schema = PrivilegeDirectiveTransformer(schema);
         schema = EncodeUriDirectiveTransformer(schema);
 
         const server = new ApolloServer({
             schema,
+            introspection: true,
             context: req => ({ express: req, ...options.context })
         });
 
@@ -184,24 +197,25 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         httpServer.on('listening', onListening);
 
         /**
-         * @description HTTP Live Streaming started
-         */
-        hls(httpServer);
+         * @description HTTP Live Streaming
+        */
+        CreateHLSServer(httpServer);
 
         /**
-         * @description Web Socket Server started
+          * @description Web Socket Server
          */
-        socketIO(httpServer);
+        const io = new Server(5000, {
+            cors: {
+                origin: '*',
+                methods: ['GET', 'POST']
+            }
+        });
+
+        SocketIO(io);
     }
 
     if (!cluster.isWorker) {
         Debug.console('default', `Master ${process.pid} is running`);
-
-        /**
-         * @description Jobs started
-         */
-        Jobs.reset();
-        Jobs.start();
 
         if (eval(String(process.env.APP_CLUSTER).toLowerCase())) {
             // Fork workers.

@@ -1,6 +1,6 @@
 /**
  * @description Retorna a URL do aplicativo
- * @author @GuilhermeSantos001
+ * @author GuilhermeSantos001
  * @update 04/10/2021
  */
 

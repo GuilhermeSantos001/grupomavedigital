@@ -1,39 +1,14 @@
 /**
  * @description Gerador de senhas
- * @author @GuilhermeSantos001
- * @update 29/06/2021
- * @version 1.0.0
+ * @author GuilhermeSantos001
+ * @update 02/12/2021
  */
 
 import { generate, generateMultiple } from 'generate-password';
 
-interface Options {
-    length: number
-    numbers: boolean
-    symbols: boolean
-    lowercase: boolean
-    uppercase: boolean
-    excludeSimilarCharacters: boolean
-    exclude: string
-    strict: boolean
-}
-
 export default class Password {
     constructor() {
         throw new Error('this is static class');
-    }
-
-    static get options(): Options {
-        return {
-            length: 20,
-            numbers: true,
-            symbols: true,
-            lowercase: true,
-            uppercase: true,
-            excludeSimilarCharacters: false,
-            exclude: '+_-=}{[]()|:;"/?><,`^~\'}',
-            strict: true
-        };
     }
 
     /**
@@ -41,7 +16,7 @@ export default class Password {
      * @return {String}
      */
     static unique(): string {
-        return generate(this.options);
+        return generate();
     }
 
     /**
@@ -50,6 +25,15 @@ export default class Password {
      * @return {[String]}
      */
     static multiple(amount = 3): string[] {
-        return generateMultiple(amount, this.options);
+        return generateMultiple(amount, {
+            length: 20,
+            numbers: true,
+            symbols: true,
+            lowercase: true,
+            uppercase: true,
+            excludeSimilarCharacters: false,
+            exclude: '+_-=}{[]()|:;"/?><,`^~\'}',
+            strict: true
+        });
     }
 }

@@ -1,8 +1,7 @@
 /**
  * @description Compilador de streams
- * @author @GuilhermeSantos001
- * @update 27/08/2021
- * @version 1.2.0
+ * @author GuilhermeSantos001
+ * @update 31/01/2022
  */
 
 import archiver from 'archiver';
@@ -18,10 +17,6 @@ export interface Reader {
 }
 
 export default class Archive {
-    constructor() {
-        throw new Error('this is static class');
-    }
-
     static base = archiver('zip', {
         zlib: { level: constants.Z_BEST_COMPRESSION }
     });

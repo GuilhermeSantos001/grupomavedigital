@@ -1,10 +1,7 @@
-
 /**
- * Crypto
  * @description Proteção de strings utilizando criptografia
  * @author GuilhermeSantos001
  * @update 17/07/2021
- * @version 1.0.1
  */
 
 import { createCipheriv, createDecipheriv } from 'crypto';

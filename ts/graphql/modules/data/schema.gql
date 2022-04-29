@@ -1,0 +1,134 @@
+# Schema dos Clientes
+type Clients {
+  id: String!
+  filial: String!
+  name: String!
+  fullname: String!
+  store: String!
+}
+
+# Schema das Filiais
+type Filial {
+  id: String!
+  name: String!
+  cnpj: String!
+}
+
+# Schema dos tipos de titulo
+type BillsType {
+  filial: String!
+  key: String!
+  description: String!
+}
+
+# Schema dos bancos
+type Banking {
+  id: String!
+  filial: String!
+  agency: String!
+  agencyDigit: String!
+  account: String!
+  accountDigit: String!
+  name: String!
+  fullname: String!
+}
+
+# Schema das naturezas bancarias
+type BankingNatures {
+  id: String!
+  filial: String!
+  description: String!
+  account: String!
+}
+
+type Query {
+  """
+  Dados dos Clientes
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=dataclients
+  """
+  dataClients(
+    """
+    Nome da filial
+    """
+    filial: String
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Clients]!
+    @auth(
+      keys: ["Z7qK6RpqqYKYKaMXnsurANrBF4X6adkj3v3LXtdL6PNn2dgd2AYChDsPJxPe2L7J"]
+    )
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados das Filiais
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=datafilial
+  """
+  dataFilial(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Filial]!
+    @auth(
+      keys: ["EEcDrRbDe6Vd2METYWWNuHpE7DbQt8S7nNzgFfyXkfFbZ2WgS9kvP2svxc7RXXFA"]
+    )
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados dos tipos de titulos
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databillstype
+  """
+  dataBillsType(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [BillsType]!
+    @auth(
+      keys: ["zf4M4cYmEYDzrWwLG6kgUUpS2CuQmDsDqPV9FQxth5KT3y3EdTrsargJvN3bpjHM"]
+    )
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados dos bancos
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databanking
+  """
+  dataBanking(
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [Banking]!
+    @auth(
+      keys: ["g8WyFaLqxv6xekH22QkNf4EH3qFrMTKWUaYSLU4ntLSjJxw7jmxycPtRs59fuM9f"]
+    )
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+  """
+  Dados das naturezas bancarias
+  Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/data-query?id=databankingnatures
+  """
+  dataBankingNatures(
+    """
+    Informa o código da natureza bancaria
+    """
+    id: String
+    """
+    Informa se deve usar o cache para retornar os dados
+    """
+    cache: Boolean
+  ): [BankingNatures]!
+    @auth(
+      keys: ["HrqFw3EvjvrRQVkMGgKJYgTW9KY2ePDUbrzZaer9TRu5pQxyaUyakbgRUVtFXUvT"]
+    )
+  # @token(ignore: false)
+  # @encodeuri(method: "lz-string")
+}
+
+directive @auth(keys: [String!]!) on FIELD_DEFINITION
+
+directive @token(ignore: Boolean!) on FIELD_DEFINITION
+
+directive @encodeuri(method: String!) on FIELD_DEFINITION
