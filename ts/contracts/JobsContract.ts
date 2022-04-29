@@ -19,6 +19,9 @@ export interface JobContract {
 }
 
 export const JobOptionsDefault: JobsOptions = {
-  attempts: 5, // If job fails it will retry till 5 times
-  backoff: 5000 // static 5 sec delay between retry
+  attempts: 5
+  , backoff: {
+    type: "fixed",
+    delay: 100
+  }
 }
