@@ -1,16 +1,10 @@
-/**
- * @description Job -> Envia o e-mail de novo acesso na conta do usuário por um endereço de IP fora do historico
- * @author GuilhermeSantos001
- * @update 31/01/2022
- */
-
-import { JobContract } from '@/contracts/JobsContract';
+import { JobContract,JobOptionsDefault } from '@/contracts/JobsContract';
 
 import MailSend from '@/utils/mailsend';
 
 const ConfirmMail: JobContract = {
   key: 'SESSION_NEW_ACCESS',
-  options: {},
+  options: { ...JobOptionsDefault },
   async handle({ data }) {
     try {
       await MailSend.sessionNewAccess(data.email, data.username, data.navigator);
