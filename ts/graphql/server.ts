@@ -206,7 +206,7 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
             cors: {
                 origin: '*',
                 methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            }
+            },
         });
 
         SocketIO(io);
