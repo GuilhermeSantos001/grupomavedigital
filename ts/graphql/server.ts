@@ -202,11 +202,9 @@ export default async (options: { typeDefs: DocumentNode, resolvers: IResolvers, 
         /**
           * @description Web Socket Server
          */
-        const io = new Server(5000, {
-            cors: {
-                origin: '*',
-                methods: ['GET', 'POST']
-            }
+        const io = new Server(httpServer, {
+            path: '/seacher',
+            transports: ['websocket'],
         });
 
         SocketIO(io);
