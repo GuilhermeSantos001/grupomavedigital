@@ -40,6 +40,7 @@ export interface Footer {
 
 export interface cardsInterface {
     cid: string;
+    author: string;
     version: string;
     photo: Photo;
     name: string;
@@ -303,6 +304,11 @@ export const footerSchema: Schema = new Schema({
 
 export const cardsSchema: Schema = new Schema({
     cid: { // Identificador customizado
+        type: String,
+        trim: true,
+        required: [true, '{PATH} este campo é obrigatório']
+    },
+    author: {
         type: String,
         trim: true,
         required: [true, '{PATH} este campo é obrigatório']

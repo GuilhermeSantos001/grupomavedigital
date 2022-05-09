@@ -1,9 +1,3 @@
-/**
- * @description Gerenciador de informações com o banco de dados
- * @author GuilhermeSantos001
- * @update 29/03/2022
- */
-
 import { FilterQuery } from 'mongoose';
 
 import { CardsSchema, cardsInterface, cardsModelInterface } from '@/schemas/CardsSchema';
@@ -32,6 +26,7 @@ export class CardsManagerDB {
             cards = _cards.map((card: cardsModelInterface) => {
                 return {
                     cid: card.cid,
+                    author: card.author,
                     index: card._id,
                     name: card.name,
                     jobtitle: card.jobtitle,
@@ -60,6 +55,7 @@ export class CardsManagerDB {
         if (_card) {
             return {
                 cid: _card.cid,
+                author: _card.author,
                 index: _card._id,
                 name: _card.name,
                 jobtitle: _card.jobtitle,

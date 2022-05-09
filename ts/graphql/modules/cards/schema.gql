@@ -73,6 +73,7 @@ input input_vcard {
 
 input input_card {
   id: String
+  author: String!
   version: String!
   photo: input_file!
   name: String!
@@ -86,6 +87,7 @@ input input_card {
 type CardInfo {
   index: String
   cid: String
+  author: String
   version: String
   photo: Photo
   name: String
@@ -184,11 +186,11 @@ type Query {
   Retorna uma lista de cartões digitais
   Docs: https://grupomavedigital-wiki.vercel.app/#/graphql/cards-query?id=cardget
   """
-  getCards(
+  getCardsByAuthor(
     """
-    ID usado como base para que a lista retorne cartões com ID's mais recentes
+    Nome do criador do cartão digital
     """
-    lastIndex: String
+    author: String
     """
     Limite de cartões a serem retornados na lista
     """

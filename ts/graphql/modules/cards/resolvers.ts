@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { VCardGenerate, VCardRemove, VCard, Metadata } from '@/lib/VCardGenerate';
 import { CardsManagerDB } from '@/database/CardsManagerDB';
 import { SocialmediaName } from '@/schemas/CardsSchema';
@@ -34,31 +33,25 @@ type CardFooter = {
 };
 
 type Card = {
-    id: string,
-    version: string,
-    photo: File,
-    name: string,
-    jobtitle: string,
-    phones: string[],
-    whatsapp: Whatsapp,
-    vcard: VCard,
+    id: string
+    author: string
+    version: string
+    photo: File
+    name: string
+    jobtitle: string
+    phones: string[]
+    whatsapp: Whatsapp
+    vcard: VCard
     footer: CardFooter
 };
 
 module.exports = {
     Query: {
-        getCards: async (parent: unknown, args: { lastIndex: string, limit: number }) => {
+        getCardsByAuthor: async (parent: unknown, args: { author: string, limit: number }) => {
             try {
-                let filter = {};
-
-                if (args.lastIndex && args.lastIndex.length > 0)
-                    filter = {
-                        _id: { $gt: new ObjectId(args.lastIndex) }
-                    }
-
                 const
                     cardsManagerDB = new CardsManagerDB(),
-                    cards = await cardsManagerDB.get(0, 1, args.limit, filter);
+                    cards = await cardsManagerDB.get(0, 1, args.limit, { author: args.author });
 
                 return cards;
             } catch (error) {
@@ -98,6 +91,7 @@ module.exports = {
                     cardsManagerDB = new CardsManagerDB(),
                     id = args.data['id'] && args.data['id'].length > 0 ? args.data['id'] : random.HASH(8, 'hex'),
                     {
+                        author,
                         version,
                         photo,
                         name,
@@ -115,6 +109,7 @@ module.exports = {
                 } catch {
                     await cardsManagerDB.register({
                         cid: id,
+                        author,
                         version,
                         photo,
                         name,
@@ -137,6 +132,7 @@ module.exports = {
                     id = args.id,
                     cardsManagerDB = new CardsManagerDB(),
                     {
+                        author,
                         version,
                         photo,
                         name,
@@ -149,6 +145,7 @@ module.exports = {
 
                 await cardsManagerDB.update(id, {
                     cid: id,
+                    author,
                     version,
                     photo,
                     name,
