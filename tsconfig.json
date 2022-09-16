@@ -1,29 +1,24 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
     "sourceMap": true,
-    "outDir": "dist",
-    "strict": true,
-    "lib": ["esnext"],
-    "esModuleInterop": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "types": ["node", "jest"],
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/config/*": ["ts/config/*"],
-      "@/constants/*": ["ts/constants/*"],
-      "@/contracts/*": ["ts/contracts/*"],
-      "@/controllers/*": ["ts/controllers/*"],
-      "@/database/*": ["ts/database/*"],
-      "@/drivers/*": ["ts/drivers/*"],
-      "@/graphql/*": ["ts/graphql/*"],
-      "@/jobs/*": ["ts/jobs/*"],
-      "@/lib/*": ["ts/lib/*"],
-      "@/schemas/*": ["ts/schemas/*"],
-      "@/socket.io/*": ["ts/socket.io/*"],
-      "@/templates/*": ["ts/templates/*"],
-      "@/test/*": ["ts/test/*"],
-      "@/utils/*": ["ts/utils/*"]
+      "@/*": ["src/*"]
     }
   },
-  "exclude": ["node_modules", "*.spec.ts"]
 }

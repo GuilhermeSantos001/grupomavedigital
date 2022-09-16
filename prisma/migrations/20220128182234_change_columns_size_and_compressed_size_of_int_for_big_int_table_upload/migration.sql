@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "uploads" ALTER COLUMN "size" SET DATA TYPE BIGINT,
-ALTER COLUMN "compressedSize" SET DATA TYPE BIGINT;

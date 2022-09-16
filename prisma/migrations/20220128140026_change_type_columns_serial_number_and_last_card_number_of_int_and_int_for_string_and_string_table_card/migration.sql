@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "cards" ALTER COLUMN "serialNumber" SET DATA TYPE TEXT,
-ALTER COLUMN "lastCardNumber" SET DATA TYPE TEXT;
