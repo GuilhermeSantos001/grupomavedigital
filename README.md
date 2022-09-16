@@ -13,7 +13,7 @@ This project is intended to be used with the latest Active LTS release of [Node.
 To clone the repository, use the following commands:
 
 ```sh
-git clone https://github.com/goldcode-io/grupomavedigital-backend.git
+git clone https://github.com/guilhermesantos001/grupomavedigital.git
 ```
 
 ### Download latest release
@@ -21,8 +21,8 @@ git clone https://github.com/goldcode-io/grupomavedigital-backend.git
 Download and unzip the current **main** branch or one of the tags:
 
 ```sh
-wget https://github.com/goldcode-io/grupomavedigital-backend/archive/main.zip -O grupomavedigital-backend.zip
-unzip grupomavedigital-backend.zip && rm grupomavedigital-backend.zip
+wget https://github.com/guilhermesantos001/grupomavedigital/archive/main.zip -O grupomavedigital.zip
+unzip grupomavedigital.zip && rm grupomavedigital.zip
 ```
 
 ### Requirements
@@ -35,5 +35,3 @@ unzip grupomavedigital-backend.zip && rm grupomavedigital-backend.zip
 [nodejs-badge]: https://img.shields.io/badge/Node.js->=%2016.15-blue.svg
 [nodejs]: https://nodejs.org/dist/latest-v16.x/docs/api/
 [typescript-4-6]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-6/
-[license-badge]: https://img.shields.io/badge/license-APLv2-blue.svg
-[repo-link]: https://github.com/grupomavedigital-backend/grupomavedigital-backend
